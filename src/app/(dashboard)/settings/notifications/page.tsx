@@ -1,0 +1,206 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  Calendar,
+  AlertCircle,
+  Save,
+  Loader2,
+  Check,
+} from 'lucide-react';
+
+export default function NotificationSettingsPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    dailyDigest: true,
+    eventReminders: true,
+    taskReminders: true,
+    healthAlerts: true,
+    medicationReminders: true,
+    cogginsExpiry: true,
+    teamUpdates: true,
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/user');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            setSettings(prev => ({
+              ...prev,
+              emailNotifications: result.data.emailNotifications ?? true,
+              smsNotifications: result.data.smsNotifications ?? false,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const response = await fetch('/api/user', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailNotifications: settings.emailNotifications,
+          smsNotifications: settings.smsNotifications,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save settings');
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleSetting = (key: keyof typeof settings) => {
+    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-stone-900">Notification Settings</h1>
+        <p className="text-stone-500 mt-1">Configure how you receive alerts and reminders</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Notification Channels */}
+        <div className="card p-6">
+          <h3 className="font-medium text-stone-900 mb-4">Notification Channels</h3>
+          <div className="space-y-4">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-stone-900">Email Notifications</p>
+                  <p className="text-sm text-stone-500">Receive updates via email</p>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={settings.emailNotifications}
+                onChange={() => toggleSetting('emailNotifications')}
+                className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+              />
+            </label>
+
+            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <Smartphone className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-stone-900">SMS Notifications</p>
+                  <p className="text-sm text-stone-500">Get text alerts for urgent items</p>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={settings.smsNotifications}
+                onChange={() => toggleSetting('smsNotifications')}
+                className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Alert Types */}
+        <div className="card p-6">
+          <h3 className="font-medium text-stone-900 mb-4">Alert Types</h3>
+          <div className="space-y-3">
+            {[
+              { key: 'dailyDigest', label: 'Daily Digest', desc: 'Summary of daily activities', icon: Bell },
+              { key: 'eventReminders', label: 'Event Reminders', desc: 'Upcoming vet visits, farrier, etc.', icon: Calendar },
+              { key: 'taskReminders', label: 'Task Reminders', desc: 'Due and overdue tasks', icon: AlertCircle },
+              { key: 'healthAlerts', label: 'Health Alerts', desc: 'Abnormal health observations', icon: AlertCircle },
+              { key: 'medicationReminders', label: 'Medication Reminders', desc: 'Time to give medications', icon: Bell },
+              { key: 'cogginsExpiry', label: 'Coggins Expiry', desc: 'Expiring Coggins tests', icon: AlertCircle },
+              { key: 'teamUpdates', label: 'Team Updates', desc: 'New members, role changes', icon: Bell },
+            ].map(({ key, label, desc, icon: Icon }) => (
+              <label
+                key={key}
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 text-stone-400" />
+                  <div>
+                    <p className="font-medium text-stone-900">{label}</p>
+                    <p className="text-xs text-stone-500">{desc}</p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings[key as keyof typeof settings]}
+                  onChange={() => toggleSetting(key as keyof typeof settings)}
+                  className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="btn-primary flex items-center gap-2"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : saved ? (
+              <>
+                <Check className="w-4 h-4" />
+                Saved!
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Save Changes
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

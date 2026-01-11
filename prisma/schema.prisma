@@ -1,0 +1,952 @@
+// StableTrack Database Schema - Supabase PostgreSQL
+// Production-ready schema with PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION (Simplified for demo - no Clerk)
+// ============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  avatarUrl   String?
+  phone       String?
+  timezone    String   @default("America/New_York")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscription    Subscription?
+  barnMemberships BarnMember[]
+  createdNotes    Note[]
+  assignedTasks   Task[]
+  assignedEvents  Event[]       @relation("AssignedEvents")
+  activityLogs    ActivityLog[]
+  lessonsAsInstructor Lesson[]
+  trainingLogsAsTrainer TrainingLog[]
+}
+
+// ============================================================================
+// SUBSCRIPTION (Simplified - no Stripe)
+// ============================================================================
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  tier      String   @default("FARM")
+  status    String   @default("ACTIVE")
+  
+  maxHorses Int      @default(999)
+  maxBarns  Int      @default(10)
+  storageGb Int      @default(50)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================================
+// BARN & TEAM
+// ============================================================================
+
+model Barn {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  country     String   @default("US")
+  phone       String?
+  email       String?
+  timezone    String   @default("America/New_York")
+  inviteCode  String   @unique
+  logoUrl     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members           BarnMember[]
+  horses            Horse[]
+  stalls            Stall[]
+  paddocks          Paddock[]
+  feedTypes         FeedType[]
+  supplements       Supplement[]
+  events            Event[]
+  tasks             Task[]
+  activityLogs      ActivityLog[]
+  inventory         InventoryItem[]
+  clients           Client[]
+  services          Service[]
+  invoices          Invoice[]
+  recurringInvoices RecurringInvoice[]
+  lessons           Lesson[]
+  trainingLogs      TrainingLog[]
+  competitions      Competition[]
+}
+
+model BarnMember {
+  id         String    @id @default(cuid())
+  userId     String
+  barnId     String
+  role       String    @default("OWNER")
+  status     String    @default("ACTIVE")
+  joinedAt   DateTime  @default(now())
+  approvedAt DateTime?
+  approvedBy String?
+  
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barn       Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  
+  horseAccess HorseAccess[]
+
+  @@unique([userId, barnId])
+}
+
+model HorseAccess {
+  id           String     @id @default(cuid())
+  barnMemberId String
+  horseId      String
+  
+  barnMember   BarnMember @relation(fields: [barnMemberId], references: [id], onDelete: Cascade)
+  horse        Horse      @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@unique([barnMemberId, horseId])
+}
+
+// ============================================================================
+// FACILITIES
+// ============================================================================
+
+model Stall {
+  id        String   @id @default(cuid())
+  barnId    String
+  name      String
+  section   String?
+  
+  barn      Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse     Horse?   @relation("CurrentStall")
+
+  @@unique([barnId, name])
+  @@index([barnId])
+}
+
+model Paddock {
+  id        String   @id @default(cuid())
+  barnId    String
+  name      String
+  acreage   Float?
+  maxHorses Int?
+  
+  barn      Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  turnouts  HorseTurnout[]
+
+  @@unique([barnId, name])
+  @@index([barnId])
+}
+
+// ============================================================================
+// HORSES
+// ============================================================================
+
+model Horse {
+  id              String    @id @default(cuid())
+  barnId          String
+  barnName        String
+  registeredName  String?
+  breed           String?
+  color           String?
+  markings        String?
+  dateOfBirth     DateTime?
+  sex             String?
+  heightHands     Float?
+  microchipNumber String?
+  status          String    @default("ACTIVE")
+  isPrivate       Boolean   @default(false)
+  ownerName       String?
+  profilePhotoUrl String?
+  bio             String?
+  stallId         String?   @unique
+  sireId          String?
+  damId           String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  barn            Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  stall           Stall?    @relation("CurrentStall", fields: [stallId], references: [id])
+  sire            Horse?    @relation("Sire", fields: [sireId], references: [id])
+  dam             Horse?    @relation("Dam", fields: [damId], references: [id])
+  sireOf          Horse[]   @relation("Sire")
+  damOf           Horse[]   @relation("Dam")
+
+  weightRecords   WeightRecord[]
+  vaccinations    Vaccination[]
+  medications     Medication[]
+  healthRecords   HealthRecord[]
+  feedProgram     FeedProgram?
+  feedLogs        FeedLog[]
+  waterLogs       WaterLog[]
+  photos          HorsePhoto[]
+  documents       Document[]
+  notes           Note[]
+  events          Event[]
+  eventHorses     EventHorse[] @relation("EventHorses")
+  turnouts        HorseTurnout[]
+  accessGrants    HorseAccess[]
+  dailyHealthChecks DailyHealthCheck[]
+  clientHorses    ClientHorse[]
+  lessons         Lesson[]
+  trainingLogs    TrainingLog[]
+  competitions    Competition[]
+
+  @@index([barnId])
+  @@index([status])
+  @@index([barnId, status])
+}
+
+model HorsePhoto {
+  id          String   @id @default(cuid())
+  horseId     String
+  url         String
+  storagePath String?
+  fileName    String?
+  fileSize    Int?
+  mimeType    String?
+  caption     String?
+  category    String?
+  isPrimary   Boolean  @default(false)
+  uploadedBy  String?
+  uploadedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  horse       Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+}
+
+model HorseTurnout {
+  id        String    @id @default(cuid())
+  horseId   String
+  paddockId String
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+
+  horse     Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  paddock   Paddock   @relation(fields: [paddockId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+}
+
+// ============================================================================
+// FEED & NUTRITION
+// ============================================================================
+
+model FeedType {
+  id          String   @id @default(cuid())
+  barnId      String
+  name        String
+  brand       String?
+  category    String?
+  unit        String   @default("lbs")
+  costPerUnit Float?
+  notes       String?
+  
+  barn        Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  feedItems   FeedProgramItem[]
+  feedLogs    FeedLog[]
+  
+  @@unique([barnId, name])
+}
+
+model Supplement {
+  id          String   @id @default(cuid())
+  barnId      String
+  name        String
+  brand       String?
+  unit        String   @default("scoops")
+  costPerUnit Float?
+  notes       String?
+  
+  barn        Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  feedItems   FeedProgramItem[]
+  
+  @@unique([barnId, name])
+}
+
+model FeedProgram {
+  id              String   @id @default(cuid())
+  horseId         String   @unique
+  name            String?
+  instructions    String?
+  estimatedDailyCost Float?
+  
+  horse           Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  items           FeedProgramItem[]
+}
+
+model FeedProgramItem {
+  id            String   @id @default(cuid())
+  feedProgramId String
+  feedTypeId    String?
+  supplementId  String?
+  customName    String?
+  amount        Float
+  unit          String
+  feedingTime   String
+  notes         String?
+  
+  feedProgram   FeedProgram @relation(fields: [feedProgramId], references: [id], onDelete: Cascade)
+  feedType      FeedType?   @relation(fields: [feedTypeId], references: [id])
+  supplement    Supplement? @relation(fields: [supplementId], references: [id])
+}
+
+model FeedLog {
+  id          String   @id @default(cuid())
+  horseId     String
+  feedTypeId  String?
+  feedingTime String
+  amount      Float?
+  amountEaten String?
+  notes       String?
+  loggedAt    DateTime @default(now())
+  loggedBy    String?
+
+  horse       Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  feedType    FeedType? @relation(fields: [feedTypeId], references: [id])
+
+  @@index([horseId])
+  @@index([horseId, loggedAt(sort: Desc)])
+  @@index([feedingTime, loggedAt(sort: Desc)])
+}
+
+// ============================================================================
+// HEALTH & MEDICAL
+// ============================================================================
+
+model WeightRecord {
+  id             String   @id @default(cuid())
+  horseId        String
+  weightLbs      Float
+  bodyCondition  Int?
+  date           DateTime @default(now())
+  notes          String?
+
+  horse          Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+  @@index([horseId, date(sort: Desc)])
+}
+
+model Vaccination {
+  id           String    @id @default(cuid())
+  horseId      String
+  type         String
+  customType   String?
+  dateGiven    DateTime
+  nextDueDate  DateTime?
+  veterinarian String?
+  manufacturer String?
+  lotNumber    String?
+  notes        String?
+
+  horse        Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+  @@index([nextDueDate])
+}
+
+model Medication {
+  id                 String    @id @default(cuid())
+  horseId            String
+  name               String
+  dosage             String
+  frequency          String
+  route              String?
+  prescribingVet     String?
+  startDate          DateTime
+  endDate            DateTime?
+  status             String    @default("ACTIVE")
+  isControlled       Boolean   @default(false)
+  refillsRemaining   Int?
+  pharmacy           String?
+  instructions       String?
+
+  horse              Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  logs               MedicationLog[]
+
+  @@index([horseId])
+  @@index([status])
+  @@index([horseId, status])
+}
+
+model MedicationLog {
+  id           String   @id @default(cuid())
+  medicationId String
+  givenAt      DateTime @default(now())
+  givenBy      String?
+  skipped      Boolean  @default(false)
+  skipReason   String?
+  notes        String?
+
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  @@index([medicationId])
+}
+
+model HealthRecord {
+  id              String    @id @default(cuid())
+  horseId         String
+  type            String
+  date            DateTime
+  provider        String?
+  diagnosis       String?
+  treatment       String?
+  findings        String?
+  followUpDate    DateTime?
+  followUpNotes   String?
+  cost            Int?
+  cogginsExpiry   DateTime?
+
+  horse           Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  attachments     HealthAttachment[]
+
+  @@index([horseId])
+  @@index([horseId, date(sort: Desc)])
+  @@index([type])
+}
+
+model HealthAttachment {
+  id             String       @id @default(cuid())
+  healthRecordId String
+  fileName       String
+  fileUrl        String
+  fileType       String?
+  uploadedAt     DateTime     @default(now())
+  
+  healthRecord   HealthRecord @relation(fields: [healthRecordId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// EVENTS & SCHEDULING
+// ============================================================================
+
+model Event {
+  id              String    @id @default(cuid())
+  barnId          String
+  horseId         String?   // Deprecated: use EventHorse junction table instead
+  type            String
+  customType      String?
+  title           String
+  description     String?
+  scheduledDate   DateTime
+  completedDate   DateTime?
+  status          String    @default("SCHEDULED")
+  providerName    String?
+  providerPhone   String?
+  farrierWork     String?
+  shoeingCycle    Int?
+  dewormProduct   String?
+  fecalEggCount   Int?
+  isRecurring     Boolean   @default(false)
+  recurringRule   String?
+  totalCost       Float     @default(0)
+  costPerHorse    Float     @default(0)
+  notes           String?
+  assignedToId    String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  barn            Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse           Horse?    @relation(fields: [horseId], references: [id]) // Deprecated relation
+  horses          EventHorse[]
+  reminders       EventReminder[]
+  assignedTo      User?     @relation("AssignedEvents", fields: [assignedToId], references: [id])
+
+  @@index([barnId])
+  @@index([barnId, scheduledDate(sort: Desc)])
+  @@index([scheduledDate])
+  @@index([status])
+  @@index([type])
+  @@index([horseId])
+  @@index([assignedToId])
+}
+
+model EventHorse {
+  id        String   @id @default(cuid())
+  eventId   String
+  horseId   String
+  cost      Float    @default(0)
+  createdAt DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  horse     Horse    @relation("EventHorses", fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, horseId])
+  @@index([eventId])
+  @@index([horseId])
+}
+
+model EventReminder {
+  id         String   @id @default(cuid())
+  eventId    String
+  daysBefore Int
+  method     String
+  sent       Boolean  @default(false)
+  sentAt     DateTime?
+
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+// ============================================================================
+// TASKS
+// ============================================================================
+
+model Task {
+  id          String    @id @default(cuid())
+  barnId      String
+  title       String
+  description String?
+  dueDate     DateTime?
+  dueTime     String?
+  priority    String    @default("MEDIUM")
+  status      String    @default("PENDING")
+  isRecurring Boolean   @default(false)
+  recurringRule String?
+  assigneeId  String?
+  completedAt DateTime?
+  completedBy String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  barn        Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  assignee    User?     @relation(fields: [assigneeId], references: [id])
+
+  @@index([barnId])
+  @@index([barnId, status])
+  @@index([barnId, dueDate(sort: Asc)])
+  @@index([assigneeId])
+  @@index([priority])
+}
+
+// ============================================================================
+// DOCUMENTS & NOTES
+// ============================================================================
+
+model Document {
+  id          String    @id @default(cuid())
+  horseId     String
+  type        String
+  title       String
+  name        String?
+  fileName    String
+  url         String?
+  fileUrl     String
+  storagePath String?
+  fileSize    Int?
+  mimeType    String?
+  expiryDate  DateTime?
+  notes       String?
+  uploadedAt  DateTime  @default(now())
+  uploadedBy  String?
+
+  horse       Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  horseId   String
+  content   String
+  isPinned  Boolean  @default(false)
+  isPrivate Boolean  @default(false)
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  horse     Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [createdBy], references: [id])
+
+  @@index([horseId])
+}
+
+model InventoryItem {
+  id           String   @id @default(cuid())
+  barnId       String
+  name         String
+  category     String?
+  quantity     Float
+  unit         String?
+  reorderLevel Float?
+  cost         Float?
+  supplier     String?
+  notes        String?
+  updatedAt    DateTime @updatedAt
+
+  barn         Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+
+  @@index([barnId])
+  @@index([category])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  barnId      String
+  userId      String?
+  type        String
+  description String
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  barn        Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([barnId])
+  @@index([barnId, createdAt(sort: Desc)])
+  @@index([userId])
+  @@index([type])
+}
+
+// Water tracking
+model WaterLog {
+  id          String   @id @default(cuid())
+  horseId     String
+  date        DateTime @default(now())
+  waterLevel  String?  // FULL, HIGH, MEDIUM, LOW, EMPTY
+  quality     String?  // CLEAN, SLIGHTLY_DIRTY, NEEDS_CLEANING
+  refilled    Boolean  @default(false)
+  notes       String?
+  loggedBy    String?
+
+  horse       Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+}
+
+// Daily health observations
+model DailyHealthCheck {
+  id              String   @id @default(cuid())
+  horseId         String
+  date            DateTime @default(now())
+
+  // Vitals
+  temperature     Float?
+  heartRate       Int?
+  respiratoryRate Int?
+
+  // Observations
+  overallCondition String?
+  appetite         String?
+  manure           String?
+  attitude         String?
+
+  notes           String?
+  checkedBy       String?
+  createdAt       DateTime @default(now())
+
+  horse           Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([horseId])
+  @@index([horseId, date(sort: Desc)])
+}
+
+// ============================================================================
+// CLIENTS
+// ============================================================================
+
+model Client {
+  id            String   @id @default(cuid())
+  barnId        String
+  userId        String?
+  firstName     String
+  lastName      String
+  name          String?
+  email         String
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  notes         String?
+  status        String   @default("ACTIVE")
+  portalEnabled Boolean  @default(false)
+  portalToken   String?
+  balance       Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  barn              Barn              @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horses            ClientHorse[]
+  invoices          Invoice[]
+  recurringInvoices RecurringInvoice[]
+  lessons           Lesson[]
+
+  @@unique([barnId, email])
+  @@index([barnId])
+  @@index([status])
+}
+
+model ClientHorse {
+  id        String   @id @default(cuid())
+  clientId  String
+  horseId   String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  horse     Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, horseId])
+  @@index([clientId])
+  @@index([horseId])
+}
+
+// ============================================================================
+// BILLING - Services, Invoices, Payments
+// ============================================================================
+
+model Service {
+  id          String   @id @default(cuid())
+  barnId      String
+  name        String
+  category    String   // BOARD, TRAINING, LESSONS, FARRIER, VET, OTHER
+  price       Float
+  unit        String   @default("month") // month, session, hour, day, each
+  description String?
+  taxable     Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  barn         Barn          @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  invoiceItems InvoiceItem[]
+  recurringItems RecurringInvoiceItem[]
+}
+
+model Invoice {
+  id            String    @id @default(cuid())
+  barnId        String
+  clientId      String
+  invoiceNumber String
+  status        String    @default("DRAFT") // DRAFT, SENT, PAID, PARTIAL, OVERDUE, VOID
+  subtotal      Float     @default(0)
+  taxRate       Float     @default(0)
+  taxAmount     Float     @default(0)
+  total         Float     @default(0)
+  amountPaid    Float     @default(0)
+  amountDue     Float     @default(0)
+  issueDate     DateTime  @default(now())
+  dueDate       DateTime
+  paidDate      DateTime?
+  notes         String?
+  terms         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  barn     Barn          @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  client   Client        @relation(fields: [clientId], references: [id])
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@unique([barnId, invoiceNumber])
+  @@index([barnId])
+  @@index([barnId, status])
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  serviceId   String?
+  description String
+  quantity    Float    @default(1)
+  unitPrice   Float
+  total       Float
+  horseId     String?  // Optional: link to specific horse
+  date        DateTime? // Optional: service date
+  
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([horseId])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  amount      Float
+  method      String   // CHECK, CASH, CARD, ACH, OTHER
+  reference   String?  // Check number, transaction ID, etc.
+  notes       String?
+  paidAt      DateTime @default(now())
+  recordedBy  String?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model RecurringInvoice {
+  id          String   @id @default(cuid())
+  barnId      String
+  clientId    String
+  name        String   // Description of what this recurring charge is for
+  frequency   String   // WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, ANNUALLY
+  amount      Float    // Total amount
+  dayOfMonth  Int?     // For monthly: which day (1-28)
+  dayOfWeek   Int?     // For weekly: which day (0=Sun, 6=Sat)
+  nextDate    DateTime
+  lastGenerated DateTime?
+  status      String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+  notes       String?
+  autoSend    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  barn   Barn                   @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  client Client                 @relation(fields: [clientId], references: [id])
+  items  RecurringInvoiceItem[]
+
+  @@index([barnId])
+  @@index([clientId])
+  @@index([nextDate])
+  @@index([status])
+}
+
+model RecurringInvoiceItem {
+  id                  String  @id @default(cuid())
+  recurringInvoiceId  String
+  serviceId           String?
+  description         String
+  quantity            Float   @default(1)
+  unitPrice           Float
+  horseId             String? // Optional: link to specific horse
+  
+  recurringInvoice RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  service          Service?         @relation(fields: [serviceId], references: [id])
+
+  @@index([recurringInvoiceId])
+}
+
+// ============================================================================
+// LESSONS
+// ============================================================================
+
+model Lesson {
+  id           String    @id @default(cuid())
+  barnId       String
+  clientId     String
+  horseId      String?
+  instructorId String
+  type         String    // PRIVATE, SEMI_PRIVATE, GROUP
+  discipline   String?   // DRESSAGE, JUMPING, WESTERN, etc.
+  date         DateTime
+  startTime    String    // "09:00"
+  duration     Int       // minutes
+  price        Float
+  status       String    @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
+  billed       Boolean   @default(false)
+  invoiceId    String?
+  notes        String?
+  rating       Int?      // 1-5 student rating
+  feedback     String?   // Instructor notes/feedback
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  barn       Barn   @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  client     Client @relation(fields: [clientId], references: [id])
+  horse      Horse? @relation(fields: [horseId], references: [id])
+  instructor User   @relation(fields: [instructorId], references: [id])
+
+  @@index([barnId])
+  @@index([clientId])
+  @@index([instructorId])
+  @@index([date(sort: Desc)])
+  @@index([status])
+  @@index([barnId, billed])
+}
+
+// ============================================================================
+// TRAINING LOGS
+// ============================================================================
+
+model TrainingLog {
+  id        String   @id @default(cuid())
+  barnId    String
+  horseId   String
+  trainerId String
+  date      DateTime
+  duration  Int      // minutes
+  type      String   // FLATWORK, JUMPING, GROUNDWORK, LUNGING, TRAIL, CONDITIONING, OTHER
+  focus     String?  // Specific focus areas
+  goals     String?  // Goals for the session
+  exercises String?  // Exercises performed
+  rating    Int?     // 1-5 how the session went
+  notes     String?
+  nextSteps String?  // What to work on next
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  barn    Barn  @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse   Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  trainer User  @relation(fields: [trainerId], references: [id])
+
+  @@index([barnId])
+  @@index([horseId])
+  @@index([trainerId])
+  @@index([date(sort: Desc)])
+  @@index([type])
+}
+
+// ============================================================================
+// COMPETITIONS
+// ============================================================================
+
+model Competition {
+  id          String   @id @default(cuid())
+  barnId      String
+  horseId     String
+  riderId     String?  // Optional: who rode
+  eventName   String
+  eventDate   DateTime
+  location    String?
+  organization String? // USEF, AQHA, etc.
+  className   String?
+  division    String?
+  placing     Int?
+  entries     Int?     // How many in the class
+  score       Float?
+  points      Float?
+  prize       Float?   // Prize money
+  isChampion  Boolean  @default(false)
+  isReserve   Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  barn  Barn  @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([barnId])
+  @@index([horseId])
+  @@index([eventDate(sort: Desc)])
+}
