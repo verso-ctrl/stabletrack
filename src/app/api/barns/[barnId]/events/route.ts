@@ -93,8 +93,8 @@ export async function GET(
     }
     
     // Add pagination to prevent loading too many events at once
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '100');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const skip = (page - 1) * limit;
 
     const [events, total] = await Promise.all([
