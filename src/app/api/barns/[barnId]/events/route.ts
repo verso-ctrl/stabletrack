@@ -92,40 +92,61 @@ export async function GET(
       }
     }
     
-    const events = await prisma.event.findMany({
-      where,
-      include: {
-        horse: {
-          select: {
-            barnName: true,
-            profilePhotoUrl: true,
+    // Add pagination to prevent loading too many events at once
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '100');
+    const skip = (page - 1) * limit;
+
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where,
+        include: {
+          horse: {
+            select: {
+              barnName: true,
+              profilePhotoUrl: true,
+            },
           },
-        },
-        horses: {
-          include: {
-            horse: {
-              select: {
-                id: true,
-                barnName: true,
-                profilePhotoUrl: true,
+          horses: {
+            take: 10, // Limit horses per event
+            include: {
+              horse: {
+                select: {
+                  id: true,
+                  barnName: true,
+                  profilePhotoUrl: true,
+                },
               },
             },
           },
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+          assignedTo: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          reminders: {
+            take: 5, // Limit reminders per event
           },
         },
-        reminders: true,
-      },
-      orderBy: { scheduledDate: 'asc' },
-    });
+        orderBy: { scheduledDate: 'asc' },
+        take: limit,
+        skip,
+      }),
+      prisma.event.count({ where }),
+    ]);
 
-    return NextResponse.json({ data: events });
+    return NextResponse.json({
+      data: events,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     return handleApiError(error);
   }

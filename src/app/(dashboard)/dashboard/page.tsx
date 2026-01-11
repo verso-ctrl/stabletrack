@@ -58,26 +58,41 @@ export default function DashboardPage() {
     setToday(now);
   }, []);
 
+  // Fetch dashboard data in parallel for better performance
   useEffect(() => {
-    if (barn?.id && !isClient) {
-      fetch(`/api/barns/${barn.id}/health-alerts`)
-        .then(res => res.json())
-        .then(data => setHealthAlerts(data.data || []))
-        .catch(() => setHealthAlerts([]));
-    }
-  }, [barn?.id, isClient]);
+    if (!barn?.id) return;
 
-  // Fetch client-specific data when in client view
-  useEffect(() => {
-    if (isClient && currentBarn?.clientId) {
+    const fetchDashboardData = async () => {
       setClientLoading(true);
-      fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`)
-        .then(res => res.json())
-        .then(data => setClientData(data.data))
-        .catch(console.error)
-        .finally(() => setClientLoading(false));
-    }
-  }, [isClient, currentBarn?.id, currentBarn?.clientId]);
+
+      try {
+        const promises = [
+          !isClient
+            ? fetch(`/api/barns/${barn.id}/health-alerts`).then(r => r.json())
+            : Promise.resolve(null),
+          isClient && currentBarn?.clientId
+            ? fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`).then(r => r.json())
+            : Promise.resolve(null)
+        ];
+
+        const [healthData, clientData] = await Promise.all(promises);
+
+        if (healthData) {
+          setHealthAlerts(healthData.data || []);
+        }
+        if (clientData) {
+          setClientData(clientData.data);
+        }
+      } catch (error) {
+        console.error('Dashboard fetch error:', error);
+        setHealthAlerts([]);
+      } finally {
+        setClientLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [barn?.id, isClient, currentBarn?.id, currentBarn?.clientId]);
 
   if (barnLoading || (isClient && clientLoading)) {
     return (

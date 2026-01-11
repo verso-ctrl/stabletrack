@@ -20,12 +20,31 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Get the most recent health check for each horse in the last 48 hours
-    const recentChecks = await prisma.dailyHealthCheck.findMany({
+    // Optimized: Get only the most recent check per horse using a subquery approach
+    // First, get distinct horse IDs with recent checks
+    const horsesWithRecentChecks = await prisma.dailyHealthCheck.findMany({
       where: {
         horse: { barnId },
         date: {
           gte: new Date(Date.now() - 48 * 60 * 60 * 1000), // Last 48 hours
+        },
+      },
+      select: {
+        horseId: true,
+        date: true,
+      },
+      orderBy: { date: 'desc' },
+      distinct: ['horseId'],
+      take: 50, // Limit to prevent large result sets
+    });
+
+    // Then fetch full details only for these specific checks
+    const horseIds = horsesWithRecentChecks.map(h => h.horseId);
+    const recentChecks = await prisma.dailyHealthCheck.findMany({
+      where: {
+        horseId: { in: horseIds },
+        date: {
+          in: horsesWithRecentChecks.map(h => h.date),
         },
       },
       include: {
@@ -38,10 +57,9 @@ export async function GET(
           },
         },
       },
-      orderBy: { date: 'desc' },
     });
 
-    // Get unique horses with their most recent check
+    // Convert to Map for unique checks
     const horseChecks = new Map();
     for (const check of recentChecks) {
       if (!horseChecks.has(check.horseId)) {
