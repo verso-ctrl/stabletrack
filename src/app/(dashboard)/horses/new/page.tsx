@@ -29,6 +29,7 @@ export default function NewHorsePage() {
     owners: [],
     markings: [],
   });
+  const [stalls, setStalls] = useState<Array<{ id: string; name: string; section: string | null }>>([]);
 
   const [formData, setFormData] = useState({
     barnName: '',
@@ -42,16 +43,28 @@ export default function NewHorsePage() {
     microchipNumber: '',
     status: 'ACTIVE' as HorseStatus,
     ownerName: '',
+    stallId: '',
   });
 
-  // Fetch suggestions when barn is available
+  // Fetch suggestions and stalls when barn is available
   useEffect(() => {
     if (barn?.id) {
+      // Fetch suggestions
       fetch(`/api/barns/${barn.id}/horses/suggestions`)
         .then((res) => res.json())
         .then((data) => {
           if (data.data) {
             setSuggestions(data.data);
+          }
+        })
+        .catch(console.error);
+
+      // Fetch available stalls
+      fetch(`/api/barns/${barn.id}/stalls?available=true`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.data) {
+            setStalls(data.data);
           }
         })
         .catch(console.error);
@@ -82,6 +95,7 @@ export default function NewHorsePage() {
           ...formData,
           heightHands: formData.heightHands ? parseFloat(formData.heightHands) : undefined,
           sex: formData.sex || undefined,
+          stallId: formData.stallId || undefined,
         }),
       });
 
@@ -326,6 +340,23 @@ export default function NewHorsePage() {
               <option value="ACTIVE">Active</option>
               <option value="LAYUP">Layup</option>
               <option value="RETIRED">Retired</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="label">Stall Assignment</label>
+            <select
+              name="stallId"
+              value={formData.stallId}
+              onChange={handleChange}
+              className="input"
+            >
+              <option value="">No stall assigned</option>
+              {stalls.map((stall) => (
+                <option key={stall.id} value={stall.id}>
+                  {stall.section ? `${stall.section} - ${stall.name}` : stall.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
