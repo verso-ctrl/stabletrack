@@ -177,6 +177,7 @@ model Horse {
   ownerName       String?
   profilePhotoUrl String?
   bio             String?
+  stall           String?
   stallId         String?   @unique
   sireId          String?
   damId           String?
@@ -185,7 +186,7 @@ model Horse {
   updatedAt       DateTime  @updatedAt
 
   barn            Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
-  stall           Stall?    @relation("CurrentStall", fields: [stallId], references: [id])
+  stallRelation   Stall?    @relation("CurrentStall", fields: [stallId], references: [id])
   sire            Horse?    @relation("Sire", fields: [sireId], references: [id])
   dam             Horse?    @relation("Dam", fields: [damId], references: [id])
   sireOf          Horse[]   @relation("Sire")

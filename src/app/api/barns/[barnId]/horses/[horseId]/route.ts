@@ -41,7 +41,7 @@ export async function GET(
         barnId: barnId,
       },
       include: {
-        stall: true,
+        stallRelation: true,
         feedProgram: {
           include: {
             items: {
@@ -106,7 +106,7 @@ export async function GET(
               (365.25 * 24 * 60 * 60 * 1000)
           )
         : null,
-      stallName: horse.stall?.name || null,
+      stallName: horse.stall || horse.stallRelation?.name || null,
       // Map weight records to expected format
       weights: horse.weightRecords.map(w => ({
         id: w.id,

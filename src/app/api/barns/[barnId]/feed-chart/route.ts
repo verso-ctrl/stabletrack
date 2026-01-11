@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
             },
           },
         },
-        stall: true,
+        stallRelation: true,
       },
       orderBy: { barnName: 'asc' },
     })
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
       return {
         id: horse.id,
         barnName: horse.barnName,
-        stall: horse.stall?.name || 'No stall',
+        stall: horse.stall || horse.stallRelation?.name || 'No stall',
         status: horse.status,
         hasFeedProgram: !!horse.feedProgram,
         feedSchedule,

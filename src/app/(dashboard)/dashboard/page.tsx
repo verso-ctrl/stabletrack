@@ -232,7 +232,7 @@ export default function DashboardPage() {
                       <p className="font-medium text-stone-900">{horse.barnName}</p>
                       <p className="text-sm text-stone-500">
                         {horse.breed || 'Unknown breed'}
-                        {horse.stall?.name && ` · Stall ${horse.stall.name}`}
+                        {horse.stallName && ` · Stall ${horse.stallName}`}
                       </p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-stone-300" />

@@ -62,7 +62,7 @@ export async function GET(
     const horses = await prisma.horse.findMany({
       where,
       include: {
-        stall: {
+        stallRelation: {
           select: { name: true },
         },
         weightRecords: {
@@ -79,11 +79,11 @@ export async function GET(
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    
+
     // Transform response
     const transformedHorses = horses.map((horse) => ({
       ...horse,
-      stallName: horse.stall?.name || null,
+      stallName: horse.stall || horse.stallRelation?.name || null,
       currentWeight: horse.weightRecords[0]?.weightLbs || null,
       activeMedicationCount: horse.medications.length,
       age: horse.dateOfBirth
@@ -92,7 +92,7 @@ export async function GET(
               (365.25 * 24 * 60 * 60 * 1000)
           )
         : null,
-      stall: undefined,
+      stallRelation: undefined,
       weightRecords: undefined,
       medications: undefined,
     }));
@@ -158,6 +158,7 @@ export async function POST(
       microchipNumber,
       status,
       ownerName,
+      stall,
     } = body;
     
     if (!barnName) {
@@ -181,6 +182,7 @@ export async function POST(
         microchipNumber,
         status: status || 'ACTIVE',
         ownerName,
+        stall,
       },
     });
     

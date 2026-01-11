@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
                   orderBy: { date: 'desc' },
                   take: 5,
                 },
-                stall: true,
+                stallRelation: true,
               },
             },
           },
@@ -43,20 +43,21 @@ export async function GET(req: NextRequest, context: RouteContext) {
     }
 
     // Build dashboard data - cast to any for included relations
-    const clientWithHorses = client as typeof client & { 
-      horses: Array<{ 
-        isPrimary: boolean; 
-        horse: { 
-          id: string; 
-          barnName: string; 
-          status: string; 
-          stall: { name: string } | null;
+    const clientWithHorses = client as typeof client & {
+      horses: Array<{
+        isPrimary: boolean;
+        horse: {
+          id: string;
+          barnName: string;
+          status: string;
+          stall: string | null;
+          stallRelation: { name: string } | null;
           vaccinations: any[];
           healthRecords: any[];
-        } 
-      }> 
+        }
+      }>
     }
-    
+
     const dashboard = {
       client: {
         id: client.id,
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
         id: ch.horse.id,
         barnName: ch.horse.barnName,
         status: ch.horse.status,
-        stall: ch.horse.stall?.name,
+        stall: ch.horse.stall || ch.horse.stallRelation?.name,
         recentVaccinations: ch.horse.vaccinations,
         recentHealth: ch.horse.healthRecords,
         isPrimary: ch.isPrimary,
