@@ -175,6 +175,9 @@ export async function POST(
     // Use the first horseId for single-horse events, or null for multi-horse/barn-wide events
     const eventHorseId = targetHorseIds && targetHorseIds.length === 1 ? targetHorseIds[0] : null;
 
+    // Convert cost to integer (cents) if provided
+    const costInCents = cost ? Math.round(typeof cost === 'number' ? cost : parseFloat(cost)) : null;
+
     // Create a single event
     const event = await prisma.event.create({
       data: {
@@ -190,7 +193,7 @@ export async function POST(
         providerPhone,
         farrierWork,
         dewormProduct,
-        cost: cost || null,
+        cost: costInCents,
         notes,
         isRecurring: isRecurring || false,
         recurringRule,
