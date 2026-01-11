@@ -29,7 +29,7 @@ export const horseSchema = z.object({
 
 // Event validation schemas
 export const eventSchema = z.object({
-  type: z.enum(['VET', 'FARRIER', 'DENTAL', 'DEWORMING', 'VACCINATION', 'LESSON', 'COMPETITION', 'TRAINING', 'CUSTOM']),
+  type: z.enum(['FARRIER', 'DEWORMING', 'VACCINATION', 'VET_APPOINTMENT', 'DENTAL', 'TRAINING', 'SHOW', 'TRANSPORT', 'BREEDING', 'OTHER']),
   customType: z.string().max(50, 'Custom type is too long').optional(),
   title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
   description: z.string().optional(),
@@ -46,7 +46,6 @@ export const eventSchema = z.object({
   notes: z.string().optional(),
   isRecurring: z.boolean().optional(),
   recurringRule: z.string().optional(),
-  assignedToId: z.string().optional(),
 });
 
 // Health record validation schemas

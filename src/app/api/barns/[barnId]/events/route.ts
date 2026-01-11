@@ -56,20 +56,6 @@ export async function GET(
     if (isClientOnly && clientAccess) {
       const clientHorseIds = clientAccess.horses.map((h: { horseId: string }) => h.horseId);
       where.horseId = { in: clientHorseIds };
-    } else if (barnMember) {
-      // Filter by assignment for non-owner/manager roles
-      const role = barnMember.role;
-      if (role !== 'OWNER' && role !== 'MANAGER') {
-        // TRAINER, CARETAKER, etc. only see assigned events OR unassigned events
-        where.OR = [
-          { assignedToId: user.id },
-          { assignedToId: null }
-        ];
-      }
-
-      if (horseId) {
-        where.horseId = horseId;
-      }
     } else if (horseId) {
       where.horseId = horseId;
     }
@@ -105,26 +91,6 @@ export async function GET(
             select: {
               barnName: true,
               profilePhotoUrl: true,
-            },
-          },
-          horses: {
-            take: 10, // Limit horses per event
-            include: {
-              horse: {
-                select: {
-                  id: true,
-                  barnName: true,
-                  profilePhotoUrl: true,
-                },
-              },
-            },
-          },
-          assignedTo: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
             },
           },
           reminders: {
@@ -201,23 +167,19 @@ export async function POST(
       notes,
       isRecurring,
       recurringRule,
-      assignedToId,
     } = validatedData;
 
     // Support both single horseId and multiple horseIds
     const targetHorseIds = horseIds || (horseId ? [horseId] : null);
 
-    // Calculate cost distribution if specified
-    const totalCost = cost ? (typeof cost === 'string' ? parseFloat(cost) : cost) : 0;
-    const costPerHorse = targetHorseIds && targetHorseIds.length > 0
-      ? totalCost / targetHorseIds.length
-      : 0;
+    // Use the first horseId for single-horse events, or null for multi-horse/barn-wide events
+    const eventHorseId = targetHorseIds && targetHorseIds.length === 1 ? targetHorseIds[0] : null;
 
-    // Create a single event with associated horses via EventHorse junction table
+    // Create a single event
     const event = await prisma.event.create({
       data: {
         barnId: barnId,
-        horseId: targetHorseIds && targetHorseIds.length === 1 ? targetHorseIds[0] : null, // For backward compatibility
+        horseId: eventHorseId,
         type,
         customType,
         title,
@@ -228,19 +190,10 @@ export async function POST(
         providerPhone,
         farrierWork,
         dewormProduct,
-        totalCost,
-        costPerHorse,
+        cost: cost || null,
         notes,
         isRecurring: isRecurring || false,
         recurringRule,
-        assignedToId: assignedToId || null,
-        // Create EventHorse entries for each selected horse
-        horses: targetHorseIds && targetHorseIds.length > 0 ? {
-          create: targetHorseIds.map((hId: string) => ({
-            horseId: hId,
-            cost: costPerHorse,
-          })),
-        } : undefined,
       },
       include: {
         horse: {
@@ -249,25 +202,7 @@ export async function POST(
             profilePhotoUrl: true,
           },
         },
-        horses: {
-          include: {
-            horse: {
-              select: {
-                id: true,
-                barnName: true,
-                profilePhotoUrl: true,
-              },
-            },
-          },
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
+        reminders: true,
       },
     });
 
