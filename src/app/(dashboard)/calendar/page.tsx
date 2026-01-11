@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useBarn } from '@/contexts/BarnContext';
-import { useEvents, useHorses } from '@/hooks/useData';
+import { useEvents, useHorses, useLessons } from '@/hooks/useData';
 import {
   ChevronLeft,
   ChevronRight,
@@ -43,22 +43,34 @@ import {
 
 const eventTypeIcons: Record<string, any> = {
   VET: Stethoscope,
+  VET_APPOINTMENT: Stethoscope,
   FARRIER: Scissors,
   VACCINATION: Syringe,
   DENTAL: FileText,
   DEWORMING: FileText,
   COMPETITION: Trophy,
+  SHOW: Trophy,
+  TRAINING: GraduationCap,
+  TRANSPORT: CalendarIcon,
+  BREEDING: CalendarIcon,
   OTHER: CalendarIcon,
+  LESSON: GraduationCap,
 };
 
 const eventTypeColors: Record<string, string> = {
   VET: 'bg-blue-100 text-blue-700 border-blue-200',
+  VET_APPOINTMENT: 'bg-blue-100 text-blue-700 border-blue-200',
   FARRIER: 'bg-orange-100 text-orange-700 border-orange-200',
   VACCINATION: 'bg-green-100 text-green-700 border-green-200',
   DENTAL: 'bg-purple-100 text-purple-700 border-purple-200',
   DEWORMING: 'bg-amber-100 text-amber-700 border-amber-200',
   COMPETITION: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  SHOW: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  TRAINING: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  TRANSPORT: 'bg-slate-100 text-slate-700 border-slate-200',
+  BREEDING: 'bg-pink-100 text-pink-700 border-pink-200',
   OTHER: 'bg-stone-100 text-stone-700 border-stone-200',
+  LESSON: 'bg-indigo-100 text-indigo-700 border-indigo-200',
 };
 
 const eventTypes = [
@@ -123,13 +135,37 @@ export default function CalendarPage() {
     notes: '',
   });
 
-  const { data: eventsData, isLoading, refetch } = useEvents({
+  const { data: eventsData, isLoading: eventsLoading, refetch: refetchEvents } = useEvents({
+    barnId: currentBarn?.id,
+    enabled: !!currentBarn?.id,
+  });
+  const { data: lessonsData, isLoading: lessonsLoading, refetch: refetchLessons } = useLessons({
     barnId: currentBarn?.id,
     enabled: !!currentBarn?.id,
   });
   const { horses } = useHorses();
 
-  const events = eventsData?.data || [];
+  const isLoading = eventsLoading || lessonsLoading;
+
+  // Merge events and lessons into a single calendar items array
+  const calendarItems = useMemo(() => {
+    const events = (eventsData?.data || []).map((event: any) => ({
+      ...event,
+      itemType: 'event' as const,
+    }));
+
+    const lessons = (lessonsData?.data || []).map((lesson: any) => ({
+      ...lesson,
+      itemType: 'lesson' as const,
+      type: 'LESSON',
+      title: `Lesson - ${lesson.client?.firstName || ''} ${lesson.client?.lastName || ''}`.trim(),
+      horse: lesson.horse,
+    }));
+
+    return [...events, ...lessons];
+  }, [eventsData, lessonsData]);
+
+  const events = calendarItems;
 
   // Fetch Google Calendar status, clients, and instructors
   useEffect(() => {
@@ -356,7 +392,7 @@ export default function CalendarPage() {
 
       setShowAddModal(false);
       setModalStep(1); // Reset step
-      refetch();
+      refetchEvents();
 
       // Reset form
       setEventForm({
@@ -413,7 +449,7 @@ export default function CalendarPage() {
       }
 
       setShowLessonModal(false);
-      refetch();
+      refetchLessons();
 
       // Reset form
       setLessonForm({

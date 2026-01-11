@@ -196,6 +196,114 @@ export function useEvents(options: UseEventsOptions = {}): UseEventsResult {
 }
 
 // ============================================================================
+// useLessons - Fetch lessons for current barn
+// ============================================================================
+
+interface UseLessonsOptions {
+  barnId?: string;
+  clientId?: string;
+  instructorId?: string;
+  status?: string;
+  unbilled?: boolean;
+  enabled?: boolean;
+}
+
+interface Lesson {
+  id: string;
+  barnId: string;
+  clientId: string;
+  horseId: string | null;
+  instructorId: string | null;
+  type: string;
+  discipline: string | null;
+  date: string;
+  scheduledDate: string;
+  startTime: string;
+  duration: number;
+  price: number;
+  status: string;
+  billed: boolean;
+  notes: string | null;
+  client?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  horse?: {
+    id: string;
+    barnName: string;
+  };
+  instructor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+interface UseLessonsResult {
+  data: { data: Lesson[] } | null;
+  lessons: Lesson[];
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+export function useLessons(options: UseLessonsOptions = {}): UseLessonsResult {
+  const { barn } = useCurrentBarn();
+  const barnId = options.barnId || barn?.id;
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchLessons = useCallback(async () => {
+    if (!barnId || options.enabled === false) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (options.clientId) params.set('clientId', options.clientId);
+      if (options.instructorId) params.set('instructorId', options.instructorId);
+      if (options.status) params.set('status', options.status);
+      if (options.unbilled) params.set('unbilled', 'true');
+
+      const response = await fetch(
+        `/api/barns/${barnId}/lessons?${params.toString()}`
+      );
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch lessons');
+      }
+
+      setLessons(result.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [barnId, options.clientId, options.instructorId, options.status, options.unbilled, options.enabled]);
+
+  useEffect(() => {
+    fetchLessons();
+  }, [fetchLessons]);
+
+  return {
+    data: lessons.length > 0 ? { data: lessons } : null,
+    lessons,
+    isLoading,
+    error,
+    refetch: fetchLessons
+  };
+}
+
+// ============================================================================
 // useTasks - Fetch tasks for current barn
 // ============================================================================
 
