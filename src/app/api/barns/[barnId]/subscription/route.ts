@@ -15,16 +15,16 @@ import {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { barnId: string } }
+  { params }: { params: Promise<{ barnId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { barnId } = params
+    const { barnId } = await params
 
     // Verify user has access to this barn
     const membership = await prisma.barnMember.findFirst({

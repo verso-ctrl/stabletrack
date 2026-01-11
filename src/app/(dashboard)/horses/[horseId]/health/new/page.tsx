@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
@@ -30,10 +30,11 @@ const recordTypes = [
   { id: 'OTHER', name: 'Other' },
 ];
 
-export default function AddHealthRecordPage({ params }: { params: { horseId: string } }) {
+export default function AddHealthRecordPage({ params }: { params: Promise<{ horseId: string }> }) {
+  const { horseId } = use(params);
   const router = useRouter();
   const { currentBarn } = useBarn();
-  const { horse, isLoading: horseLoading } = useHorse(params.horseId);
+  const { horse, isLoading: horseLoading } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     type: '',
@@ -60,7 +61,7 @@ export default function AddHealthRecordPage({ params }: { params: { horseId: str
     
     try {
       const response = await fetch(
-        `/api/barns/${currentBarn?.id}/horses/${params.horseId}/health`,
+        `/api/barns/${currentBarn?.id}/horses/${horseId}/health`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -84,7 +85,7 @@ export default function AddHealthRecordPage({ params }: { params: { horseId: str
         throw new Error(error.error || 'Failed to create health record');
       }
 
-      router.push(`/horses/${params.horseId}`);
+      router.push(`/horses/${horseId}`);
     } catch (error) {
       console.error('Error creating health record:', error);
       alert(error instanceof Error ? error.message : 'Failed to create health record');
@@ -123,7 +124,7 @@ export default function AddHealthRecordPage({ params }: { params: { horseId: str
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
-          href={`/horses/${params.horseId}`}
+          href={`/horses/${horseId}`}
           className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -325,7 +326,7 @@ export default function AddHealthRecordPage({ params }: { params: { horseId: str
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Link href={`/horses/${params.horseId}`} className="btn-secondary flex-1">
+          <Link href={`/horses/${horseId}`} className="btn-secondary flex-1">
             Cancel
           </Link>
           <button

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
@@ -31,10 +31,11 @@ const statusOptions = [
   { value: 'DECEASED', label: 'Deceased' },
 ];
 
-export default function EditHorsePage({ params }: { params: { horseId: string } }) {
+export default function EditHorsePage({ params }: { params: Promise<{ horseId: string }> }) {
+  const { horseId } = use(params);
   const router = useRouter();
   const { currentBarn } = useBarn();
-  const { horse, isLoading, error } = useHorse(params.horseId);
+  const { horse, isLoading, error } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestions>({
@@ -102,7 +103,7 @@ export default function EditHorsePage({ params }: { params: { horseId: string } 
     setIsSaving(true);
     
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${params.horseId}`, {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,7 +118,7 @@ export default function EditHorsePage({ params }: { params: { horseId: string } 
         throw new Error(error.error || 'Failed to update horse');
       }
       
-      router.push(`/horses/${params.horseId}`);
+      router.push(`/horses/${horseId}`);
     } catch (err) {
       console.error('Error updating horse:', err);
       alert(err instanceof Error ? err.message : 'Failed to update horse');
@@ -128,7 +129,7 @@ export default function EditHorsePage({ params }: { params: { horseId: string } 
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${params.horseId}`, {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
         method: 'DELETE',
       });
       
@@ -176,7 +177,7 @@ export default function EditHorsePage({ params }: { params: { horseId: string } 
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
-          href={`/horses/${params.horseId}`}
+          href={`/horses/${horseId}`}
           className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -390,7 +391,7 @@ export default function EditHorsePage({ params }: { params: { horseId: string } 
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Link href={`/horses/${params.horseId}`} className="btn-secondary flex-1">
+          <Link href={`/horses/${horseId}`} className="btn-secondary flex-1">
             Cancel
           </Link>
           <button

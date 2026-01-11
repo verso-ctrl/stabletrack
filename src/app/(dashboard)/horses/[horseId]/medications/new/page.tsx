@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
@@ -34,10 +34,11 @@ const routeOptions = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-export default function AddMedicationPage({ params }: { params: { horseId: string } }) {
+export default function AddMedicationPage({ params }: { params: Promise<{ horseId: string }> }) {
+  const { horseId } = use(params);
   const router = useRouter();
   const { currentBarn } = useBarn();
-  const { horse, isLoading: horseLoading } = useHorse(params.horseId);
+  const { horse, isLoading: horseLoading } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -65,7 +66,7 @@ export default function AddMedicationPage({ params }: { params: { horseId: strin
     
     try {
       const response = await fetch(
-        `/api/barns/${currentBarn?.id}/horses/${params.horseId}/medications`,
+        `/api/barns/${currentBarn?.id}/horses/${horseId}/medications`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -90,7 +91,7 @@ export default function AddMedicationPage({ params }: { params: { horseId: strin
         throw new Error(error.error || 'Failed to add medication');
       }
 
-      router.push(`/horses/${params.horseId}`);
+      router.push(`/horses/${horseId}`);
     } catch (error) {
       console.error('Error adding medication:', error);
       alert(error instanceof Error ? error.message : 'Failed to add medication');
@@ -129,7 +130,7 @@ export default function AddMedicationPage({ params }: { params: { horseId: strin
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
-          href={`/horses/${params.horseId}`}
+          href={`/horses/${horseId}`}
           className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -331,7 +332,7 @@ export default function AddMedicationPage({ params }: { params: { horseId: strin
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Link href={`/horses/${params.horseId}`} className="btn-secondary flex-1">
+          <Link href={`/horses/${horseId}`} className="btn-secondary flex-1">
             Cancel
           </Link>
           <button

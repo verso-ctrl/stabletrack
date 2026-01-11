@@ -2,9 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Disable Sentry automatic instrumentation to prevent clientModules error
+  // Production optimizations for Next.js 15
   experimental: {
-    instrumentationHook: false,
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
 
   // Image optimization

@@ -6,10 +6,11 @@ import { getMimeType } from '@/lib/storage-server';
 // GET /api/uploads/[...path] - Serve uploaded files
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const filePath = params.path.join('/');
+    const { path: pathSegments } = await params;
+    const filePath = pathSegments.join('/');
     const absolutePath = path.join(process.cwd(), 'uploads', filePath);
     
     // Security: Prevent directory traversal
