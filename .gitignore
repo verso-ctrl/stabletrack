@@ -61,3 +61,14 @@ next-env.d.ts
 # Misc
 .turbo
 .cache
+
+# Capacitor / Mobile
+ios/App/Pods
+ios/App/Podfile.lock
+ios/App/App/public
+android/app/build
+android/app/release
+android/.gradle
+android/build
+android/app/src/main/assets/public
+.capacitor

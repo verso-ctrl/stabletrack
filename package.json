@@ -19,9 +19,28 @@
     "setup": "npx tsx scripts/setup-db.ts",
     "setup:sqlite": "npx tsx scripts/setup-db.ts sqlite",
     "setup:supabase": "npx tsx scripts/setup-db.ts postgres",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "mobile:init": "npx cap init",
+    "mobile:build": "next build && npx cap sync",
+    "mobile:sync": "npx cap sync",
+    "mobile:open:ios": "npx cap open ios",
+    "mobile:open:android": "npx cap open android",
+    "mobile:run:ios": "npx cap run ios",
+    "mobile:run:android": "npx cap run android",
+    "mobile:add:ios": "npx cap add ios",
+    "mobile:add:android": "npx cap add android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/camera": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/ios": "^8.0.1",
+    "@capacitor/push-notifications": "^8.0.0",
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "@clerk/nextjs": "^6.36.5",
     "@hookform/resolvers": "^3.10.0",
     "@prisma/client": "5.22.0",
@@ -59,6 +78,8 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
