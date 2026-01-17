@@ -4,18 +4,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  FileText, 
-  Upload, 
-  Trash2, 
-  Download, 
+import {
+  FileText,
+  Upload,
+  Trash2,
+  Download,
   Calendar,
   AlertTriangle,
   Lock,
   Plus,
   ExternalLink,
   Share2,
-  Clock
+  Clock,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 import { useDocumentUpload, useFileList } from '@/hooks/useStorage'
 import { useTier } from '@/hooks/useTierPermissions'
@@ -267,16 +269,43 @@ export function DocumentManager({
               Upload {getDocumentTypeDisplayName(selectedType)}
             </h4>
             
-            <FileUpload
-              onFilesSelected={handleUpload}
-              accept={['application/pdf', 'image/*', '.doc', '.docx']}
-              maxSizeMB={25}
-              uploading={uploading}
-              progress={progress}
-              error={error}
-            />
+            {!uploading && !error ? (
+              <FileUpload
+                onFilesSelected={handleUpload}
+                accept={['application/pdf', 'image/*', '.doc', '.docx']}
+                maxSizeMB={25}
+                uploading={false}
+                progress={0}
+                error={null}
+              />
+            ) : uploading ? (
+              <div className="py-8 text-center">
+                <Loader2 className="w-12 h-12 mx-auto mb-4 text-amber-500 animate-spin" />
+                <p className="text-sm text-stone-600">Uploading document...</p>
+                <div className="w-full max-w-xs mx-auto bg-stone-200 rounded-full h-2 overflow-hidden mt-4">
+                  <div
+                    className="h-full bg-amber-500 transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            ) : error ? (
+              <div className="py-8 text-center">
+                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                <p className="text-sm text-red-600 mb-4">{error}</p>
+                <button
+                  onClick={() => {
+                    setShowUpload(false)
+                    setSelectedType(null)
+                  }}
+                  className="px-4 py-2 bg-stone-100 text-stone-700 rounded hover:bg-stone-200"
+                >
+                  Close
+                </button>
+              </div>
+            ) : null}
 
-            {canTrackDocumentExpiry && (
+            {canTrackDocumentExpiry && !uploading && !error && (
               <div className="mt-4">
                 <label className="block text-sm font-medium mb-1">
                   Expiry Date (optional)
@@ -289,17 +318,19 @@ export function DocumentManager({
               </div>
             )}
 
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setShowUpload(false)
-                  setSelectedType(null)
-                }}
-                className="flex-1 px-4 py-2 border rounded text-sm"
-              >
-                Cancel
-              </button>
-            </div>
+            {!uploading && !error && (
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => {
+                    setShowUpload(false)
+                    setSelectedType(null)
+                  }}
+                  className="flex-1 px-4 py-2 border rounded text-sm hover:bg-stone-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

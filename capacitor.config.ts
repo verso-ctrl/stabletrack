@@ -14,7 +14,6 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       backgroundColor: '#f5f5f4', // stone-100
       androidSplashResourceName: 'splash',
-      iosSplashResourceName: 'splash',
       showSpinner: true,
       spinnerColor: '#f59e0b', // amber-500
     },
