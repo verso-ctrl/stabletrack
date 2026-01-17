@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
-export default function BarnCreationSuccessPage() {
+function SuccessPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sessionId = searchParams?.get('session_id')
@@ -90,5 +90,23 @@ export default function BarnCreationSuccessPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function BarnCreationSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center">
+            <Loader2 className="w-16 h-16 text-amber-500 animate-spin mx-auto mb-4" />
+            <h1 className="text-xl font-bold text-stone-900 mb-2">Loading...</h1>
+            <p className="text-stone-600">Please wait while we process your request.</p>
+          </div>
+        </div>
+      }
+    >
+      <SuccessPageContent />
+    </Suspense>
   )
 }
