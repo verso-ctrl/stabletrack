@@ -52,22 +52,22 @@ export default function HorsesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-stone-900">Horses</h1>
-          <p className="text-stone-500 mt-0.5">{total} total in barn</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-stone-900">Horses</h1>
+          <p className="text-stone-500 mt-0.5 text-sm sm:text-base">{total} total in barn</p>
         </div>
-        
+
         {canWrite && (
           canAdd ? (
-            <Link href="/horses/new" className="btn-primary">
+            <Link href="/horses/new" className="btn-primary w-full sm:w-auto justify-center">
               <Plus className="w-4 h-4" />
-              Add Horse
+              <span>Add Horse</span>
             </Link>
           ) : (
-            <Link href="/settings/billing" className="btn-primary">
+            <Link href="/settings/billing" className="btn-primary w-full sm:w-auto justify-center text-sm">
               Upgrade to Add More
             </Link>
           )
@@ -75,16 +75,16 @@ export default function HorsesPage() {
       </div>
 
       {/* Filters */}
-      <div className="card p-4">
+      <div className="card p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
             <input
               type="text"
-              placeholder="Search by name, breed, or owner..."
+              placeholder="Search horses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input pl-10"
+              className="input pl-10 text-sm sm:text-base"
             />
           </div>
 
@@ -92,7 +92,7 @@ export default function HorsesPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="input w-auto"
+              className="input flex-1 sm:flex-initial text-sm sm:text-base"
             >
               <option value="all">All Status</option>
               <option value="ACTIVE">Active</option>
@@ -100,16 +100,18 @@ export default function HorsesPage() {
               <option value="RETIRED">Retired</option>
             </select>
 
-            <div className="flex border border-stone-200 rounded-lg overflow-hidden">
+            <div className="flex border border-stone-200 rounded-lg overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                className={`p-2 sm:p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                aria-label="Grid view"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 transition-colors ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                className={`p-2 sm:p-2.5 transition-colors ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                aria-label="List view"
               >
                 <List className="w-4 h-4" />
               </button>
