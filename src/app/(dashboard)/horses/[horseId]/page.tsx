@@ -508,22 +508,21 @@ export default function HorseDetailPage() {
 
       {/* Tabs */}
       <div className="border-b border-stone-200 -mx-4 sm:mx-0">
-        <nav className="flex gap-1 overflow-x-auto scrollbar-hide px-4 sm:px-0">
+        <nav className="flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`
-                flex items-center gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
+                flex items-center gap-1.5 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
                 ${activeTab === id
                   ? 'border-stone-900 text-stone-900'
                   : 'border-transparent text-stone-500 hover:text-stone-700 active:bg-stone-50'
                 }
               `}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">{label}</span>
-              <span className="sm:hidden">{label.split(' ')[0]}</span>
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span>{label}</span>
             </button>
           ))}
         </nav>
@@ -966,27 +965,27 @@ export default function HorseDetailPage() {
   );
 }
 
-function InfoItem({ 
-  label, 
-  value, 
-  subValue, 
-  icon: Icon 
-}: { 
-  label: string; 
-  value: string | number | null | undefined; 
+function InfoItem({
+  label,
+  value,
+  subValue,
+  icon: Icon
+}: {
+  label: string;
+  value: string | number | null | undefined;
   subValue?: string;
   icon?: any;
 }) {
   return (
-    <div>
-      <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">{label}</p>
-      <div className="flex items-center gap-2">
-        {Icon && <Icon className="w-4 h-4 text-stone-400" />}
-        <p className="text-sm font-medium text-stone-900">
+    <div className="min-w-0">
+      <p className="text-xs text-stone-500 uppercase tracking-wide mb-1 truncate">{label}</p>
+      <div className="flex items-center gap-2 min-w-0">
+        {Icon && <Icon className="w-4 h-4 text-stone-400 flex-shrink-0" />}
+        <p className="text-sm font-medium text-stone-900 truncate">
           {value || '—'}
         </p>
       </div>
-      {subValue && <p className="text-xs text-stone-500 mt-0.5">{subValue}</p>}
+      {subValue && <p className="text-xs text-stone-500 mt-0.5 truncate">{subValue}</p>}
     </div>
   );
 }
