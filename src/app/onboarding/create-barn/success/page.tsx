@@ -7,7 +7,7 @@ import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 export default function BarnCreationSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const sessionId = searchParams.get('session_id')
+  const sessionId = searchParams?.get('session_id')
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('Processing your payment...')
