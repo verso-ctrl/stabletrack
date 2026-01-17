@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.stabletrack.app',
   appName: 'StableTrack',
   webDir: 'out',
-  bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
     iosScheme: 'https',
