@@ -374,35 +374,35 @@ export default function HorseDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link 
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <Link
           href="/horses"
-          className="p-2 rounded-xl hover:bg-stone-100 transition-all"
+          className="p-2 rounded-xl hover:bg-stone-100 transition-all self-start"
         >
           <ArrowLeft className="w-5 h-5 text-stone-600" />
         </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-stone-900">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 truncate">
               {horse.barnName}
             </h1>
-            <span className={statusColors[horse.status] || 'badge-neutral'}>
+            <span className={`${statusColors[horse.status] || 'badge-neutral'} text-xs sm:text-sm flex-shrink-0`}>
               {horse.status}
             </span>
           </div>
           {horse.registeredName && (
-            <p className="text-stone-500">{horse.registeredName}</p>
+            <p className="text-sm sm:text-base text-stone-500 truncate">{horse.registeredName}</p>
           )}
         </div>
         {canEdit && (
-          <div className="flex items-center gap-2">
-            <Link href={`/horses/${horse.id}/edit`} className="btn-secondary btn-md">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Link href={`/horses/${horse.id}/edit`} className="btn-secondary btn-md flex-1 sm:flex-initial justify-center">
               <Edit className="w-4 h-4" />
-              Edit
+              <span className="sm:inline">Edit</span>
             </Link>
-            <button className="p-2 rounded-xl hover:bg-stone-100 transition-all">
+            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-stone-100 transition-all flex-shrink-0">
               <MoreVertical className="w-5 h-5 text-stone-600" />
             </button>
           </div>
@@ -410,8 +410,8 @@ export default function HorseDetailPage() {
       </div>
 
       {/* Profile Card */}
-      <div className="card p-6">
-        <div className="flex flex-col md:flex-row gap-6">
+      <div className="card p-4 sm:p-6">
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
           {/* Photo */}
           <input
             ref={profilePhotoInputRef}
@@ -420,7 +420,7 @@ export default function HorseDetailPage() {
             onChange={handleProfilePhotoUpload}
             className="hidden"
           />
-          <div 
+          <div
             className="relative w-full md:w-48 aspect-square rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 group cursor-pointer"
             onClick={() => {
               if (horse.profilePhotoUrl) {
@@ -439,8 +439,8 @@ export default function HorseDetailPage() {
               </div>
             ) : horse.profilePhotoUrl ? (
               <>
-                <img 
-                  src={horse.profilePhotoUrl} 
+                <img
+                  src={horse.profilePhotoUrl}
                   alt={horse.barnName}
                   className="w-full h-full object-cover"
                 />
@@ -460,37 +460,37 @@ export default function HorseDetailPage() {
           </div>
 
           {/* Info Grid */}
-          <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <InfoItem label="Breed" value={horse.breed} />
             <InfoItem label="Color" value={horse.color} />
             <InfoItem label="Sex" value={horse.sex} />
-            <InfoItem 
-              label="Age" 
+            <InfoItem
+              label="Age"
               value={horse.age ? `${horse.age} years` : null}
               subValue={horse.dateOfBirth ? new Date(horse.dateOfBirth).toLocaleDateString() : undefined}
             />
-            <InfoItem 
-              label="Height" 
+            <InfoItem
+              label="Height"
               value={horse.heightHands ? `${horse.heightHands} hands` : null}
               icon={Ruler}
             />
-            <InfoItem 
-              label="Weight" 
+            <InfoItem
+              label="Weight"
               value={horse.currentWeight ? `${horse.currentWeight} lbs` : null}
               icon={Weight}
             />
-            <InfoItem 
-              label="Stall" 
+            <InfoItem
+              label="Stall"
               value={horse.stallName}
               icon={MapPin}
             />
-            <InfoItem 
-              label="Owner" 
+            <InfoItem
+              label="Owner"
               value={horse.ownerName}
               icon={User}
             />
-            <InfoItem 
-              label="Microchip" 
+            <InfoItem
+              label="Microchip"
               value={horse.microchipNumber}
             />
           </div>
@@ -507,22 +507,23 @@ export default function HorseDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-stone-200">
-        <nav className="flex gap-1 overflow-x-auto scrollbar-hide">
+      <div className="border-b border-stone-200 -mx-4 sm:mx-0">
+        <nav className="flex gap-1 overflow-x-auto scrollbar-hide px-4 sm:px-0">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`
-                flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all
-                ${activeTab === id 
-                  ? 'border-stone-900 text-stone-900' 
-                  : 'border-transparent text-stone-500 hover:text-stone-700'
+                flex items-center gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
+                ${activeTab === id
+                  ? 'border-stone-900 text-stone-900'
+                  : 'border-transparent text-stone-500 hover:text-stone-700 active:bg-stone-50'
                 }
               `}
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden">{label.split(' ')[0]}</span>
             </button>
           ))}
         </nav>
