@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
@@ -39,7 +39,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-  const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [suggestions, setSuggestions] = useState<Suggestions>({
     breeds: [],
     colors: [],
