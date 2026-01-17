@@ -57,6 +57,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
     status: 'ACTIVE',
     ownerName: '',
     bio: '',
+    stall: '',
   });
 
   // Fetch suggestions when barn is available
@@ -88,6 +89,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
         status: horse.status || 'ACTIVE',
         ownerName: horse.ownerName || '',
         bio: horse.bio || '',
+        stall: (horse as any).stall || (horse as any).stallName || '',
       });
     }
   }, [horse]);
@@ -337,19 +339,34 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
         <div className="card p-6">
           <h3 className="font-medium text-stone-900 mb-4">Status & Ownership</h3>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="input w-full"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status.value} value={status.value}>{status.label}</option>
-                ))}
-              </select>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="input w-full"
+                >
+                  {statusOptions.map((status) => (
+                    <option key={status.value} value={status.value}>{status.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">
+                  Stall
+                </label>
+                <input
+                  type="text"
+                  value={formData.stall}
+                  onChange={(e) => setFormData({ ...formData, stall: e.target.value })}
+                  className="input w-full"
+                  placeholder="e.g., A12 or Barn 1 - Stall 5"
+                />
+              </div>
             </div>
 
             <div>

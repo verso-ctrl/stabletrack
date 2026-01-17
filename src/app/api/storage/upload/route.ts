@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
-import { 
+import {
   getTierFeatures,
   getTierLimits,
   hasReachedPhotoLimit,
@@ -14,16 +14,25 @@ import {
   normalizeTier,
   type SubscriptionTier
 } from '@/lib/tiers'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { checkRateLimit, getRateLimitIdentifier, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
+// No longer need filesystem imports - storing in database
 
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser()
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting - 10 uploads per minute
+    const rateLimitResult = checkRateLimit(
+      getRateLimitIdentifier(req, user.id),
+      RATE_LIMITS.upload
+    )
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult)
     }
 
     const formData = await req.formData()
@@ -42,12 +51,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify user has access
+    // Verify user has access and get barn tier
     const membership = await prisma.barnMember.findFirst({
       where: {
         barnId,
         userId: user.id,
         role: { in: ['OWNER', 'MANAGER', 'CARETAKER'] },
+      },
+      include: {
+        barn: {
+          select: {
+            tier: true,
+          },
+        },
       },
     })
 
@@ -58,8 +74,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Demo mode: Always FARM tier
-    const tier: SubscriptionTier = 'FARM'
+    // Get tier from barn
+    const tier = normalizeTier(membership.barn.tier)
     const features = getTierFeatures(tier)
     const limits = getTierLimits(tier)
 
@@ -100,22 +116,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Save file to local uploads directory
+    // Convert file to base64 for database storage
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    
-    const uploadDir = join(process.cwd(), 'uploads', type === 'photo' ? 'photos' : 'documents')
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
-    }
-    
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`
-    const filePath = join(uploadDir, fileName)
-    await writeFile(filePath, buffer)
-    
-    const fileUrl = `/api/uploads/${type === 'photo' ? 'photos' : 'documents'}/${fileName}`
+    const base64Data = buffer.toString('base64')
 
-    // Create database record
+    // Create database record with file data
     if (type === 'photo') {
       // If setting as primary, unset other primaries first
       if (isPrimary) {
@@ -128,8 +134,8 @@ export async function POST(req: NextRequest) {
       const photo = await prisma.horsePhoto.create({
         data: {
           horseId,
-          url: fileUrl,
-          storagePath: filePath,
+          url: `/api/storage/file/photo/${horseId}`, // Placeholder URL, will use photo ID
+          fileData: base64Data,
           fileName: file.name,
           fileSize: file.size,
           mimeType: file.type,
@@ -137,6 +143,13 @@ export async function POST(req: NextRequest) {
           isPrimary,
           uploadedBy: user.id,
         },
+      })
+
+      // Update URL with actual photo ID
+      const fileUrl = `/api/storage/file/photo/${photo.id}`
+      await prisma.horsePhoto.update({
+        where: { id: photo.id },
+        data: { url: fileUrl },
       })
 
       // Update horse profile photo if primary
@@ -149,7 +162,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        photo,
+        photo: { ...photo, url: fileUrl },
         url: fileUrl,
       })
     } else {
@@ -160,18 +173,28 @@ export async function POST(req: NextRequest) {
           title: file.name,
           name: file.name,
           fileName: file.name,
-          url: fileUrl,
-          fileUrl: fileUrl,
-          storagePath: filePath,
+          url: `/api/storage/file/document/${horseId}`, // Placeholder
+          fileUrl: `/api/storage/file/document/${horseId}`, // Placeholder
+          fileData: base64Data,
           fileSize: file.size,
           mimeType: file.type,
           uploadedBy: user.id,
         },
       })
 
+      // Update URL with actual document ID
+      const fileUrl = `/api/storage/file/document/${document.id}`
+      await prisma.document.update({
+        where: { id: document.id },
+        data: {
+          url: fileUrl,
+          fileUrl: fileUrl,
+        },
+      })
+
       return NextResponse.json({
         success: true,
-        document,
+        document: { ...document, url: fileUrl, fileUrl },
         url: fileUrl,
       })
     }

@@ -370,24 +370,32 @@ export default function CalendarPage() {
     try {
       const scheduledDateTime = `${eventForm.scheduledDate}T${eventForm.scheduledTime}:00`;
 
+      // Build request body, excluding null/undefined values for optional fields
+      const requestBody: any = {
+        type: eventForm.type,
+        title: eventForm.title || `${eventForm.type.charAt(0) + eventForm.type.slice(1).toLowerCase().replace('_', ' ')} Appointment`,
+        scheduledDate: new Date(scheduledDateTime).toISOString(),
+      };
+
+      // Only include optional fields if they have values
+      if (eventForm.description) requestBody.description = eventForm.description;
+      if (eventForm.horseIds.length > 0) requestBody.horseIds = eventForm.horseIds;
+      if (eventForm.providerName) requestBody.providerName = eventForm.providerName;
+      if (eventForm.providerPhone) requestBody.providerPhone = eventForm.providerPhone;
+
       const response = await fetch(`/api/barns/${currentBarn?.id}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: eventForm.type,
-          title: eventForm.title,
-          description: eventForm.description || null,
-          horseIds: eventForm.horseIds.length > 0 ? eventForm.horseIds : null,
-          scheduledDate: new Date(scheduledDateTime).toISOString(),
-          providerName: eventForm.providerName || null,
-          providerPhone: eventForm.providerPhone || null,
-          assignedToId: eventForm.assignedToId || null,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create event');
+        console.error('Event creation failed:', error);
+        const errorMessage = error.details
+          ? `${error.error}: ${Object.entries(error.details).map(([field, msg]) => `${field}: ${msg}`).join(', ')}`
+          : error.error || 'Failed to create event';
+        throw new Error(errorMessage);
       }
 
       setShowAddModal(false);

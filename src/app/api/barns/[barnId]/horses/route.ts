@@ -127,20 +127,32 @@ export async function POST(
     }
     
     const hasPermission = await checkBarnPermission(user.id, barnId, 'horses:write');
-    
+
     if (!hasPermission) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-    
-    // Check horse limit based on subscription
+
+    // Check horse limit based on barn's subscription tier
+    const barn = await prisma.barn.findUnique({
+      where: { id: barnId },
+      select: { tier: true },
+    });
+
+    if (!barn) {
+      return NextResponse.json({ error: 'Barn not found' }, { status: 404 });
+    }
+
     const horseCount = await prisma.horse.count({
       where: { barnId: barnId },
     });
-    
-    const maxHorses = user.subscription?.maxHorses ?? 5;
-    if (maxHorses !== -1 && horseCount >= maxHorses) {
+
+    const { getTierLimits, normalizeTier } = await import('@/lib/tiers');
+    const tier = normalizeTier(barn.tier);
+    const limits = getTierLimits(tier);
+
+    if (limits.maxHorses !== -1 && horseCount >= limits.maxHorses) {
       return NextResponse.json(
-        { error: 'Horse limit reached. Please upgrade your subscription.' },
+        { error: `Horse limit reached (${limits.maxHorses} horses on ${tier} plan)` },
         { status: 403 }
       );
     }

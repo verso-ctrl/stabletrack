@@ -530,7 +530,7 @@ export default function HorseDetailPage() {
 
       {/* Tab Content */}
       <div className="min-h-[400px]">
-        {activeTab === 'overview' && <OverviewTab horse={horse} />}
+        {activeTab === 'overview' && <OverviewTab horse={horse} onNavigateToHealth={() => setActiveTab('health')} />}
         {activeTab === 'photos' && currentBarn && (
           <div className="card p-6">
             <HorsePhotoGallery
@@ -990,7 +990,7 @@ function InfoItem({
   );
 }
 
-function OverviewTab({ horse }: { horse: any }) {
+function OverviewTab({ horse, onNavigateToHealth }: { horse: any; onNavigateToHealth: () => void }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Active Medications */}
@@ -1062,16 +1062,28 @@ function OverviewTab({ horse }: { horse: any }) {
         {horse.recentHealthRecords?.length > 0 ? (
           <div className="space-y-2">
             {horse.recentHealthRecords.slice(0, 3).map((record: any) => (
-              <div key={record.id} className="p-3 rounded-xl bg-stone-50">
+              <button
+                key={record.id}
+                onClick={onNavigateToHealth}
+                className="w-full p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+              >
                 <p className="font-medium text-stone-900">{record.type.replace(/_/g, ' ')}</p>
                 <p className="text-sm text-stone-500">
                   {new Date(record.date).toLocaleDateString()}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         ) : (
           <p className="text-stone-500 text-sm py-4">No health records</p>
+        )}
+        {horse.recentHealthRecords?.length > 3 && (
+          <button
+            onClick={onNavigateToHealth}
+            className="w-full mt-3 text-sm text-amber-600 hover:text-amber-700 font-medium"
+          >
+            View All Health Records →
+          </button>
         )}
       </div>
     </div>
@@ -1081,6 +1093,10 @@ function OverviewTab({ horse }: { horse: any }) {
 function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true }: { horse: any; onLogWeight: () => void; onLogVaccination: () => void; onLogCoggins: () => void; barnId: string; canEdit?: boolean }) {
   const [coggins, setCoggins] = React.useState<any>(null);
   const [cogginsLoading, setCogginsLoading] = React.useState(true);
+  const [healthRecords, setHealthRecords] = React.useState<any[]>([]);
+  const [healthRecordsLoading, setHealthRecordsLoading] = React.useState(true);
+  const [selectedHealthRecord, setSelectedHealthRecord] = React.useState<any>(null);
+  const [showHealthRecordModal, setShowHealthRecordModal] = React.useState(false);
 
   React.useEffect(() => {
     if (barnId && horse?.id) {
@@ -1091,6 +1107,15 @@ function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId,
           setCogginsLoading(false);
         })
         .catch(() => setCogginsLoading(false));
+
+      // Fetch health records
+      fetch(`/api/barns/${barnId}/horses/${horse.id}/health`)
+        .then(res => res.json())
+        .then(data => {
+          setHealthRecords(data.data || []);
+          setHealthRecordsLoading(false);
+        })
+        .catch(() => setHealthRecordsLoading(false));
     }
   }, [barnId, horse?.id]);
 
@@ -1263,6 +1288,157 @@ function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId,
           <p className="text-stone-500 text-sm">No weight records</p>
         )}
       </div>
+
+      {/* All Health Records */}
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-stone-900">Health Records</h3>
+          {canEdit && (
+            <Link href={`/horses/${horse.id}/health/new`} className="btn-secondary btn-sm">
+              <Plus className="w-4 h-4" />
+              Add Record
+            </Link>
+          )}
+        </div>
+        {healthRecordsLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+          </div>
+        ) : healthRecords.length > 0 ? (
+          <div className="space-y-2">
+            {healthRecords.map((record: any) => (
+              <button
+                key={record.id}
+                onClick={() => {
+                  setSelectedHealthRecord(record);
+                  setShowHealthRecordModal(true);
+                }}
+                className="w-full p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-stone-900">{record.type.replace(/_/g, ' ')}</p>
+                    <p className="text-sm text-stone-500">{new Date(record.date).toLocaleDateString()}</p>
+                    {record.provider && (
+                      <p className="text-xs text-stone-400 mt-1">Provider: {record.provider}</p>
+                    )}
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-stone-400" />
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <FileText className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+            <p className="text-stone-500 text-sm mb-3">No health records</p>
+            {canEdit && (
+              <Link href={`/horses/${horse.id}/health/new`} className="btn-primary btn-sm inline-flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add First Record
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Health Record Detail Modal */}
+      {showHealthRecordModal && selectedHealthRecord && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-stone-200 p-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-stone-900">
+                {selectedHealthRecord.type.replace(/_/g, ' ')}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowHealthRecordModal(false);
+                  setSelectedHealthRecord(null);
+                }}
+                className="text-stone-400 hover:text-stone-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-stone-700">Date</label>
+                <p className="text-stone-900">{new Date(selectedHealthRecord.date).toLocaleDateString()}</p>
+              </div>
+
+              {selectedHealthRecord.provider && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Provider</label>
+                  <p className="text-stone-900">{selectedHealthRecord.provider}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.diagnosis && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Diagnosis</label>
+                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.diagnosis}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.treatment && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Treatment</label>
+                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.treatment}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.findings && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Findings</label>
+                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.findings}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.followUpNotes && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Notes</label>
+                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.followUpNotes}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.followUpDate && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Follow-up Date</label>
+                  <p className="text-stone-900">{new Date(selectedHealthRecord.followUpDate).toLocaleDateString()}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.cost && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700">Cost</label>
+                  <p className="text-stone-900">${selectedHealthRecord.cost.toFixed(2)}</p>
+                </div>
+              )}
+
+              {selectedHealthRecord.attachments && selectedHealthRecord.attachments.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-stone-700 block mb-2">Attachments</label>
+                  <div className="space-y-2">
+                    {selectedHealthRecord.attachments.map((att: any) => (
+                      <a
+                        key={att.id}
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 p-2 rounded bg-stone-50 hover:bg-stone-100 text-amber-600 hover:text-amber-700"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span className="text-sm">{att.filename || 'View Document'}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

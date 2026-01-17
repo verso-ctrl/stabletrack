@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useBarn } from '@/contexts/BarnContext';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useUser } from '@clerk/nextjs';
 import {
   User,
   Building2,
@@ -14,25 +14,20 @@ import {
   HelpCircle,
   ChevronRight,
   ExternalLink,
+  Loader2,
+  Crown,
+  Users,
 } from 'lucide-react';
-
-// Demo user (no Clerk in demo mode)
-const demoUser = {
-  firstName: 'Demo',
-  lastName: 'User',
-  imageUrl: null,
-  email: 'demo@stabletrack.com',
-};
 
 const settingsGroups = [
   {
-    title: 'Account',
+    title: 'Personal',
     items: [
       {
         href: '/settings/profile',
         icon: User,
         label: 'Profile',
-        description: 'Manage your personal information',
+        description: 'Manage your personal information and avatar',
       },
       {
         href: '/settings/notifications',
@@ -44,30 +39,30 @@ const settingsGroups = [
         href: '/settings/security',
         icon: Shield,
         label: 'Security',
-        description: 'Password and authentication settings',
+        description: 'Password and two-factor authentication',
       },
     ],
   },
   {
-    title: 'Barn',
+    title: 'Barn Management',
     items: [
       {
         href: '/settings/barn',
         icon: Building2,
         label: 'Barn Settings',
-        description: 'Update barn info and preferences',
+        description: 'Update barn info, location, and preferences',
       },
       {
         href: '/settings/billing',
         icon: CreditCard,
         label: 'Billing & Subscription',
-        description: 'Manage your plan and payment methods',
+        description: 'Manage your plan, usage, and payment methods',
       },
       {
         href: '/settings/appearance',
         icon: Palette,
         label: 'Appearance',
-        description: 'Customize colors and branding',
+        description: 'Customize colors, branding, and theme',
       },
     ],
   },
@@ -75,104 +70,187 @@ const settingsGroups = [
     title: 'Support',
     items: [
       {
-        href: '/help',
+        href: 'https://help.stabletrack.com',
         icon: HelpCircle,
         label: 'Help Center',
-        description: 'Guides, FAQs, and tutorials',
+        description: 'Guides, FAQs, tutorials, and support',
         external: true,
       },
     ],
   },
 ];
 
+const roleIcons: Record<string, any> = {
+  OWNER: Crown,
+  MANAGER: Users,
+  CARETAKER: User,
+  CLIENT: User,
+};
+
+const roleColors: Record<string, string> = {
+  OWNER: 'bg-amber-100 text-amber-700',
+  MANAGER: 'bg-blue-100 text-blue-700',
+  CARETAKER: 'bg-green-100 text-green-700',
+  CLIENT: 'bg-stone-100 text-stone-700',
+};
+
 export default function SettingsPage() {
-  const user = demoUser; // Demo mode
+  const { user, isLoaded: isUserLoaded } = useUser();
   const { currentBarn } = useBarn();
-  const { tier } = useSubscription();
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+
+  useEffect(() => {
+    if (currentBarn?.id) {
+      fetch(`/api/barns/${currentBarn.id}/subscription`)
+        .then(res => res.json())
+        .then(data => {
+          setSubscription(data);
+          setIsLoadingSubscription(false);
+        })
+        .catch(() => setIsLoadingSubscription(false));
+    }
+  }, [currentBarn?.id]);
+
+  if (!isUserLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+      </div>
+    );
+  }
+
+  const RoleIcon = currentBarn?.role ? roleIcons[currentBarn.role] : User;
+  const roleColor = currentBarn?.role ? roleColors[currentBarn.role] : 'bg-stone-100 text-stone-700';
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Settings</h1>
-        <p className="text-stone-500 mt-1">Manage your account and barn preferences</p>
+        <h1 className="text-3xl font-bold text-stone-900">Settings</h1>
+        <p className="text-stone-600 mt-2">Manage your account, barn, and preferences</p>
       </div>
 
-      {/* Quick Info */}
+      {/* User Info Card */}
       <div className="card p-6">
-        <div className="flex items-center gap-4">
-          <div className="avatar avatar-xl">
+        <div className="flex items-start gap-4">
+          {/* Avatar */}
+          <div className="relative flex-shrink-0">
             {user?.imageUrl ? (
-              <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+              <img
+                src={user.imageUrl}
+                alt={user.fullName || 'User'}
+                className="w-20 h-20 rounded-full object-cover ring-4 ring-stone-100"
+              />
             ) : (
-              <span className="text-stone-500 text-xl">
-                {user?.firstName?.[0] || 'U'}
-              </span>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center ring-4 ring-stone-100">
+                <span className="text-white text-2xl font-semibold">
+                  {user?.firstName?.[0] || user?.username?.[0] || 'U'}
+                </span>
+              </div>
             )}
           </div>
-          <div className="flex-1">
-            <h2 className="font-semibold text-stone-900">
-              {user?.firstName} {user?.lastName}
-            </h2>
-            <p className="text-stone-500 text-sm">{user?.email}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="badge-neutral">{currentBarn?.role || 'Member'}</span>
-              <span className="badge bg-amber-100 text-amber-700">{tier} Plan</span>
+
+          {/* User Details */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-bold text-stone-900 truncate">
+                  {user?.fullName || user?.username || 'User'}
+                </h2>
+                <p className="text-stone-600 text-sm mt-1 truncate">
+                  {user?.primaryEmailAddress?.emailAddress}
+                </p>
+
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  {currentBarn && (
+                    <>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${roleColor}`}>
+                        <RoleIcon className="w-3.5 h-3.5" />
+                        {currentBarn.role}
+                      </span>
+                      {!isLoadingSubscription && subscription && (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700 border border-amber-200">
+                          {subscription.displayName} Plan
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {currentBarn && (
+                  <div className="mt-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                    <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Current Barn</p>
+                    <p className="text-sm font-semibold text-stone-900">{currentBarn.name}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit Button */}
+              <Link
+                href="/settings/profile"
+                className="btn-secondary btn-sm flex-shrink-0"
+              >
+                Edit Profile
+              </Link>
             </div>
           </div>
-          <Link href="/settings/profile" className="btn-secondary btn-sm">
-            Edit Profile
-          </Link>
         </div>
       </div>
 
       {/* Settings Groups */}
       {settingsGroups.map((group) => (
         <div key={group.title}>
-          <h3 className="text-sm font-medium text-stone-500 uppercase tracking-wide mb-3">
+          <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-3 px-1">
             {group.title}
           </h3>
           <div className="card divide-y divide-stone-100">
-            {group.items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-4 p-4 hover:bg-stone-50 transition-all"
-              >
-                <div className="p-2 rounded-xl bg-stone-100">
-                  <item.icon className="w-5 h-5 text-stone-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-stone-900">{item.label}</p>
-                  <p className="text-sm text-stone-500">{item.description}</p>
-                </div>
-                {(item as any).external ? (
-                  <ExternalLink className="w-4 h-4 text-stone-400" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-stone-400" />
-                )}
-              </Link>
-            ))}
+            {group.items.map((item) => {
+              const ItemIcon = item.icon;
+              const isExternal = (item as any).external;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                  className="flex items-center gap-4 p-5 hover:bg-stone-50 transition-all group"
+                >
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 group-hover:from-amber-100 group-hover:to-amber-50 transition-all">
+                    <ItemIcon className="w-5 h-5 text-stone-600 group-hover:text-amber-600 transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors">
+                      {item.label}
+                    </p>
+                    <p className="text-sm text-stone-500 mt-0.5 line-clamp-1">
+                      {item.description}
+                    </p>
+                  </div>
+                  {isExternal ? (
+                    <ExternalLink className="w-5 h-5 text-stone-400 group-hover:text-amber-600 transition-colors flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
       ))}
 
-      {/* Danger Zone */}
-      <div>
-        <h3 className="text-sm font-medium text-red-500 uppercase tracking-wide mb-3">
-          Danger Zone
-        </h3>
-        <div className="card p-4 border-red-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-stone-900">Delete Account</p>
-              <p className="text-sm text-stone-500">
-                Permanently delete your account and all data
-              </p>
-            </div>
-            <button className="btn bg-red-100 text-red-700 hover:bg-red-200 btn-sm">
-              Delete
-            </button>
+      {/* App Info */}
+      <div className="card p-5 bg-gradient-to-br from-stone-50 to-white border-stone-200">
+        <div className="flex items-center justify-between text-sm">
+          <div>
+            <p className="text-stone-500">StableTrack Version</p>
+            <p className="font-semibold text-stone-900 mt-0.5">1.0.0</p>
+          </div>
+          <div className="text-right">
+            <p className="text-stone-500">Last Updated</p>
+            <p className="font-semibold text-stone-900 mt-0.5">January 2026</p>
           </div>
         </div>
       </div>

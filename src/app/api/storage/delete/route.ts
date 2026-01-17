@@ -4,8 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
-import { unlink } from 'fs/promises'
-import { existsSync } from 'fs'
+// No longer need filesystem imports - files stored in database
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -69,7 +68,7 @@ export async function DELETE(req: NextRequest) {
         })
       }
 
-      // Delete from database
+      // Delete from database (fileData is deleted with the record)
       await prisma.horsePhoto.delete({ where: { id: fileId } })
 
     } else if (fileType === 'document') {
@@ -82,20 +81,10 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: 'Document not found' }, { status: 404 })
       }
 
-      storagePath = doc.storagePath
       fileName = doc.name || doc.fileName
 
-      // Delete from database
+      // Delete from database (fileData is deleted with the record)
       await prisma.document.delete({ where: { id: fileId } })
-    }
-
-    // Delete from local filesystem
-    if (storagePath && existsSync(storagePath)) {
-      try {
-        await unlink(storagePath)
-      } catch (err) {
-        console.error('Failed to delete file from disk:', err)
-      }
     }
 
     // Log activity

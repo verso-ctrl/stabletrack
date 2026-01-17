@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { nanoid } from 'nanoid';
+import { checkRateLimit, getRateLimitIdentifier, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 // GET /api/barns - Get user's barns (as member AND client)
 export async function GET() {
@@ -137,41 +138,42 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Check subscription limits
-    const userBarns = await prisma.barnMember.count({
-      where: {
-        userId: user.id,
-        role: 'OWNER',
-      },
-    });
-    
-    const maxBarns = user.subscription?.maxBarns ?? 1;
-    if (maxBarns !== -1 && userBarns >= maxBarns) {
-      return NextResponse.json(
-        { error: 'Barn limit reached. Please upgrade your subscription.' },
-        { status: 403 }
-      );
+
+    // Rate limiting - 30 writes per minute
+    const rateLimitResult = checkRateLimit(
+      getRateLimitIdentifier(request, user.id),
+      RATE_LIMITS.write
+    );
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult);
     }
-    
+
     const body = await request.json();
-    const { name, address, city, state, zipCode, country, timezone } = body;
-    
+    const { name, address, city, state, zipCode, country, timezone, phone, email, tier } = body;
+
     if (!name) {
       return NextResponse.json(
         { error: 'Barn name is required' },
         { status: 400 }
       );
     }
-    
+
+    if (!tier) {
+      return NextResponse.json(
+        { error: 'Subscription tier is required' },
+        { status: 400 }
+      );
+    }
+
     // Generate unique invite code
     const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`;
-    
-    // Create barn with owner membership
+
+    // Create barn with owner membership and subscription tier
     const barn = await prisma.barn.create({
       data: {
         name,
@@ -179,9 +181,13 @@ export async function POST(request: NextRequest) {
         city,
         state,
         zipCode,
+        phone,
+        email,
         country: country || 'US',
         timezone: timezone || 'America/New_York',
         inviteCode,
+        tier, // Store tier on the barn itself
+        subscriptionStatus: 'ACTIVE',
         members: {
           create: {
             userId: user.id,

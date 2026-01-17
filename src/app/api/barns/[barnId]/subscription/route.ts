@@ -33,7 +33,12 @@ export async function GET(
         userId: user.id,
       },
       include: {
-        barn: true,
+        barn: {
+          select: {
+            tier: true,
+            subscriptionStatus: true,
+          },
+        },
       },
     })
 
@@ -41,8 +46,8 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    // Demo mode: Always FARM tier
-    const tier: SubscriptionTier = 'FARM'
+    // Get tier from barn
+    const tier = normalizeTier(membership.barn.tier)
     const limits = getTierLimits(tier)
     const features = getTierFeatures(tier)
     const pricing = getTierPricing(tier)
@@ -76,7 +81,7 @@ export async function GET(
     return NextResponse.json({
       tier,
       displayName: pricing.displayName,
-      status: 'ACTIVE',
+      status: membership.barn.subscriptionStatus || 'ACTIVE',
       features,
       limits: {
         maxHorses: limits.maxHorses,

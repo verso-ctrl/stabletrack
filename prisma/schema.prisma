@@ -73,7 +73,11 @@ model Barn {
   timezone    String   @default("America/New_York")
   inviteCode  String   @unique
   logoUrl     String?
-  
+
+  // Subscription (per-barn, not per-user)
+  tier        String   @default("FREE") // FREE, PROFESSIONAL, FARM, ENTERPRISE
+  subscriptionStatus String @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -222,6 +226,7 @@ model HorsePhoto {
   horseId     String
   url         String
   storagePath String?
+  fileData    String?  // Base64 encoded file data stored in DB
   fileName    String?
   fileSize    Int?
   mimeType    String?
@@ -559,6 +564,7 @@ model Document {
   url         String?
   fileUrl     String
   storagePath String?
+  fileData    String?  // Base64 encoded file data stored in DB
   fileSize    Int?
   mimeType    String?
   expiryDate  DateTime?
