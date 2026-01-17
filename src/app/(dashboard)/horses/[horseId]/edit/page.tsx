@@ -35,9 +35,11 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
   const { horseId } = use(params);
   const router = useRouter();
   const { currentBarn } = useBarn();
-  const { horse, isLoading, error } = useHorse(horseId);
+  const { horse, isLoading, error, refetch } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
   const [suggestions, setSuggestions] = useState<Suggestions>({
     breeds: [],
     colors: [],
@@ -93,6 +95,42 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       });
     }
   }, [horse]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentBarn) return;
+
+    try {
+      setIsUploadingPhoto(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('barnId', currentBarn.id);
+      formData.append('horseId', horseId);
+      formData.append('type', 'photo');
+      formData.append('isPrimary', 'true');
+
+      const response = await fetch('/api/storage/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await refetch();
+        alert('Photo uploaded successfully!');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload photo');
+      }
+    } catch (err) {
+      console.error('Failed to upload photo:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload photo');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,12 +250,30 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
             </div>
             <div>
               <p className="text-sm text-stone-600">Upload a new profile photo</p>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
               <button
                 type="button"
-                onClick={() => alert('Demo mode: Photo upload disabled')}
-                className="btn-secondary btn-sm mt-2"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={isUploadingPhoto}
+                className="btn-secondary btn-sm mt-2 flex items-center gap-2"
               >
-                Change Photo
+                {isUploadingPhoto ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-4 h-4" />
+                    Change Photo
+                  </>
+                )}
               </button>
             </div>
           </div>
