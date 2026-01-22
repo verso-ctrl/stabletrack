@@ -36,7 +36,7 @@ export function UpgradeModal({
 
   if (!open) return null
 
-  const tierOrder: SubscriptionTier[] = ['FREE', 'PROFESSIONAL', 'FARM', 'ENTERPRISE']
+  const tierOrder: SubscriptionTier[] = ['FREE', 'BASIC', 'ADVANCED']
   const currentIndex = tierOrder.indexOf(currentTier)
   const availableTiers = tierOrder.slice(currentIndex + 1)
 
@@ -153,8 +153,8 @@ export function UpgradeModal({
                 )}
 
                 <div className="flex items-center gap-2 mb-2">
-                  {tierName === 'ENTERPRISE' && <Crown className="w-5 h-5 text-purple-500" />}
-                  {tierName === 'FARM' && <Zap className="w-5 h-5 text-green-500" />}
+                  {tierName === 'ADVANCED' && <Crown className="w-5 h-5 text-green-500" />}
+                  {tierName === 'BASIC' && <Zap className="w-5 h-5 text-blue-500" />}
                   <h3 className="font-semibold">{pricing.displayName}</h3>
                 </div>
 
@@ -258,14 +258,13 @@ export function UpgradeModal({
 }
 
 // Helper to get key differentiating features for each tier
+// Note: All features are now available on all tiers - only horse limits differ
 function getKeyFeatures(tier: SubscriptionTier): (keyof TierFeatures)[] {
   switch (tier) {
-    case 'PROFESSIONAL':
+    case 'BASIC':
       return ['taskManagement', 'feedCalendar', 'basicReporting']
-    case 'FARM':
+    case 'ADVANCED':
       return ['trainingScheduling', 'lessonManagement', 'invoicing']
-    case 'ENTERPRISE':
-      return ['multiLocation', 'advancedAnalytics', 'apiAccess']
     default:
       return []
   }

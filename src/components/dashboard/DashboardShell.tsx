@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { toast } from '@/lib/toast';
 
 // Demo user (no Clerk in demo mode)
 const demoUser = {
@@ -244,8 +245,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   {currentBarn?.role || 'Owner'}
                 </p>
               </div>
-              <button 
-                onClick={() => alert('Demo mode: Sign out disabled')}
+              <button
+                onClick={() => toast.info('Demo Mode', 'Sign out is disabled in demo mode')}
                 className="p-2 rounded-lg hover:bg-stone-100 text-stone-400"
               >
                 <LogOut className="w-4 h-4" />

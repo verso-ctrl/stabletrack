@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   FileText,
   Upload,
@@ -109,7 +110,7 @@ export default function DocumentsPage() {
     if (!file) return;
     
     if (file.size > 10 * 1024 * 1024) {
-      alert('File must be less than 10MB');
+      toast.warning('File too large', 'File must be less than 10MB');
       return;
     }
     
@@ -122,7 +123,7 @@ export default function DocumentsPage() {
 
   const handleUpload = async () => {
     if (!uploadForm.file || !uploadForm.title || !uploadForm.horseId || !currentBarn) {
-      alert('Please fill in all required fields');
+      toast.warning('Missing fields', 'Please fill in all required fields');
       return;
     }
 
@@ -161,7 +162,7 @@ export default function DocumentsPage() {
       setUploadForm({ title: '', type: 'OTHER', horseId: '', expiryDate: '', file: null });
     } catch (error) {
       console.error('Error uploading:', error);
-      alert(error instanceof Error ? error.message : 'Failed to upload document');
+      toast.error('Upload failed', error instanceof Error ? error.message : 'Failed to upload document');
     } finally {
       setIsUploading(false);
     }
@@ -177,12 +178,13 @@ export default function DocumentsPage() {
 
       if (response.ok) {
         setDocuments(prev => prev.filter(d => d.id !== docId));
+        toast.success('Document deleted');
       } else {
-        alert('Failed to delete document');
+        toast.error('Delete failed', 'Failed to delete document');
       }
     } catch (error) {
       console.error('Error deleting:', error);
-      alert('Failed to delete document');
+      toast.error('Delete failed', 'Failed to delete document');
     }
   };
 

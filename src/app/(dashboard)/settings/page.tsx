@@ -7,18 +7,14 @@ import { useUser } from '@clerk/nextjs';
 import {
   User,
   Building2,
-  CreditCard,
-  Bell,
-  Shield,
-  Palette,
-  HelpCircle,
   ChevronRight,
-  ExternalLink,
   Loader2,
   Crown,
   Users,
 } from 'lucide-react';
 
+// v1 SIMPLIFIED: Only essential settings
+// Hidden for v1: Notifications, Security, Billing, Appearance, Help Center
 const settingsGroups = [
   {
     title: 'Personal',
@@ -27,19 +23,7 @@ const settingsGroups = [
         href: '/settings/profile',
         icon: User,
         label: 'Profile',
-        description: 'Manage your personal information and avatar',
-      },
-      {
-        href: '/settings/notifications',
-        icon: Bell,
-        label: 'Notifications',
-        description: 'Configure email and push notifications',
-      },
-      {
-        href: '/settings/security',
-        icon: Shield,
-        label: 'Security',
-        description: 'Password and two-factor authentication',
+        description: 'Manage your personal information',
       },
     ],
   },
@@ -50,31 +34,7 @@ const settingsGroups = [
         href: '/settings/barn',
         icon: Building2,
         label: 'Barn Settings',
-        description: 'Update barn info, location, and preferences',
-      },
-      {
-        href: '/settings/billing',
-        icon: CreditCard,
-        label: 'Billing & Subscription',
-        description: 'Manage your plan, usage, and payment methods',
-      },
-      {
-        href: '/settings/appearance',
-        icon: Palette,
-        label: 'Appearance',
-        description: 'Customize colors, branding, and theme',
-      },
-    ],
-  },
-  {
-    title: 'Support',
-    items: [
-      {
-        href: 'https://help.stabletrack.com',
-        icon: HelpCircle,
-        label: 'Help Center',
-        description: 'Guides, FAQs, tutorials, and support',
-        external: true,
+        description: 'Update barn info and location',
       },
     ],
   },
@@ -101,15 +61,21 @@ export default function SettingsPage() {
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
 
   useEffect(() => {
-    if (currentBarn?.id) {
-      fetch(`/api/barns/${currentBarn.id}/subscription`)
-        .then(res => res.json())
-        .then(data => {
-          setSubscription(data);
-          setIsLoadingSubscription(false);
-        })
-        .catch(() => setIsLoadingSubscription(false));
-    }
+    const fetchSubscription = async () => {
+      if (!currentBarn?.id) return;
+
+      try {
+        const response = await fetch(`/api/barns/${currentBarn.id}/subscription`);
+        const data = await response.json();
+        setSubscription(data);
+      } catch {
+        // Subscription fetch failed silently
+      } finally {
+        setIsLoadingSubscription(false);
+      }
+    };
+
+    fetchSubscription();
   }, [currentBarn?.id]);
 
   if (!isUserLoaded) {
@@ -208,14 +174,10 @@ export default function SettingsPage() {
           <div className="card divide-y divide-stone-100">
             {group.items.map((item) => {
               const ItemIcon = item.icon;
-              const isExternal = (item as any).external;
-
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
                   className="flex items-center gap-4 p-5 hover:bg-stone-50 transition-all group"
                 >
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 group-hover:from-amber-100 group-hover:to-amber-50 transition-all">
@@ -229,11 +191,7 @@ export default function SettingsPage() {
                       {item.description}
                     </p>
                   </div>
-                  {isExternal ? (
-                    <ExternalLink className="w-5 h-5 text-stone-400 group-hover:text-amber-600 transition-colors flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                  )}
+                  <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                 </Link>
               );
             })}

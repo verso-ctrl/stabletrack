@@ -8,24 +8,15 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import {
   LayoutDashboard,
-  Users,
   Calendar,
   Settings,
   ChevronDown,
   Plus,
   Building2,
-  HelpCircle,
   Menu,
   X,
   Loader2,
-  CheckSquare,
-  FolderOpen,
-  DollarSign,
-  GraduationCap,
   Activity,
-  Utensils,
-  Trophy,
-  LogOut,
   User,
 } from 'lucide-react';
 
@@ -45,22 +36,19 @@ const HorseIcon = ({ className }: { className?: string }) => (
 );
 
 // Nav items with required permissions
+// v1 SIMPLIFIED: Core features only
+// Hidden for v1: Team, Documents, Billing (code exists, just not in nav)
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null }, // Always visible
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null },
   { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read' },
-  { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read' }, // Renamed from Calendar to Schedule
-  { href: '/lessons', label: 'Lessons', icon: GraduationCap, permission: 'lessons:read' },
-  { href: '/tasks', label: 'Tasks', icon: CheckSquare, permission: 'tasks:read' },
-  { href: '/feed-chart', label: 'Feed Chart', icon: Utensils, permission: 'feed:read' },
+  { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read' },
+  { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read' },
   { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read' },
-  { href: '/billing', label: 'Billing', icon: DollarSign, permission: 'billing:read' },
-  { href: '/team', label: 'Team', icon: Users, permission: 'team:read' },
-  { href: '/documents', label: 'Documents', icon: FolderOpen, permission: 'documents:read' },
 ];
 
 const bottomNavItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/help', label: 'Help', icon: HelpCircle },
+  // Help hidden for v1 - links are placeholder
 ];
 
 function UserProfile() {
@@ -354,8 +342,8 @@ export function MobileBottomNav() {
   const mobileNavItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
     { href: '/horses', label: 'Horses', icon: HorseIcon },
-    { href: '/calendar', label: 'Calendar', icon: Calendar },
-    { href: '/lessons', label: 'Lessons', icon: GraduationCap },
+    { href: '/daily-care', label: 'Daily Care', icon: Activity },
+    { href: '/calendar', label: 'Schedule', icon: Calendar },
     { href: '/settings', label: 'More', icon: Settings },
   ];
 

@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 import { useEvents, useHorses, useLessons } from '@/hooks/useData';
 import {
   ChevronLeft,
@@ -236,7 +237,7 @@ export default function CalendarPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        alert(data.data.message);
+        toast.success('Sync complete', data.data.message);
         fetchGoogleStatus();
       }
     } catch (error) {
@@ -258,7 +259,7 @@ export default function CalendarPage() {
         if (data.data.authUrl) {
           window.location.href = data.data.authUrl;
         } else {
-          alert(data.data.message);
+          toast.info('Google Calendar', data.data.message);
         }
       }
     } catch (error) {
@@ -354,7 +355,7 @@ export default function CalendarPage() {
   // Handle step navigation
   const handleNext = () => {
     if (!eventForm.title || !eventForm.scheduledDate) {
-      alert('Please fill in required fields (Title and Date)');
+      toast.warning('Missing fields', 'Please fill in title and date');
       return;
     }
     setModalStep(2);
@@ -416,7 +417,7 @@ export default function CalendarPage() {
       });
     } catch (error) {
       console.error('Error creating event:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create event');
+      toast.error('Failed to create event', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -425,7 +426,7 @@ export default function CalendarPage() {
   // Submit lesson
   const handleLessonSubmit = async () => {
     if (!lessonForm.clientId || !lessonForm.scheduledDate) {
-      alert('Please select a client and date');
+      toast.warning('Missing fields', 'Please select a client and date');
       return;
     }
 
@@ -476,7 +477,7 @@ export default function CalendarPage() {
       });
     } catch (error) {
       console.error('Error creating lesson:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create lesson');
+      toast.error('Failed to create lesson', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

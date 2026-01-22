@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 import {
   DollarSign,
   Users,
@@ -30,13 +31,13 @@ import {
   GraduationCap,
 } from 'lucide-react';
 
-type TabId = 'invoices' | 'unbilled' | 'recurring' | 'clients' | 'services';
+type TabId = 'invoices' | 'unbilled' | 'recurring' | 'services';
 
+// Removed 'clients' tab - clients are managed in the dedicated /clients page
 const tabs: { id: TabId; label: string; icon: any }[] = [
   { id: 'invoices', label: 'Invoices', icon: FileText },
   { id: 'unbilled', label: 'Unbilled', icon: Clock },
   { id: 'recurring', label: 'Recurring', icon: RefreshCw },
-  { id: 'clients', label: 'Clients', icon: Users },
   { id: 'services', label: 'Services', icon: DollarSign },
 ];
 
@@ -70,13 +71,12 @@ export default function BillingPage() {
   // Modal states
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
-  const [showClientModal, setShowClientModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [selectedRecurring, setSelectedRecurring] = useState<any>(null);
-  
+
   // Form states
   const [invoiceForm, setInvoiceForm] = useState({
     clientId: '',
@@ -84,20 +84,7 @@ export default function BillingPage() {
     items: [{ description: '', quantity: 1, unitPrice: 0, horseId: '', serviceId: '' }],
     notes: '',
   });
-  
-  const [clientForm, setClientForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    portalEnabled: false,
-    horseIds: [] as string[],
-  });
-  
+
   const [serviceForm, setServiceForm] = useState({
     name: '',
     description: '',
@@ -182,7 +169,7 @@ export default function BillingPage() {
 
   const handleCreateInvoice = async () => {
     if (!invoiceForm.clientId) {
-      alert('Please select a client');
+      toast.warning('Missing client', 'Please select a client');
       return;
     }
 
@@ -223,40 +210,7 @@ export default function BillingPage() {
       });
       fetchData();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create invoice');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCreateClient = async () => {
-    if (!clientForm.firstName || !clientForm.lastName || !clientForm.email) {
-      alert('Please fill in required fields');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/clients`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(clientForm),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to create client');
-      }
-
-      setShowClientModal(false);
-      setClientForm({
-        firstName: '', lastName: '', email: '', phone: '',
-        address: '', city: '', state: '', zipCode: '',
-        portalEnabled: false, horseIds: [],
-      });
-      fetchData();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create client');
+      toast.error('Failed to create invoice', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -264,7 +218,7 @@ export default function BillingPage() {
 
   const handleCreateService = async () => {
     if (!serviceForm.name || !serviceForm.price) {
-      alert('Please fill in required fields');
+      toast.warning('Missing fields', 'Please fill in all required fields');
       return;
     }
 
@@ -291,7 +245,7 @@ export default function BillingPage() {
       });
       fetchData();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create service');
+      toast.error('Failed to create service', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -299,7 +253,7 @@ export default function BillingPage() {
 
   const handleRecordPayment = async () => {
     if (!paymentForm.amount || !selectedInvoice) {
-      alert('Please enter payment amount');
+      toast.warning('Missing amount', 'Please enter payment amount');
       return;
     }
 
@@ -326,7 +280,7 @@ export default function BillingPage() {
       setSelectedInvoice(null);
       fetchData();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to record payment');
+      toast.error('Failed to record payment', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -366,7 +320,7 @@ export default function BillingPage() {
       document.body.removeChild(a);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      alert('Failed to download PDF');
+      toast.error('Download failed', 'Failed to download PDF');
     } finally {
       setIsDownloading(null);
     }
@@ -386,12 +340,15 @@ export default function BillingPage() {
       if (data.data.paymentLinkUrl) {
         // Copy to clipboard
         await navigator.clipboard.writeText(data.data.paymentLinkUrl);
-        alert(`Payment link created and copied to clipboard!\n\n${data.data.mode === 'demo' ? '(Demo mode - not a real payment link)' : ''}`);
+        toast.success(
+          'Payment link created',
+          data.data.mode === 'demo' ? 'Link copied to clipboard (Demo mode)' : 'Link copied to clipboard'
+        );
         fetchData();
       }
     } catch (error) {
       console.error('Error creating payment link:', error);
-      alert('Failed to create payment link');
+      toast.error('Failed to create payment link', 'Please try again');
     } finally {
       setIsCreatingPaymentLink(null);
     }
@@ -400,13 +357,13 @@ export default function BillingPage() {
   // Create recurring invoice
   const handleCreateRecurring = async () => {
     if (!recurringForm.clientId || !recurringForm.name) {
-      alert('Please select a client and enter a name');
+      toast.warning('Missing fields', 'Please select a client and enter a name');
       return;
     }
 
     const validItems = recurringForm.items.filter(item => item.description && item.unitPrice > 0);
     if (validItems.length === 0) {
-      alert('Please add at least one item');
+      toast.warning('Missing items', 'Please add at least one item');
       return;
     }
 
@@ -440,7 +397,7 @@ export default function BillingPage() {
       });
       fetchData();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create recurring invoice');
+      toast.error('Failed to create recurring invoice', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -462,11 +419,11 @@ export default function BillingPage() {
       if (!response.ok) throw new Error('Failed to generate invoices');
       
       const data = await response.json();
-      alert(data.data.message || `Generated ${data.data.generated} invoice(s)`);
+      toast.success('Invoices generated', data.data.message || `Generated ${data.data.generated} invoice(s)`);
       fetchData();
     } catch (error) {
       console.error('Error generating invoices:', error);
-      alert('Failed to generate invoices');
+      toast.error('Generation failed', 'Failed to generate invoices');
     } finally {
       setIsGenerating(false);
     }
@@ -510,7 +467,7 @@ export default function BillingPage() {
       setShowExportModal(false);
     } catch (error) {
       console.error('Error exporting:', error);
-      alert('Failed to export data');
+      toast.error('Export failed', 'Failed to export data');
     }
   };
 
@@ -626,12 +583,6 @@ export default function BillingPage() {
             <button onClick={() => setShowRecurringModal(true)} className="btn-primary btn-md">
               <Plus className="w-4 h-4" />
               New Recurring
-            </button>
-          )}
-          {canEdit && activeTab === 'clients' && (
-            <button onClick={() => setShowClientModal(true)} className="btn-primary btn-md">
-              <Plus className="w-4 h-4" />
-              Add Client
             </button>
           )}
           {canEdit && activeTab === 'services' && (
@@ -991,43 +942,6 @@ export default function BillingPage() {
         </div>
       )}
 
-      {activeTab === 'clients' && (
-        <div className="card divide-y divide-stone-100">
-          {clients.length === 0 ? (
-            <div className="p-8 text-center">
-              <Users className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-500">No clients yet</p>
-              <button onClick={() => setShowClientModal(true)} className="btn-primary btn-sm mt-4">
-                Add First Client
-              </button>
-            </div>
-          ) : (
-            clients.map(client => (
-              <div key={client.id} className="p-4 flex items-center gap-4 hover:bg-stone-50">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                  <span className="text-amber-700 font-medium">
-                    {client.firstName[0]}{client.lastName[0]}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-stone-900">{client.firstName} {client.lastName}</p>
-                  <p className="text-sm text-stone-500">{client.email}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-stone-500">{client.horses?.length || 0} horses</p>
-                  {client.balance > 0 && (
-                    <p className="text-sm font-medium text-red-600">Balance: ${client.balance.toFixed(2)}</p>
-                  )}
-                </div>
-                {client.portalEnabled && (
-                  <span className="badge-success">Portal</span>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
       {activeTab === 'services' && (
         <div className="card divide-y divide-stone-100">
           {services.length === 0 ? (
@@ -1188,100 +1102,6 @@ export default function BillingPage() {
               </button>
               <button onClick={handleCreateInvoice} className="btn-primary flex-1" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Invoice'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Client Modal */}
-      {showClientModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Add Client</h3>
-                <button onClick={() => setShowClientModal(false)} className="p-1 rounded hover:bg-stone-100">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    value={clientForm.firstName}
-                    onChange={(e) => setClientForm(prev => ({ ...prev, firstName: e.target.value }))}
-                    className="input w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    value={clientForm.lastName}
-                    onChange={(e) => setClientForm(prev => ({ ...prev, lastName: e.target.value }))}
-                    className="input w-full"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Email *</label>
-                <input
-                  type="email"
-                  value={clientForm.email}
-                  onChange={(e) => setClientForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="input w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Phone</label>
-                <input
-                  type="tel"
-                  value={clientForm.phone}
-                  onChange={(e) => setClientForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="input w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Horses</label>
-                <select
-                  multiple
-                  value={clientForm.horseIds}
-                  onChange={(e) => setClientForm(prev => ({
-                    ...prev,
-                    horseIds: Array.from(e.target.selectedOptions, option => option.value)
-                  }))}
-                  className="input w-full"
-                  size={4}
-                >
-                  {horses.map(horse => (
-                    <option key={horse.id} value={horse.id}>{horse.barnName}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-stone-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="portalEnabled"
-                  checked={clientForm.portalEnabled}
-                  onChange={(e) => setClientForm(prev => ({ ...prev, portalEnabled: e.target.checked }))}
-                  className="rounded"
-                />
-                <label htmlFor="portalEnabled" className="text-sm text-stone-700">
-                  Enable client portal access
-                </label>
-              </div>
-            </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
-              <button onClick={() => setShowClientModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
-                Cancel
-              </button>
-              <button onClick={handleCreateClient} className="btn-primary flex-1" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Client'}
               </button>
             </div>
           </div>

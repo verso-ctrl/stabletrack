@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 import {
   Users,
   UserPlus,
@@ -125,7 +126,7 @@ export default function TeamPage() {
 
       fetchMembers();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to reject member');
+      toast.error('Rejection failed', err instanceof Error ? err.message : 'Failed to reject member');
     } finally {
       setIsUpdating(false);
     }
@@ -179,8 +180,9 @@ export default function TeamPage() {
       setMembers(members.filter(m => m.id !== memberId));
       setShowRoleModal(false);
       setSelectedMember(null);
+      toast.success('Member removed');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to remove member');
+      toast.error('Removal failed', err instanceof Error ? err.message : 'Failed to remove member');
     }
   };
 

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useTasks } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Plus,
   Search,
@@ -70,7 +71,7 @@ export default function TasksPage() {
       refetch();
     } catch (error) {
       console.error('Error updating task:', error);
-      alert('Failed to update task');
+      toast.error('Failed to update task', 'Please try again');
     }
   };
 
@@ -334,7 +335,7 @@ export default function TasksPage() {
               <button
                 onClick={async () => {
                   if (!newTask.title.trim()) {
-                    alert('Please enter a task title');
+                    toast.warning('Missing title', 'Please enter a task title');
                     return;
                   }
                   setIsCreating(true);
@@ -354,9 +355,10 @@ export default function TasksPage() {
                     setShowAddModal(false);
                     setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM' });
                     refetch();
+                    toast.success('Task created', 'Your task has been added');
                   } catch (error) {
                     console.error('Error creating task:', error);
-                    alert('Failed to create task');
+                    toast.error('Failed to create task', 'Please try again');
                   } finally {
                     setIsCreating(false);
                   }

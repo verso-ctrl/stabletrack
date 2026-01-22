@@ -1,6 +1,6 @@
 // src/contexts/SubscriptionContext.tsx
 // React context for subscription and tier state management
-// Demo mode: Always FARM tier with full access
+// Demo mode: Defaults to BASIC tier (15 horses)
 
 'use client'
 
@@ -18,6 +18,7 @@ import {
   hasReachedTeamMemberLimit,
   getNextTier,
 } from '@/lib/tiers'
+import { toast } from '@/lib/toast'
 
 // =============================================================================
 // TYPES
@@ -89,10 +90,10 @@ interface SubscriptionProviderProps {
   defaultTier?: SubscriptionTier
 }
 
-export function SubscriptionProvider({ 
-  children, 
+export function SubscriptionProvider({
+  children,
   barnId,
-  defaultTier = 'FARM'  // Demo mode defaults to FARM
+  defaultTier = 'BASIC'  // Demo mode defaults to BASIC (15 horses)
 }: SubscriptionProviderProps) {
   // Demo mode: Fixed tier, can be changed via defaultTier prop
   const [tier] = useState<SubscriptionTier>(defaultTier)
@@ -176,15 +177,15 @@ export function SubscriptionProvider({
 
   // Demo mode actions
   const upgradeTier = useCallback(async (newTier: SubscriptionTier) => {
-    alert(`Demo mode: Billing is disabled.\n\nIn production, this would open Stripe checkout for the ${newTier} plan.`)
+    toast.info('Demo Mode', `Billing is disabled. In production, this would open Stripe checkout for the ${newTier} plan.`)
   }, [])
 
   const openBillingPortal = useCallback(async () => {
-    alert('Demo mode: Billing portal is disabled.\n\nIn production, this would open the Stripe billing portal.')
+    toast.info('Demo Mode', 'Billing portal is disabled. In production, this would open the Stripe billing portal.')
   }, [])
 
   const openUpgradeModal = useCallback(() => {
-    alert('Demo mode: Upgrade modal disabled.\n\nIn production, this would show upgrade options.')
+    toast.info('Demo Mode', 'Upgrade modal disabled. In production, this would show upgrade options.')
   }, [])
 
   const refetch = useCallback(async () => {

@@ -299,7 +299,7 @@ export default function CreateBarnPage() {
               </p>
 
               <div className="space-y-3">
-                {(['FREE', 'PROFESSIONAL', 'FARM', 'ENTERPRISE'] as SubscriptionTier[]).map((tier) => {
+                {(['FREE', 'BASIC', 'ADVANCED'] as SubscriptionTier[]).map((tier) => {
                   const pricing = TIER_PRICING[tier];
                   const limits = TIER_LIMITS[tier];
                   const features = TIER_FEATURES[tier];

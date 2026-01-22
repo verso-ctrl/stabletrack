@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from '@/lib/toast';
 import {
   Bell,
   Mail,
@@ -68,10 +69,11 @@ export default function NotificationSettingsPage() {
       if (!response.ok) throw new Error('Failed to save settings');
 
       setSaved(true);
+      toast.success('Settings saved', 'Notification preferences updated');
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Failed to save settings');
+      toast.error('Save failed', 'Failed to save settings');
     } finally {
       setIsSaving(false);
     }

@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Globe, 
+import { toast } from '@/lib/toast';
+import {
+  User,
+  Mail,
+  Phone,
+  Globe,
   Camera,
   Save,
   Loader2,
@@ -68,11 +69,11 @@ export default function ProfileSettingsPage() {
 
     // Validate file
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.warning('Invalid file', 'Please select an image file');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB');
+      toast.warning('File too large', 'Image must be less than 5MB');
       return;
     }
 
@@ -97,10 +98,11 @@ export default function ProfileSettingsPage() {
         const result = await response.json();
         setFormData(prev => ({ ...prev, avatarUrl: result.data.avatarUrl }));
         setSaved(true);
+        toast.success('Photo updated', 'Profile photo saved');
         setTimeout(() => setSaved(false), 2000);
       } catch (error) {
         console.error('Error uploading photo:', error);
-        alert('Failed to upload photo');
+        toast.error('Upload failed', 'Failed to upload photo');
       } finally {
         setIsSaving(false);
       }
@@ -127,10 +129,11 @@ export default function ProfileSettingsPage() {
       if (!response.ok) throw new Error('Failed to save profile');
 
       setSaved(true);
+      toast.success('Profile saved', 'Your profile has been updated');
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile');
+      toast.error('Save failed', 'Failed to save profile');
     } finally {
       setIsSaving(false);
     }

@@ -16,7 +16,6 @@ import {
   ArrowUpRight,
   Activity,
   Syringe,
-  FileText,
   Heart,
   DollarSign,
   Phone,
@@ -65,23 +64,29 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       setClientLoading(true);
 
-      try {
-        const promises = [
-          !isClient
-            ? fetch(`/api/barns/${barn.id}/health-alerts`).then(r => r.json())
-            : Promise.resolve(null),
-          isClient && currentBarn?.clientId
-            ? fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`).then(r => r.json())
-            : Promise.resolve(null)
-        ];
+      const fetchHealthAlerts = async () => {
+        if (isClient) return null;
+        const response = await fetch(`/api/barns/${barn.id}/health-alerts`);
+        return response.json();
+      };
 
-        const [healthData, clientData] = await Promise.all(promises);
+      const fetchClientDashboard = async () => {
+        if (!isClient || !currentBarn?.clientId) return null;
+        const response = await fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`);
+        return response.json();
+      };
+
+      try {
+        const [healthData, clientDashboardData] = await Promise.all([
+          fetchHealthAlerts(),
+          fetchClientDashboard(),
+        ]);
 
         if (healthData) {
           setHealthAlerts(healthData.data || []);
         }
-        if (clientData) {
-          setClientData(clientData.data);
+        if (clientDashboardData) {
+          setClientData(clientDashboardData.data);
         }
       } catch (error) {
         console.error('Dashboard fetch error:', error);
@@ -483,7 +488,7 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <Link href="/tasks" className="stat-card hover:border-stone-300 transition-colors">
+        <Link href="/daily-care" className="stat-card hover:border-stone-300 transition-colors">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-stone-500">Pending Tasks</p>
@@ -520,7 +525,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between p-4 border-b border-stone-100">
             <h2 className="font-semibold text-stone-900">Today's Tasks</h2>
-            <Link href="/tasks" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+            <Link href="/daily-care" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
               View all <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -577,9 +582,9 @@ export default function DashboardPage() {
                 <Syringe className="w-4 h-4 text-purple-600" />
                 <span className="text-sm text-stone-700">Log Meds</span>
               </Link>
-              <Link href="/documents" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
-                <FileText className="w-4 h-4 text-amber-600" />
-                <span className="text-sm text-stone-700">Documents</span>
+              <Link href="/daily-care" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+                <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                <span className="text-sm text-stone-700">Tasks</span>
               </Link>
             </div>
           </div>

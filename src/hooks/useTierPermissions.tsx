@@ -73,9 +73,9 @@ export function TierProvider({
 export function useTier(): TierContextValue {
   const context = useContext(TierContext)
   
-  // If no provider, return default FARM tier values (demo mode)
+  // If no provider, return default BASIC tier values (demo mode)
   if (!context) {
-    const tier: SubscriptionTier = 'FARM'
+    const tier: SubscriptionTier = 'BASIC'
     const features = getTierFeatures(tier)
     const limits = getTierLimits(tier)
     

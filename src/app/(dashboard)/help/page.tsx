@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toast } from '@/lib/toast';
 import {
   HelpCircle,
   Search,
@@ -286,14 +287,14 @@ export default function HelpPage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => alert('Demo mode: Email support disabled')}
+                onClick={() => toast.info('Demo Mode', 'Email support is disabled in demo mode')}
                 className="flex items-center gap-2 px-6 py-3 bg-white text-stone-900 rounded-xl font-medium hover:bg-stone-100 transition-all"
               >
                 <Mail className="w-4 h-4" />
                 Email Support
               </button>
               <button
-                onClick={() => alert('Demo mode: Live chat disabled')}
+                onClick={() => toast.info('Demo Mode', 'Live chat is disabled in demo mode')}
                 className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />

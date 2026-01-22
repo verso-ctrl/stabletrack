@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Shield, 
-  Key, 
-  Smartphone, 
+import { toast } from '@/lib/toast';
+import {
+  Shield,
+  Key,
+  Smartphone,
   History,
   AlertTriangle,
   Check,
@@ -54,16 +55,16 @@ export default function SecuritySettingsPage() {
 
   const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Demo mode: Password change disabled');
+    toast.info('Demo Mode', 'Password change is disabled in demo mode');
     setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 
   const handleLogoutAllSessions = () => {
-    alert('Demo mode: Session management disabled');
+    toast.info('Demo Mode', 'Session management is disabled in demo mode');
   };
 
-  const handleLogoutSession = (sessionId: string) => {
-    alert('Demo mode: Session management disabled');
+  const handleLogoutSession = (_sessionId: string) => {
+    toast.info('Demo Mode', 'Session management is disabled in demo mode');
   };
 
   return (
@@ -176,11 +177,7 @@ export default function SecuritySettingsPage() {
             )}
             <button
               onClick={() => {
-                if (twoFactorEnabled) {
-                  alert('Demo mode: 2FA management disabled');
-                } else {
-                  alert('Demo mode: 2FA setup disabled');
-                }
+                toast.info('Demo Mode', twoFactorEnabled ? '2FA management is disabled in demo mode' : '2FA setup is disabled in demo mode');
               }}
               className={twoFactorEnabled ? 'btn-secondary btn-sm' : 'btn-primary btn-sm'}
             >

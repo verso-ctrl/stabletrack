@@ -1,8 +1,9 @@
 // src/lib/tiers.ts
 // SINGLE SOURCE OF TRUTH for all tier configuration
-// Combines app features, storage limits, and permissions
+// Simple 3-tier system: Free, Basic, Advanced
+// The only difference is the number of horses allowed
 
-export type SubscriptionTier = 'FREE' | 'PROFESSIONAL' | 'FARM' | 'ENTERPRISE'
+export type SubscriptionTier = 'FREE' | 'BASIC' | 'ADVANCED'
 
 // =============================================================================
 // TIER LIMITS
@@ -13,31 +14,25 @@ export interface TierLimits {
   maxHorses: number              // -1 = unlimited
   maxTeamMembers: number         // -1 = unlimited
   maxStorageBytes: number        // Storage in bytes
-  
+
   // Photo limits
   maxPhotosPerHorse: number      // -1 = unlimited
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   FREE: {
-    maxHorses: 5,
-    maxTeamMembers: 1,
-    maxStorageBytes: 1 * 1024 * 1024 * 1024,      // 1 GB
-    maxPhotosPerHorse: 3,
+    maxHorses: 3,
+    maxTeamMembers: 2,
+    maxStorageBytes: 5 * 1024 * 1024 * 1024,      // 5 GB
+    maxPhotosPerHorse: 10,
   },
-  PROFESSIONAL: {
+  BASIC: {
     maxHorses: 15,
-    maxTeamMembers: 3,
-    maxStorageBytes: 10 * 1024 * 1024 * 1024,     // 10 GB
-    maxPhotosPerHorse: 15,
-  },
-  FARM: {
-    maxHorses: 50,
-    maxTeamMembers: 10,
+    maxTeamMembers: 5,
     maxStorageBytes: 25 * 1024 * 1024 * 1024,     // 25 GB
     maxPhotosPerHorse: 50,
   },
-  ENTERPRISE: {
+  ADVANCED: {
     maxHorses: -1,               // Unlimited
     maxTeamMembers: -1,          // Unlimited
     maxStorageBytes: 100 * 1024 * 1024 * 1024,    // 100 GB
@@ -47,6 +42,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
 
 // =============================================================================
 // TIER FEATURES
+// All tiers have the same features - only horse limits differ
 // =============================================================================
 
 export interface TierFeatures {
@@ -54,226 +50,98 @@ export interface TierFeatures {
   horseProfiles: boolean
   basicHealthRecords: boolean
   simpleCalendar: boolean
-  
+
   // Photo features
   canUploadPhotos: boolean
   canSetPrimaryPhoto: boolean
   canViewPhotoGallery: boolean
   canDownloadOriginals: boolean
   canBulkUpload: boolean
-  
+
   // Document features
   canUploadDocuments: boolean
   canTrackDocumentExpiry: boolean
   canShareDocuments: boolean
-  
-  // Professional features
+
+  // Care features
   taskManagement: boolean
   feedCalendar: boolean
   medicationTracking: boolean
   vaccinationReminders: boolean
   basicReporting: boolean
-  
-  // Farm features
+
+  // Additional features
   trainingScheduling: boolean
   lessonManagement: boolean
   invoicing: boolean
   expenseTracking: boolean
   customFields: boolean
   activityLogs: boolean
-  
-  // Enterprise features
+
+  // Enterprise-level (disabled for now)
   multiLocation: boolean
   advancedAnalytics: boolean
   apiAccess: boolean
   rolePermissions: boolean
   prioritySupport: boolean
-  
-  // Add-ons
+
+  // Add-ons (disabled)
   breedingManagement: boolean
   clientPortal: boolean
   smsNotifications: boolean
 }
 
+// All tiers get full features - only horse count differs
+const ALL_FEATURES: TierFeatures = {
+  // Core
+  horseProfiles: true,
+  basicHealthRecords: true,
+  simpleCalendar: true,
+
+  // Photos
+  canUploadPhotos: true,
+  canSetPrimaryPhoto: true,
+  canViewPhotoGallery: true,
+  canDownloadOriginals: true,
+  canBulkUpload: true,
+
+  // Documents
+  canUploadDocuments: true,
+  canTrackDocumentExpiry: true,
+  canShareDocuments: true,
+
+  // Care
+  taskManagement: true,
+  feedCalendar: true,
+  medicationTracking: true,
+  vaccinationReminders: true,
+  basicReporting: true,
+
+  // Additional
+  trainingScheduling: true,
+  lessonManagement: true,
+  invoicing: true,
+  expenseTracking: true,
+  customFields: true,
+  activityLogs: true,
+
+  // Enterprise-level (all tiers get basic access)
+  multiLocation: false,
+  advancedAnalytics: false,
+  apiAccess: false,
+  rolePermissions: true,
+  prioritySupport: false,
+
+  // Add-ons
+  breedingManagement: false,
+  clientPortal: true,
+  smsNotifications: false,
+}
+
 export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
-  FREE: {
-    // Core
-    horseProfiles: true,
-    basicHealthRecords: true,
-    simpleCalendar: true,
-    
-    // Photos
-    canUploadPhotos: true,
-    canSetPrimaryPhoto: true,
-    canViewPhotoGallery: true,
-    canDownloadOriginals: false,
-    canBulkUpload: false,
-    
-    // Documents
-    canUploadDocuments: false,
-    canTrackDocumentExpiry: false,
-    canShareDocuments: false,
-    
-    // Professional
-    taskManagement: false,
-    feedCalendar: false,
-    medicationTracking: false,
-    vaccinationReminders: false,
-    basicReporting: false,
-    
-    // Farm
-    trainingScheduling: false,
-    lessonManagement: false,
-    invoicing: false,
-    expenseTracking: false,
-    customFields: false,
-    activityLogs: false,
-    
-    // Enterprise
-    multiLocation: false,
-    advancedAnalytics: false,
-    apiAccess: false,
-    rolePermissions: false,
-    prioritySupport: false,
-    
-    // Add-ons
-    breedingManagement: false,
-    clientPortal: false,
-    smsNotifications: false,
-  },
-
-  PROFESSIONAL: {
-    // Core
-    horseProfiles: true,
-    basicHealthRecords: true,
-    simpleCalendar: true,
-    
-    // Photos
-    canUploadPhotos: true,
-    canSetPrimaryPhoto: true,
-    canViewPhotoGallery: true,
-    canDownloadOriginals: true,
-    canBulkUpload: false,
-    
-    // Documents
-    canUploadDocuments: true,
-    canTrackDocumentExpiry: false,
-    canShareDocuments: false,
-    
-    // Professional
-    taskManagement: true,
-    feedCalendar: true,
-    medicationTracking: true,
-    vaccinationReminders: true,
-    basicReporting: true,
-    
-    // Farm
-    trainingScheduling: false,
-    lessonManagement: false,
-    invoicing: false,
-    expenseTracking: false,
-    customFields: false,
-    activityLogs: false,
-    
-    // Enterprise
-    multiLocation: false,
-    advancedAnalytics: false,
-    apiAccess: false,
-    rolePermissions: false,
-    prioritySupport: false,
-    
-    // Add-ons
-    breedingManagement: false,
-    clientPortal: false,
-    smsNotifications: false,
-  },
-
-  FARM: {
-    // Core
-    horseProfiles: true,
-    basicHealthRecords: true,
-    simpleCalendar: true,
-    
-    // Photos
-    canUploadPhotos: true,
-    canSetPrimaryPhoto: true,
-    canViewPhotoGallery: true,
-    canDownloadOriginals: true,
-    canBulkUpload: true,
-    
-    // Documents
-    canUploadDocuments: true,
-    canTrackDocumentExpiry: true,
-    canShareDocuments: true,
-    
-    // Professional
-    taskManagement: true,
-    feedCalendar: true,
-    medicationTracking: true,
-    vaccinationReminders: true,
-    basicReporting: true,
-    
-    // Farm
-    trainingScheduling: true,
-    lessonManagement: true,
-    invoicing: true,
-    expenseTracking: true,
-    customFields: true,
-    activityLogs: true,
-    
-    // Enterprise
-    multiLocation: false,
-    advancedAnalytics: false,
-    apiAccess: false,
-    rolePermissions: false,
-    prioritySupport: false,
-    
-    // Add-ons
-    breedingManagement: false,
-    clientPortal: false,
-    smsNotifications: false,
-  },
-
-  ENTERPRISE: {
-    // All features enabled
-    horseProfiles: true,
-    basicHealthRecords: true,
-    simpleCalendar: true,
-    
-    canUploadPhotos: true,
-    canSetPrimaryPhoto: true,
-    canViewPhotoGallery: true,
-    canDownloadOriginals: true,
-    canBulkUpload: true,
-    
-    canUploadDocuments: true,
-    canTrackDocumentExpiry: true,
-    canShareDocuments: true,
-    
-    taskManagement: true,
-    feedCalendar: true,
-    medicationTracking: true,
-    vaccinationReminders: true,
-    basicReporting: true,
-    
-    trainingScheduling: true,
-    lessonManagement: true,
-    invoicing: true,
-    expenseTracking: true,
-    customFields: true,
-    activityLogs: true,
-    
-    multiLocation: true,
-    advancedAnalytics: true,
-    apiAccess: true,
-    rolePermissions: true,
-    prioritySupport: true,
-    
-    // Add-ons included
-    breedingManagement: true,
-    clientPortal: true,
-    smsNotifications: true,
-  },
+  FREE: { ...ALL_FEATURES },
+  BASIC: { ...ALL_FEATURES, prioritySupport: true },
+  ADVANCED: { ...ALL_FEATURES, prioritySupport: true },
 }
 
 // =============================================================================
@@ -295,24 +163,11 @@ export const DOCUMENT_TYPES = {
 
 export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES]
 
+// All tiers can upload all document types
 export const TIER_DOCUMENT_TYPES: Record<SubscriptionTier, DocumentType[]> = {
-  FREE: [],
-  PROFESSIONAL: [
-    DOCUMENT_TYPES.COGGINS,
-    DOCUMENT_TYPES.VET_RECORD,
-    DOCUMENT_TYPES.OTHER,
-  ],
-  FARM: [
-    DOCUMENT_TYPES.COGGINS,
-    DOCUMENT_TYPES.VET_RECORD,
-    DOCUMENT_TYPES.REGISTRATION,
-    DOCUMENT_TYPES.INSURANCE,
-    DOCUMENT_TYPES.HEALTH_CERTIFICATE,
-    DOCUMENT_TYPES.CONTRACT,
-    DOCUMENT_TYPES.INVOICE,
-    DOCUMENT_TYPES.OTHER,
-  ],
-  ENTERPRISE: Object.values(DOCUMENT_TYPES),
+  FREE: Object.values(DOCUMENT_TYPES),
+  BASIC: Object.values(DOCUMENT_TYPES),
+  ADVANCED: Object.values(DOCUMENT_TYPES),
 }
 
 // =============================================================================
@@ -331,69 +186,23 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
   FREE: {
     monthlyPriceCents: 0,
     annualPriceCents: 0,
-    displayName: 'Starter',
-    description: 'Perfect for hobbyists and small operations',
+    displayName: 'Free',
+    description: 'Perfect for getting started with up to 3 horses',
   },
-  PROFESSIONAL: {
-    monthlyPriceCents: 3900,
-    annualPriceCents: 39000,
-    displayName: 'Professional',
-    description: 'For small boarding facilities and trainers',
-  },
-  FARM: {
-    monthlyPriceCents: 9900,
-    annualPriceCents: 99000,
-    displayName: 'Farm',
-    description: 'For mid-size boarding and training facilities',
+  BASIC: {
+    monthlyPriceCents: 1900,
+    annualPriceCents: 19000,
+    displayName: 'Basic',
+    description: 'For growing operations with up to 15 horses',
     popular: true,
   },
-  ENTERPRISE: {
-    monthlyPriceCents: 24900,
-    annualPriceCents: 249000,
-    displayName: 'Enterprise',
-    description: 'For large operations and multi-location farms',
+  ADVANCED: {
+    monthlyPriceCents: 3900,
+    annualPriceCents: 39000,
+    displayName: 'Advanced',
+    description: 'Unlimited horses for larger farms',
   },
 }
-
-// =============================================================================
-// ADD-ONS
-// =============================================================================
-
-export interface AddOn {
-  id: string
-  name: string
-  description: string
-  monthlyPriceCents: number
-  featureKey: keyof TierFeatures
-  minimumTier: SubscriptionTier
-}
-
-export const ADD_ONS: AddOn[] = [
-  {
-    id: 'breeding',
-    name: 'Breeding Management',
-    description: 'Heat cycle tracking, breeding records, foal registry, lineage',
-    monthlyPriceCents: 3500,
-    featureKey: 'breedingManagement',
-    minimumTier: 'PROFESSIONAL',
-  },
-  {
-    id: 'client-portal',
-    name: 'Client Portal',
-    description: 'Owner login, horse updates, photo sharing, communication hub',
-    monthlyPriceCents: 2500,
-    featureKey: 'clientPortal',
-    minimumTier: 'PROFESSIONAL',
-  },
-  {
-    id: 'sms',
-    name: 'SMS Notifications',
-    description: 'Text alerts for tasks, appointments, medications, reminders',
-    monthlyPriceCents: 1500,
-    featureKey: 'smsNotifications',
-    minimumTier: 'PROFESSIONAL',
-  },
-]
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -403,9 +212,18 @@ export const ADD_ONS: AddOn[] = [
  * Normalize tier string to SubscriptionTier type
  */
 export function normalizeTier(tier: string): SubscriptionTier {
-  const normalized = tier.toUpperCase() as SubscriptionTier
+  const normalized = tier.toUpperCase()
+
+  // Handle legacy tier names
+  if (normalized === 'PROFESSIONAL' || normalized === 'FARM') {
+    return 'BASIC'
+  }
+  if (normalized === 'ENTERPRISE') {
+    return 'ADVANCED'
+  }
+
   if (normalized in TIER_LIMITS) {
-    return normalized
+    return normalized as SubscriptionTier
   }
   return 'FREE'
 }
@@ -418,21 +236,11 @@ export function getTierLimits(tier: string): TierLimits {
 }
 
 /**
- * Get features for a tier, optionally with add-ons applied
+ * Get features for a tier
  */
 export function getTierFeatures(tier: string, activeAddOns: string[] = []): TierFeatures {
   const normalizedTier = normalizeTier(tier)
-  const features = { ...TIER_FEATURES[normalizedTier] }
-
-  // Apply active add-ons
-  for (const addOnId of activeAddOns) {
-    const addOn = ADD_ONS.find(a => a.id === addOnId)
-    if (addOn) {
-      features[addOn.featureKey] = true
-    }
-  }
-
-  return features
+  return { ...TIER_FEATURES[normalizedTier] }
 }
 
 /**
@@ -465,7 +273,7 @@ export function hasFeature(
  * Get next tier for upgrade path
  */
 export function getNextTier(currentTier: string): SubscriptionTier | null {
-  const order: SubscriptionTier[] = ['FREE', 'PROFESSIONAL', 'FARM', 'ENTERPRISE']
+  const order: SubscriptionTier[] = ['FREE', 'BASIC', 'ADVANCED']
   const current = normalizeTier(currentTier)
   const currentIndex = order.indexOf(current)
 
@@ -581,36 +389,36 @@ export const FEATURE_LABELS: Record<keyof TierFeatures, string> = {
   horseProfiles: 'Horse Profiles',
   basicHealthRecords: 'Health Records',
   simpleCalendar: 'Calendar & Scheduling',
-  
+
   canUploadPhotos: 'Photo Uploads',
   canSetPrimaryPhoto: 'Set Primary Photo',
   canViewPhotoGallery: 'Photo Gallery',
   canDownloadOriginals: 'Download Original Photos',
   canBulkUpload: 'Bulk Photo Upload',
-  
+
   canUploadDocuments: 'Document Uploads',
   canTrackDocumentExpiry: 'Document Expiry Tracking',
   canShareDocuments: 'Document Sharing',
-  
+
   taskManagement: 'Task Management',
   feedCalendar: 'Feed Calendar',
   medicationTracking: 'Medication Tracking',
   vaccinationReminders: 'Vaccination Reminders',
   basicReporting: 'Basic Reports',
-  
+
   trainingScheduling: 'Training Scheduling',
   lessonManagement: 'Lesson Management',
   invoicing: 'Invoicing',
   expenseTracking: 'Expense Tracking',
   customFields: 'Custom Fields',
   activityLogs: 'Activity Logs',
-  
+
   multiLocation: 'Multi-Location Support',
   advancedAnalytics: 'Advanced Analytics',
   apiAccess: 'API Access',
   rolePermissions: 'Role-Based Permissions',
   prioritySupport: 'Priority Support',
-  
+
   breedingManagement: 'Breeding Management',
   clientPortal: 'Client Portal',
   smsNotifications: 'SMS Notifications',

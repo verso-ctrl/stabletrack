@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 import {
   Calendar,
   Plus,
@@ -99,7 +100,7 @@ export default function LessonsPage() {
 
   const handleCreateLesson = async () => {
     if (!form.scheduledDate) {
-      alert('Please select a date');
+      toast.warning('Missing date', 'Please select a date');
       return;
     }
 
@@ -137,8 +138,9 @@ export default function LessonsPage() {
         discipline: '', level: '', price: '', location: '', notes: '',
       });
       fetchData();
+      toast.success('Lesson created', 'Lesson has been scheduled');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create lesson');
+      toast.error('Failed to create lesson', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

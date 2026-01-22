@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 import {
   Activity,
   Plus,
@@ -80,7 +81,7 @@ export default function TrainingPage() {
 
   const handleCreate = async () => {
     if (!form.horseId) {
-      alert('Please select a horse');
+      toast.warning('No horse selected', 'Please select a horse');
       return;
     }
 
@@ -116,8 +117,9 @@ export default function TrainingPage() {
         goals: '', exercises: '', notes: '', rating: 0,
       });
       fetchData();
+      toast.success('Training logged', 'Training session has been recorded');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create training log');
+      toast.error('Failed to create log', err instanceof Error ? err.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Pill,
   ChevronLeft,
@@ -56,9 +57,9 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.dosage.trim()) {
-      alert('Medication name and dosage are required');
+      toast.warning('Missing fields', 'Medication name and dosage are required');
       return;
     }
     
@@ -94,7 +95,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
       router.push(`/horses/${horseId}`);
     } catch (error) {
       console.error('Error adding medication:', error);
-      alert(error instanceof Error ? error.message : 'Failed to add medication');
+      toast.error('Failed to add medication', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSaving(false);
     }

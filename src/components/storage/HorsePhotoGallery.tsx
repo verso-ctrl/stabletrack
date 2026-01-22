@@ -45,14 +45,14 @@ export function HorsePhotoGallery({
   const [showUpload, setShowUpload] = useState(false)
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
 
-  // Demo mode: FARM tier always enabled
-  const tier = 'FARM' as const
+  // Demo mode: BASIC tier always enabled
+  const tier = 'BASIC' as const
   const canUploadPhotos = true
   const canBulkUpload = true
   const canDownloadOriginals = true
   const maxPhotosPerHorse = 50
-  const tierDisplayName = 'Farm'
-  const nextTier = 'ENTERPRISE' as const
+  const tierDisplayName = 'Basic'
+  const nextTier = 'ADVANCED' as const
 
   // File list hook
   const { files, loading, refresh, remove } = useFileList({

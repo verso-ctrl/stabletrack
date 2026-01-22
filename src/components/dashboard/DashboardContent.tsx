@@ -6,14 +6,13 @@ import {
   AlertTriangle,
   Calendar,
   CheckCircle2,
+  CheckSquare,
   ChevronRight,
   Clock,
   Droplets,
   FileText,
   Heart,
   Pill,
-  Scissors,
-  Stethoscope,
   TrendingUp,
   Utensils,
   X,
@@ -349,7 +348,7 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
       )}
 
       <Link
-        href="/tasks"
+        href="/daily-care"
         className="mt-4 flex items-center justify-center gap-2 py-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
       >
         View all tasks
@@ -365,8 +364,8 @@ function QuickActionsWidget() {
     { label: 'Log Feed', icon: Utensils, href: '/log/feed', color: 'from-amber-400 to-orange-500' },
     { label: 'Give Meds', icon: Pill, href: '/log/medication', color: 'from-purple-400 to-pink-500' },
     { label: 'Add Event', icon: Calendar, href: '/calendar', color: 'from-emerald-400 to-teal-500' },
-    { label: 'Farrier Log', icon: Scissors, href: '/log/farrier', color: 'from-stone-500 to-stone-700' },
-    { label: 'Vet Record', icon: Stethoscope, href: '/log/vet', color: 'from-red-400 to-rose-500' },
+    { label: 'Add Task', icon: CheckSquare, href: '/daily-care', color: 'from-stone-500 to-stone-700' },
+    { label: 'View Horses', icon: Heart, href: '/horses', color: 'from-amber-400 to-amber-600' },
   ];
 
   return (

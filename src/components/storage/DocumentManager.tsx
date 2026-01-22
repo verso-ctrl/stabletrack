@@ -23,8 +23,9 @@ import { useDocumentUpload, useFileList } from '@/hooks/useStorage'
 import { useTier } from '@/hooks/useTierPermissions'
 import { FileUpload } from './FileUpload'
 import { UpgradeBanner, FeatureLocked } from './UpgradePrompt'
-import { 
-  DOCUMENT_TYPES, 
+import { toast } from '@/lib/toast'
+import {
+  DOCUMENT_TYPES,
   getDocumentTypeDisplayName,
   getTierDisplayName,
   formatBytes,
@@ -108,7 +109,7 @@ export function DocumentManager({
     return (
       <FeatureLocked
         feature="Document Management"
-        requiredTier="PROFESSIONAL"
+        requiredTier="BASIC"
         onUpgrade={() => window.location.href = '/settings/billing'}
       />
     )
@@ -141,12 +142,12 @@ export function DocumentManager({
 
   const handleShare = async (doc: DocumentItem) => {
     if (!features.canShareDocuments) {
-      alert(`Document sharing requires ${getTierDisplayName('FARM')} plan`)
+      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('BASIC')} plan`)
       return
     }
     // Implement sharing logic
     navigator.clipboard.writeText(doc.url)
-    alert('Document link copied to clipboard')
+    toast.success('Link copied', 'Document link copied to clipboard')
   }
 
   // Group documents by type

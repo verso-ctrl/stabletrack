@@ -1,6 +1,6 @@
 // src/lib/tier-validation.ts
 // Server-side tier validation and enforcement
-// Demo mode: Always returns FARM tier
+// Demo mode: Always returns BASIC tier
 
 import { prisma } from './prisma'
 import {
@@ -40,7 +40,7 @@ export interface BarnUsage {
 // =============================================================================
 
 /**
- * Get subscription info for a barn (Demo mode: always FARM)
+ * Get subscription info for a barn (Demo mode: always BASIC)
  */
 export async function getBarnSubscription(barnId: string): Promise<BarnSubscription> {
   // Verify barn exists
@@ -52,8 +52,8 @@ export async function getBarnSubscription(barnId: string): Promise<BarnSubscript
     throw new Error('Barn not found')
   }
 
-  // Demo mode: Always return FARM tier
-  const tier: SubscriptionTier = 'FARM'
+  // Demo mode: Always return BASIC tier
+  const tier: SubscriptionTier = 'BASIC'
 
   return {
     tier,

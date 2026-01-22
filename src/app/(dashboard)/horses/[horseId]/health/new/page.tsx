@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Stethoscope,
   ChevronLeft,
@@ -51,9 +52,9 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.type || !formData.date) {
-      alert('Please fill in required fields');
+      toast.warning('Missing fields', 'Please fill in required fields');
       return;
     }
     
@@ -88,7 +89,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
       router.push(`/horses/${horseId}`);
     } catch (error) {
       console.error('Error creating health record:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create health record');
+      toast.error('Failed to create record', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSaving(false);
     }

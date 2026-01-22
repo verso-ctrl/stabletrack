@@ -18,6 +18,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useBarn } from '@/contexts/BarnContext';
+import { toast } from '@/lib/toast';
 
 const timezones = [
   { value: 'America/New_York', label: 'Eastern Time (ET)' },
@@ -87,11 +88,11 @@ export default function BarnSettingsPage() {
     if (!file || !currentBarn) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.warning('Invalid file', 'Please select an image file');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB');
+      toast.warning('File too large', 'Image must be less than 5MB');
       return;
     }
 
@@ -116,10 +117,11 @@ export default function BarnSettingsPage() {
         setFormData(prev => ({ ...prev, logoUrl: result.data.logoUrl }));
         refetch();
         setSaved(true);
+        toast.success('Logo updated', 'Barn logo saved');
         setTimeout(() => setSaved(false), 2000);
       } catch (error) {
         console.error('Error uploading logo:', error);
-        alert('Failed to upload logo');
+        toast.error('Upload failed', 'Failed to upload logo');
       } finally {
         setIsSaving(false);
       }
@@ -150,9 +152,10 @@ export default function BarnSettingsPage() {
 
       const result = await response.json();
       setFormData(prev => ({ ...prev, inviteCode: result.data.inviteCode }));
+      toast.success('Code regenerated', 'New invite code created');
     } catch (error) {
       console.error('Error regenerating code:', error);
-      alert('Failed to regenerate invite code');
+      toast.error('Regeneration failed', 'Failed to regenerate invite code');
     } finally {
       setIsSaving(false);
     }
@@ -184,10 +187,11 @@ export default function BarnSettingsPage() {
 
       refetch();
       setSaved(true);
+      toast.success('Settings saved', 'Barn settings updated');
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Failed to save settings');
+      toast.error('Save failed', 'Failed to save settings');
     } finally {
       setIsSaving(false);
     }
@@ -195,7 +199,7 @@ export default function BarnSettingsPage() {
 
   const handleDeleteBarn = async () => {
     if (!currentBarn) return;
-    
+
     try {
       const response = await fetch(`/api/barns/${currentBarn.id}`, {
         method: 'DELETE',
@@ -206,7 +210,7 @@ export default function BarnSettingsPage() {
       window.location.href = '/dashboard';
     } catch (error) {
       console.error('Error deleting barn:', error);
-      alert('Failed to delete barn');
+      toast.error('Delete failed', 'Failed to delete barn');
     }
   };
 

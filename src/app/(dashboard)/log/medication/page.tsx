@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Pill,
   ChevronLeft,
@@ -33,32 +34,35 @@ export default function LogMedicationPage() {
 
   // Fetch medications when horse is selected
   useEffect(() => {
-    if (selectedHorse && currentBarn?.id) {
+    const fetchMedications = async () => {
+      if (!selectedHorse || !currentBarn?.id) return;
+
       setLoadingMeds(true);
       setMedications([]);
       setSelectedMedication(null);
-      
-      fetch(`/api/barns/${currentBarn.id}/horses/${selectedHorse}/medications`)
-        .then(res => res.json())
-        .then(data => {
-          setMedications(data.data || []);
-          setLoadingMeds(false);
-        })
-        .catch(() => {
-          setMedications([]);
-          setLoadingMeds(false);
-        });
-    }
+
+      try {
+        const response = await fetch(`/api/barns/${currentBarn.id}/horses/${selectedHorse}/medications`);
+        const data = await response.json();
+        setMedications(data.data || []);
+      } catch {
+        setMedications([]);
+      } finally {
+        setLoadingMeds(false);
+      }
+    };
+
+    fetchMedications();
   }, [selectedHorse, currentBarn?.id]);
 
   const handleSubmit = async () => {
     if (!selectedHorse || !selectedMedication) {
-      alert('Please select a horse and medication');
+      toast.warning('Missing selection', 'Please select a horse and medication');
       return;
     }
-    
+
     if (skipped && !skipReason) {
-      alert('Please provide a reason for skipping');
+      toast.warning('Missing reason', 'Please provide a reason for skipping');
       return;
     }
     
@@ -85,10 +89,11 @@ export default function LogMedicationPage() {
         throw new Error(error.error || 'Failed to log medication');
       }
 
+      toast.success('Medication logged', skipped ? 'Medication skipped and recorded' : 'Medication recorded successfully');
       router.push('/dashboard');
     } catch (error) {
       console.error('Error logging medication:', error);
-      alert(error instanceof Error ? error.message : 'Failed to log medication');
+      toast.error('Failed to log medication', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

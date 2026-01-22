@@ -2,9 +2,10 @@
 // SUBSCRIPTION & BILLING TYPES
 // ============================================================================
 
-export type SubscriptionTier = 'FREE' | 'PROFESSIONAL' | 'FARM' | 'ENTERPRISE';
+// Simple 3-tier system: Free, Basic, Advanced
+// The only difference is the number of horses allowed
+export type SubscriptionTier = 'FREE' | 'BASIC' | 'ADVANCED';
 export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'TRIALING' | 'PAUSED';
-export type AddOnType = 'SMS_NOTIFICATIONS' | 'BREEDING_MODULE' | 'ADVANCED_ANALYTICS' | 'WHITE_LABEL' | 'API_ACCESS';
 
 export interface TierLimits {
   maxHorses: number;
@@ -15,84 +16,44 @@ export interface TierLimits {
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   FREE: {
-    maxHorses: 5,
+    maxHorses: 3,
     maxBarns: 1,
-    storageGb: 1,
-    features: ['Basic horse profiles', 'Daily care logging', 'Basic events'],
-  },
-  PROFESSIONAL: {
-    maxHorses: 25,
-    maxBarns: 1,
-    storageGb: 10,
+    storageGb: 5,
     features: [
-      'Everything in Free',
-      'Full health records',
-      'Document storage',
-      'Calendar & reminders',
-      'Email support',
+      'Up to 3 horses',
+      'Horse profiles & photos',
+      'Health records',
+      'Calendar & scheduling',
+      'Daily care logging',
+      'Client management',
     ],
   },
-  FARM: {
+  BASIC: {
+    maxHorses: 15,
+    maxBarns: 1,
+    storageGb: 25,
+    features: [
+      'Up to 15 horses',
+      'Everything in Free',
+      'Priority email support',
+    ],
+  },
+  ADVANCED: {
     maxHorses: -1, // unlimited
     maxBarns: 1,
-    storageGb: 50,
+    storageGb: 100,
     features: [
-      'Everything in Professional',
       'Unlimited horses',
-      'Financial tracking',
-      'Reports & analytics',
+      'Everything in Basic',
       'Priority support',
-      'Custom branding',
-    ],
-  },
-  ENTERPRISE: {
-    maxHorses: -1,
-    maxBarns: -1, // unlimited
-    storageGb: 200,
-    features: [
-      'Everything in Farm',
-      'Multiple barns',
-      'API access',
-      'SSO integration',
-      'Dedicated support',
-      'Custom integrations',
     ],
   },
 };
 
 export const TIER_PRICING: Record<SubscriptionTier, number> = {
   FREE: 0,
-  PROFESSIONAL: 2900, // $29.00
-  FARM: 7900, // $79.00
-  ENTERPRISE: 19900, // $199.00
-};
-
-export const ADDON_PRICING: Record<AddOnType, { price: number; name: string; description: string }> = {
-  SMS_NOTIFICATIONS: {
-    price: 1000, // $10.00
-    name: 'SMS Notifications',
-    description: 'Receive alerts via text message',
-  },
-  BREEDING_MODULE: {
-    price: 2000, // $20.00
-    name: 'Breeding Module',
-    description: 'Heat cycles, breeding records, foaling management',
-  },
-  ADVANCED_ANALYTICS: {
-    price: 1500, // $15.00
-    name: 'Advanced Analytics',
-    description: 'Detailed reports, trends, and insights',
-  },
-  WHITE_LABEL: {
-    price: 5000, // $50.00
-    name: 'White Label',
-    description: 'Remove StableTrack branding, use your own',
-  },
-  API_ACCESS: {
-    price: 3000, // $30.00
-    name: 'API Access',
-    description: 'Programmatic access to your data',
-  },
+  BASIC: 1900, // $19.00
+  ADVANCED: 3900, // $39.00
 };
 
 export interface Subscription {
@@ -108,6 +69,9 @@ export interface Subscription {
   trialEnd: Date | null;
   addOns: SubscriptionAddOn[];
 }
+
+// AddOnType kept for backward compatibility (no add-ons in simplified tier system)
+export type AddOnType = 'EXTRA_STORAGE' | 'ADDITIONAL_USERS';
 
 export interface SubscriptionAddOn {
   id: string;

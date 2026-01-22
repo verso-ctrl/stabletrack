@@ -2,6 +2,7 @@
 
 import { Sidebar, MobileBottomNav } from '@/components/dashboard/Sidebar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ToastContainer } from '@/components/ui/ToastContainer';
 
 export default function DashboardLayout({
   children,
@@ -23,6 +24,7 @@ export default function DashboardLayout({
         </main>
 
         <MobileBottomNav />
+        <ToastContainer />
       </div>
     </ErrorBoundary>
   );

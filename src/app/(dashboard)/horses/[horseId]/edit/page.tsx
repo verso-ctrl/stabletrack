@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
+import { toast } from '@/lib/toast';
 import {
   ChevronLeft,
   Save,
@@ -64,16 +65,21 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
   // Fetch suggestions when barn is available
   useEffect(() => {
-    if (currentBarn?.id) {
-      fetch(`/api/barns/${currentBarn.id}/horses/suggestions`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) {
-            setSuggestions(data.data);
-          }
-        })
-        .catch(console.error);
-    }
+    const fetchSuggestions = async () => {
+      if (!currentBarn?.id) return;
+
+      try {
+        const response = await fetch(`/api/barns/${currentBarn.id}/horses/suggestions`);
+        const data = await response.json();
+        if (data.data) {
+          setSuggestions(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch suggestions:', error);
+      }
+    };
+
+    fetchSuggestions();
   }, [currentBarn?.id]);
 
   useEffect(() => {
@@ -116,14 +122,14 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
       if (response.ok) {
         await refetch();
-        alert('Photo uploaded successfully!');
+        toast.success('Photo uploaded', 'Profile photo updated successfully');
       } else {
         const error = await response.json();
         throw new Error(error.error || 'Failed to upload photo');
       }
     } catch (err) {
       console.error('Failed to upload photo:', err);
-      alert(err instanceof Error ? err.message : 'Failed to upload photo');
+      toast.error('Upload failed', err instanceof Error ? err.message : 'Failed to upload photo');
     } finally {
       setIsUploadingPhoto(false);
       if (photoInputRef.current) {
@@ -134,9 +140,9 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.barnName.trim()) {
-      alert('Barn name is required');
+      toast.warning('Missing name', 'Barn name is required');
       return;
     }
     
@@ -161,7 +167,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       router.push(`/horses/${horseId}`);
     } catch (err) {
       console.error('Error updating horse:', err);
-      alert(err instanceof Error ? err.message : 'Failed to update horse');
+      toast.error('Update failed', err instanceof Error ? err.message : 'Failed to update horse');
     } finally {
       setIsSaving(false);
     }
@@ -172,16 +178,16 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to delete horse');
       }
-      
+
       router.push('/horses');
     } catch (err) {
       console.error('Error deleting horse:', err);
-      alert(err instanceof Error ? err.message : 'Failed to delete horse');
+      toast.error('Delete failed', err instanceof Error ? err.message : 'Failed to delete horse');
     } finally {
       setShowDeleteConfirm(false);
     }

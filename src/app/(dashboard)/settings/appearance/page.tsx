@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Palette, 
-  Sun, 
-  Moon, 
+import { toast } from '@/lib/toast';
+import {
+  Palette,
+  Sun,
+  Moon,
   Monitor,
   Check,
   Save,
@@ -36,10 +37,10 @@ export default function AppearanceSettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    
+
     setTimeout(() => {
       setIsSaving(false);
-      alert('Demo mode: Appearance settings not saved');
+      toast.info('Demo Mode', 'Appearance settings are not saved in demo mode');
     }, 1000);
   };
 

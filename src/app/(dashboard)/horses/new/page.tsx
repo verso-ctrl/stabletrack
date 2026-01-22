@@ -47,16 +47,21 @@ export default function NewHorsePage() {
 
   // Fetch suggestions when barn is available
   useEffect(() => {
-    if (barn?.id) {
-      fetch(`/api/barns/${barn.id}/horses/suggestions`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) {
-            setSuggestions(data.data);
-          }
-        })
-        .catch(console.error);
-    }
+    const fetchSuggestions = async () => {
+      if (!barn?.id) return;
+
+      try {
+        const response = await fetch(`/api/barns/${barn.id}/horses/suggestions`);
+        const data = await response.json();
+        if (data.data) {
+          setSuggestions(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch suggestions:', error);
+      }
+    };
+
+    fetchSuggestions();
   }, [barn?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Heart,
   Droplets,
@@ -106,7 +107,7 @@ export default function DailyCheckPage() {
     const selectedHorses = Object.entries(observations).filter(([_, obs]) => obs.selected);
 
     if (selectedHorses.length === 0) {
-      alert('Please select at least one horse');
+      toast.warning('No horses selected', 'Please select at least one horse');
       return;
     }
 
@@ -151,10 +152,11 @@ export default function DailyCheckPage() {
         throw new Error('Failed to log water checks');
       }
 
+      toast.success('Daily checks logged', `Logged checks for ${selectedHorses.length} horse${selectedHorses.length > 1 ? 's' : ''}`);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error logging daily checks:', error);
-      alert(error instanceof Error ? error.message : 'Failed to log daily checks');
+      toast.error('Failed to log checks', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

@@ -3,14 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { PricingPlans, AddOnsList, CurrentPlanCard } from '@/components/billing/PricingPlans';
+import { PricingPlans, CurrentPlanCard } from '@/components/billing/PricingPlans';
 
 export default function BillingPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link 
+        <Link
           href="/settings"
           className="p-2 rounded-xl hover:bg-stone-100 transition-all"
         >
@@ -31,11 +31,6 @@ export default function BillingPage() {
       {/* Pricing Plans */}
       <section>
         <PricingPlans />
-      </section>
-
-      {/* Add-Ons */}
-      <section>
-        <AddOnsList />
       </section>
     </div>
   );

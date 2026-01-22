@@ -44,14 +44,14 @@ model Subscription {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  tier      String   @default("FARM")
+
+  tier      String   @default("BASIC") // FREE, BASIC, ADVANCED
   status    String   @default("ACTIVE")
-  
-  maxHorses Int      @default(999)
-  maxBarns  Int      @default(10)
-  storageGb Int      @default(50)
-  
+
+  maxHorses Int      @default(15)
+  maxBarns  Int      @default(1)
+  storageGb Int      @default(25)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -75,7 +75,7 @@ model Barn {
   logoUrl     String?
 
   // Subscription (per-barn, not per-user)
-  tier        String   @default("FREE") // FREE, PROFESSIONAL, FARM, ENTERPRISE
+  tier        String   @default("FREE") // FREE, BASIC, ADVANCED
   subscriptionStatus String @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
 
   createdAt   DateTime @default(now())

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
+import { toast } from '@/lib/toast';
 import {
   Utensils,
   ChevronLeft,
@@ -47,7 +48,7 @@ export default function LogFeedPage() {
 
   const handleSubmit = async () => {
     if (selectedHorses.length === 0) {
-      alert('Please select at least one horse');
+      toast.warning('No horses selected', 'Please select at least one horse');
       return;
     }
     
@@ -81,10 +82,11 @@ export default function LogFeedPage() {
         throw new Error(error.error || 'Failed to log feed');
       }
 
+      toast.success('Feeding logged', `Logged ${feedingTime.toLowerCase()} feeding for ${selectedHorses.length} horse${selectedHorses.length > 1 ? 's' : ''}`);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error logging feed:', error);
-      alert(error instanceof Error ? error.message : 'Failed to log feed');
+      toast.error('Failed to log feed', error instanceof Error ? error.message : 'Please try again');
     } finally {
       setIsSubmitting(false);
     }

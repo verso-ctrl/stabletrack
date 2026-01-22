@@ -289,9 +289,8 @@ function getImprovements(from: SubscriptionTier, to: SubscriptionTier): string[]
 function PricingHint({ tier }: { tier: SubscriptionTier }) {
   const prices: Record<SubscriptionTier, string> = {
     FREE: 'Free',
-    PROFESSIONAL: '$39/month',
-    FARM: '$99/month',
-    ENTERPRISE: '$249/month',
+    BASIC: '$19/month',
+    ADVANCED: '$39/month',
   }
 
   return (
