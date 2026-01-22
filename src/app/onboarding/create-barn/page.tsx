@@ -29,6 +29,7 @@ export default function CreateBarnPage() {
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
+  const [stripeUnavailable, setStripeUnavailable] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -90,7 +91,17 @@ export default function CreateBarnPage() {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || 'Failed to create checkout session');
+          // If Stripe is not configured, show helpful error
+          if (result.demoMode || response.status === 503) {
+            setStripeUnavailable(true);
+            setError(
+              'Stripe is not configured. Please select the FREE tier to continue, or configure Stripe payment processing.'
+            );
+            setIsCreating(false);
+            return;
+          }
+          const errorMsg = result.details || result.error || 'Failed to create checkout session';
+          throw new Error(errorMsg);
         }
 
         // Redirect to Stripe checkout
@@ -294,9 +305,15 @@ export default function CreateBarnPage() {
           ) : (
             <>
               <h2 className="font-semibold text-stone-900 mb-4">Choose Your Plan</h2>
-              <p className="text-sm text-stone-600 mb-6">
+              <p className="text-sm text-stone-600 mb-4">
                 Select the subscription tier that best fits your barn's needs
               </p>
+              {error && error.includes('Stripe is not configured') && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                  <p className="font-medium">Payment Processing Unavailable</p>
+                  <p className="mt-1">Stripe is not configured. Please select the FREE tier to continue without payment.</p>
+                </div>
+              )}
 
               <div className="space-y-3">
                 {(['FREE', 'BASIC', 'ADVANCED'] as SubscriptionTier[]).map((tier) => {

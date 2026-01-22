@@ -315,7 +315,7 @@ export function PricingPlans() {
                   Upgrade to {TIER_INFO[showUpgradeModal].name}
                 </h3>
                 <p className="text-sm text-stone-500">
-                  {TIER_INFO[showUpgradeModal].price}
+                  {formatPrice(TIER_PRICING[showUpgradeModal])}/month
                 </p>
               </div>
             </div>
