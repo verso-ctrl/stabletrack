@@ -11,10 +11,9 @@ import {
   Loader2,
   Crown,
   Users,
+  CreditCard,
 } from 'lucide-react';
 
-// v1 SIMPLIFIED: Only essential settings
-// Hidden for v1: Notifications, Security, Billing, Appearance, Help Center
 const settingsGroups = [
   {
     title: 'Personal',
@@ -35,6 +34,17 @@ const settingsGroups = [
         icon: Building2,
         label: 'Barn Settings',
         description: 'Update barn info and location',
+      },
+    ],
+  },
+  {
+    title: 'Billing',
+    items: [
+      {
+        href: '/settings/billing',
+        icon: CreditCard,
+        label: 'Subscription & Billing',
+        description: 'Manage your plan and payment details',
       },
     ],
   },

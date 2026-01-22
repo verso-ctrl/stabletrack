@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import {
   TIER_LIMITS,
@@ -45,19 +45,32 @@ function formatLimit(value: number): string {
 }
 
 export function PricingPlans() {
-  const { tier: currentTier, upgradeTier, isLoading } = useSubscription();
+  const { tier: currentTier, changeTier, isLoading } = useSubscription();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState<{ tier: SubscriptionTier; isDowngrade: boolean } | null>(null);
 
-  const handleUpgrade = async (tier: SubscriptionTier) => {
-    if (tier === 'FREE' || tier === currentTier) return;
+  const handleChangePlan = async (tier: SubscriptionTier) => {
+    if (tier === currentTier) return;
 
     try {
       setLoadingTier(tier);
-      await upgradeTier(tier);
+      await changeTier(tier);
+      setShowConfirmModal(null);
     } catch (err) {
-      console.error('Upgrade failed:', err);
+      console.error('Plan change failed:', err);
     } finally {
       setLoadingTier(null);
+    }
+  };
+
+  const handlePlanClick = (tier: SubscriptionTier, isDowngrade: boolean) => {
+    if (tier === currentTier) return;
+
+    // Show confirmation for downgrades
+    if (isDowngrade) {
+      setShowConfirmModal({ tier, isDowngrade });
+    } else {
+      handleChangePlan(tier);
     }
   };
 
@@ -149,22 +162,16 @@ export function PricingPlans() {
               </ul>
 
               <button
-                onClick={() => handleUpgrade(tier)}
-                disabled={
-                  isCurrent ||
-                  tier === 'FREE' ||
-                  isDowngrade ||
-                  loadingTier !== null ||
-                  isLoading
-                }
+                onClick={() => handlePlanClick(tier, isDowngrade)}
+                disabled={isCurrent || loadingTier !== null || isLoading}
                 className={`
                   w-full py-3 px-4 rounded-xl font-medium transition-all
                   flex items-center justify-center gap-2
                   ${
                     isCurrent
                       ? 'bg-green-100 text-green-700 cursor-default'
-                      : tier === 'FREE' || isDowngrade
-                      ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                      : isDowngrade
+                      ? 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       : info.highlighted
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
                       : 'bg-stone-900 text-white hover:bg-stone-800'
@@ -178,12 +185,16 @@ export function PricingPlans() {
                   </>
                 ) : isCurrent ? (
                   'Current Plan'
-                ) : tier === 'FREE' ? (
-                  'Free Forever'
                 ) : isDowngrade ? (
-                  'Contact Support'
+                  <>
+                    <ArrowDown className="w-4 h-4" />
+                    Downgrade to {info.name}
+                  </>
                 ) : (
-                  `Upgrade to ${info.name}`
+                  <>
+                    <ArrowUp className="w-4 h-4" />
+                    Upgrade to {info.name}
+                  </>
                 )}
               </button>
             </div>
@@ -194,6 +205,62 @@ export function PricingPlans() {
       <p className="text-center text-sm text-stone-500 mt-8">
         All plans include full access to every feature. Only the number of horses differs.
       </p>
+
+      {/* Downgrade Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-stone-900 mb-2">
+              Confirm Plan Change
+            </h3>
+            <p className="text-stone-600 mb-4">
+              Are you sure you want to downgrade to the{' '}
+              <span className="font-semibold">{TIER_INFO[showConfirmModal.tier].name}</span> plan?
+            </p>
+
+            {showConfirmModal.tier === 'FREE' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Note:</strong> The Free plan only supports up to 3 horses.
+                  If you have more than 3 horses, you will need to archive some before downgrading.
+                </p>
+              </div>
+            )}
+
+            {showConfirmModal.tier === 'BASIC' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Note:</strong> The Basic plan supports up to 15 horses.
+                  If you have more horses, you will need to archive some before downgrading.
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(null)}
+                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleChangePlan(showConfirmModal.tier)}
+                disabled={loadingTier !== null}
+                className="flex-1 py-2 px-4 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
+              >
+                {loadingTier === showConfirmModal.tier ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Confirm Downgrade'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

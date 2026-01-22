@@ -1,10 +1,10 @@
 // src/contexts/SubscriptionContext.tsx
 // React context for subscription and tier state management
-// Demo mode: Defaults to BASIC tier (15 horses)
+// Demo mode: Persists tier to localStorage
 
 'use client'
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import {
   SubscriptionTier,
   TierFeatures,
@@ -59,7 +59,8 @@ export interface SubscriptionContextType {
   getUpgradeMessageForLimit: (limitType: 'horses' | 'team' | 'storage') => string
   storagePercentUsed: number
   
-  // Actions (disabled in demo mode)
+  // Actions
+  changeTier: (tier: SubscriptionTier) => Promise<void>
   upgradeTier: (tier: SubscriptionTier) => Promise<void>
   openBillingPortal: () => Promise<void>
   openUpgradeModal: () => void
@@ -90,17 +91,27 @@ interface SubscriptionProviderProps {
   defaultTier?: SubscriptionTier
 }
 
+const STORAGE_KEY = 'stabletrack_subscription_tier'
+
 export function SubscriptionProvider({
   children,
   barnId,
   defaultTier = 'BASIC'  // Demo mode defaults to BASIC (15 horses)
 }: SubscriptionProviderProps) {
-  // Demo mode: Fixed tier, can be changed via defaultTier prop
-  const [tier] = useState<SubscriptionTier>(defaultTier)
-  const [loading] = useState(false)
+  // Load tier from localStorage or use default
+  const [tier, setTier] = useState<SubscriptionTier>(defaultTier)
+  const [loading, setLoading] = useState(false)
   const [error] = useState<string | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  
+
+  // Load saved tier from localStorage on mount
+  useEffect(() => {
+    const savedTier = localStorage.getItem(STORAGE_KEY) as SubscriptionTier | null
+    if (savedTier && ['FREE', 'BASIC', 'ADVANCED'].includes(savedTier)) {
+      setTier(savedTier)
+    }
+  }, [])
+
   // Demo usage - minimal usage to show features
   const [usage] = useState<BarnUsage>({
     horses: 5,
@@ -175,17 +186,41 @@ export function SubscriptionProvider({
     }
   }, [nextTier, upgradeMessage])
 
-  // Demo mode actions
-  const upgradeTier = useCallback(async (newTier: SubscriptionTier) => {
-    toast.info('Demo Mode', `Billing is disabled. In production, this would open Stripe checkout for the ${newTier} plan.`)
+  // Change tier (works in demo mode by saving to localStorage)
+  const changeTier = useCallback(async (newTier: SubscriptionTier) => {
+    setLoading(true)
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Save to localStorage
+      localStorage.setItem(STORAGE_KEY, newTier)
+      setTier(newTier)
+
+      const tierNames: Record<SubscriptionTier, string> = {
+        FREE: 'Free',
+        BASIC: 'Basic',
+        ADVANCED: 'Advanced',
+      }
+
+      toast.success('Plan Changed', `You are now on the ${tierNames[newTier]} plan.`)
+    } catch (err) {
+      toast.error('Failed to change plan', 'Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
+  // Alias for backwards compatibility
+  const upgradeTier = changeTier
+
   const openBillingPortal = useCallback(async () => {
-    toast.info('Demo Mode', 'Billing portal is disabled. In production, this would open the Stripe billing portal.')
+    toast.info('Demo Mode', 'In production, this would open the Stripe billing portal for payment methods and invoices.')
   }, [])
 
   const openUpgradeModal = useCallback(() => {
-    toast.info('Demo Mode', 'Upgrade modal disabled. In production, this would show upgrade options.')
+    // Could open a modal, but for now just show a toast
+    toast.info('Upgrade', 'Visit Settings → Billing to change your plan.')
   }, [])
 
   const refetch = useCallback(async () => {
@@ -212,6 +247,7 @@ export function SubscriptionProvider({
     getUpgradeMessage,
     getUpgradeMessageForLimit,
     storagePercentUsed,
+    changeTier,
     upgradeTier,
     openBillingPortal,
     openUpgradeModal,
