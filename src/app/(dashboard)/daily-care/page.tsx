@@ -49,11 +49,33 @@ const priorityColors = {
   LOW: 'bg-stone-100 text-stone-600 border-stone-200',
 };
 
+interface FeedLog {
+  id: string;
+  horseId: string;
+  feedingTime: string;
+  amountEaten: string;
+  loggedAt: string;
+  horse?: { barnName: string };
+}
+
+interface HealthCheck {
+  id: string;
+  horseId: string;
+  overallCondition: string;
+  date: string;
+  horse?: { barnName: string };
+}
+
 export default function DailyCarePage() {
   const { currentBarn } = useBarn();
   const { horses } = useHorses();
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [feedLogs, setFeedLogs] = useState<FeedLog[]>([]);
+  const [healthChecks, setHealthChecks] = useState<HealthCheck[]>([]);
+  const [checkedHorseIds, setCheckedHorseIds] = useState<Set<string>>(new Set());
+  const [amFedHorseIds, setAmFedHorseIds] = useState<Set<string>>(new Set());
+  const [pmFedHorseIds, setPmFedHorseIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DailyStats>({
     tasks: { pending: 0, completed: 0, urgent: 0 },
@@ -62,37 +84,116 @@ export default function DailyCarePage() {
     medications: { given: 0, due: 0, overdue: 0 },
   });
 
-  // Fetch tasks
+  // Fetch all daily care data
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchDailyCareData = async () => {
       if (!currentBarn?.id) return;
 
+      const today = new Date().toISOString().split('T')[0];
+
       try {
-        const response = await fetch(`/api/barns/${currentBarn.id}/tasks`);
-        const data = await response.json();
-        if (data.data) {
-          setTasks(data.data);
-          // Calculate task stats
-          const pending = data.data.filter((t: Task) => t.status === 'PENDING').length;
-          const completed = data.data.filter((t: Task) => t.status === 'COMPLETED').length;
-          const urgent = data.data.filter((t: Task) => t.status === 'PENDING' && t.priority === 'URGENT').length;
-          setStats(prev => ({
-            ...prev,
-            tasks: { pending, completed, urgent },
-            healthChecks: { completed: 0, total: horses?.length || 0 },
-            feeding: { am: 0, pm: 0, total: horses?.length || 0 },
-            medications: { given: 0, due: 0, overdue: 0 },
-          }));
+        // Fetch all data in parallel
+        const [tasksRes, feedLogsRes, healthChecksRes] = await Promise.all([
+          fetch(`/api/barns/${currentBarn.id}/tasks`),
+          fetch(`/api/barns/${currentBarn.id}/feed-logs?date=${today}`),
+          fetch(`/api/barns/${currentBarn.id}/health-checks?date=${today}`),
+        ]);
+
+        const [tasksData, feedLogsData, healthChecksData] = await Promise.all([
+          tasksRes.json(),
+          feedLogsRes.json(),
+          healthChecksRes.json(),
+        ]);
+
+        // Process tasks
+        if (tasksData.data) {
+          setTasks(tasksData.data);
         }
+
+        // Calculate task stats
+        const tasksList = tasksData.data || [];
+        const pending = tasksList.filter((t: Task) => t.status === 'PENDING').length;
+        const completed = tasksList.filter((t: Task) => t.status === 'COMPLETED').length;
+        const urgent = tasksList.filter((t: Task) => t.status === 'PENDING' && t.priority === 'URGENT').length;
+
+        // Store and calculate feed logs stats (AM/PM feedings) - count unique horses fed
+        const feedLogsArr: FeedLog[] = feedLogsData.data || [];
+        setFeedLogs(feedLogsArr);
+
+        const amFedSet = new Set(
+          feedLogsArr
+            .filter((log) => log.feedingTime === 'AM' || log.feedingTime === 'MORNING')
+            .map((log) => log.horseId)
+        );
+        const pmFedSet = new Set(
+          feedLogsArr
+            .filter((log) => log.feedingTime === 'PM' || log.feedingTime === 'EVENING')
+            .map((log) => log.horseId)
+        );
+        setAmFedHorseIds(amFedSet);
+        setPmFedHorseIds(pmFedSet);
+
+        // Store and calculate health check stats - unique horses checked today
+        const healthChecksArr: HealthCheck[] = healthChecksData.data || [];
+        setHealthChecks(healthChecksArr);
+
+        const checkedSet = new Set(
+          healthChecksArr.map((check) => check.horseId)
+        );
+        setCheckedHorseIds(checkedSet);
+
+        // Fetch medication stats
+        let medicationStats = { given: 0, due: 0, overdue: 0 };
+        try {
+          const horsesWithMeds = horses?.filter(h => (h.activeMedicationCount || 0) > 0) || [];
+          let totalGiven = 0;
+          let totalDue = 0;
+
+          // Fetch medications for each horse with active medications
+          for (const horse of horsesWithMeds) {
+            const medsRes = await fetch(`/api/barns/${currentBarn.id}/horses/${horse.id}/medications`);
+            const medsData = await medsRes.json();
+            const activeMeds = (medsData.data || []).filter((m: { status: string }) => m.status === 'ACTIVE');
+
+            for (const med of activeMeds) {
+              totalDue++;
+              // Check if medication was logged today by fetching medication details
+              const medDetailRes = await fetch(`/api/barns/${currentBarn.id}/horses/${horse.id}/medications/${med.id}`);
+              const medDetail = await medDetailRes.json();
+              const todayLogs = (medDetail.data?.logs || []).filter((log: { givenAt: string }) => {
+                const logDate = new Date(log.givenAt).toISOString().split('T')[0];
+                return logDate === today;
+              });
+              if (todayLogs.length > 0) {
+                totalGiven++;
+              }
+            }
+          }
+
+          medicationStats = {
+            given: totalGiven,
+            due: totalDue,
+            overdue: Math.max(0, totalDue - totalGiven),
+          };
+        } catch (medError) {
+          console.error('Failed to fetch medication stats:', medError);
+        }
+
+        setStats({
+          tasks: { pending, completed, urgent },
+          healthChecks: { completed: checkedSet.size, total: horses?.length || 0 },
+          feeding: { am: amFedSet.size, pm: pmFedSet.size, total: horses?.length || 0 },
+          medications: medicationStats,
+        });
       } catch (error) {
-        console.error('Failed to fetch tasks:', error);
+        console.error('Failed to fetch daily care data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTasks();
-  }, [currentBarn?.id, horses?.length]);
+    fetchDailyCareData();
+  }, [currentBarn?.id, horses]);
 
   const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
@@ -453,23 +554,37 @@ export default function DailyCarePage() {
             </div>
             {/* Horse list */}
             <div className="mt-6 space-y-2">
-              {horses?.map(horse => (
-                <div key={horse.id} className="flex items-center gap-3 p-3 rounded-lg bg-stone-50">
-                  <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden">
-                    {horse.profilePhotoUrl ? (
-                      <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+              {horses?.map(horse => {
+                const isChecked = checkedHorseIds.has(horse.id);
+                const horseCheck = healthChecks.find(c => c.horseId === horse.id);
+                return (
+                  <div key={horse.id} className={`flex items-center gap-3 p-3 rounded-lg ${isChecked ? 'bg-green-50 border border-green-200' : 'bg-stone-50'}`}>
+                    <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden">
+                      {horse.profilePhotoUrl ? (
+                        <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm font-medium">
+                          {horse.barnName.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-stone-900">{horse.barnName}</p>
+                      {isChecked && horseCheck?.overallCondition && (
+                        <p className="text-xs text-green-600">Condition: {horseCheck.overallCondition}</p>
+                      )}
+                    </div>
+                    {isChecked ? (
+                      <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                        <Check className="w-4 h-4" />
+                        Checked
+                      </span>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm font-medium">
-                        {horse.barnName.charAt(0)}
-                      </div>
+                      <span className="text-xs text-stone-500">Not checked</span>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-stone-900">{horse.barnName}</p>
-                  </div>
-                  <span className="text-xs text-stone-500">Not checked</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -504,6 +619,51 @@ export default function DailyCarePage() {
                 <p className="text-2xl font-bold text-indigo-900">{stats.feeding.pm}/{stats.feeding.total}</p>
                 <p className="text-sm text-indigo-700">horses fed</p>
               </div>
+            </div>
+
+            {/* Horse feeding status */}
+            <div className="mt-6 space-y-2">
+              <h3 className="text-sm font-medium text-stone-700 mb-3">Feeding Status by Horse</h3>
+              {horses?.map(horse => {
+                const amFed = amFedHorseIds.has(horse.id);
+                const pmFed = pmFedHorseIds.has(horse.id);
+                const amLog = feedLogs.find(l => l.horseId === horse.id && (l.feedingTime === 'AM' || l.feedingTime === 'MORNING'));
+                const pmLog = feedLogs.find(l => l.horseId === horse.id && (l.feedingTime === 'PM' || l.feedingTime === 'EVENING'));
+                return (
+                  <div key={horse.id} className="flex items-center gap-3 p-3 rounded-lg bg-stone-50">
+                    <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden flex-shrink-0">
+                      {horse.profilePhotoUrl ? (
+                        <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm font-medium">
+                          {horse.barnName.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-stone-900">{horse.barnName}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                        amFed
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-stone-100 text-stone-400'
+                      }`}>
+                        <Sun className="w-3 h-3" />
+                        AM {amFed && amLog?.amountEaten ? `(${amLog.amountEaten})` : ''}
+                      </span>
+                      <span className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                        pmFed
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'bg-stone-100 text-stone-400'
+                      }`}>
+                        <Moon className="w-3 h-3" />
+                        PM {pmFed && pmLog?.amountEaten ? `(${pmLog.amountEaten})` : ''}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

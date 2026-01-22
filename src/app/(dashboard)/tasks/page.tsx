@@ -7,7 +7,6 @@ import { toast } from '@/lib/toast';
 import {
   Plus,
   Search,
-  Filter,
   CheckCircle2,
   Circle,
   Clock,
@@ -17,6 +16,7 @@ import {
   Loader2,
   ListTodo,
   AlertCircle,
+  Repeat,
 } from 'lucide-react';
 
 const priorityColors: Record<string, string> = {
@@ -25,6 +25,26 @@ const priorityColors: Record<string, string> = {
   MEDIUM: 'bg-blue-100 text-blue-700 border-blue-200',
   LOW: 'bg-stone-100 text-stone-700 border-stone-200',
 };
+
+const DAYS_OF_WEEK = [
+  { key: 'SUN', label: 'S', full: 'Sunday' },
+  { key: 'MON', label: 'M', full: 'Monday' },
+  { key: 'TUE', label: 'T', full: 'Tuesday' },
+  { key: 'WED', label: 'W', full: 'Wednesday' },
+  { key: 'THU', label: 'T', full: 'Thursday' },
+  { key: 'FRI', label: 'F', full: 'Friday' },
+  { key: 'SAT', label: 'S', full: 'Saturday' },
+];
+
+interface RecurringRule {
+  type: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM';
+  interval: number; // Every X days/weeks/months
+  daysOfWeek?: string[]; // For weekly: which days (MON, TUE, etc.)
+  dayOfMonth?: number; // For monthly: which day (1-31)
+  endType: 'NEVER' | 'ON_DATE' | 'AFTER_COUNT';
+  endDate?: string;
+  endCount?: number;
+}
 
 export default function TasksPage() {
   const { currentBarn } = useBarn();
@@ -38,6 +58,8 @@ export default function TasksPage() {
     dueDate: '',
     dueTime: '',
     priority: 'MEDIUM',
+    isRecurring: false,
+    recurringRule: null as RecurringRule | null,
   });
 
   const { tasks: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useTasks({ status: 'PENDING' });
@@ -190,12 +212,18 @@ export default function TasksPage() {
               </button>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <p className={`font-medium ${
                     task.status === 'COMPLETED' ? 'text-stone-400 line-through' : 'text-stone-900'
                   }`}>
                     {task.title}
                   </p>
+                  {task.isRecurring && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
+                      <Repeat className="w-3 h-3" />
+                      Repeats
+                    </span>
+                  )}
                   {task.priority && task.priority !== 'MEDIUM' && (
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityColors[task.priority]}`}>
                       {task.priority}
@@ -308,7 +336,7 @@ export default function TasksPage() {
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Priority
                 </label>
-                <select 
+                <select
                   className="input w-full"
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
@@ -319,13 +347,289 @@ export default function TasksPage() {
                   <option value="URGENT">Urgent</option>
                 </select>
               </div>
+
+              {/* Recurring Task Toggle */}
+              <div className="border-t border-stone-200 pt-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newTask.isRecurring}
+                    onChange={(e) => {
+                      const isRecurring = e.target.checked;
+                      setNewTask({
+                        ...newTask,
+                        isRecurring,
+                        recurringRule: isRecurring ? {
+                          type: 'DAILY',
+                          interval: 1,
+                          daysOfWeek: [],
+                          endType: 'NEVER',
+                        } : null,
+                      });
+                    }}
+                    className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Repeat className="w-4 h-4 text-stone-500" />
+                    <span className="font-medium text-stone-700">Make this a repeating task</span>
+                  </div>
+                </label>
+              </div>
+
+              {/* Recurring Options */}
+              {newTask.isRecurring && newTask.recurringRule && (
+                <div className="bg-amber-50 rounded-xl p-4 space-y-4 border border-amber-200">
+                  {/* Repeat Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Repeat
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: 'DAILY', label: 'Daily' },
+                        { value: 'WEEKLY', label: 'Weekly' },
+                        { value: 'MONTHLY', label: 'Monthly' },
+                        { value: 'CUSTOM', label: 'Custom' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setNewTask({
+                            ...newTask,
+                            recurringRule: {
+                              ...newTask.recurringRule!,
+                              type: option.value as RecurringRule['type'],
+                              interval: 1,
+                              daysOfWeek: option.value === 'WEEKLY' ? ['MON'] : [],
+                            },
+                          })}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            newTask.recurringRule?.type === option.value
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-white text-stone-700 border border-stone-200 hover:border-amber-300'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Interval */}
+                  {newTask.recurringRule?.type === 'CUSTOM' && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-stone-600">Every</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={newTask.recurringRule?.interval}
+                        onChange={(e) => setNewTask({
+                          ...newTask,
+                          recurringRule: {
+                            ...newTask.recurringRule!,
+                            interval: parseInt(e.target.value) || 1,
+                          },
+                        })}
+                        className="input w-20 text-center"
+                      />
+                      <span className="text-sm text-stone-600">day(s)</span>
+                    </div>
+                  )}
+
+                  {/* Days of Week (for Weekly) */}
+                  {newTask.recurringRule?.type === 'WEEKLY' && (
+                    <div>
+                      <label className="block text-sm font-medium text-stone-700 mb-2">
+                        Repeat on
+                      </label>
+                      <div className="flex gap-2">
+                        {DAYS_OF_WEEK.map((day) => {
+                          const isSelected = newTask.recurringRule?.daysOfWeek?.includes(day.key);
+                          return (
+                            <button
+                              key={day.key}
+                              type="button"
+                              onClick={() => {
+                                const currentDays = newTask.recurringRule?.daysOfWeek || [];
+                                const newDays = isSelected
+                                  ? currentDays.filter((d) => d !== day.key)
+                                  : [...currentDays, day.key];
+                                // Ensure at least one day is selected
+                                if (newDays.length > 0) {
+                                  setNewTask({
+                                    ...newTask,
+                                    recurringRule: {
+                                      ...newTask.recurringRule!,
+                                      daysOfWeek: newDays,
+                                    },
+                                  });
+                                }
+                              }}
+                              title={day.full}
+                              className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${
+                                isSelected
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-white text-stone-700 border border-stone-200 hover:border-amber-300'
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-stone-500 mt-2">
+                        Selected: {newTask.recurringRule?.daysOfWeek?.map(d =>
+                          DAYS_OF_WEEK.find(day => day.key === d)?.full
+                        ).join(', ') || 'None'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Day of Month (for Monthly) */}
+                  {newTask.recurringRule?.type === 'MONTHLY' && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-stone-600">On day</span>
+                      <select
+                        value={newTask.recurringRule?.dayOfMonth || 1}
+                        onChange={(e) => setNewTask({
+                          ...newTask,
+                          recurringRule: {
+                            ...newTask.recurringRule!,
+                            dayOfMonth: parseInt(e.target.value),
+                          },
+                        })}
+                        className="input w-24"
+                      >
+                        {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                          <option key={day} value={day}>{day}</option>
+                        ))}
+                      </select>
+                      <span className="text-sm text-stone-600">of each month</span>
+                    </div>
+                  )}
+
+                  {/* End Condition */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Ends
+                    </label>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="endType"
+                          checked={newTask.recurringRule?.endType === 'NEVER'}
+                          onChange={() => setNewTask({
+                            ...newTask,
+                            recurringRule: {
+                              ...newTask.recurringRule!,
+                              endType: 'NEVER',
+                              endDate: undefined,
+                              endCount: undefined,
+                            },
+                          })}
+                          className="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span className="text-sm text-stone-700">Never</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="endType"
+                          checked={newTask.recurringRule?.endType === 'ON_DATE'}
+                          onChange={() => setNewTask({
+                            ...newTask,
+                            recurringRule: {
+                              ...newTask.recurringRule!,
+                              endType: 'ON_DATE',
+                              endCount: undefined,
+                            },
+                          })}
+                          className="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span className="text-sm text-stone-700">On</span>
+                        {newTask.recurringRule?.endType === 'ON_DATE' && (
+                          <input
+                            type="date"
+                            value={newTask.recurringRule?.endDate || ''}
+                            onChange={(e) => setNewTask({
+                              ...newTask,
+                              recurringRule: {
+                                ...newTask.recurringRule!,
+                                endDate: e.target.value,
+                              },
+                            })}
+                            className="input w-40"
+                            min={newTask.dueDate || new Date().toISOString().split('T')[0]}
+                          />
+                        )}
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="endType"
+                          checked={newTask.recurringRule?.endType === 'AFTER_COUNT'}
+                          onChange={() => setNewTask({
+                            ...newTask,
+                            recurringRule: {
+                              ...newTask.recurringRule!,
+                              endType: 'AFTER_COUNT',
+                              endCount: 10,
+                              endDate: undefined,
+                            },
+                          })}
+                          className="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span className="text-sm text-stone-700">After</span>
+                        {newTask.recurringRule?.endType === 'AFTER_COUNT' && (
+                          <>
+                            <input
+                              type="number"
+                              min="1"
+                              max="365"
+                              value={newTask.recurringRule?.endCount || 10}
+                              onChange={(e) => setNewTask({
+                                ...newTask,
+                                recurringRule: {
+                                  ...newTask.recurringRule!,
+                                  endCount: parseInt(e.target.value) || 10,
+                                },
+                              })}
+                              className="input w-20 text-center"
+                            />
+                            <span className="text-sm text-stone-700">occurrences</span>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                  <div className="bg-white rounded-lg p-3 border border-amber-200">
+                    <p className="text-sm text-stone-600">
+                      <span className="font-medium">Summary: </span>
+                      {newTask.recurringRule?.type === 'DAILY' && 'Repeats every day'}
+                      {newTask.recurringRule?.type === 'WEEKLY' && `Repeats weekly on ${
+                        newTask.recurringRule?.daysOfWeek?.map(d =>
+                          DAYS_OF_WEEK.find(day => day.key === d)?.full
+                        ).join(', ') || 'selected days'
+                      }`}
+                      {newTask.recurringRule?.type === 'MONTHLY' && `Repeats monthly on day ${newTask.recurringRule?.dayOfMonth || 1}`}
+                      {newTask.recurringRule?.type === 'CUSTOM' && `Repeats every ${newTask.recurringRule?.interval} day(s)`}
+                      {newTask.recurringRule?.endType === 'ON_DATE' && newTask.recurringRule?.endDate && ` until ${new Date(newTask.recurringRule?.endDate).toLocaleDateString()}`}
+                      {newTask.recurringRule?.endType === 'AFTER_COUNT' && ` for ${newTask.recurringRule?.endCount} occurrences`}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM' });
+                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', isRecurring: false, recurringRule: null });
                 }}
                 className="btn-secondary flex-1"
                 disabled={isCreating}
@@ -338,6 +642,17 @@ export default function TasksPage() {
                     toast.warning('Missing title', 'Please enter a task title');
                     return;
                   }
+                  // Validate recurring settings
+                  if (newTask.isRecurring && newTask.recurringRule) {
+                    if (newTask.recurringRule?.type === 'WEEKLY' && (!newTask.recurringRule?.daysOfWeek || newTask.recurringRule?.daysOfWeek.length === 0)) {
+                      toast.warning('Select days', 'Please select at least one day for weekly repeat');
+                      return;
+                    }
+                    if (newTask.recurringRule?.endType === 'ON_DATE' && !newTask.recurringRule?.endDate) {
+                      toast.warning('Select end date', 'Please select an end date for the recurring task');
+                      return;
+                    }
+                  }
                   setIsCreating(true);
                   try {
                     const response = await fetch(`/api/barns/${currentBarn?.id}/tasks`, {
@@ -349,13 +664,20 @@ export default function TasksPage() {
                         dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null,
                         dueTime: newTask.dueTime || null,
                         priority: newTask.priority,
+                        isRecurring: newTask.isRecurring,
+                        recurringRule: newTask.isRecurring && newTask.recurringRule
+                          ? JSON.stringify(newTask.recurringRule)
+                          : null,
                       }),
                     });
                     if (!response.ok) throw new Error('Failed to create task');
                     setShowAddModal(false);
-                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM' });
+                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', isRecurring: false, recurringRule: null });
                     refetch();
-                    toast.success('Task created', 'Your task has been added');
+                    toast.success(
+                      newTask.isRecurring ? 'Recurring task created' : 'Task created',
+                      newTask.isRecurring ? 'Your repeating task has been set up' : 'Your task has been added'
+                    );
                   } catch (error) {
                     console.error('Error creating task:', error);
                     toast.error('Failed to create task', 'Please try again');
