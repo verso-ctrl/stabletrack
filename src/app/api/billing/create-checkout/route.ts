@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { getCurrentUser } from '@/lib/auth';
+import { TIER_PRICING, type SubscriptionTier } from '@/lib/tiers';
+import { prisma } from '@/lib/prisma';
 
-// POST /api/billing/create-checkout - Create Stripe checkout session
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-12-15.clover',
+    })
+  : null;
+
+// POST /api/billing/create-checkout - Create Stripe checkout session for plan change
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -10,47 +19,93 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { priceId, barnId, tier } = body;
+    const { tier, barnId, billingCycle = 'monthly' } = body;
 
-    if (!priceId || !tier) {
+    if (!tier || tier === 'FREE') {
       return NextResponse.json(
-        { error: 'Missing required fields: priceId and tier' },
+        { error: 'Stripe checkout not needed for FREE tier' },
         { status: 400 }
       );
     }
 
-    // TODO: Implement Stripe checkout session creation
-    // This is a placeholder implementation until Stripe is configured
+    if (!barnId) {
+      return NextResponse.json(
+        { error: 'Barn ID is required' },
+        { status: 400 }
+      );
+    }
 
-    // Example Stripe implementation:
-    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    // const session = await stripe.checkout.sessions.create({
-    //   payment_method_types: ['card'],
-    //   line_items: [{
-    //     price: priceId,
-    //     quantity: 1,
-    //   }],
-    //   mode: 'subscription',
-    //   success_url: `${request.headers.get('origin')}/settings/billing?success=true`,
-    //   cancel_url: `${request.headers.get('origin')}/settings/billing?canceled=true`,
-    //   client_reference_id: barnId,
-    //   customer_email: user.email,
-    //   metadata: {
-    //     userId: user.id,
-    //     barnId: barnId,
-    //     tier: tier,
-    //   },
-    // });
-    //
-    // return NextResponse.json({ sessionId: session.id, url: session.url });
-
-    return NextResponse.json(
-      {
-        error: 'Stripe integration not configured',
-        message: 'Please configure STRIPE_SECRET_KEY environment variable to enable billing',
+    // Verify user has access to this barn
+    const barn = await prisma.barn.findFirst({
+      where: {
+        id: barnId,
+        members: {
+          some: {
+            userId: user.id,
+            role: { in: ['OWNER', 'MANAGER'] },
+          },
+        },
       },
-      { status: 501 }
-    );
+    });
+
+    if (!barn) {
+      return NextResponse.json(
+        { error: 'Barn not found or access denied' },
+        { status: 403 }
+      );
+    }
+
+    // If Stripe is not configured, return demo mode response
+    if (!stripe) {
+      return NextResponse.json(
+        {
+          demoMode: true,
+          message: 'Stripe not configured. In demo mode, plan changes are simulated.',
+          tier,
+        },
+        { status: 200 }
+      );
+    }
+
+    const pricing = TIER_PRICING[tier as SubscriptionTier];
+    const priceAmount = billingCycle === 'annual'
+      ? pricing.annualPriceCents / 12
+      : pricing.monthlyPriceCents;
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `StableTrack ${pricing.displayName} Plan`,
+              description: pricing.description,
+            },
+            unit_amount: priceAmount,
+            recurring: {
+              interval: billingCycle === 'annual' ? 'year' : 'month',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?success=true&tier=${tier}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?canceled=true`,
+      client_reference_id: user.id,
+      customer_email: user.email || undefined,
+      metadata: {
+        userId: user.id,
+        barnId,
+        tier,
+        billingCycle,
+        action: 'upgrade',
+      },
+    });
+
+    return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     return NextResponse.json(

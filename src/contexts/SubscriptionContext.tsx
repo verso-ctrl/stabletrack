@@ -96,7 +96,7 @@ const STORAGE_KEY = 'stabletrack_subscription_tier'
 export function SubscriptionProvider({
   children,
   barnId,
-  defaultTier = 'BASIC'  // Demo mode defaults to BASIC (15 horses)
+  defaultTier = 'FREE'  // Start with FREE tier until payment is made
 }: SubscriptionProviderProps) {
   // Load tier from localStorage or use default
   const [tier, setTier] = useState<SubscriptionTier>(defaultTier)

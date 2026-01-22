@@ -6,9 +6,11 @@ import Stripe from 'stripe'
 import { getCurrentUser } from '@/lib/auth'
 import { TIER_PRICING, type SubscriptionTier } from '@/lib/tiers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover',
-})
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-12-15.clover',
+    })
+  : null
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,6 +34,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Barn data is required' },
         { status: 400 }
+      )
+    }
+
+    // If Stripe is not configured, return error with helpful message
+    if (!stripe) {
+      return NextResponse.json(
+        {
+          error: 'Stripe is not configured',
+          message: 'Please configure STRIPE_SECRET_KEY environment variable to enable payments. For development, you can create a barn with the FREE tier.',
+          demoMode: true,
+        },
+        { status: 503 }
       )
     }
 

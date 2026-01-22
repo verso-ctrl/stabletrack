@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Loader2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Check, Loader2, ArrowUp, ArrowDown, CreditCard, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useBarn } from '@/contexts/BarnContext';
 import {
   TIER_LIMITS,
   TIER_PRICING,
@@ -46,8 +47,10 @@ function formatLimit(value: number): string {
 
 export function PricingPlans() {
   const { tier: currentTier, changeTier, isLoading } = useSubscription();
+  const { currentBarn } = useBarn();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState<{ tier: SubscriptionTier; isDowngrade: boolean } | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState<SubscriptionTier | null>(null);
 
   const handleChangePlan = async (tier: SubscriptionTier) => {
     if (tier === currentTier) return;
@@ -63,6 +66,42 @@ export function PricingPlans() {
     }
   };
 
+  const handleUpgrade = async (tier: SubscriptionTier) => {
+    if (!currentBarn?.id) return;
+
+    try {
+      setLoadingTier(tier);
+
+      // Call the Stripe checkout API
+      const response = await fetch('/api/billing/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier,
+          barnId: currentBarn.id,
+          billingCycle: 'monthly',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.demoMode) {
+        // Demo mode: Simulate the upgrade
+        await changeTier(tier);
+        setShowUpgradeModal(null);
+      } else if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout error:', data.error);
+      }
+    } catch (err) {
+      console.error('Upgrade failed:', err);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
   const handlePlanClick = (tier: SubscriptionTier, isDowngrade: boolean) => {
     if (tier === currentTier) return;
 
@@ -70,7 +109,8 @@ export function PricingPlans() {
     if (isDowngrade) {
       setShowConfirmModal({ tier, isDowngrade });
     } else {
-      handleChangePlan(tier);
+      // Show upgrade confirmation modal with Stripe checkout
+      setShowUpgradeModal(tier);
     }
   };
 
@@ -255,6 +295,96 @@ export function PricingPlans() {
                   </>
                 ) : (
                   'Confirm Downgrade'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade Confirmation Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-stone-900">
+                  Upgrade to {TIER_INFO[showUpgradeModal].name}
+                </h3>
+                <p className="text-sm text-stone-500">
+                  {TIER_INFO[showUpgradeModal].price}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-stone-50 rounded-lg p-4 mb-4">
+              <h4 className="font-medium text-stone-900 mb-2">What you'll get:</h4>
+              <ul className="space-y-2">
+                {showUpgradeModal === 'BASIC' && (
+                  <>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Up to 15 horses</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>5GB storage</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Document uploads</span>
+                    </li>
+                  </>
+                )}
+                {showUpgradeModal === 'ADVANCED' && (
+                  <>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Unlimited horses</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Unlimited storage</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Advanced analytics & reporting</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-stone-700">
+                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>Priority support</span>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(null)}
+                disabled={loadingTier !== null}
+                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleUpgrade(showUpgradeModal)}
+                disabled={loadingTier !== null}
+                className="flex-1 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-medium hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loadingTier === showUpgradeModal ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    Continue to Payment
+                  </>
                 )}
               </button>
             </div>
