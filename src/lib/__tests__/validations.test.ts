@@ -10,7 +10,7 @@ import {
 describe('Event Validation', () => {
   it('should validate a valid event', () => {
     const validEvent = {
-      type: 'VET',
+      type: 'VET_APPOINTMENT',
       title: 'Vet Visit',
       scheduledDate: '2024-01-15T10:00:00Z',
     };
@@ -24,7 +24,7 @@ describe('Event Validation', () => {
 
   it('should reject event without title', () => {
     const invalidEvent = {
-      type: 'VET',
+      type: 'VET_APPOINTMENT',
       scheduledDate: '2024-01-15T10:00:00Z',
     };
 
@@ -49,7 +49,7 @@ describe('Event Validation', () => {
 
   it('should reject event with invalid date', () => {
     const invalidEvent = {
-      type: 'VET',
+      type: 'VET_APPOINTMENT',
       title: 'Test',
       scheduledDate: 'not-a-date',
     };
@@ -60,7 +60,7 @@ describe('Event Validation', () => {
 
   it('should reject negative cost', () => {
     const invalidEvent = {
-      type: 'VET',
+      type: 'VET_APPOINTMENT',
       title: 'Test',
       scheduledDate: '2024-01-15T10:00:00Z',
       cost: -100,
@@ -72,13 +72,12 @@ describe('Event Validation', () => {
 
   it('should accept optional fields', () => {
     const validEvent = {
-      type: 'VET',
+      type: 'VET_APPOINTMENT',
       title: 'Vet Visit',
       scheduledDate: '2024-01-15T10:00:00Z',
       description: 'Annual checkup',
       providerName: 'Dr. Smith',
       cost: 150.50,
-      assignedToId: 'user123',
     };
 
     const result = validate(eventSchema, validEvent);
