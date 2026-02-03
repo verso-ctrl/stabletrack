@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#ffffff',
+  themeColor: '#f7f4f0',
 };
 
 // Check if Clerk is properly configured - only check NEXT_PUBLIC_ vars to avoid hydration mismatch
@@ -36,9 +36,9 @@ export default function RootLayout({
   if (!isClerkConfigured) {
     return (
       <html lang="en" suppressHydrationWarning>
-        <body className="min-h-screen bg-stone-50" suppressHydrationWarning>
+        <body className="min-h-screen bg-background" suppressHydrationWarning>
           {/* Demo Mode Banner */}
-          <div className="bg-amber-500 text-amber-950 text-center py-2 px-4 text-sm font-medium">
+          <div className="bg-primary/90 text-primary-foreground text-center py-2 px-4 text-sm font-medium">
             🔧 Demo Mode - Configure Clerk & Stripe keys in .env for full features
           </div>
           <Providers>{children}</Providers>
@@ -50,7 +50,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className="min-h-screen bg-stone-50" suppressHydrationWarning>
+        <body className="min-h-screen bg-background" suppressHydrationWarning>
           <Providers>{children}</Providers>
         </body>
       </html>

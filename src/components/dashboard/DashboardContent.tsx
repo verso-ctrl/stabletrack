@@ -61,10 +61,10 @@ export function DashboardContent() {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-semibold text-stone-900">
+        <h1 className="font-display text-2xl font-semibold text-foreground">
           Good {timeOfDay}, {currentBarn.name}
         </h1>
-        <p className="text-stone-500 mt-1">
+        <p className="text-muted-foreground mt-1">
           Here's what's happening at your barn today.
         </p>
       </div>
@@ -138,25 +138,25 @@ export function DashboardContent() {
 function NoBarnState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-      <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mb-4">
-        <FileText className="w-8 h-8 text-stone-400" />
+      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center mb-4">
+        <FileText className="w-8 h-8 text-muted-foreground" />
       </div>
-      <h2 className="text-xl font-semibold text-stone-900 mb-2">
+      <h2 className="font-display text-xl font-semibold text-foreground mb-2">
         No barn selected
       </h2>
-      <p className="text-stone-500 mb-6 max-w-sm">
+      <p className="text-muted-foreground mb-6 max-w-sm">
         Create a new barn or join an existing one to get started with StableTrack.
       </p>
       <div className="flex gap-3">
         <Link
           href="/barns/new"
-          className="px-4 py-2 bg-stone-900 text-white rounded-xl font-medium hover:bg-stone-800 transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
         >
           Create Barn
         </Link>
         <Link
           href="/barns/join"
-          className="px-4 py-2 bg-stone-100 text-stone-700 rounded-xl font-medium hover:bg-stone-200 transition-colors"
+          className="px-4 py-2 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
         >
           Join Barn
         </Link>
@@ -172,7 +172,7 @@ function AlertsBanner({ alerts }: { alerts: any[] }) {
   if (visibleAlerts.length === 0) return null;
 
   return (
-    <div className="p-4 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white">
+    <div className="p-4 rounded-lg bg-destructive/90 text-destructive-foreground">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -221,7 +221,7 @@ function StatCard({ label, value, icon: Icon, trend, color, href }: StatCardProp
   return (
     <Link
       href={href}
-      className="group p-4 rounded-2xl bg-white border border-stone-200 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+      className="group p-4 rounded-lg bg-card border border-border/60 hover:shadow-card hover:border-border transition-all"
     >
       <div className="flex items-start justify-between">
         <div
@@ -232,10 +232,10 @@ function StatCard({ label, value, icon: Icon, trend, color, href }: StatCardProp
         >
           <Icon className="w-5 h-5 text-white" />
         </div>
-        <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-stone-400 transition-colors" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </div>
-      <p className="mt-4 text-2xl font-bold text-stone-900">{value}</p>
-      <p className="text-sm text-stone-500">{label}</p>
+      <p className="mt-4 text-2xl font-display font-semibold text-foreground">{value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
       {trend !== null && (
         <div className="flex items-center gap-1 mt-1">
           <TrendingUp className="w-3 h-3 text-emerald-500" />
@@ -268,16 +268,16 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="p-6 rounded-2xl bg-white border border-stone-200">
+    <div className="p-6 rounded-lg bg-card border border-border/60">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-stone-900">Today's Tasks</h3>
-          <p className="text-sm text-stone-500">
+          <h3 className="font-display font-medium text-foreground">Today&apos;s Tasks</h3>
+          <p className="text-sm text-muted-foreground">
             {completedCount} of {totalCount} completed
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-24 h-2 bg-stone-100 rounded-full overflow-hidden">
+          <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all"
               style={{ width: `${progress}%` }}
@@ -292,8 +292,8 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
       {tasks.length === 0 ? (
         <div className="py-8 text-center">
           <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-          <p className="text-stone-600">All caught up!</p>
-          <p className="text-sm text-stone-400">No pending tasks for today.</p>
+          <p className="text-muted-foreground">All caught up!</p>
+          <p className="text-sm text-muted-foreground/80">No pending tasks for today.</p>
         </div>
       ) : (
         <ul className="space-y-2">
@@ -304,7 +304,7 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
                 key={task.id}
                 className={cn(
                   'flex items-center gap-3 p-3 rounded-xl transition-all',
-                  isCompleted ? 'bg-stone-50' : 'bg-amber-50/50 hover:bg-amber-50'
+                  isCompleted ? 'bg-muted/50' : 'bg-primary/5 hover:bg-primary/10'
                 )}
               >
                 <button
@@ -313,7 +313,7 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
                     'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all',
                     isCompleted
                       ? 'bg-emerald-500 border-emerald-500'
-                      : 'border-stone-300 hover:border-emerald-500'
+                      : 'border-border hover:border-emerald-500'
                   )}
                 >
                   {isCompleted && (
@@ -324,19 +324,19 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
                   <p
                     className={cn(
                       'text-sm font-medium',
-                      isCompleted ? 'text-stone-400 line-through' : 'text-stone-900'
+                      isCompleted ? 'text-muted-foreground line-through' : 'text-foreground'
                     )}
                   >
                     {task.title}
                   </p>
                   {task.description && (
-                    <p className="text-xs text-stone-500 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {task.description}
                     </p>
                   )}
                 </div>
                 {task.dueTime && (
-                  <span className="text-xs text-stone-400 flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {task.dueTime}
                   </span>
@@ -349,7 +349,7 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
 
       <Link
         href="/daily-care"
-        className="mt-4 flex items-center justify-center gap-2 py-2 text-sm text-stone-600 hover:text-stone-900 transition-colors"
+        className="mt-4 flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         View all tasks
         <ChevronRight className="w-4 h-4" />
@@ -369,14 +369,14 @@ function QuickActionsWidget() {
   ];
 
   return (
-    <div className="p-6 rounded-2xl bg-white border border-stone-200">
-      <h3 className="font-semibold text-stone-900 mb-4">Quick Actions</h3>
+    <div className="p-6 rounded-lg bg-card border border-border/60">
+      <h3 className="font-display font-medium text-foreground mb-4">Quick Actions</h3>
       <div className="grid grid-cols-2 gap-3">
         {actions.map((action) => (
           <Link
             key={action.label}
             href={action.href}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors group"
+            className="flex flex-col items-center gap-2 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
           >
             <div
               className={cn(
@@ -386,7 +386,7 @@ function QuickActionsWidget() {
             >
               <action.icon className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xs font-medium text-stone-600">
+            <span className="text-xs font-medium text-muted-foreground">
               {action.label}
             </span>
           </Link>
@@ -398,12 +398,12 @@ function QuickActionsWidget() {
 
 function UpcomingEventsWidget({ events }: { events: any[] }) {
   return (
-    <div className="p-6 rounded-2xl bg-white border border-stone-200">
+    <div className="p-6 rounded-lg bg-card border border-border/60">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-stone-900">Upcoming Events</h3>
+        <h3 className="font-display font-medium text-foreground">Upcoming Events</h3>
         <Link
           href="/calendar"
-          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+          className="text-sm text-primary hover:opacity-80 font-medium"
         >
           View Calendar
         </Link>
@@ -411,27 +411,27 @@ function UpcomingEventsWidget({ events }: { events: any[] }) {
 
       {events.length === 0 ? (
         <div className="py-8 text-center">
-          <Calendar className="w-12 h-12 text-stone-300 mx-auto mb-2" />
-          <p className="text-stone-500">No upcoming events</p>
+          <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
+          <p className="text-muted-foreground">No upcoming events</p>
         </div>
       ) : (
         <ul className="space-y-3">
           {events.map((event) => (
             <li
               key={event.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-stone-50"
+              className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
             >
               <div className="text-2xl">{getEventTypeEmoji(event.type)}</div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {event.title}
                 </p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   {event.horse?.barnName && `${event.horse.barnName} • `}
                   {formatRelativeDate(event.scheduledDate)}
                 </p>
               </div>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-muted-foreground">
                 {formatDate(event.scheduledDate, 'MMM d')}
               </span>
             </li>
@@ -444,12 +444,12 @@ function UpcomingEventsWidget({ events }: { events: any[] }) {
 
 function HorseRosterWidget({ horses }: { horses: any[] }) {
   return (
-    <div className="p-6 rounded-2xl bg-white border border-stone-200">
+    <div className="p-6 rounded-lg bg-card border border-border/60">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-stone-900">Horse Roster</h3>
+        <h3 className="font-display font-medium text-foreground">Horse Roster</h3>
         <Link
           href="/horses"
-          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+          className="text-sm text-primary hover:opacity-80 font-medium"
         >
           View All
         </Link>
@@ -457,11 +457,11 @@ function HorseRosterWidget({ horses }: { horses: any[] }) {
 
       {horses.length === 0 ? (
         <div className="py-8 text-center">
-          <Heart className="w-12 h-12 text-stone-300 mx-auto mb-2" />
-          <p className="text-stone-500">No horses yet</p>
+          <Heart className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
+          <p className="text-muted-foreground">No horses yet</p>
           <Link
             href="/horses/new"
-            className="inline-block mt-2 text-sm text-amber-600 hover:text-amber-700 font-medium"
+            className="inline-block mt-2 text-sm text-primary hover:opacity-80 font-medium"
           >
             Add your first horse
           </Link>
@@ -472,9 +472,9 @@ function HorseRosterWidget({ horses }: { horses: any[] }) {
             <li key={horse.id}>
               <Link
                 href={`/horses/${horse.id}`}
-                className="flex items-center gap-3 p-2 rounded-xl hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                   {horse.profilePhotoUrl ? (
                     <img
                       src={horse.profilePhotoUrl}
@@ -482,16 +482,16 @@ function HorseRosterWidget({ horses }: { horses: any[] }) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-sm font-medium text-stone-600">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {horse.barnName.charAt(0)}
                     </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-stone-900 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {horse.barnName}
                   </p>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-muted-foreground">
                     {horse.breed} • {horse.age ? `${horse.age} yo` : 'Age unknown'}
                   </p>
                 </div>
@@ -501,8 +501,8 @@ function HorseRosterWidget({ horses }: { horses: any[] }) {
                     horse.status === 'ACTIVE'
                       ? 'bg-emerald-100 text-emerald-700'
                       : horse.status === 'LAYUP'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-stone-100 text-stone-600'
+                      ? 'bg-emerald-500/10 text-emerald-700'
+                      : 'bg-muted text-muted-foreground'
                   )}
                 >
                   {horse.status.toLowerCase()}

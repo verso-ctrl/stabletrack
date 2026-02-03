@@ -24,7 +24,7 @@ export function EventsTab({ horse, canEdit = true }: EventsTabProps) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-stone-900">Event History</h3>
         {canEdit && (
-          <Link href="/calendar" className="btn-primary btn-sm">
+          <Link href={`/calendar?horseId=${horse.id}&addEvent=true`} className="btn-primary btn-sm">
             <Plus className="w-4 h-4" />
             Add Event
           </Link>

@@ -22,7 +22,7 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Headers for security and caching
   async headers() {
     return [
@@ -43,13 +43,17 @@ const nextConfig = {
           },
         ],
       },
-      // Cache API responses with stale-while-revalidate
+      // Cache authenticated API responses (private = browser-only, not CDN)
       {
         source: '/api/barns/:barnId/horses',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, s-maxage=60, stale-while-revalidate=300',
+            value: 'private, max-age=120, stale-while-revalidate=300',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
           },
         ],
       },
@@ -58,7 +62,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, s-maxage=30, stale-while-revalidate=180',
+            value: 'private, max-age=30, stale-while-revalidate=180',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
           },
         ],
       },
@@ -67,7 +75,82 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, s-maxage=120, stale-while-revalidate=600',
+            value: 'private, max-age=300, stale-while-revalidate=600',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
+          },
+        ],
+      },
+      {
+        source: '/api/barns/:barnId/tasks',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, max-age=30, stale-while-revalidate=120',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
+          },
+        ],
+      },
+      {
+        source: '/api/barns/:barnId/invoices',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, max-age=60, stale-while-revalidate=180',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
+          },
+        ],
+      },
+      {
+        source: '/api/barns/:barnId/alerts',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, max-age=30, stale-while-revalidate=120',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
+          },
+        ],
+      },
+      {
+        source: '/api/barns/:barnId/activity',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, max-age=60, stale-while-revalidate=180',
+          },
+          {
+            key: 'Vary',
+            value: 'Authorization, Cookie',
+          },
+        ],
+      },
+      // Never cache CSRF tokens or webhooks
+      {
+        source: '/api/csrf',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/api/webhooks/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
           },
         ],
       },

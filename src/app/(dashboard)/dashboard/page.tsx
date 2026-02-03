@@ -131,56 +131,56 @@ export default function DashboardPage() {
   // CLIENT VIEW DASHBOARD
   if (isClient) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-semibold text-stone-900">{greeting}</h1>
-            <p className="text-stone-500 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">{greeting}</h1>
+            <p className="text-stone-500 text-sm sm:text-base mt-0.5">
               {dateString || 'Loading...'} · {barn.name}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto">
             <span>Client Portal</span>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <div className="stat-card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-stone-500">Your Horses</p>
-                <p className="text-3xl font-semibold text-stone-900 mt-1">{clientData?.horses?.length || 0}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-stone-500">Your Horses</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{clientData?.horses?.length || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <HorseIcon className="w-5 h-5 text-amber-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <HorseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
               </div>
             </div>
           </div>
 
           <div className="stat-card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-stone-500">Upcoming Events</p>
-                <p className="text-3xl font-semibold text-stone-900 mt-1">{clientData?.stats?.upcomingEvents || 0}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-stone-500">Events</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{clientData?.stats?.upcomingEvents || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
               </div>
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card col-span-2 md:col-span-1">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-stone-500">Balance Due</p>
-                <p className="text-3xl font-semibold text-stone-900 mt-1">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-stone-500">Balance Due</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">
                   ${(clientData?.stats?.balanceDue || 0).toLocaleString()}
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-amber-500" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
               </div>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Your Horses */}
           <div className="lg:col-span-2 card">
             <div className="flex items-center justify-between p-4 border-b border-stone-100">
@@ -359,23 +359,23 @@ export default function DashboardPage() {
   const pendingTasks = tasks.filter(t => t.status !== 'COMPLETED').length;
   const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
   const urgentAlerts = alerts.filter(a => a.type === 'urgent');
-  
+
   // Check if user has permission to add horses
   const userRole = (currentBarn?.role || 'CARETAKER') as BarnRole;
   const canAddHorse = hasPermission(userRole, 'horses:write');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-stone-900">{greeting}</h1>
-          <p className="text-stone-500 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">{greeting}</h1>
+          <p className="text-stone-500 text-sm sm:text-base mt-0.5">
             {dateString || 'Loading...'} · {barn.name}
           </p>
         </div>
         {canAddHorse && (
-          <Link href="/horses/new" className="btn-primary">
+          <Link href="/horses/new" className="btn-primary w-full sm:w-auto justify-center">
             <Plus className="w-4 h-4" />
             Add Horse
           </Link>
@@ -459,68 +459,68 @@ export default function DashboardPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-stone-500">Active Horses</p>
-              <p className="text-3xl font-semibold text-stone-900 mt-1">{activeHorses}</p>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-stone-500">Active Horses</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{activeHorses}</p>
               {layupHorses > 0 && (
-                <p className="text-xs text-amber-600 mt-1">{layupHorses} on layup</p>
+                <p className="text-[10px] sm:text-xs text-amber-600 mt-0.5 sm:mt-1 truncate">{layupHorses} on layup</p>
               )}
             </div>
-            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-              <HorseIcon className="w-5 h-5 text-amber-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+              <HorseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
             </div>
           </div>
         </div>
 
-        <Link href="/calendar" className="stat-card hover:border-stone-300 transition-colors">
+        <Link href="/calendar" className="stat-card hover:border-stone-300 transition-colors active:scale-[0.98]">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-stone-500">Upcoming Events</p>
-              <p className="text-3xl font-semibold text-stone-900 mt-1">{events.length}</p>
-              <p className="text-xs text-stone-400 mt-1">This week</p>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-stone-500">Events</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{events.length}</p>
+              <p className="text-[10px] sm:text-xs text-stone-400 mt-0.5 sm:mt-1 truncate">This week</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
           </div>
         </Link>
 
-        <Link href="/daily-care" className="stat-card hover:border-stone-300 transition-colors">
+        <Link href="/daily-care" className="stat-card hover:border-stone-300 transition-colors active:scale-[0.98]">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-stone-500">Pending Tasks</p>
-              <p className="text-3xl font-semibold text-stone-900 mt-1">{pendingTasks}</p>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-stone-500">Tasks</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{pendingTasks}</p>
               {completedTasks > 0 && (
-                <p className="text-xs text-emerald-600 mt-1">{completedTasks} completed today</p>
+                <p className="text-[10px] sm:text-xs text-emerald-600 mt-0.5 sm:mt-1 truncate">{completedTasks} done</p>
               )}
             </div>
-            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-purple-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
             </div>
           </div>
         </Link>
 
         <div className="stat-card">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-stone-500">Alerts</p>
-              <p className="text-3xl font-semibold text-stone-900 mt-1">{alerts.length}</p>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-stone-500">Alerts</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{alerts.length}</p>
               {urgentAlerts.length > 0 && (
-                <p className="text-xs text-red-600 mt-1">{urgentAlerts.length} urgent</p>
+                <p className="text-[10px] sm:text-xs text-red-600 mt-0.5 sm:mt-1 truncate">{urgentAlerts.length} urgent</p>
               )}
             </div>
-            <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Tasks */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between p-4 border-b border-stone-100">

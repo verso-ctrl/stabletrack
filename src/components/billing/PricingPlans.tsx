@@ -46,21 +46,39 @@ function formatLimit(value: number): string {
 }
 
 export function PricingPlans() {
-  const { tier: currentTier, changeTier, isLoading } = useSubscription();
-  const { currentBarn } = useBarn();
+  const { tier: currentTier, isLoading } = useSubscription();
+  const { currentBarn, refreshBarn } = useBarn();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState<{ tier: SubscriptionTier; isDowngrade: boolean } | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState<SubscriptionTier | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChangePlan = async (tier: SubscriptionTier) => {
-    if (tier === currentTier) return;
+  const handleDowngrade = async (tier: SubscriptionTier) => {
+    if (!currentBarn?.id) return;
 
     try {
       setLoadingTier(tier);
-      await changeTier(tier);
+      setError(null);
+
+      // Downgrade is immediate - just update the barn tier
+      const response = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to change plan');
+      }
+
+      // Refresh barn data to get updated tier
+      await refreshBarn?.();
       setShowConfirmModal(null);
     } catch (err) {
-      console.error('Plan change failed:', err);
+      console.error('Downgrade failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to change plan');
     } finally {
       setLoadingTier(null);
     }
@@ -71,8 +89,9 @@ export function PricingPlans() {
 
     try {
       setLoadingTier(tier);
+      setError(null);
 
-      // Call the Stripe checkout API
+      // Call the Stripe checkout API for upgrades
       const response = await fetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,18 +104,31 @@ export function PricingPlans() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
       if (data.demoMode) {
-        // Demo mode: Simulate the upgrade
-        await changeTier(tier);
-        setShowUpgradeModal(null);
+        // Demo mode: Simulate the upgrade by calling the subscription endpoint
+        const upgradeResponse = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tier }),
+        });
+
+        if (upgradeResponse.ok) {
+          await refreshBarn?.();
+          setShowUpgradeModal(null);
+        }
       } else if (data.url) {
         // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
-        console.error('Checkout error:', data.error);
+        throw new Error('No checkout URL received');
       }
     } catch (err) {
       console.error('Upgrade failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upgrade');
     } finally {
       setLoadingTier(null);
     }
@@ -104,12 +136,11 @@ export function PricingPlans() {
 
   const handlePlanClick = (tier: SubscriptionTier, isDowngrade: boolean) => {
     if (tier === currentTier) return;
+    setError(null);
 
-    // Show confirmation for downgrades
     if (isDowngrade) {
       setShowConfirmModal({ tier, isDowngrade });
     } else {
-      // Show upgrade confirmation modal with Stripe checkout
       setShowUpgradeModal(tier);
     }
   };
@@ -126,6 +157,12 @@ export function PricingPlans() {
           All features included. Only pay for the horses you need.
         </p>
       </div>
+
+      {error && (
+        <div className="max-w-5xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {tiers.map((tier) => {
@@ -216,6 +253,7 @@ export function PricingPlans() {
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
                       : 'bg-stone-900 text-white hover:bg-stone-800'
                   }
+                  disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               >
                 {loadingTier === tier ? (
@@ -279,14 +317,15 @@ export function PricingPlans() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirmModal(null)}
-                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all"
+                disabled={loadingTier !== null}
+                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleChangePlan(showConfirmModal.tier)}
+                onClick={() => handleDowngrade(showConfirmModal.tier)}
                 disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-2 px-4 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loadingTier === showConfirmModal.tier ? (
                   <>
@@ -323,42 +362,12 @@ export function PricingPlans() {
             <div className="bg-stone-50 rounded-lg p-4 mb-4">
               <h4 className="font-medium text-stone-900 mb-2">What you'll get:</h4>
               <ul className="space-y-2">
-                {showUpgradeModal === 'BASIC' && (
-                  <>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Up to 15 horses</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>5GB storage</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Document uploads</span>
-                    </li>
-                  </>
-                )}
-                {showUpgradeModal === 'ADVANCED' && (
-                  <>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Unlimited horses</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Unlimited storage</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Advanced analytics & reporting</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-stone-700">
-                      <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Priority support</span>
-                    </li>
-                  </>
-                )}
+                {TIER_LIMITS[showUpgradeModal].features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-stone-700">
+                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -396,13 +405,29 @@ export function PricingPlans() {
 }
 
 export function CurrentPlanCard() {
-  const { subscription, tier, openBillingPortal, isLoading } = useSubscription();
+  const { subscription, tier, isLoading } = useSubscription();
+  const { currentBarn } = useBarn();
   const [isOpening, setIsOpening] = useState(false);
 
   const handleManageBilling = async () => {
+    if (!currentBarn?.id) return;
+
     try {
       setIsOpening(true);
-      await openBillingPortal();
+
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ barnId: currentBarn.id }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.demoMode) {
+        alert('Demo Mode: In production, this would open the Stripe billing portal.');
+      }
     } catch (err) {
       console.error('Failed to open billing portal:', err);
     } finally {
@@ -485,20 +510,11 @@ export function CurrentPlanCard() {
         </div>
       </div>
 
-      {(subscription as any)?.currentPeriodEnd && (
-        <p className="text-sm text-stone-500 mt-4">
-          {(subscription as any).cancelAtPeriodEnd
-            ? 'Access until '
-            : 'Next billing date: '}
-          {new Date((subscription as any).currentPeriodEnd).toLocaleDateString()}
-        </p>
-      )}
-
       {tier !== 'FREE' && (
         <button
           onClick={handleManageBilling}
           disabled={isOpening}
-          className="mt-4 w-full py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all flex items-center justify-center gap-2"
+          className="mt-4 w-full py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isOpening ? (
             <>

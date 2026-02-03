@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { formatValidationErrors } from './validations';
 import { captureException } from './sentry';
+import crypto from 'crypto';
 
 /**
  * Validates request body against a Zod schema
@@ -140,4 +141,112 @@ export function withErrorHandling<T extends any[], R>(
       return handleApiError(error);
     }
   };
+}
+
+// ============================================================================
+// ETag and Cached Response Helpers
+// ============================================================================
+
+/**
+ * Generate an ETag from data
+ * Uses MD5 hash of JSON stringified data for fast hashing
+ */
+export function generateETag(data: unknown): string {
+  const content = JSON.stringify(data);
+  const hash = crypto.createHash('md5').update(content).digest('hex');
+  return `"${hash}"`;
+}
+
+/**
+ * Generate a weak ETag (for use when data may be semantically equivalent)
+ */
+export function generateWeakETag(data: unknown): string {
+  const content = JSON.stringify(data);
+  const hash = crypto.createHash('md5').update(content).digest('hex');
+  return `W/"${hash}"`;
+}
+
+interface CachedResponseOptions {
+  /** Cache max-age in seconds (default: 60) */
+  maxAge?: number;
+  /** Use private caching (default: true for authenticated endpoints) */
+  isPrivate?: boolean;
+  /** Stale-while-revalidate duration in seconds */
+  staleWhileRevalidate?: number;
+  /** Use weak ETag instead of strong (default: false) */
+  weakETag?: boolean;
+}
+
+/**
+ * Create a cached JSON response with ETag support
+ * Automatically returns 304 Not Modified if client has current version
+ */
+export function createCachedResponse(
+  data: unknown,
+  request: Request,
+  options: CachedResponseOptions = {}
+): NextResponse {
+  const {
+    maxAge = 60,
+    isPrivate = true,
+    staleWhileRevalidate = 300,
+    weakETag = false,
+  } = options;
+
+  // Generate ETag for the data
+  const etag = weakETag ? generateWeakETag(data) : generateETag(data);
+
+  // Check if client has current version
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch) {
+    // Handle multiple ETags in if-none-match header
+    const clientETags = ifNoneMatch.split(',').map(tag => tag.trim());
+    if (clientETags.includes(etag) || clientETags.includes('*')) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          'ETag': etag,
+          'Cache-Control': buildCacheControl(isPrivate, maxAge, staleWhileRevalidate),
+        },
+      });
+    }
+  }
+
+  // Return full response with cache headers
+  return NextResponse.json(data, {
+    headers: {
+      'ETag': etag,
+      'Cache-Control': buildCacheControl(isPrivate, maxAge, staleWhileRevalidate),
+      'Vary': 'Authorization, Cookie',
+    },
+  });
+}
+
+/**
+ * Build Cache-Control header value
+ */
+function buildCacheControl(
+  isPrivate: boolean,
+  maxAge: number,
+  staleWhileRevalidate?: number
+): string {
+  const parts = [isPrivate ? 'private' : 'public', `max-age=${maxAge}`];
+
+  if (staleWhileRevalidate) {
+    parts.push(`stale-while-revalidate=${staleWhileRevalidate}`);
+  }
+
+  return parts.join(', ');
+}
+
+/**
+ * Create a response that should never be cached
+ */
+export function createNoCacheResponse(data: unknown): NextResponse {
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache',
+    },
+  });
 }

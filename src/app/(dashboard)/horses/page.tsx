@@ -52,22 +52,22 @@ export default function HorsesPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-stone-900">Horses</h1>
-          <p className="text-stone-500 mt-0.5 text-sm sm:text-base">{total} total in barn</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">Horses</h1>
+          <p className="text-stone-500 mt-0.5 text-sm">{total} total in barn</p>
         </div>
 
         {canWrite && (
           canAdd ? (
-            <Link href="/horses/new" className="btn-primary w-full sm:w-auto justify-center">
+            <Link href="/horses/new" className="btn-primary w-full sm:w-auto justify-center touch-target">
               <Plus className="w-4 h-4" />
               <span>Add Horse</span>
             </Link>
           ) : (
-            <Link href="/settings/billing" className="btn-primary w-full sm:w-auto justify-center text-sm">
+            <Link href="/settings/billing" className="btn-primary w-full sm:w-auto justify-center text-sm touch-target">
               Upgrade to Add More
             </Link>
           )
@@ -75,8 +75,8 @@ export default function HorsesPage() {
       </div>
 
       {/* Filters */}
-      <div className="card p-3 sm:p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="card p-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
             <input
@@ -84,7 +84,7 @@ export default function HorsesPage() {
               placeholder="Search horses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input pl-10 text-sm sm:text-base"
+              className="input pl-10 text-sm h-10"
             />
           </div>
 
@@ -92,7 +92,7 @@ export default function HorsesPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="input flex-1 sm:flex-initial text-sm sm:text-base"
+              className="input flex-1 sm:flex-initial text-sm h-10"
             >
               <option value="all">All Status</option>
               <option value="ACTIVE">Active</option>
@@ -103,14 +103,14 @@ export default function HorsesPage() {
             <div className="flex border border-stone-200 rounded-lg overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 sm:p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                className={`p-2.5 transition-colors touch-target ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50 active:bg-stone-100'}`}
                 aria-label="Grid view"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 sm:p-2.5 transition-colors ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50'}`}
+                className={`p-2.5 transition-colors touch-target ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50 active:bg-stone-100'}`}
                 aria-label="List view"
               >
                 <List className="w-4 h-4" />
@@ -153,50 +153,50 @@ export default function HorsesPage() {
 
       {/* Grid View */}
       {!isLoading && horses.length > 0 && viewMode === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {horses.map((horse) => {
             const status = statusConfig[horse.status] || statusConfig.ACTIVE;
             return (
               <Link
                 key={horse.id}
                 href={`/horses/${horse.id}`}
-                className="card overflow-hidden hover:shadow-md hover:border-stone-300 transition-all group"
+                className="card overflow-hidden hover:shadow-md hover:border-stone-300 transition-all group active:scale-[0.98] no-tap-highlight"
               >
                 {/* Photo */}
-                <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden">
+                <div className="aspect-square sm:aspect-[4/3] bg-stone-100 relative overflow-hidden">
                   {horse.profilePhotoUrl ? (
-                    <img 
-                      src={horse.profilePhotoUrl} 
-                      alt={horse.barnName} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    <img
+                      src={horse.profilePhotoUrl}
+                      alt={horse.barnName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
-                      <span className="text-5xl font-bold text-amber-300">
+                      <span className="text-3xl sm:text-5xl font-bold text-amber-300">
                         {horse.barnName?.charAt(0) || '?'}
                       </span>
                     </div>
                   )}
-                  
+
                   {/* Status Badge */}
-                  <div className={`absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.text}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                  <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${status.bg} ${status.text}`}>
+                    <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${status.dot}`} />
                     {horse.status}
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors">
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-semibold text-sm sm:text-base text-stone-900 group-hover:text-amber-600 transition-colors truncate">
                     {horse.barnName}
                   </h3>
-                  <p className="text-sm text-stone-500 mt-0.5">
+                  <p className="text-xs sm:text-sm text-stone-500 mt-0.5 truncate">
                     {horse.breed || 'Unknown breed'}
                     {horse.age && ` · ${horse.age} yrs`}
                   </p>
-                  
+
                   {horse.stallName && (
-                    <p className="text-xs text-stone-400 mt-2">
+                    <p className="text-[10px] sm:text-xs text-stone-400 mt-1.5 sm:mt-2 truncate">
                       Stall {horse.stallName}
                     </p>
                   )}
@@ -216,14 +216,14 @@ export default function HorsesPage() {
               <Link
                 key={horse.id}
                 href={`/horses/${horse.id}`}
-                className="flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors group"
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors group no-tap-highlight"
               >
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {horse.profilePhotoUrl ? (
                     <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-lg font-bold text-amber-600">
+                    <span className="text-base sm:text-lg font-bold text-amber-600">
                       {horse.barnName?.charAt(0) || '?'}
                     </span>
                   )}
@@ -232,27 +232,27 @@ export default function HorsesPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors">
+                    <h3 className="font-semibold text-sm sm:text-base text-stone-900 group-hover:text-amber-600 transition-colors truncate">
                       {horse.barnName}
                     </h3>
-                    {horse.registeredName && horse.registeredName !== horse.barnName && (
-                      <span className="text-xs text-stone-400">({horse.registeredName})</span>
-                    )}
                   </div>
-                  <p className="text-sm text-stone-500 mt-0.5">
+                  <p className="text-xs sm:text-sm text-stone-500 mt-0.5 truncate">
                     {horse.breed || 'Unknown breed'}
                     {horse.age && ` · ${horse.age} yrs`}
                     {horse.stallName && ` · Stall ${horse.stallName}`}
                   </p>
                 </div>
 
-                {/* Status */}
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.text}`}>
+                {/* Status - hidden on very small screens */}
+                <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.bg} ${status.text}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
                   {horse.status}
                 </div>
-                
-                <ChevronRight className="w-5 h-5 text-stone-300 group-hover:text-stone-400 transition-colors" />
+
+                {/* Status dot on mobile */}
+                <div className={`sm:hidden w-2 h-2 rounded-full ${status.dot}`} />
+
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-stone-300 group-hover:text-stone-400 transition-colors flex-shrink-0" />
               </Link>
             );
           })}

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { useEvents, useHorses, useLessons } from '@/hooks/useData';
@@ -86,6 +87,7 @@ const eventTypes = [
 
 export default function CalendarPage() {
   const { currentBarn } = useBarn();
+  const searchParams = useSearchParams();
   const [currentMonth, setCurrentMonth] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [view, setView] = useState<'month' | 'list'>('month');
@@ -99,7 +101,8 @@ export default function CalendarPage() {
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
   const [instructors, setInstructors] = useState<any[]>([]);
-  
+  const [preselectedHorseId, setPreselectedHorseId] = useState<string | null>(null);
+
   // Initialize date on client side only
   useEffect(() => {
     if (!currentMonth) {
@@ -147,6 +150,26 @@ export default function CalendarPage() {
   const { horses } = useHorses();
 
   const isLoading = eventsLoading || lessonsLoading;
+
+  // Handle URL params for pre-selecting horse and auto-opening modal
+  useEffect(() => {
+    const horseId = searchParams.get('horseId');
+    const addEvent = searchParams.get('addEvent');
+
+    if (horseId) {
+      setPreselectedHorseId(horseId);
+      // Pre-select the horse in the form
+      setEventForm(prev => ({
+        ...prev,
+        horseIds: [horseId],
+        scheduledDate: format(new Date(), 'yyyy-MM-dd'),
+      }));
+    }
+
+    if (addEvent === 'true') {
+      setShowAddModal(true);
+    }
+  }, [searchParams]);
 
   // Merge events and lessons into a single calendar items array
   const calendarItems = useMemo(() => {
@@ -401,6 +424,11 @@ export default function CalendarPage() {
 
       setShowAddModal(false);
       setModalStep(1); // Reset step
+      setPreselectedHorseId(null); // Clear preselected horse
+      // Clear URL params
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', '/calendar');
+      }
       refetchEvents();
 
       // Reset form
@@ -503,53 +531,57 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-stone-900">Schedule</h1>
-          <p className="text-stone-500 mt-1">Events, appointments & lessons</p>
-          <div className="flex items-center gap-2 mt-2">
-            <Link href="/lessons" className="text-xs font-medium text-blue-600 hover:text-blue-700 px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors">
-              Manage Lessons →
-            </Link>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-stone-900">Schedule</h1>
+            <p className="text-stone-500 text-sm sm:text-base mt-0.5">Events, appointments & lessons</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCalendarSettings(true)}
+              className="btn-secondary btn-sm flex items-center gap-2 touch-target"
+              title="Calendar Settings"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Sync</span>
+            </button>
+            <div className="flex rounded-xl bg-stone-100 p-1">
+              <button
+                onClick={() => setView('month')}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  view === 'month' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
+                }`}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => setView('list')}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  view === 'list' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
+                }`}
+              >
+                List
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowCalendarSettings(true)}
-            className="btn-secondary btn-sm flex items-center gap-2"
-            title="Calendar Settings"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Sync</span>
-          </button>
-          <div className="flex rounded-xl bg-stone-100 p-1">
-            <button
-              onClick={() => setView('month')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                view === 'month' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
-              }`}
-            >
-              Month
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                view === 'list' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
-              }`}
-            >
-              List
-            </button>
-          </div>
+
+        {/* Action buttons - stacked on mobile */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+          <Link href="/lessons" className="text-xs font-medium text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors text-center sm:text-left">
+            Manage Lessons →
+          </Link>
           <button
             onClick={() => openLessonModal()}
-            className="btn-secondary flex items-center gap-2"
+            className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <GraduationCap className="w-4 h-4" />
-            <span className="hidden sm:inline">Schedule Lesson</span>
+            <span>Schedule Lesson</span>
           </button>
           <button
             onClick={() => openAddModal()}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4" />
             Add Event
@@ -562,30 +594,30 @@ export default function CalendarPage() {
           <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
         </div>
       ) : view === 'month' ? (
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Calendar Grid */}
-          <div className="lg:col-span-2 card p-6">
+          <div className="lg:col-span-2 card p-3 sm:p-6">
             {/* Month Navigation */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-stone-900">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-stone-900">
                 {format(currentMonth, 'MMMM yyyy')}
               </h2>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <button
                   onClick={() => setCurrentMonth(new Date())}
-                  className="px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                  className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
                 >
                   Today
                 </button>
                 <button
                   onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="p-2 rounded-lg hover:bg-stone-100 transition-all"
+                  className="p-2 rounded-lg hover:bg-stone-100 active:bg-stone-200 transition-all touch-target"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="p-2 rounded-lg hover:bg-stone-100 transition-all"
+                  className="p-2 rounded-lg hover:bg-stone-100 active:bg-stone-200 transition-all touch-target"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -593,16 +625,17 @@ export default function CalendarPage() {
             </div>
 
             {/* Day Headers */}
-            <div className="grid grid-cols-7 mb-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="text-center text-sm font-medium text-stone-500 py-2">
-                  {day}
+            <div className="grid grid-cols-7 mb-1 sm:mb-2">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                <div key={i} className="text-center text-xs sm:text-sm font-medium text-stone-500 py-1 sm:py-2">
+                  <span className="sm:hidden">{day}</span>
+                  <span className="hidden sm:inline">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i]}</span>
                 </div>
               ))}
             </div>
 
             {/* Calendar Days */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {calendarDays.map((day) => {
                 const dayEvents = getEventsForDate(day);
                 const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -615,28 +648,27 @@ export default function CalendarPage() {
                     onClick={() => setSelectedDate(day)}
                     onDoubleClick={() => openAddModal(day)}
                     className={`
-                      aspect-square p-1 rounded-xl text-left transition-all relative
+                      aspect-square p-0.5 sm:p-1 rounded-lg sm:rounded-xl text-left transition-all relative no-tap-highlight
                       ${!isCurrentMonth ? 'text-stone-300' : 'text-stone-900'}
-                      ${isSelected ? 'bg-stone-900 text-white' : 'hover:bg-stone-100'}
+                      ${isSelected ? 'bg-stone-900 text-white' : 'hover:bg-stone-100 active:bg-stone-200'}
                       ${dayIsToday && !isSelected ? 'ring-2 ring-amber-500 ring-inset' : ''}
                     `}
-                    title="Double-click to add event"
                   >
-                    <span className={`text-sm font-medium ${dayIsToday && !isSelected ? 'text-amber-600' : ''}`}>
+                    <span className={`text-xs sm:text-sm font-medium ${dayIsToday && !isSelected ? 'text-amber-600' : ''}`}>
                       {format(day, 'd')}
                     </span>
                     {dayEvents.length > 0 && (
-                      <div className="absolute bottom-1 left-1 right-1 flex gap-0.5 justify-center">
+                      <div className="absolute bottom-1 sm:bottom-1.5 left-0.5 sm:left-1 right-0.5 sm:right-1 flex gap-0.5 justify-center">
                         {dayEvents.slice(0, 3).map((event: any, i: number) => (
                           <div
                             key={i}
-                            className={`w-1.5 h-1.5 rounded-full ${
+                            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                               isSelected ? 'bg-white' : 'bg-amber-500'
                             }`}
                           />
                         ))}
                         {dayEvents.length > 3 && (
-                          <span className={`text-[10px] ${isSelected ? 'text-white' : 'text-stone-500'}`}>
+                          <span className={`text-[8px] sm:text-[10px] ${isSelected ? 'text-white' : 'text-stone-500'}`}>
                             +{dayEvents.length - 3}
                           </span>
                         )}
@@ -780,8 +812,8 @@ export default function CalendarPage() {
 
       {/* Add Event Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
             <div className="p-6 border-b border-stone-100">
               <div className="flex items-center justify-between">
                 <div>
@@ -796,6 +828,10 @@ export default function CalendarPage() {
                   onClick={() => {
                     setShowAddModal(false);
                     setModalStep(1);
+                    setPreselectedHorseId(null);
+                    if (typeof window !== 'undefined') {
+                      window.history.replaceState({}, '', '/calendar');
+                    }
                   }}
                   className="p-1 rounded hover:bg-stone-100"
                 >
@@ -805,6 +841,23 @@ export default function CalendarPage() {
             </div>
 
             <div className="p-6 space-y-4">
+              {/* Show preselected horse banner */}
+              {preselectedHorseId && horses.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-amber-700 font-semibold">
+                      {horses.find((h: any) => h.id === preselectedHorseId)?.barnName?.charAt(0) || '?'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-amber-900">
+                      Adding event for {horses.find((h: any) => h.id === preselectedHorseId)?.barnName || 'Selected Horse'}
+                    </p>
+                    <p className="text-xs text-amber-700">Horse will be automatically selected</p>
+                  </div>
+                </div>
+              )}
+
               {modalStep === 1 ? (
                 // Step 1: Event Details
                 <>
@@ -1017,6 +1070,10 @@ export default function CalendarPage() {
                     onClick={() => {
                       setShowAddModal(false);
                       setModalStep(1);
+                      setPreselectedHorseId(null);
+                      if (typeof window !== 'undefined') {
+                        window.history.replaceState({}, '', '/calendar');
+                      }
                     }}
                     className="btn-secondary flex-1"
                   >
@@ -1065,8 +1122,8 @@ export default function CalendarPage() {
 
       {/* Lesson Modal */}
       {showLessonModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
             <div className="p-6 border-b border-stone-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -1274,8 +1331,8 @@ export default function CalendarPage() {
 
       {/* Calendar Settings Modal */}
       {showCalendarSettings && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl sm:m-4 max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
             <div className="p-6 border-b border-stone-100 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Calendar Sync</h3>
               <button

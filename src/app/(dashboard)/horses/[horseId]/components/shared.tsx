@@ -70,14 +70,14 @@ export function InfoItem({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-xs text-stone-500 uppercase tracking-wide mb-1 truncate">{label}</p>
-      <div className="flex items-center gap-2 min-w-0">
-        {Icon && <Icon className="w-4 h-4 text-stone-400 flex-shrink-0" />}
-        <p className="text-sm font-medium text-stone-900 truncate">
+      <p className="text-[10px] sm:text-xs text-stone-500 uppercase tracking-wide mb-0.5 sm:mb-1 truncate">{label}</p>
+      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400 flex-shrink-0" />}
+        <p className="text-xs sm:text-sm font-medium text-stone-900 truncate">
           {value || '—'}
         </p>
       </div>
-      {subValue && <p className="text-xs text-stone-500 mt-0.5 truncate">{subValue}</p>}
+      {subValue && <p className="text-[10px] sm:text-xs text-stone-500 mt-0.5 truncate">{subValue}</p>}
     </div>
   );
 }

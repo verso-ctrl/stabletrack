@@ -19,6 +19,7 @@ interface BarnContextType {
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  refreshBarn: () => Promise<void>;  // Alias for refetch, used after tier changes
   // Helper properties
   isClient: boolean;  // True if current barn access is as client
   isMember: boolean;  // True if current barn access is as member
@@ -108,6 +109,7 @@ export function BarnProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         error,
         refetch: fetchBarns,
+        refreshBarn: fetchBarns,
         isClient,
         isMember,
         memberBarns,

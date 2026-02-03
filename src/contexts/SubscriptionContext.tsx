@@ -88,29 +88,28 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 interface SubscriptionProviderProps {
   children: React.ReactNode
   barnId?: string
+  barnTier?: SubscriptionTier  // Tier from current barn
   defaultTier?: SubscriptionTier
 }
-
-const STORAGE_KEY = 'stabletrack_subscription_tier'
 
 export function SubscriptionProvider({
   children,
   barnId,
+  barnTier,
   defaultTier = 'FREE'  // Start with FREE tier until payment is made
 }: SubscriptionProviderProps) {
-  // Load tier from localStorage or use default
-  const [tier, setTier] = useState<SubscriptionTier>(defaultTier)
+  // Use barn tier if provided, otherwise use default
+  const [tier, setTier] = useState<SubscriptionTier>(barnTier || defaultTier)
   const [loading, setLoading] = useState(false)
   const [error] = useState<string | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Load saved tier from localStorage on mount
+  // Update tier when barn tier changes
   useEffect(() => {
-    const savedTier = localStorage.getItem(STORAGE_KEY) as SubscriptionTier | null
-    if (savedTier && ['FREE', 'BASIC', 'ADVANCED'].includes(savedTier)) {
-      setTier(savedTier)
+    if (barnTier && ['FREE', 'BASIC', 'ADVANCED'].includes(barnTier)) {
+      setTier(barnTier)
     }
-  }, [])
+  }, [barnTier])
 
   // Demo usage - minimal usage to show features
   const [usage] = useState<BarnUsage>({
@@ -186,15 +185,11 @@ export function SubscriptionProvider({
     }
   }, [nextTier, upgradeMessage])
 
-  // Change tier (works in demo mode by saving to localStorage)
+  // Change tier - updates local state (actual change happens via API)
   const changeTier = useCallback(async (newTier: SubscriptionTier) => {
     setLoading(true)
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Save to localStorage
-      localStorage.setItem(STORAGE_KEY, newTier)
+      // Update local state immediately for responsiveness
       setTier(newTier)
 
       const tierNames: Record<SubscriptionTier, string> = {

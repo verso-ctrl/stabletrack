@@ -185,6 +185,11 @@ export interface Barn {
   createdAt: Date;
   memberCount?: number;
   horseCount?: number;
+  // Subscription fields
+  tier?: SubscriptionTier;
+  subscriptionStatus?: SubscriptionStatus;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
 }
 
 export interface BarnMember {

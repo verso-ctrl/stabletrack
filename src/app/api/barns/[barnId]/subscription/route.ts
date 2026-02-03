@@ -1,114 +1,154 @@
 // src/app/api/barns/[barnId]/subscription/route.ts
-// API route to get subscription info for a barn (Demo mode)
+// Get and update barn subscription/tier
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth'
-import { 
-  getTierLimits, 
-  getTierFeatures,
-  getTierPricing,
-  formatBytes,
-  normalizeTier,
-  type SubscriptionTier
-} from '@/lib/tiers'
+import { getCurrentUser, checkBarnPermission } from '@/lib/auth'
+import { TIER_LIMITS, type SubscriptionTier } from '@/types'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ barnId: string }> }
-) {
+interface RouteParams {
+  params: Promise<{ barnId: string }>
+}
+
+// GET /api/barns/[barnId]/subscription - Get barn subscription info
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
+    const { barnId } = await params
+    const hasAccess = await checkBarnPermission(user.id, barnId, 'read')
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+
+    const barn = await prisma.barn.findUnique({
+      where: { id: barnId },
+      select: {
+        tier: true,
+        subscriptionStatus: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        _count: {
+          select: { horses: true },
+        },
+      },
+    })
+
+    if (!barn) {
+      return NextResponse.json({ error: 'Barn not found' }, { status: 404 })
+    }
+
+    const tier = barn.tier as SubscriptionTier
+    const limits = TIER_LIMITS[tier] || TIER_LIMITS.FREE
+
+    return NextResponse.json({
+      tier,
+      status: barn.subscriptionStatus,
+      hasStripeSubscription: !!barn.stripeSubscriptionId,
+      limits,
+      usage: {
+        horses: barn._count.horses,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching subscription:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch subscription' },
+      { status: 500 }
+    )
+  }
+}
+
+// PATCH /api/barns/[barnId]/subscription - Update barn tier (for downgrades)
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { barnId } = await params
 
-    // Verify user has access to this barn
-    const membership = await prisma.barnMember.findFirst({
+    // Only owners and managers can change subscription
+    const member = await prisma.barnMember.findFirst({
       where: {
-        barnId,
         userId: user.id,
-      },
-      include: {
-        barn: {
-          select: {
-            tier: true,
-            subscriptionStatus: true,
-          },
-        },
+        barnId,
+        role: { in: ['OWNER', 'MANAGER'] },
       },
     })
 
-    if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    if (!member) {
+      return NextResponse.json(
+        { error: 'Only owners and managers can change the subscription' },
+        { status: 403 }
+      )
     }
 
-    // Get tier from barn
-    const tier = normalizeTier(membership.barn.tier)
-    const limits = getTierLimits(tier)
-    const features = getTierFeatures(tier)
-    const pricing = getTierPricing(tier)
+    const body = await request.json()
+    const { tier } = body
 
-    // Get current usage
-    const [horseCount, memberCount] = await Promise.all([
-      prisma.horse.count({ where: { barnId } }),
-      prisma.barnMember.count({ where: { barnId } }),
-    ])
-
-    // Calculate storage usage
-    const [photoStats, documentStats] = await Promise.all([
-      prisma.horsePhoto.aggregate({
-        where: { horse: { barnId } },
-        _sum: { fileSize: true },
-      }),
-      prisma.document.aggregate({
-        where: { horse: { barnId } },
-        _sum: { fileSize: true },
-      }),
-    ])
-    
-    const storageUsed = (photoStats._sum.fileSize || 0) + (documentStats._sum.fileSize || 0)
-
-    const usage = {
-      horses: horseCount,
-      teamMembers: memberCount,
-      storageBytes: storageUsed,
+    if (!tier || !['FREE', 'BASIC', 'ADVANCED'].includes(tier)) {
+      return NextResponse.json(
+        { error: 'Invalid tier' },
+        { status: 400 }
+      )
     }
+
+    // Get current barn data to check horse count
+    const barn = await prisma.barn.findUnique({
+      where: { id: barnId },
+      select: {
+        tier: true,
+        _count: { select: { horses: true } },
+      },
+    })
+
+    if (!barn) {
+      return NextResponse.json({ error: 'Barn not found' }, { status: 404 })
+    }
+
+    const newLimits = TIER_LIMITS[tier as SubscriptionTier]
+    const horseCount = barn._count.horses
+
+    // Check if downgrade is allowed based on horse count
+    if (newLimits.maxHorses !== -1 && horseCount > newLimits.maxHorses) {
+      return NextResponse.json(
+        {
+          error: `Cannot downgrade: You have ${horseCount} horses but ${tier} plan only allows ${newLimits.maxHorses}. Please archive some horses first.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // Update the barn tier
+    const updatedBarn = await prisma.barn.update({
+      where: { id: barnId },
+      data: {
+        tier,
+        // If downgrading to FREE, clear Stripe subscription
+        ...(tier === 'FREE' && {
+          stripeSubscriptionId: null,
+        }),
+      },
+      select: {
+        tier: true,
+        subscriptionStatus: true,
+      },
+    })
 
     return NextResponse.json({
-      tier,
-      displayName: pricing.displayName,
-      status: membership.barn.subscriptionStatus || 'ACTIVE',
-      features,
-      limits: {
-        maxHorses: limits.maxHorses,
-        maxTeamMembers: limits.maxTeamMembers,
-        maxStorageBytes: limits.maxStorageBytes,
-        maxPhotosPerHorse: limits.maxPhotosPerHorse,
-      },
-      usage,
-      remaining: {
-        horses: limits.maxHorses === -1 ? Infinity : Math.max(0, limits.maxHorses - horseCount),
-        teamMembers: limits.maxTeamMembers === -1 ? Infinity : Math.max(0, limits.maxTeamMembers - memberCount),
-        storageBytes: limits.maxStorageBytes - storageUsed,
-      },
-      percentage: {
-        horses: limits.maxHorses === -1 ? 0 : Math.round((horseCount / limits.maxHorses) * 100),
-        teamMembers: limits.maxTeamMembers === -1 ? 0 : Math.round((memberCount / limits.maxTeamMembers) * 100),
-        storage: Math.round((storageUsed / limits.maxStorageBytes) * 100),
-      },
-      formatted: {
-        storageUsed: formatBytes(storageUsed),
-        storageLimit: formatBytes(limits.maxStorageBytes),
-      },
+      success: true,
+      tier: updatedBarn.tier,
+      status: updatedBarn.subscriptionStatus,
     })
   } catch (error) {
-    console.error('Subscription info error:', error)
+    console.error('Error updating subscription:', error)
     return NextResponse.json(
-      { error: 'Failed to get subscription info' },
+      { error: 'Failed to update subscription' },
       { status: 500 }
     )
   }

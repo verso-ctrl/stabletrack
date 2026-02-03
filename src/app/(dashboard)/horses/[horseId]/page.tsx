@@ -378,9 +378,9 @@ export default function HorseDetailPage() {
       </div>
 
       {/* Profile Card */}
-      <div className="card p-4 sm:p-6">
-        <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
-          {/* Photo */}
+      <div className="card p-3 sm:p-6">
+        <div className="flex flex-row gap-3 sm:gap-6">
+          {/* Photo - smaller on mobile */}
           <input
             ref={profilePhotoInputRef}
             type="file"
@@ -389,21 +389,18 @@ export default function HorseDetailPage() {
             className="hidden"
           />
           <div
-            className="relative w-full md:w-48 aspect-square rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 group cursor-pointer"
+            className="relative w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 group cursor-pointer"
             onClick={() => {
               if (horse.profilePhotoUrl) {
-                // If there's a photo, go to photos tab
                 setActiveTab('photos');
               } else {
-                // If no photo, trigger file upload
                 profilePhotoInputRef.current?.click();
               }
             }}
           >
             {isUploadingPhoto ? (
               <div className="w-full h-full flex flex-col items-center justify-center">
-                <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-2" />
-                <span className="text-sm text-stone-500">Uploading...</span>
+                <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-emerald-500 animate-spin" />
               </div>
             ) : horse.profilePhotoUrl ? (
               <>
@@ -414,21 +411,19 @@ export default function HorseDetailPage() {
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <div className="text-white text-center">
-                    <Camera className="w-8 h-8 mx-auto mb-1" />
-                    <span className="text-sm">Manage Photos</span>
+                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 mx-auto" />
                   </div>
                 </div>
               </>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center hover:bg-stone-50 transition-colors">
-                <Camera className="w-12 h-12 text-stone-300 mb-2" />
-                <span className="text-sm text-stone-400">Add Photo</span>
+                <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-stone-300" />
               </div>
             )}
           </div>
 
-          {/* Info Grid */}
-          <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          {/* Info Grid - fewer columns on mobile */}
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 content-start">
             <InfoItem label="Breed" value={horse.breed} />
             <InfoItem label="Color" value={horse.color} />
             <InfoItem label="Sex" value={horse.sex} />
@@ -474,22 +469,43 @@ export default function HorseDetailPage() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-stone-200 -mx-4 sm:mx-0">
-        <nav className="flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
+      {/* Tabs - Grid on mobile, horizontal scroll on larger screens */}
+      <div className="border-b border-stone-200 -mx-3 sm:-mx-4 sm:mx-0">
+        {/* Mobile: Grid layout */}
+        <nav className="grid grid-cols-4 gap-1 px-2 pb-2 sm:hidden">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`
-                flex items-center gap-1.5 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
+                flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all no-tap-highlight
                 ${activeTab === id
-                  ? 'border-stone-900 text-stone-900'
-                  : 'border-transparent text-stone-500 hover:text-stone-700 active:bg-stone-50'
+                  ? 'bg-stone-900 text-white'
+                  : 'bg-stone-100 text-stone-600 active:bg-stone-200'
                 }
               `}
             >
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <Icon className="w-4 h-4" />
+              <span className="text-[10px] font-medium leading-tight text-center">{label.split(' ')[0]}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Desktop: Horizontal tabs */}
+        <nav className="hidden sm:flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`
+                flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
+                ${activeTab === id
+                  ? 'border-stone-900 text-stone-900'
+                  : 'border-transparent text-stone-500 hover:text-stone-700'
+                }
+              `}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
               <span>{label}</span>
             </button>
           ))}

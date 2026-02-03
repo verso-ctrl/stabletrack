@@ -1,6 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCurrentBarn } from '@/contexts/BarnContext';
+import { queryKeys, staleTimes } from '@/lib/queryKeys';
 import type { Horse, Event, Task, ActivityLog, Alert } from '@/types';
+
+// ============================================================================
+// Shared fetch helper
+// ============================================================================
+
+async function fetchApi<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || 'Request failed');
+  }
+
+  return result;
+}
 
 // ============================================================================
 // useHorses - Fetch horses for current barn
@@ -11,6 +27,12 @@ interface UseHorsesOptions {
   search?: string;
   page?: number;
   pageSize?: number;
+}
+
+interface HorsesResponse {
+  data: Horse[];
+  total: number;
+  totalPages: number;
 }
 
 interface UseHorsesResult {
@@ -24,49 +46,42 @@ interface UseHorsesResult {
 
 export function useHorses(options: UseHorsesOptions = {}): UseHorsesResult {
   const { barn } = useCurrentBarn();
-  const [horses, setHorses] = useState<Horse[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchHorses = useCallback(async () => {
-    if (!barn) return;
+  const filters = {
+    status: options.status,
+    search: options.search,
+    page: options.page,
+    pageSize: options.pageSize,
+  };
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.horses.list(barn?.id ?? '', filters),
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (options.status) params.set('status', options.status);
       if (options.search) params.set('search', options.search);
       if (options.page) params.set('page', options.page.toString());
       if (options.pageSize) params.set('pageSize', options.pageSize.toString());
 
-      const response = await fetch(
-        `/api/barns/${barn.id}/horses?${params.toString()}`
-      );
-      const result = await response.json();
+      return fetchApi<HorsesResponse>(`/api/barns/${barn!.id}/horses?${params.toString()}`);
+    },
+    enabled: !!barn,
+    staleTime: staleTimes.horses,
+  });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch horses');
-      }
+  const refetch = async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.horses.all(barn?.id ?? '') });
+  };
 
-      setHorses(result.data);
-      setTotal(result.total);
-      setTotalPages(result.totalPages);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [barn, options.status, options.search, options.page, options.pageSize]);
-
-  useEffect(() => {
-    fetchHorses();
-  }, [fetchHorses]);
-
-  return { horses, total, totalPages, isLoading, error, refetch: fetchHorses };
+  return {
+    horses: data?.data ?? [],
+    total: data?.total ?? 0,
+    totalPages: data?.totalPages ?? 0,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refetch,
+  };
 }
 
 // ============================================================================
@@ -82,41 +97,31 @@ interface UseHorseResult {
 
 export function useHorse(horseId: string | null): UseHorseResult {
   const { barn } = useCurrentBarn();
-  const [horse, setHorse] = useState<Horse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchHorse = useCallback(async () => {
-    if (!barn || !horseId) {
-      setHorse(null);
-      setIsLoading(false);
-      return;
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.horses.detail(barn?.id ?? '', horseId ?? ''),
+    queryFn: async () => {
+      return fetchApi<{ data: Horse }>(`/api/barns/${barn!.id}/horses/${horseId}`);
+    },
+    enabled: !!barn && !!horseId,
+    staleTime: staleTimes.horses,
+  });
+
+  const refetch = async () => {
+    if (barn && horseId) {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.horses.detail(barn.id, horseId),
+      });
     }
+  };
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch(`/api/barns/${barn.id}/horses/${horseId}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch horse');
-      }
-
-      setHorse(result.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [barn, horseId]);
-
-  useEffect(() => {
-    fetchHorse();
-  }, [fetchHorse]);
-
-  return { horse, isLoading, error, refetch: fetchHorse };
+  return {
+    horse: data?.data ?? null,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refetch,
+  };
 }
 
 // ============================================================================
@@ -144,20 +149,19 @@ interface UseEventsResult {
 export function useEvents(options: UseEventsOptions = {}): UseEventsResult {
   const { barn } = useCurrentBarn();
   const barnId = options.barnId || barn?.id;
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchEvents = useCallback(async () => {
-    if (!barnId || options.enabled === false) {
-      setIsLoading(false);
-      return;
-    }
+  const filters = {
+    horseId: options.horseId,
+    status: options.status,
+    type: options.type,
+    startDate: options.startDate?.toISOString(),
+    endDate: options.endDate?.toISOString(),
+  };
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.events.list(barnId ?? '', filters),
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (options.horseId) params.set('horseId', options.horseId);
       if (options.status) params.set('status', options.status);
@@ -165,33 +169,24 @@ export function useEvents(options: UseEventsOptions = {}): UseEventsResult {
       if (options.startDate) params.set('startDate', options.startDate.toISOString());
       if (options.endDate) params.set('endDate', options.endDate.toISOString());
 
-      const response = await fetch(
-        `/api/barns/${barnId}/events?${params.toString()}`
-      );
-      const result = await response.json();
+      return fetchApi<{ data: Event[] }>(`/api/barns/${barnId}/events?${params.toString()}`);
+    },
+    enabled: !!barnId && options.enabled !== false,
+    staleTime: staleTimes.events,
+  });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch events');
-      }
-
-      setEvents(result.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
+  const refetch = async () => {
+    if (barnId) {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barnId) });
     }
-  }, [barnId, options.horseId, options.status, options.type, options.startDate, options.endDate, options.enabled]);
+  };
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
-
-  return { 
-    data: events.length > 0 ? { data: events } : null,
-    events, 
-    isLoading, 
-    error, 
-    refetch: fetchEvents 
+  return {
+    data: data ?? null,
+    events: data?.data ?? [],
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refetch,
   };
 }
 
@@ -253,53 +248,42 @@ interface UseLessonsResult {
 export function useLessons(options: UseLessonsOptions = {}): UseLessonsResult {
   const { barn } = useCurrentBarn();
   const barnId = options.barnId || barn?.id;
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchLessons = useCallback(async () => {
-    if (!barnId || options.enabled === false) {
-      setIsLoading(false);
-      return;
-    }
+  const filters = {
+    clientId: options.clientId,
+    instructorId: options.instructorId,
+    status: options.status,
+    unbilled: options.unbilled,
+  };
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.lessons.list(barnId ?? '', filters),
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (options.clientId) params.set('clientId', options.clientId);
       if (options.instructorId) params.set('instructorId', options.instructorId);
       if (options.status) params.set('status', options.status);
       if (options.unbilled) params.set('unbilled', 'true');
 
-      const response = await fetch(
-        `/api/barns/${barnId}/lessons?${params.toString()}`
-      );
-      const result = await response.json();
+      return fetchApi<{ data: Lesson[] }>(`/api/barns/${barnId}/lessons?${params.toString()}`);
+    },
+    enabled: !!barnId && options.enabled !== false,
+    staleTime: staleTimes.lessons,
+  });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch lessons');
-      }
-
-      setLessons(result.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
+  const refetch = async () => {
+    if (barnId) {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.lessons.all(barnId) });
     }
-  }, [barnId, options.clientId, options.instructorId, options.status, options.unbilled, options.enabled]);
-
-  useEffect(() => {
-    fetchLessons();
-  }, [fetchLessons]);
+  };
 
   return {
-    data: lessons.length > 0 ? { data: lessons } : null,
-    lessons,
+    data: data ?? null,
+    lessons: data?.data ?? [],
     isLoading,
-    error,
-    refetch: fetchLessons
+    error: error ? (error as Error).message : null,
+    refetch,
   };
 }
 
@@ -322,82 +306,62 @@ interface UseTasksResult {
 
 export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
   const { barn } = useCurrentBarn();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchTasks = useCallback(async () => {
-    if (!barn) return;
+  const filters = {
+    status: options.status,
+    assigneeId: options.assigneeId,
+    dueDate: options.dueDate?.toISOString(),
+  };
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.tasks.list(barn?.id ?? '', filters),
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (options.status) params.set('status', options.status);
       if (options.assigneeId) params.set('assigneeId', options.assigneeId);
       if (options.dueDate) params.set('dueDate', options.dueDate.toISOString());
 
-      const response = await fetch(
-        `/api/barns/${barn.id}/tasks?${params.toString()}`
-      );
-      const result = await response.json();
+      return fetchApi<{ data: Task[] }>(`/api/barns/${barn!.id}/tasks?${params.toString()}`);
+    },
+    enabled: !!barn,
+    staleTime: staleTimes.tasks,
+  });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch tasks');
-      }
-
-      setTasks(result.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
+  const refetch = async () => {
+    if (barn) {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
     }
-  }, [barn, options.status, options.assigneeId, options.dueDate]);
+  };
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
-
-  return { tasks, isLoading, error, refetch: fetchTasks };
+  return {
+    tasks: data?.data ?? [],
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refetch,
+  };
 }
 
 // ============================================================================
-// useAlerts - Generate alerts for current barn
+// useAlerts - Fetch alerts for current barn
 // ============================================================================
 
 export function useAlerts(): { alerts: Alert[]; isLoading: boolean } {
   const { barn } = useCurrentBarn();
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!barn) {
-      setAlerts([]);
-      setIsLoading(false);
-      return;
-    }
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.alerts.list(barn?.id ?? ''),
+    queryFn: async () => {
+      return fetchApi<{ data: Alert[] }>(`/api/barns/${barn!.id}/alerts`);
+    },
+    enabled: !!barn,
+    staleTime: staleTimes.alerts,
+  });
 
-    // Fetch alerts from the API
-    const fetchAlerts = async () => {
-      try {
-        const response = await fetch(`/api/barns/${barn.id}/alerts`);
-        const result = await response.json();
-
-        if (response.ok) {
-          setAlerts(result.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch alerts:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAlerts();
-  }, [barn]);
-
-  return { alerts, isLoading };
+  return {
+    alerts: data?.data ?? [],
+    isLoading,
+  };
 }
 
 // ============================================================================
@@ -410,41 +374,19 @@ export function useActivityLog(limit: number = 20): {
   error: string | null;
 } {
   const { barn } = useCurrentBarn();
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!barn) {
-      setActivities([]);
-      setIsLoading(false);
-      return;
-    }
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.activity.list(barn?.id ?? '', limit),
+    queryFn: async () => {
+      return fetchApi<{ data: ActivityLog[] }>(`/api/barns/${barn!.id}/activity?limit=${limit}`);
+    },
+    enabled: !!barn,
+    staleTime: staleTimes.activity,
+  });
 
-    const fetchActivities = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await fetch(
-          `/api/barns/${barn.id}/activity?limit=${limit}`
-        );
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || 'Failed to fetch activity');
-        }
-
-        setActivities(result.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchActivities();
-  }, [barn, limit]);
-
-  return { activities, isLoading, error };
+  return {
+    activities: data?.data ?? [],
+    isLoading,
+    error: error ? (error as Error).message : null,
+  };
 }

@@ -1,11 +1,20 @@
 import { prisma } from './prisma';
 import type { BarnRole } from '@/types';
+import {
+  getCachedPermission,
+  setCachedPermission,
+  getCachedMembership,
+  setCachedMembership,
+} from './server-cache';
 
 // Check if Clerk is configured (use secret key for server-side)
-const isClerkConfigured = 
+const isClerkConfigured =
   process.env.CLERK_SECRET_KEY &&
   !process.env.CLERK_SECRET_KEY.includes('your_key') &&
   !process.env.CLERK_SECRET_KEY.includes('_here');
+
+// Check if demo mode is explicitly disabled (for production)
+const isDemoModeDisabled = process.env.DISABLE_DEMO_MODE === 'true';
 
 // Demo user ID for when Clerk is not configured
 const DEMO_USER_ID = 'demo-user-001';
@@ -23,15 +32,19 @@ export async function getCurrentUser() {
     const { auth, currentUser } = await import('@clerk/nextjs/server');
     const authResult = await auth();
     userId = authResult.userId;
-    
+
     if (!userId) {
       return null;
     }
-    
+
     clerkUser = await currentUser();
-  } else {
-    // Demo mode
+  } else if (!isDemoModeDisabled) {
+    // Demo mode - only if not explicitly disabled
     userId = DEMO_USER_ID;
+  } else {
+    // Demo mode is disabled and Clerk is not configured - no access
+    console.warn('Auth: Demo mode is disabled and Clerk is not configured. No user access.');
+    return null;
   }
   
   // Get or create user in our database
@@ -130,8 +143,15 @@ export async function getCurrentUser() {
 
 /**
  * Get user's barn membership and role
+ * Results are cached for 5 minutes
  */
 export async function getUserBarnMembership(userId: string, barnId: string) {
+  // Check cache first
+  const cached = getCachedMembership(userId, barnId);
+  if (cached !== null) {
+    return cached as Awaited<ReturnType<typeof prisma.barnMember.findUnique>>;
+  }
+
   const membership = await prisma.barnMember.findUnique({
     where: {
       userId_barnId: {
@@ -150,47 +170,63 @@ export async function getUserBarnMembership(userId: string, barnId: string) {
       },
     },
   });
-  
+
+  // Cache the result (including null for non-members)
+  setCachedMembership(userId, barnId, membership);
+
   return membership;
 }
 
 /**
  * Check if user has permission for an action in a barn
+ * Results are cached for 5 minutes
  */
 export async function checkBarnPermission(
   userId: string,
   barnId: string,
   permission: string
 ): Promise<boolean> {
+  // Check cache first
+  const cachedResult = getCachedPermission(userId, barnId, permission);
+  if (cachedResult !== null) {
+    return cachedResult;
+  }
+
+  let hasPermission = false;
+
   // First check if user is a barn member
   const membership = await getUserBarnMembership(userId, barnId);
-  
+
   if (membership) {
     // Must be an ACTIVE member to have any permissions
     if ((membership as any).status !== 'ACTIVE') {
+      setCachedPermission(userId, barnId, permission, false);
       return false;
     }
-    
+
     const rolePermissions = getRolePermissions(membership.role as BarnRole);
-    
+
     // Check for wildcard (owner has all permissions)
     if (rolePermissions.includes('*')) {
-      return true;
+      hasPermission = true;
+    } else {
+      hasPermission = rolePermissions.includes(permission);
     }
-    
-    return rolePermissions.includes(permission);
+  } else {
+    // Check if user is a client with access to this barn
+    const clientAccess = await getClientAccess(userId, barnId);
+    if (clientAccess) {
+      const clientPermissions = getRolePermissions('CLIENT');
+      // Check if permission matches client permissions (with :own suffix)
+      const basePermission = permission.split(':').slice(0, 2).join(':');
+      hasPermission = clientPermissions.some(p => p.startsWith(basePermission));
+    }
   }
-  
-  // Check if user is a client with access to this barn
-  const clientAccess = await getClientAccess(userId, barnId);
-  if (clientAccess) {
-    const clientPermissions = getRolePermissions('CLIENT');
-    // Check if permission matches client permissions (with :own suffix)
-    const basePermission = permission.split(':').slice(0, 2).join(':');
-    return clientPermissions.some(p => p.startsWith(basePermission));
-  }
-  
-  return false;
+
+  // Cache the result
+  setCachedPermission(userId, barnId, permission, hasPermission);
+
+  return hasPermission;
 }
 
 /**
@@ -458,5 +494,18 @@ export async function getAuthUserId(): Promise<string | null> {
     const { userId } = await auth();
     return userId;
   }
-  return DEMO_USER_ID;
+
+  // Return demo user only if demo mode is not disabled
+  if (!isDemoModeDisabled) {
+    return DEMO_USER_ID;
+  }
+
+  return null;
+}
+
+/**
+ * Check if demo mode is currently active
+ */
+export function isDemoMode(): boolean {
+  return !isClerkConfigured && !isDemoModeDisabled;
 }

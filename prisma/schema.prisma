@@ -75,8 +75,10 @@ model Barn {
   logoUrl     String?
 
   // Subscription (per-barn, not per-user)
-  tier        String   @default("FREE") // FREE, BASIC, ADVANCED
-  subscriptionStatus String @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
+  tier                 String   @default("FREE") // FREE, BASIC, ADVANCED
+  subscriptionStatus   String   @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
+  stripeCustomerId     String?  // Stripe customer ID
+  stripeSubscriptionId String?  // Stripe subscription ID
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -137,12 +139,12 @@ model Stall {
   id        String   @id @default(cuid())
   barnId    String
   name      String
-  section   String?
-  
+  section   String   @default("Main Barn")
+
   barn      Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
   horse     Horse?   @relation("CurrentStall")
 
-  @@unique([barnId, name])
+  @@unique([barnId, section, name])
   @@index([barnId])
 }
 
@@ -483,6 +485,7 @@ model Event {
 
   @@index([barnId])
   @@index([barnId, scheduledDate(sort: Desc)])
+  @@index([barnId, status, scheduledDate])
   @@index([scheduledDate])
   @@index([status])
   @@index([type])
@@ -546,6 +549,8 @@ model Task {
   @@index([barnId])
   @@index([barnId, status])
   @@index([barnId, dueDate(sort: Asc)])
+  @@index([barnId, status, dueDate])
+  @@index([barnId, assigneeId, status])
   @@index([assigneeId])
   @@index([priority])
 }
@@ -774,6 +779,7 @@ model Invoice {
   @@unique([barnId, invoiceNumber])
   @@index([barnId])
   @@index([barnId, status])
+  @@index([barnId, status, createdAt(sort: Desc)])
   @@index([clientId])
   @@index([status])
   @@index([dueDate])

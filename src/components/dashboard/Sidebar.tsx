@@ -18,12 +18,13 @@ import {
   Loader2,
   Activity,
   User,
+  Trees,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
 const ClerkUserButton = dynamic(
   () => import('@clerk/nextjs').then((mod) => mod.UserButton).catch(() => () => null),
-  { ssr: false, loading: () => <div className="w-8 h-8 rounded-full bg-stone-200 animate-pulse" /> }
+  { ssr: false, loading: () => <div className="w-8 h-8 rounded-full bg-muted animate-pulse" /> }
 );
 
 import { hasPermission, BarnRole } from '@/types';
@@ -43,6 +44,7 @@ const navItems = [
   { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read' },
   { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read' },
   { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read' },
+  { href: '/pastures', label: 'Pastures', icon: Trees, permission: 'horses:read' },
   { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read' },
 ];
 
@@ -74,8 +76,8 @@ function UserProfile() {
           }}
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-stone-900">Account</p>
-          <p className="text-xs text-stone-500">Manage profile</p>
+          <p className="text-sm font-medium text-foreground">Account</p>
+          <p className="text-xs text-muted-foreground">Manage profile</p>
         </div>
       </div>
     );
@@ -83,13 +85,13 @@ function UserProfile() {
 
   // Demo mode user
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-stone-100 transition-colors">
-      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold text-amber-700">
+    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors">
+      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
         D
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-stone-900">Demo User</p>
-        <p className="text-xs text-stone-500">demo@stabletrack.com</p>
+        <p className="text-sm font-medium text-foreground">Demo User</p>
+        <p className="text-xs text-muted-foreground">demo@stabletrack.com</p>
       </div>
     </div>
   );
@@ -121,8 +123,8 @@ export function Sidebar() {
         className={`
           flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
           ${isActive 
-            ? isClient ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700' 
-            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+            ? isClient ? 'bg-sky-500/10 text-sky-700' : 'bg-primary/10 text-primary' 
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           }
         `}
       >
@@ -135,39 +137,39 @@ export function Sidebar() {
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div className="p-4 border-b border-stone-200">
+      <div className="p-4 border-b border-border/40">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-            <HorseIcon className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+            <HorseIcon className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold text-stone-900">StableTrack</span>
+          <span className="font-display text-lg font-semibold text-foreground tracking-tight">StableTrack</span>
         </Link>
         
         {/* Barn Switcher */}
         <div className="relative mt-4">
           <button
             onClick={() => setBarnSwitcherOpen(!barnSwitcherOpen)}
-            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-stone-100 hover:bg-stone-200 transition-colors"
+            className="w-full flex items-center justify-between p-2.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <Building2 className="w-4 h-4 text-stone-500 flex-shrink-0" />
+              <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               {barnsLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-stone-400" />
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               ) : (
-                <span className="text-sm font-medium text-stone-900 truncate">
+                <span className="text-sm font-medium text-foreground truncate">
                   {currentBarn?.name || 'Select Barn'}
                 </span>
               )}
             </div>
-            <ChevronDown className={`w-4 h-4 text-stone-500 transition-transform ${barnSwitcherOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${barnSwitcherOpen ? 'rotate-180' : ''}`} />
           </button>
           
           {barnSwitcherOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-stone-200 overflow-hidden z-50">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-lg shadow-card border border-border/60 overflow-hidden z-50">
               {/* Member barns section */}
               {barns.filter(b => b.accessType === 'member').length > 0 && (
                 <>
-                  <div className="px-3 py-1.5 text-xs font-medium text-stone-400 uppercase tracking-wider bg-stone-50">
+                  <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider bg-muted/50">
                     Your Barns
                   </div>
                   {barns.filter(b => b.accessType === 'member').map((barn) => (
@@ -178,13 +180,13 @@ export function Sidebar() {
                         setBarnSwitcherOpen(false);
                       }}
                       className={`
-                        w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-stone-50
-                        ${currentBarn?.id === barn.id ? 'bg-amber-50 text-amber-700' : 'text-stone-700'}
+                        w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50
+                        ${currentBarn?.id === barn.id ? 'bg-primary/10 text-primary' : 'text-foreground'}
                       `}
                     >
                       <Building2 className="w-4 h-4" />
                       <span className="truncate flex-1 text-left">{barn.name}</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                         {barn.role === 'OWNER' ? 'Owner' : barn.role === 'MANAGER' ? 'Manager' : barn.role === 'TRAINER' ? 'Trainer' : 'Staff'}
                       </span>
                     </button>
@@ -195,7 +197,7 @@ export function Sidebar() {
               {/* Client barns section */}
               {barns.filter(b => b.accessType === 'client').length > 0 && (
                 <>
-                  <div className="px-3 py-1.5 text-xs font-medium text-stone-400 uppercase tracking-wider bg-stone-50 border-t border-stone-100">
+                  <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/40">
                     Client Access
                   </div>
                   {barns.filter(b => b.accessType === 'client').map((barn) => (
@@ -206,13 +208,13 @@ export function Sidebar() {
                         setBarnSwitcherOpen(false);
                       }}
                       className={`
-                        w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-stone-50
-                        ${currentBarn?.id === barn.id ? 'bg-blue-50 text-blue-700' : 'text-stone-700'}
+                        w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50
+                        ${currentBarn?.id === barn.id ? 'bg-sky-500/10 text-sky-700' : 'text-foreground'}
                       `}
                     >
                       <User className="w-4 h-4" />
                       <span className="truncate flex-1 text-left">{barn.name}</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-600">
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-700">
                         Client
                       </span>
                     </button>
@@ -220,11 +222,11 @@ export function Sidebar() {
                 </>
               )}
               
-              <div className="border-t border-stone-100">
+              <div className="border-t border-border/40">
                 <Link
                   href="/barns/new"
                   onClick={() => setBarnSwitcherOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-amber-600 hover:bg-amber-50"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-primary/5"
                 >
                   <Plus className="w-4 h-4" />
                   Add New Barn
@@ -237,13 +239,13 @@ export function Sidebar() {
         {/* Tier Badge or Client Mode */}
         {isClient ? (
           <div className="mt-3 px-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-sky-500/10 text-sky-700">
               Client View
             </span>
           </div>
         ) : tier && (
           <div className="mt-3 px-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary">
               {tier} Plan
             </span>
           </div>
@@ -258,7 +260,7 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-stone-200 space-y-1">
+      <div className="p-4 border-t border-border/40 space-y-1">
         {bottomNavItems.map((item) => (
           <NavLink key={item.href} {...item} />
         ))}
@@ -272,26 +274,29 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 bg-white border-r border-stone-200 h-screen sticky top-0">
+      <aside className="hidden lg:flex flex-col w-60 bg-card border-r border-border/40 h-screen sticky top-0">
         <SidebarContent />
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-stone-200 safe-top">
-        <div className="flex items-center justify-between px-4 py-3">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-              <HorseIcon className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-stone-900">StableTrack</span>
-          </Link>
-          
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg text-stone-600 hover:bg-stone-100"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-lg border-b border-border/40">
+        <div className="safe-top">
+          <div className="flex items-center justify-between px-4 h-14">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+                <HorseIcon className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="font-display font-semibold text-foreground">StableTrack</span>
+            </Link>
+
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted active:bg-muted/80 touch-target no-tap-highlight"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -302,17 +307,17 @@ export function Sidebar() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="absolute top-0 left-0 bottom-0 w-72 bg-white flex flex-col safe-top">
-            <div className="flex items-center justify-between p-4 border-b border-stone-200">
+          <aside className="absolute top-0 left-0 bottom-0 w-72 bg-card flex flex-col safe-top">
+            <div className="flex items-center justify-between p-4 border-b border-border/40">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-                  <HorseIcon className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+                  <HorseIcon className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span className="font-bold text-stone-900">StableTrack</span>
+                <span className="font-display font-semibold text-foreground">StableTrack</span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg text-stone-600 hover:bg-stone-100"
+                className="p-2 rounded-lg text-muted-foreground hover:bg-muted"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -322,7 +327,7 @@ export function Sidebar() {
                 <NavLink key={item.href} {...item} />
               ))}
             </nav>
-            <div className="p-4 border-t border-stone-200 space-y-1">
+            <div className="p-4 border-t border-border/40 space-y-1">
               {bottomNavItems.map((item) => (
                 <NavLink key={item.href} {...item} />
               ))}
@@ -342,32 +347,43 @@ export function MobileBottomNav() {
   const mobileNavItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
     { href: '/horses', label: 'Horses', icon: HorseIcon },
-    { href: '/daily-care', label: 'Daily Care', icon: Activity },
+    { href: '/daily-care', label: 'Care', icon: Activity },
     { href: '/calendar', label: 'Schedule', icon: Calendar },
     { href: '/settings', label: 'More', icon: Settings },
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 safe-bottom z-30">
-      <div className="flex justify-around items-center h-16">
-        {mobileNavItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-          const Icon = item.icon;
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border/40 z-30">
+      <div className="safe-bottom">
+        <div className="flex justify-around items-center h-16 px-2">
+          {mobileNavItems.map((item) => {
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+            const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`
-                flex flex-col items-center justify-center gap-0.5 w-16 h-full
-                ${isActive ? 'text-amber-600' : 'text-stone-500'}
-              `}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                  flex flex-col items-center justify-center gap-1 flex-1 h-full py-2 rounded-lg
+                  transition-colors no-tap-highlight active:scale-95 transform
+                  ${isActive
+                    ? 'text-primary'
+                    : 'text-muted-foreground active:text-foreground'
+                  }
+                `}
+              >
+                <div className={`
+                  p-1.5 rounded-full transition-colors
+                  ${isActive ? 'bg-primary/10' : ''}
+                `}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

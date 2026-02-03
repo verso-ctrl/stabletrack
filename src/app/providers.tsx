@@ -1,9 +1,22 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BarnProvider } from '@/contexts/BarnContext';
+import { BarnProvider, useBarn } from '@/contexts/BarnContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { useState } from 'react';
+import type { SubscriptionTier } from '@/lib/tiers';
+
+// Wrapper component to connect BarnContext to SubscriptionProvider
+function SubscriptionProviderWithBarn({ children }: { children: React.ReactNode }) {
+  const { currentBarn } = useBarn();
+  const barnTier = (currentBarn?.tier as SubscriptionTier) || 'FREE';
+
+  return (
+    <SubscriptionProvider barnId={currentBarn?.id} barnTier={barnTier}>
+      {children}
+    </SubscriptionProvider>
+  );
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -23,9 +36,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <BarnProvider>
-        <SubscriptionProvider>
+        <SubscriptionProviderWithBarn>
           {children}
-        </SubscriptionProvider>
+        </SubscriptionProviderWithBarn>
       </BarnProvider>
     </QueryClientProvider>
   );
