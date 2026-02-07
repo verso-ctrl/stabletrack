@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCurrentBarn, useBarn } from '@/contexts/BarnContext';
@@ -40,37 +40,76 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState('Welcome');
   const [dateString, setDateString] = useState('');
   const [today, setToday] = useState<Date | null>(null);
-  const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
+  // Task completion: 'checking' = strikethrough shown, 'fading' = fading out, 'done' = hidden
+  const [taskStates, setTaskStates] = useState<Record<string, 'checking' | 'fading' | 'done'>>({});
+  const fadeTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
-    // Optimistic update
-    setCompletedTaskIds(prev => {
-      const next = new Set(prev);
-      if (newStatus === 'COMPLETED') next.add(taskId);
-      else next.delete(taskId);
-      return next;
-    });
+  const completeTask = useCallback(async (taskId: string, taskTitle: string) => {
+    // Step 1: Optimistic strikethrough
+    setTaskStates(prev => ({ ...prev, [taskId]: 'checking' }));
+
+    // Step 2: After 1.5s start fading out
+    fadeTimers.current[taskId] = setTimeout(() => {
+      setTaskStates(prev => ({ ...prev, [taskId]: 'fading' }));
+      // After fade animation (300ms), mark as done
+      fadeTimers.current[`${taskId}-done`] = setTimeout(() => {
+        setTaskStates(prev => ({ ...prev, [taskId]: 'done' }));
+      }, 300);
+    }, 1500);
+
+    // Step 3: Fire API call
     try {
       const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: 'COMPLETED' }),
       });
       if (!response.ok) throw new Error('Failed to update task');
+
+      // Step 4: Toast with undo
+      toast.success('Task completed', taskTitle, {
+        label: 'Undo',
+        onClick: () => undoComplete(taskId),
+      });
+
       refetch();
     } catch (error) {
-      console.error('Error updating task:', error);
-      toast.error('Update failed', 'Could not update task status');
-      // Roll back optimistic update
-      setCompletedTaskIds(prev => {
-        const next = new Set(prev);
-        if (newStatus === 'COMPLETED') next.delete(taskId);
-        else next.add(taskId);
+      console.error('Error completing task:', error);
+      toast.error('Update failed', 'Could not complete task');
+      // Roll back
+      clearTimeout(fadeTimers.current[taskId]);
+      clearTimeout(fadeTimers.current[`${taskId}-done`]);
+      setTaskStates(prev => {
+        const next = { ...prev };
+        delete next[taskId];
         return next;
       });
     }
-  };
+  }, [currentBarn?.id, refetch]);
+
+  const undoComplete = useCallback(async (taskId: string) => {
+    // Immediately restore the task in the UI
+    clearTimeout(fadeTimers.current[taskId]);
+    clearTimeout(fadeTimers.current[`${taskId}-done`]);
+    setTaskStates(prev => {
+      const next = { ...prev };
+      delete next[taskId];
+      return next;
+    });
+
+    try {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PENDING' }),
+      });
+      if (!response.ok) throw new Error('Failed to undo');
+      refetch();
+    } catch (error) {
+      console.error('Error undoing task:', error);
+      toast.error('Undo failed', 'Could not restore task');
+    }
+  }, [currentBarn?.id, refetch]);
 
   // Client-specific state
   const [clientData, setClientData] = useState<any>(null);
@@ -515,21 +554,29 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y divide-border">
               {tasks.slice(0, 5).map((task: any) => {
-                const isDone = completedTaskIds.has(task.id) || task.status === 'COMPLETED';
+                const state = taskStates[task.id];
+                const isChecked = !!state || task.status === 'COMPLETED';
+                if (state === 'done') return null;
                 return (
-                <div key={task.id} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
+                <div
+                  key={task.id}
+                  className={`flex items-center gap-3 p-4 hover:bg-accent transition-all duration-300 ${
+                    state === 'fading' ? 'opacity-0 max-h-0 py-0 overflow-hidden' : 'opacity-100 max-h-24'
+                  }`}
+                >
                   <button
-                    onClick={() => toggleTaskStatus(task.id, isDone ? 'COMPLETED' : 'PENDING')}
+                    onClick={() => !state && completeTask(task.id, task.title)}
                     className="flex-shrink-0"
+                    disabled={!!state}
                   >
-                    {isDone ? (
+                    {isChecked ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <Circle className="w-5 h-5 text-muted-foreground hover:text-emerald-400 transition-colors" />
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm transition-all ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                    <p className={`text-sm transition-all duration-300 ${isChecked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </p>
                     {task.horse?.barnName && (

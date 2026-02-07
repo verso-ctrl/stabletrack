@@ -11,6 +11,7 @@ interface Toast {
   title: string
   message?: string
   duration?: number
+  action?: { label: string; onClick: () => void }
 }
 
 const icons = {
@@ -76,6 +77,14 @@ export function ToastContainer() {
               <p className="font-semibold text-sm">{toast.title}</p>
               {toast.message && (
                 <p className="text-sm opacity-90 mt-1">{toast.message}</p>
+              )}
+              {toast.action && (
+                <button
+                  onClick={() => { toast.action!.onClick(); removeToast(toast.id); }}
+                  className="text-sm font-semibold underline underline-offset-2 mt-1 hover:opacity-80 transition-opacity"
+                >
+                  {toast.action.label}
+                </button>
               )}
             </div>
             <button

@@ -9,6 +9,7 @@ interface ToastEvent {
   title: string
   message?: string
   duration?: number
+  action?: { label: string; onClick: () => void }
 }
 
 type ToastListener = (toast: ToastEvent) => void
@@ -25,14 +26,15 @@ function emitToast(toast: ToastEvent) {
   listeners.forEach(listener => listener(toast))
 }
 
-function createToast(type: ToastType, title: string, message?: string, duration = 5000): void {
+function createToast(type: ToastType, title: string, message?: string, duration = 5000, action?: { label: string; onClick: () => void }): string {
   const id = Math.random().toString(36).slice(2)
-  emitToast({ id, type, title, message, duration })
+  emitToast({ id, type, title, message, duration, action })
+  return id
 }
 
 // Main toast API
 export const toast = {
-  success: (title: string, message?: string) => createToast('success', title, message),
+  success: (title: string, message?: string, action?: { label: string; onClick: () => void }) => createToast('success', title, message, 5000, action),
   error: (title: string, message?: string) => createToast('error', title, message),
   warning: (title: string, message?: string) => createToast('warning', title, message),
   info: (title: string, message?: string) => createToast('info', title, message),
