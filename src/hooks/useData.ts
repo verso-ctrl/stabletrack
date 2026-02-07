@@ -55,7 +55,7 @@ export function useHorses(options: UseHorsesOptions = {}): UseHorsesResult {
     pageSize: options.pageSize,
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: queryKeys.horses.list(barn?.id ?? '', filters),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -72,6 +72,7 @@ export function useHorses(options: UseHorsesOptions = {}): UseHorsesResult {
 
   const refetch = async () => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.horses.all(barn?.id ?? '') });
+    await queryRefetch();
   };
 
   return {
@@ -99,7 +100,7 @@ export function useHorse(horseId: string | null): UseHorseResult {
   const { barn } = useCurrentBarn();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: queryKeys.horses.detail(barn?.id ?? '', horseId ?? ''),
     queryFn: async () => {
       return fetchApi<{ data: Horse }>(`/api/barns/${barn!.id}/horses/${horseId}`);
@@ -114,6 +115,7 @@ export function useHorse(horseId: string | null): UseHorseResult {
         queryKey: queryKeys.horses.detail(barn.id, horseId),
       });
     }
+    await queryRefetch();
   };
 
   return {
@@ -159,7 +161,7 @@ export function useEvents(options: UseEventsOptions = {}): UseEventsResult {
     endDate: options.endDate?.toISOString(),
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: queryKeys.events.list(barnId ?? '', filters),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -179,6 +181,7 @@ export function useEvents(options: UseEventsOptions = {}): UseEventsResult {
     if (barnId) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barnId) });
     }
+    await queryRefetch();
   };
 
   return {
@@ -257,7 +260,7 @@ export function useLessons(options: UseLessonsOptions = {}): UseLessonsResult {
     unbilled: options.unbilled,
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: queryKeys.lessons.list(barnId ?? '', filters),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -276,6 +279,7 @@ export function useLessons(options: UseLessonsOptions = {}): UseLessonsResult {
     if (barnId) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.lessons.all(barnId) });
     }
+    await queryRefetch();
   };
 
   return {
@@ -318,7 +322,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
     dueDate: options.dueDate?.toISOString(),
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: queryKeys.tasks.list(barn?.id ?? '', filters),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -338,6 +342,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
     if (barn) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
     }
+    await queryRefetch();
   };
 
   return {
