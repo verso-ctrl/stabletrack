@@ -468,7 +468,7 @@ export default function DashboardPage() {
         {/* Tasks */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">Today's Tasks</h2>
+            <h2 className="font-semibold text-foreground">Barn Overview</h2>
             <Link href="/daily-care" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
               View all <ChevronRight className="w-4 h-4" />
             </Link>
@@ -493,6 +493,9 @@ export default function DashboardPage() {
                     <p className={`text-sm ${task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </p>
+                    {task.horse?.barnName && (
+                      <p className="text-xs text-muted-foreground">{task.horse.barnName}</p>
+                    )}
                   </div>
                   {task.dueTime && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
