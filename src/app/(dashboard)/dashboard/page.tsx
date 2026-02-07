@@ -7,6 +7,7 @@ import { useCurrentBarn, useBarn } from '@/contexts/BarnContext';
 import { useDashboard } from '@/hooks/useData';
 import { WelcomeChecklist } from '@/components/dashboard/WelcomeChecklist';
 import { hasPermission, BarnRole } from '@/types';
+import { toast } from '@/lib/toast';
 import {
   AlertTriangle,
   Calendar,
@@ -34,11 +35,27 @@ const HorseIcon = ({ className }: { className?: string }) => (
 export default function DashboardPage() {
   const { barn, isLoading: barnLoading } = useCurrentBarn();
   const { isClient, currentBarn } = useBarn();
-  const { horses, events, tasks, alerts, stalls, paddocks, isLoading: dashboardLoading } = useDashboard();
+  const { horses, events, tasks, alerts, stalls, paddocks, isLoading: dashboardLoading, refetch } = useDashboard();
   const [mounted, setMounted] = useState(false);
   const [greeting, setGreeting] = useState('Welcome');
   const [dateString, setDateString] = useState('');
   const [today, setToday] = useState<Date | null>(null);
+
+  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+    try {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) throw new Error('Failed to update task');
+      refetch();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast.error('Update failed', 'Could not update task status');
+    }
+  };
 
   // Client-specific state
   const [clientData, setClientData] = useState<any>(null);
@@ -484,11 +501,16 @@ export default function DashboardPage() {
             <div className="divide-y divide-border">
               {tasks.slice(0, 5).map((task: any) => (
                 <div key={task.id} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
-                  {task.status === 'COMPLETED' ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  ) : (
-                    <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  )}
+                  <button
+                    onClick={() => toggleTaskStatus(task.id, task.status)}
+                    className="flex-shrink-0"
+                  >
+                    {task.status === 'COMPLETED' ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-muted-foreground hover:text-emerald-400 transition-colors" />
+                    )}
+                  </button>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm ${task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}

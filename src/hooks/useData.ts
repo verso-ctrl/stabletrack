@@ -409,7 +409,7 @@ export function useActivityLog(limit: number = 20): {
 export function useDashboard() {
   const { barn } = useCurrentBarn();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.dashboard.stats(barn?.id || ''),
     queryFn: () => fetchApi<{ data: any }>(`/api/barns/${barn!.id}/dashboard`),
     enabled: !!barn?.id,
@@ -428,5 +428,6 @@ export function useDashboard() {
     stats: d?.stats ?? null,
     isLoading,
     error: error ? (error as Error).message : null,
+    refetch,
   };
 }
