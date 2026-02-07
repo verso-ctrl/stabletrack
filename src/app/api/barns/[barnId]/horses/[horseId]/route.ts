@@ -91,6 +91,11 @@ export async function GET(
           orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
           take: 10,
         },
+        turnouts: {
+          where: { endTime: null },
+          include: { paddock: { select: { name: true } } },
+          take: 1,
+        },
       },
     });
     
@@ -108,7 +113,8 @@ export async function GET(
               (365.25 * 24 * 60 * 60 * 1000)
           )
         : null,
-      stallName: horse.stall || horse.stallRelation?.name || null,
+      stallName: horse.stallRelation?.name || horse.stall || null,
+      paddockName: horse.turnouts[0]?.paddock?.name || null,
       // Map weight records to expected format
       weights: horse.weightRecords.map(w => ({
         id: w.id,
@@ -157,7 +163,7 @@ export async function PATCH(
     const body = await request.json();
     
     // Remove fields that shouldn't be updated directly
-    const { id, barnId: _, createdAt, updatedAt, ...updateData } = body;
+    const { id, barnId: _, createdAt, updatedAt, stall, ...updateData } = body;
     
     // Handle date conversion
     if (updateData.dateOfBirth) {

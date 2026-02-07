@@ -235,6 +235,7 @@ export interface Horse {
   
   // Computed/joined fields
   stallName?: string | null;
+  paddockName?: string | null;
   currentWeight?: number | null;
   age?: number | null;
   activeMedicationCount?: number;

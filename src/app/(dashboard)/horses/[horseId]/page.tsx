@@ -13,6 +13,7 @@ import {
   MoreVertical,
   Ruler,
   MapPin,
+  Trees,
   User,
   Loader2,
   X,
@@ -446,6 +447,11 @@ export default function HorseDetailPage() {
               label="Stall"
               value={horse.stallName}
               icon={MapPin}
+            />
+            <InfoItem
+              label="Pasture"
+              value={horse.paddockName}
+              icon={Trees}
             />
             <InfoItem
               label="Owner"

@@ -74,6 +74,11 @@ export async function GET(
           where: { status: 'ACTIVE' },
           select: { id: true },
         },
+        turnouts: {
+          where: { endTime: null },
+          include: { paddock: { select: { name: true } } },
+          take: 1,
+        },
       },
       orderBy: { barnName: 'asc' },
       skip: (page - 1) * pageSize,
@@ -83,7 +88,8 @@ export async function GET(
     // Transform response
     const transformedHorses = horses.map((horse) => ({
       ...horse,
-      stallName: horse.stall || horse.stallRelation?.name || null,
+      stallName: horse.stallRelation?.name || horse.stall || null,
+      paddockName: horse.turnouts[0]?.paddock?.name || null,
       currentWeight: horse.weightRecords[0]?.weightLbs || null,
       activeMedicationCount: horse.medications.length,
       age: horse.dateOfBirth
@@ -95,6 +101,7 @@ export async function GET(
       stallRelation: undefined,
       weightRecords: undefined,
       medications: undefined,
+      turnouts: undefined,
     }));
     
     return NextResponse.json({

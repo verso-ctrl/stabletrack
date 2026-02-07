@@ -61,7 +61,6 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
     status: 'ACTIVE',
     ownerName: '',
     bio: '',
-    stall: '',
   });
 
   // Fetch suggestions when barn is available
@@ -98,7 +97,6 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
         status: horse.status || 'ACTIVE',
         ownerName: horse.ownerName || '',
         bio: horse.bio || '',
-        stall: (horse as any).stall || (horse as any).stallName || '',
       });
     }
   }, [horse]);
@@ -420,15 +418,15 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Stall
+                  Stall / Pasture
                 </label>
-                <input
-                  type="text"
-                  value={formData.stall}
-                  onChange={(e) => setFormData({ ...formData, stall: e.target.value })}
-                  className="input w-full"
-                  placeholder="e.g., A12 or Barn 1 - Stall 5"
-                />
+                <p className="text-sm text-muted-foreground py-2">
+                  Manage stall &amp; pasture assignments from the{' '}
+                  <Link href="/pastures" className="text-amber-600 hover:text-amber-700 underline">
+                    Pastures &amp; Stalls
+                  </Link>{' '}
+                  page.
+                </p>
               </div>
             </div>
 
