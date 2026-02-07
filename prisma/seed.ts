@@ -164,11 +164,11 @@ async function main() {
   console.log('✅ Created paddocks');
 
   // Get stalls for horses
-  const stallA1 = await prisma.stall.findUnique({ where: { barnId_name: { barnId: barn.id, name: 'A1' } } });
-  const stallA2 = await prisma.stall.findUnique({ where: { barnId_name: { barnId: barn.id, name: 'A2' } } });
-  const stallB1 = await prisma.stall.findUnique({ where: { barnId_name: { barnId: barn.id, name: 'B1' } } });
-  const stallB2 = await prisma.stall.findUnique({ where: { barnId_name: { barnId: barn.id, name: 'B2' } } });
-  const stallC1 = await prisma.stall.findUnique({ where: { barnId_name: { barnId: barn.id, name: 'C1' } } });
+  const stallA1 = await prisma.stall.findUnique({ where: { barnId_section_name: { barnId: barn.id, section: 'Main Barn', name: 'A1' } } });
+  const stallA2 = await prisma.stall.findUnique({ where: { barnId_section_name: { barnId: barn.id, section: 'Main Barn', name: 'A2' } } });
+  const stallB1 = await prisma.stall.findUnique({ where: { barnId_section_name: { barnId: barn.id, section: 'Main Barn', name: 'B1' } } });
+  const stallB2 = await prisma.stall.findUnique({ where: { barnId_section_name: { barnId: barn.id, section: 'Main Barn', name: 'B2' } } });
+  const stallC1 = await prisma.stall.findUnique({ where: { barnId_section_name: { barnId: barn.id, section: 'Main Barn', name: 'C1' } } });
 
   // Create horses
   const thunder = await prisma.horse.create({

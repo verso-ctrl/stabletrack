@@ -57,6 +57,8 @@
   ],
   "exclude": [
     "stabletrack/node_modules",
+    "node_modules",
+    "**/__tests__/**",
     "__tests_disabled__"
   ]
 }

@@ -133,6 +133,7 @@ export default function CalendarPage() {
 
   // Handle URL params for pre-selecting horse and auto-opening modal
   useEffect(() => {
+    if (!searchParams) return;
     const horseId = searchParams.get('horseId');
     const addEvent = searchParams.get('addEvent');
 
