@@ -40,9 +40,17 @@ export default function DashboardPage() {
   const [greeting, setGreeting] = useState('Welcome');
   const [dateString, setDateString] = useState('');
   const [today, setToday] = useState<Date | null>(null);
+  const [completedTaskIds, setCompletedTaskIds] = useState<Set<string>>(new Set());
 
   const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+    // Optimistic update
+    setCompletedTaskIds(prev => {
+      const next = new Set(prev);
+      if (newStatus === 'COMPLETED') next.add(taskId);
+      else next.delete(taskId);
+      return next;
+    });
     try {
       const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
@@ -54,6 +62,13 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Update failed', 'Could not update task status');
+      // Roll back optimistic update
+      setCompletedTaskIds(prev => {
+        const next = new Set(prev);
+        if (newStatus === 'COMPLETED') next.delete(taskId);
+        else next.add(taskId);
+        return next;
+      });
     }
   };
 
@@ -499,20 +514,22 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {tasks.slice(0, 5).map((task: any) => (
+              {tasks.slice(0, 5).map((task: any) => {
+                const isDone = completedTaskIds.has(task.id) || task.status === 'COMPLETED';
+                return (
                 <div key={task.id} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
                   <button
-                    onClick={() => toggleTaskStatus(task.id, task.status)}
+                    onClick={() => toggleTaskStatus(task.id, isDone ? 'COMPLETED' : 'PENDING')}
                     className="flex-shrink-0"
                   >
-                    {task.status === 'COMPLETED' ? (
+                    {isDone ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     ) : (
                       <Circle className="w-5 h-5 text-muted-foreground hover:text-emerald-400 transition-colors" />
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                    <p className={`text-sm transition-all ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </p>
                     {task.horse?.barnName && (
@@ -528,7 +545,8 @@ export default function DashboardPage() {
                     <span className="badge-danger">Urgent</span>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
