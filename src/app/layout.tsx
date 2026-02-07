@@ -3,7 +3,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import '@/styles/globals.css';
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stabletrack.app';
+const rawUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stabletrack.app';
+const siteUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
 export const metadata: Metadata = {
   title: {
