@@ -168,14 +168,14 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
       {/* Basic Information */}
       <section>
-        <h3 className="text-lg font-semibold text-stone-900 mb-4">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           Basic Information
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Barn Name */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Barn Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -187,14 +187,14 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               className="input-base"
               required
             />
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               The name used daily around the barn
             </p>
           </div>
 
           {/* Registered Name */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Registered Name
             </label>
             <input
@@ -205,14 +205,14 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               placeholder="e.g., Thunder's Lightning Strike"
               className="input-base"
             />
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Official registered name (if any)
             </p>
           </div>
 
           {/* Breed */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Breed
             </label>
             <input
@@ -233,7 +233,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
           {/* Color */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Color
             </label>
             <input
@@ -254,7 +254,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
           {/* Sex */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Sex
             </label>
             <select
@@ -274,7 +274,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
           {/* Date of Birth */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Date of Birth
             </label>
             <div className="relative">
@@ -289,13 +289,13 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
                 onChange={handleDateChange}
                 className="input-base"
               />
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 pointer-events-none" />
+              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
             </div>
           </div>
 
           {/* Height */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Height (hands)
             </label>
             <input
@@ -313,7 +313,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Status
             </label>
             <select
@@ -334,14 +334,14 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
       {/* Identification */}
       <section>
-        <h3 className="text-lg font-semibold text-stone-900 mb-4">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           Identification
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Microchip */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Microchip Number
             </label>
             <input
@@ -356,7 +356,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
           {/* Owner */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Owner Name
             </label>
             <input
@@ -373,16 +373,16 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
 
       {/* Photo Upload Placeholder */}
       <section>
-        <h3 className="text-lg font-semibold text-stone-900 mb-4">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           Profile Photo
         </h3>
         
-        <div className="border-2 border-dashed border-stone-200 rounded-xl p-8 text-center">
-          <Upload className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-          <p className="text-sm text-stone-600 mb-2">
+        <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
+          <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground mb-2">
             Drag and drop a photo, or click to browse
           </p>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-muted-foreground">
             PNG, JPG up to 10MB
           </p>
           <input
@@ -393,7 +393,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
           />
           <label
             htmlFor="photo-upload"
-            className="mt-4 inline-block px-4 py-2 bg-stone-100 rounded-lg text-sm font-medium text-stone-700 cursor-pointer hover:bg-stone-200 transition-colors"
+            className="mt-4 inline-block px-4 py-2 bg-muted rounded-lg text-sm font-medium text-muted-foreground cursor-pointer hover:bg-accent transition-colors"
           >
             Choose File
           </label>
@@ -401,7 +401,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
       </section>
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
         {onCancel && (
           <button
             type="button"

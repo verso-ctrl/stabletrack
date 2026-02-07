@@ -29,24 +29,24 @@
   }
 
   .dark {
-    --background: 20 14% 6%;
+    --background: 20 10% 10%;
     --foreground: 40 15% 95%;
-    --card: 20 12% 8%;
+    --card: 20 8% 13%;
     --card-foreground: 40 15% 95%;
-    --popover: 20 12% 8%;
+    --popover: 20 8% 13%;
     --popover-foreground: 40 15% 95%;
     --primary: 25 45% 55%;
     --primary-foreground: 20 14% 6%;
-    --secondary: 20 10% 14%;
+    --secondary: 20 8% 18%;
     --secondary-foreground: 40 15% 95%;
-    --muted: 20 10% 14%;
-    --muted-foreground: 25 8% 55%;
-    --accent: 20 10% 14%;
+    --muted: 20 8% 18%;
+    --muted-foreground: 25 8% 60%;
+    --accent: 20 8% 18%;
     --accent-foreground: 40 15% 95%;
     --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 20 10% 16%;
-    --input: 20 10% 16%;
+    --border: 20 8% 20%;
+    --input: 20 8% 20%;
     --ring: 25 45% 55%;
   }
 }
@@ -63,6 +63,204 @@
   }
 }
 
+/* ==========================================================================
+   Dark Mode Override Layer
+   Remaps hardcoded Tailwind stone/white/colored classes to semantic variables
+   when .dark is active. Higher specificity (.dark .class) wins over bare .class.
+   ========================================================================== */
+
+/* --- Stone text colors → semantic foreground --- */
+.dark .text-stone-900,
+.dark .text-stone-800 {
+  color: hsl(var(--foreground));
+}
+.dark .text-stone-700,
+.dark .text-stone-600 {
+  color: hsl(var(--muted-foreground));
+}
+.dark .text-stone-500,
+.dark .text-stone-400 {
+  color: hsl(var(--muted-foreground));
+}
+
+/* --- Stone backgrounds → semantic surfaces --- */
+.dark .bg-white {
+  background-color: hsl(var(--card));
+}
+.dark .bg-stone-50 {
+  background-color: hsl(var(--background));
+}
+.dark .bg-stone-100 {
+  background-color: hsl(var(--muted));
+}
+.dark .bg-stone-200 {
+  background-color: hsl(var(--accent));
+}
+
+/* --- Stone borders → semantic border --- */
+.dark .border-stone-100,
+.dark .border-stone-200,
+.dark .border-stone-300 {
+  border-color: hsl(var(--border));
+}
+
+/* --- Stone dividers --- */
+.dark .divide-stone-100 > * + *,
+.dark .divide-stone-200 > * + * {
+  border-color: hsl(var(--border));
+}
+
+/* --- Stone hover states --- */
+.dark .hover\:bg-stone-50:hover,
+.dark .hover\:bg-stone-100:hover {
+  background-color: hsl(var(--accent));
+}
+.dark .hover\:bg-stone-200:hover {
+  background-color: hsl(20 8% 22%);
+}
+
+/* --- Stone ring/focus --- */
+.dark .ring-stone-200,
+.dark .ring-stone-300 {
+  --tw-ring-color: hsl(var(--border));
+}
+
+/* --- Placeholder text --- */
+.dark .placeholder\:text-stone-400::placeholder,
+.dark .placeholder\:text-stone-500::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* --- Gradient overrides: stone --- */
+.dark .from-stone-50 { --tw-gradient-from: hsl(var(--background)); }
+.dark .to-stone-50 { --tw-gradient-to: hsl(var(--background)); }
+
+/* --- Gradient overrides: colored -50 stops --- */
+.dark .from-green-50 { --tw-gradient-from: rgba(34, 197, 94, 0.1); }
+.dark .to-green-50 { --tw-gradient-to: rgba(34, 197, 94, 0.1); }
+.dark .from-red-50 { --tw-gradient-from: rgba(239, 68, 68, 0.1); }
+.dark .to-red-50 { --tw-gradient-to: rgba(239, 68, 68, 0.1); }
+.dark .from-amber-50 { --tw-gradient-from: rgba(245, 158, 11, 0.1); }
+.dark .to-amber-50 { --tw-gradient-to: rgba(245, 158, 11, 0.1); }
+.dark .from-orange-50 { --tw-gradient-from: rgba(249, 115, 22, 0.1); }
+.dark .to-orange-50 { --tw-gradient-to: rgba(249, 115, 22, 0.1); }
+.dark .from-blue-50 { --tw-gradient-from: rgba(59, 130, 246, 0.1); }
+.dark .to-blue-50 { --tw-gradient-to: rgba(59, 130, 246, 0.1); }
+.dark .from-indigo-50 { --tw-gradient-from: rgba(99, 102, 241, 0.1); }
+.dark .to-indigo-50 { --tw-gradient-to: rgba(99, 102, 241, 0.1); }
+.dark .from-purple-50 { --tw-gradient-from: rgba(168, 85, 247, 0.1); }
+.dark .to-purple-50 { --tw-gradient-to: rgba(168, 85, 247, 0.1); }
+
+/* ==========================================================================
+   Colored light backgrounds → dark-friendly translucent tints
+   bg-{color}-50 becomes a subtle translucent version in dark mode
+   ========================================================================== */
+
+.dark .bg-green-50 { background-color: rgba(34, 197, 94, 0.1); }
+.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.1); }
+.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1); }
+.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.1); }
+.dark .bg-orange-50 { background-color: rgba(249, 115, 22, 0.1); }
+.dark .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.1); }
+.dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1); }
+.dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.1); }
+.dark .bg-purple-50 { background-color: rgba(168, 85, 247, 0.1); }
+.dark .bg-sky-50 { background-color: rgba(14, 165, 233, 0.1); }
+
+/* bg-{color}-100 → slightly stronger tint */
+.dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.15); }
+.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.15); }
+.dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.15); }
+.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.15); }
+.dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.15); }
+.dark .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.15); }
+.dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.15); }
+.dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.15); }
+.dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.15); }
+.dark .bg-sky-100 { background-color: rgba(14, 165, 233, 0.15); }
+
+/* ==========================================================================
+   Colored borders → dark-friendly translucent borders
+   ========================================================================== */
+
+.dark .border-green-200, .dark .border-green-300 { border-color: rgba(34, 197, 94, 0.25); }
+.dark .border-emerald-200, .dark .border-emerald-300 { border-color: rgba(16, 185, 129, 0.25); }
+.dark .border-red-200, .dark .border-red-300 { border-color: rgba(239, 68, 68, 0.25); }
+.dark .border-amber-200, .dark .border-amber-300 { border-color: rgba(245, 158, 11, 0.25); }
+.dark .border-orange-200, .dark .border-orange-300 { border-color: rgba(249, 115, 22, 0.25); }
+.dark .border-yellow-200, .dark .border-yellow-300 { border-color: rgba(234, 179, 8, 0.25); }
+.dark .border-blue-200, .dark .border-blue-300 { border-color: rgba(59, 130, 246, 0.25); }
+.dark .border-indigo-200, .dark .border-indigo-300 { border-color: rgba(99, 102, 241, 0.25); }
+.dark .border-purple-200, .dark .border-purple-300 { border-color: rgba(168, 85, 247, 0.25); }
+
+/* ==========================================================================
+   Colored dark text → lighter dark-mode-friendly shades
+   text-{color}-900/800/700 (very dark, invisible on dark bg) → lighter 300/400
+   ========================================================================== */
+
+/* Green */
+.dark .text-green-900, .dark .text-green-800 { color: rgb(134, 239, 172); }
+.dark .text-green-700 { color: rgb(74, 222, 128); }
+.dark .text-green-600 { color: rgb(74, 222, 128); }
+
+/* Emerald */
+.dark .text-emerald-900, .dark .text-emerald-800 { color: rgb(110, 231, 183); }
+.dark .text-emerald-700, .dark .text-emerald-600 { color: rgb(52, 211, 153); }
+
+/* Red */
+.dark .text-red-900, .dark .text-red-800 { color: rgb(252, 165, 165); }
+.dark .text-red-700, .dark .text-red-600 { color: rgb(248, 113, 113); }
+.dark .text-red-500 { color: rgb(248, 113, 113); }
+
+/* Amber */
+.dark .text-amber-900, .dark .text-amber-800 { color: rgb(252, 211, 77); }
+.dark .text-amber-700, .dark .text-amber-600 { color: rgb(251, 191, 36); }
+
+/* Orange */
+.dark .text-orange-900, .dark .text-orange-800 { color: rgb(253, 186, 116); }
+.dark .text-orange-700, .dark .text-orange-600 { color: rgb(251, 146, 60); }
+
+/* Blue */
+.dark .text-blue-900, .dark .text-blue-800 { color: rgb(147, 197, 253); }
+.dark .text-blue-700, .dark .text-blue-600 { color: rgb(96, 165, 250); }
+
+/* Indigo */
+.dark .text-indigo-900, .dark .text-indigo-800 { color: rgb(165, 180, 252); }
+.dark .text-indigo-700, .dark .text-indigo-600 { color: rgb(129, 140, 248); }
+
+/* Purple */
+.dark .text-purple-900, .dark .text-purple-800 { color: rgb(216, 180, 254); }
+.dark .text-purple-700, .dark .text-purple-600 { color: rgb(192, 132, 252); }
+
+/* Sky */
+.dark .text-sky-900, .dark .text-sky-800 { color: rgb(125, 211, 252); }
+.dark .text-sky-700, .dark .text-sky-600 { color: rgb(56, 189, 248); }
+
+/* Yellow */
+.dark .text-yellow-900, .dark .text-yellow-800 { color: rgb(253, 224, 71); }
+.dark .text-yellow-700, .dark .text-yellow-600 { color: rgb(250, 204, 21); }
+
+/* ==========================================================================
+   Colored hover backgrounds → dark-friendly
+   ========================================================================== */
+
+.dark .hover\:bg-green-50:hover, .dark .hover\:bg-green-100:hover { background-color: rgba(34, 197, 94, 0.15); }
+.dark .hover\:bg-red-50:hover, .dark .hover\:bg-red-100:hover { background-color: rgba(239, 68, 68, 0.15); }
+.dark .hover\:bg-amber-50:hover, .dark .hover\:bg-amber-100:hover { background-color: rgba(245, 158, 11, 0.15); }
+.dark .hover\:bg-orange-50:hover, .dark .hover\:bg-orange-100:hover { background-color: rgba(249, 115, 22, 0.15); }
+.dark .hover\:bg-blue-50:hover, .dark .hover\:bg-blue-100:hover { background-color: rgba(59, 130, 246, 0.15); }
+.dark .hover\:bg-indigo-50:hover, .dark .hover\:bg-indigo-100:hover { background-color: rgba(99, 102, 241, 0.15); }
+.dark .hover\:bg-purple-50:hover, .dark .hover\:bg-purple-100:hover { background-color: rgba(168, 85, 247, 0.15); }
+
+/* ==========================================================================
+   Red/colored 50/50 opacity patterns (e.g., bg-red-50/50)
+   These use Tailwind's opacity modifier - override the base color
+   ========================================================================== */
+
+.dark .bg-red-50\/50 { background-color: rgba(239, 68, 68, 0.06); }
+.dark .bg-green-50\/50 { background-color: rgba(34, 197, 94, 0.06); }
+.dark .bg-amber-50\/50 { background-color: rgba(245, 158, 11, 0.06); }
+
 @layer components {
   .card {
     @apply bg-card rounded-lg border border-border/60 shadow-sm;
@@ -73,7 +271,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-medium px-4 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
   
   .btn-primary {
@@ -140,7 +338,7 @@
   }
 
   .modal-content {
-    @apply bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden;
+    @apply bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden;
   }
 
   /* Touch-friendly button base */
@@ -199,5 +397,147 @@
   /* Tap highlight removal for cleaner mobile experience */
   .no-tap-highlight {
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ============================================================================
+   Printable Calendar Styles
+   ============================================================================ */
+
+/* Screen styles for the printable calendar (hidden by default on screen) */
+/* Printable calendar: hidden on screen */
+.printable-calendar-wrapper {
+  display: none;
+}
+
+.printable-calendar {
+  display: none;
+}
+
+/* Print styles */
+@media print {
+  /* Hide everything on the page */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show the printable calendar and all its children */
+  .printable-calendar-wrapper,
+  .printable-calendar-wrapper * {
+    visibility: visible;
+  }
+
+  .printable-calendar-wrapper {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    background: white;
+    overflow: visible;
+  }
+
+  .printable-calendar {
+    display: block !important;
+    padding: 0.25in;
+    background: white;
+    color: black;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .print-header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .print-title {
+    font-size: 22pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .print-barn-name {
+    font-size: 10pt;
+    color: #666;
+    margin: 2px 0 0 0;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  /* List table header */
+  .print-list-header {
+    background: #f5f0eb;
+    border: 1px solid #d4c5b5;
+    padding: 6px 8px;
+    font-size: 8pt;
+    font-weight: 700;
+    text-align: left;
+    color: #4a3728;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* List table cell */
+  .print-list-cell {
+    border-bottom: 1px solid #e8e0d8;
+    padding: 5px 8px;
+    font-size: 9pt;
+    color: #333;
+    vertical-align: top;
+  }
+
+  /* Date column — bold day display */
+  .print-list-date {
+    font-size: 9pt;
+    white-space: nowrap;
+  }
+
+  /* Event title column */
+  .print-list-title {
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+
+  /* Notes inline */
+  .print-list-notes {
+    font-weight: 400;
+    color: #888;
+    font-size: 8pt;
+  }
+
+  /* Type badge */
+  .print-type-badge {
+    display: inline-block;
+    background: #f5f0eb;
+    color: #6b5744;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+
+  /* Row divider between date groups */
+  .print-row-divider td {
+    border-top: 2px solid #d4c5b5;
+  }
+
+  .print-footer {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 7pt;
+    color: #aaa;
+  }
+
+  /* Portrait for list view */
+  @page {
+    size: letter portrait;
+    margin: 0.5in;
   }
 }

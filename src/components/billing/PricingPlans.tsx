@@ -150,10 +150,10 @@ export function PricingPlans() {
   return (
     <div className="py-8">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-stone-900">
+        <h2 className="text-3xl font-bold text-foreground">
           Simple, transparent pricing
         </h2>
-        <p className="mt-4 text-lg text-stone-600">
+        <p className="mt-4 text-lg text-muted-foreground">
           All features included. Only pay for the horses you need.
         </p>
       </div>
@@ -178,7 +178,7 @@ export function PricingPlans() {
               key={tier}
               className={`
                 relative rounded-2xl border-2 p-6 flex flex-col
-                ${info.highlighted ? 'border-amber-500 shadow-xl' : 'border-stone-200'}
+                ${info.highlighted ? 'border-amber-500 shadow-xl' : 'border-border'}
                 ${isCurrent ? 'ring-2 ring-green-500 ring-offset-2' : ''}
               `}
             >
@@ -199,16 +199,16 @@ export function PricingPlans() {
               )}
 
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-stone-900">{info.name}</h3>
-                <p className="text-stone-500 text-sm mt-1">{info.description}</p>
+                <h3 className="text-xl font-bold text-foreground">{info.name}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{info.description}</p>
               </div>
 
               <div className="mb-6">
-                <span className="text-4xl font-bold text-stone-900">
+                <span className="text-4xl font-bold text-foreground">
                   {formatPrice(price)}
                 </span>
                 {price > 0 && (
-                  <span className="text-stone-500 ml-1">/month</span>
+                  <span className="text-muted-foreground ml-1">/month</span>
                 )}
               </div>
 
@@ -248,10 +248,10 @@ export function PricingPlans() {
                     isCurrent
                       ? 'bg-green-100 text-green-700 cursor-default'
                       : isDowngrade
-                      ? 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      ? 'bg-muted text-muted-foreground hover:bg-accent'
                       : info.highlighted
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-stone-900 text-white hover:bg-stone-800'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
                   }
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
@@ -280,18 +280,18 @@ export function PricingPlans() {
         })}
       </div>
 
-      <p className="text-center text-sm text-stone-500 mt-8">
+      <p className="text-center text-sm text-muted-foreground mt-8">
         All plans include full access to every feature. Only the number of horses differs.
       </p>
 
       {/* Downgrade Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Confirm Plan Change
             </h3>
-            <p className="text-stone-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Are you sure you want to downgrade to the{' '}
               <span className="font-semibold">{TIER_INFO[showConfirmModal.tier].name}</span> plan?
             </p>
@@ -318,7 +318,7 @@ export function PricingPlans() {
               <button
                 onClick={() => setShowConfirmModal(null)}
                 disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all disabled:opacity-50"
+                className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -344,26 +344,26 @@ export function PricingPlans() {
       {/* Upgrade Confirmation Modal */}
       {showUpgradeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-stone-900">
+                <h3 className="text-lg font-semibold text-foreground">
                   Upgrade to {TIER_INFO[showUpgradeModal].name}
                 </h3>
-                <p className="text-sm text-stone-500">
+                <p className="text-sm text-muted-foreground">
                   {formatPrice(TIER_PRICING[showUpgradeModal])}/month
                 </p>
               </div>
             </div>
 
-            <div className="bg-stone-50 rounded-lg p-4 mb-4">
-              <h4 className="font-medium text-stone-900 mb-2">What you'll get:</h4>
+            <div className="bg-background rounded-lg p-4 mb-4">
+              <h4 className="font-medium text-foreground mb-2">What you'll get:</h4>
               <ul className="space-y-2">
                 {TIER_LIMITS[showUpgradeModal].features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-stone-700">
+                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                     <span>{feature}</span>
                   </li>
@@ -375,7 +375,7 @@ export function PricingPlans() {
               <button
                 onClick={() => setShowUpgradeModal(null)}
                 disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all disabled:opacity-50"
+                className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -437,9 +437,9 @@ export function CurrentPlanCard() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 animate-pulse">
-        <div className="h-6 w-32 bg-stone-200 rounded mb-4" />
-        <div className="h-4 w-48 bg-stone-100 rounded" />
+      <div className="bg-card rounded-2xl border border-border p-6 animate-pulse">
+        <div className="h-6 w-32 bg-muted rounded mb-4" />
+        <div className="h-4 w-48 bg-muted rounded" />
       </div>
     );
   }
@@ -448,11 +448,11 @@ export function CurrentPlanCard() {
   const limits = TIER_LIMITS[tier];
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-6">
+    <div className="bg-card rounded-2xl border border-border p-6">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-stone-900">
+            <h3 className="text-lg font-semibold text-foreground">
               {info.name} Plan
             </h3>
             <span
@@ -463,22 +463,22 @@ export function CurrentPlanCard() {
                   ? 'bg-green-100 text-green-700'
                   : subscription?.status === 'PAST_DUE'
                   ? 'bg-red-100 text-red-700'
-                  : 'bg-stone-100 text-stone-700'
+                  : 'bg-muted text-muted-foreground'
               }
             `}
             >
               {subscription?.status || 'Active'}
             </span>
           </div>
-          <p className="text-stone-500 text-sm mt-1">{info.description}</p>
+          <p className="text-muted-foreground text-sm mt-1">{info.description}</p>
         </div>
 
         <div className="text-right">
-          <span className="text-2xl font-bold text-stone-900">
+          <span className="text-2xl font-bold text-foreground">
             {formatPrice(TIER_PRICING[tier])}
           </span>
           {TIER_PRICING[tier] > 0 && (
-            <span className="text-stone-500">/month</span>
+            <span className="text-muted-foreground">/month</span>
           )}
         </div>
       </div>
@@ -492,19 +492,19 @@ export function CurrentPlanCard() {
             {formatLimit(limits.maxHorses)}
           </p>
         </div>
-        <div className="p-3 bg-stone-50 rounded-lg">
-          <p className="text-xs text-stone-500 uppercase tracking-wide">
+        <div className="p-3 bg-background rounded-lg">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
             Storage
           </p>
-          <p className="text-lg font-semibold text-stone-900">
+          <p className="text-lg font-semibold text-foreground">
             {limits.storageGb} GB
           </p>
         </div>
-        <div className="p-3 bg-stone-50 rounded-lg">
-          <p className="text-xs text-stone-500 uppercase tracking-wide">
+        <div className="p-3 bg-background rounded-lg">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
             Features
           </p>
-          <p className="text-lg font-semibold text-stone-900">
+          <p className="text-lg font-semibold text-foreground">
             All
           </p>
         </div>
@@ -514,7 +514,7 @@ export function CurrentPlanCard() {
         <button
           onClick={handleManageBilling}
           disabled={isOpening}
-          className="mt-4 w-full py-2 px-4 bg-stone-100 text-stone-700 rounded-lg font-medium hover:bg-stone-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="mt-4 w-full py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isOpening ? (
             <>

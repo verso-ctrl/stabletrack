@@ -181,7 +181,7 @@ export default function LessonsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -191,8 +191,8 @@ export default function LessonsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Lessons</h1>
-          <p className="text-stone-500">{canEdit ? 'Schedule and manage riding lessons' : 'View your riding lessons'}</p>
+          <h1 className="text-2xl font-bold text-foreground">Lessons</h1>
+          <p className="text-muted-foreground">{canEdit ? 'Schedule and manage riding lessons' : 'View your riding lessons'}</p>
         </div>
         {canEdit && (
           <button onClick={() => setShowModal(true)} className="btn-primary btn-md">
@@ -211,7 +211,7 @@ export default function LessonsPage() {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               filter === f
                 ? 'bg-amber-100 text-amber-700'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                : 'bg-muted text-muted-foreground hover:bg-accent'
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -220,11 +220,11 @@ export default function LessonsPage() {
       </div>
 
       {/* Lessons List */}
-      <div className="card divide-y divide-stone-100">
+      <div className="card divide-y divide-border">
         {filteredLessons.length === 0 ? (
           <div className="p-8 text-center">
-            <Calendar className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <p className="text-stone-500">{canEdit ? 'No lessons scheduled' : 'No lessons found'}</p>
+            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">{canEdit ? 'No lessons scheduled' : 'No lessons found'}</p>
             {canEdit && (
               <button onClick={() => setShowModal(true)} className="btn-primary btn-sm mt-4">
                 Schedule First Lesson
@@ -233,23 +233,23 @@ export default function LessonsPage() {
           </div>
         ) : (
           filteredLessons.map(lesson => (
-            <div key={lesson.id} className="p-4 flex items-center gap-4 hover:bg-stone-50">
+            <div key={lesson.id} className="p-4 flex items-center gap-4 hover:bg-accent">
               <div className="w-16 text-center">
-                <p className="text-2xl font-bold text-stone-900">
+                <p className="text-2xl font-bold text-foreground">
                   {new Date(lesson.scheduledDate).getDate()}
                 </p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   {new Date(lesson.scheduledDate).toLocaleDateString('en-US', { month: 'short' })}
                 </p>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-stone-900">
+                  <p className="font-medium text-foreground">
                     {lesson.type.replace(/_/g, ' ')} Lesson
                   </p>
                   <span className={statusColors[lesson.status]}>{lesson.status}</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-stone-500 mt-1">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
                     {new Date(lesson.scheduledDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
@@ -276,7 +276,7 @@ export default function LessonsPage() {
                 </div>
               </div>
               {lesson.price && (
-                <p className="font-semibold text-stone-700">${lesson.price}</p>
+                <p className="font-semibold text-muted-foreground">${lesson.price}</p>
               )}
               {lesson.status === 'SCHEDULED' && (
                 <div className="flex items-center gap-1">
@@ -304,11 +304,11 @@ export default function LessonsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Schedule Lesson</h3>
-                <button onClick={() => setShowModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -316,7 +316,7 @@ export default function LessonsPage() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Date *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date *</label>
                   <input
                     type="date"
                     value={form.scheduledDate}
@@ -325,7 +325,7 @@ export default function LessonsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Time *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Time *</label>
                   <input
                     type="time"
                     value={form.scheduledTime}
@@ -337,7 +337,7 @@ export default function LessonsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Type</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))}
@@ -349,7 +349,7 @@ export default function LessonsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Duration (min)</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Duration (min)</label>
                   <select
                     value={form.duration}
                     onChange={(e) => setForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
@@ -365,7 +365,7 @@ export default function LessonsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Client</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Client</label>
                 <select
                   value={form.clientId}
                   onChange={(e) => setForm(prev => ({ ...prev, clientId: e.target.value }))}
@@ -379,7 +379,7 @@ export default function LessonsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Horse</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Horse</label>
                 <select
                   value={form.horseId}
                   onChange={(e) => setForm(prev => ({ ...prev, horseId: e.target.value }))}
@@ -393,7 +393,7 @@ export default function LessonsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Instructor/Trainer</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Instructor/Trainer</label>
                 <select
                   value={form.instructorId}
                   onChange={(e) => setForm(prev => ({ ...prev, instructorId: e.target.value }))}
@@ -410,7 +410,7 @@ export default function LessonsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Discipline</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Discipline</label>
                   <select
                     value={form.discipline}
                     onChange={(e) => setForm(prev => ({ ...prev, discipline: e.target.value }))}
@@ -423,7 +423,7 @@ export default function LessonsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Level</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Level</label>
                   <select
                     value={form.level}
                     onChange={(e) => setForm(prev => ({ ...prev, level: e.target.value }))}
@@ -439,7 +439,7 @@ export default function LessonsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Price</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Price</label>
                   <input
                     type="number"
                     value={form.price}
@@ -450,7 +450,7 @@ export default function LessonsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Location</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Location</label>
                   <input
                     type="text"
                     value={form.location}
@@ -462,7 +462,7 @@ export default function LessonsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -471,7 +471,7 @@ export default function LessonsPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>

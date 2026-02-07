@@ -2,7 +2,7 @@ import { SignUp } from '@clerk/nextjs';
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-100">
+    <div className="min-h-screen flex items-center justify-center bg-muted">
       <div className="w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
@@ -11,8 +11,8 @@ export default function SignUpPage() {
               <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">Create your account</h1>
-          <p className="text-stone-500 mt-1">Start managing your barn today</p>
+          <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
+          <p className="text-muted-foreground mt-1">Start managing your barn today</p>
         </div>
         
         {/* Clerk Sign Up Component */}
@@ -21,10 +21,10 @@ export default function SignUpPage() {
           appearance={{
             elements: {
               rootBox: 'mx-auto',
-              card: 'shadow-xl border border-stone-200',
+              card: 'shadow-xl border border-border',
               headerTitle: 'hidden',
               headerSubtitle: 'hidden',
-              socialButtonsBlockButton: 'border-stone-300 hover:bg-stone-50',
+              socialButtonsBlockButton: 'border-border hover:bg-accent',
               formButtonPrimary: 'bg-amber-500 hover:bg-amber-600',
               footerActionLink: 'text-amber-600 hover:text-amber-700',
             },

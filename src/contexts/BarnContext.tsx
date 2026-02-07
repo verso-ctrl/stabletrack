@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { Barn, BarnRole } from '@/types';
 
 type AccessType = 'member' | 'client';
@@ -94,28 +94,30 @@ export function BarnProvider({ children }: { children: React.ReactNode }) {
     fetchBarns();
   }, [fetchBarns]);
 
-  // Computed values
-  const isClient = currentBarn?.accessType === 'client';
-  const isMember = currentBarn?.accessType === 'member';
-  const memberBarns = barns.filter(b => b.accessType === 'member');
-  const clientBarns = barns.filter(b => b.accessType === 'client');
+  // Memoize computed values to prevent unnecessary re-renders of consumers
+  const contextValue = useMemo(() => {
+    const isClient = currentBarn?.accessType === 'client';
+    const isMember = currentBarn?.accessType === 'member';
+    const memberBarns = barns.filter(b => b.accessType === 'member');
+    const clientBarns = barns.filter(b => b.accessType === 'client');
+
+    return {
+      barns,
+      currentBarn,
+      setCurrentBarn,
+      isLoading,
+      error,
+      refetch: fetchBarns,
+      refreshBarn: fetchBarns,
+      isClient,
+      isMember,
+      memberBarns,
+      clientBarns,
+    };
+  }, [barns, currentBarn, setCurrentBarn, isLoading, error, fetchBarns]);
 
   return (
-    <BarnContext.Provider
-      value={{
-        barns,
-        currentBarn,
-        setCurrentBarn,
-        isLoading,
-        error,
-        refetch: fetchBarns,
-        refreshBarn: fetchBarns,
-        isClient,
-        isMember,
-        memberBarns,
-        clientBarns,
-      }}
-    >
+    <BarnContext.Provider value={contextValue}>
       {children}
     </BarnContext.Provider>
   );

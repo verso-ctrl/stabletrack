@@ -160,7 +160,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
 
           {/* Basic Info */}
           <div className="space-y-4">
-            <h3 className="font-medium text-stone-900">Basic Information</h3>
+            <h3 className="font-medium text-foreground">Basic Information</h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -180,7 +180,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                   Breed
                 </label>
                 <Select
@@ -210,7 +210,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                   Sex
                 </label>
                 <Select
@@ -251,7 +251,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
               />
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                   Status
                 </label>
                 <Select
@@ -275,7 +275,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
 
           {/* Additional Info */}
           <div className="space-y-4">
-            <h3 className="font-medium text-stone-900">Additional Information</h3>
+            <h3 className="font-medium text-foreground">Additional Information</h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input

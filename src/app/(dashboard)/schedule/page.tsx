@@ -13,7 +13,7 @@ export default function SchedulePage() {
 
   return (
     <div className="flex items-center justify-center h-64">
-      <p className="text-stone-500">Redirecting to schedule...</p>
+      <p className="text-muted-foreground">Redirecting to schedule...</p>
     </div>
   );
 }

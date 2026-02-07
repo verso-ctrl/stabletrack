@@ -119,12 +119,12 @@ export default function CreateBarnPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 py-12 px-4">
+    <div className="min-h-screen bg-muted py-12 px-4">
       <div className="max-w-xl mx-auto">
         {/* Back Link */}
         <Link 
           href="/onboarding" 
-          className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 mb-8"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
@@ -135,8 +135,8 @@ export default function CreateBarnPage() {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">Create a New Barn</h1>
-          <p className="text-stone-500 mt-2">
+          <h1 className="text-2xl font-bold text-foreground">Create a New Barn</h1>
+          <p className="text-muted-foreground mt-2">
             Set up your barn to start managing your horses
           </p>
         </div>
@@ -149,13 +149,13 @@ export default function CreateBarnPage() {
                 w-8 h-8 rounded-full flex items-center justify-center font-medium
                 ${step >= s
                   ? 'bg-amber-500 text-white'
-                  : 'bg-stone-200 text-stone-500'
+                  : 'bg-muted text-muted-foreground'
                 }
               `}>
                 {step > s ? <CheckCircle className="w-5 h-5" /> : s}
               </div>
               {s < 3 && (
-                <div className={`w-16 h-1 mx-2 rounded ${step > s ? 'bg-amber-500' : 'bg-stone-200'}`} />
+                <div className={`w-16 h-1 mx-2 rounded ${step > s ? 'bg-amber-500' : 'bg-muted'}`} />
               )}
             </div>
           ))}
@@ -173,39 +173,39 @@ export default function CreateBarnPage() {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+        <form onSubmit={handleSubmit} className="bg-card rounded-xl shadow-sm border border-border p-6">
           {step === 1 ? (
             <>
-              <h2 className="font-semibold text-stone-900 mb-4">Basic Information</h2>
+              <h2 className="font-semibold text-foreground mb-4">Basic Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Barn Name *
                   </label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="e.g., Sunny Meadow Farm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Street Address
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="123 Farm Road"
                     />
                   </div>
@@ -213,37 +213,37 @@ export default function CreateBarnPage() {
 
                 <div className="grid grid-cols-6 gap-4">
                   <div className="col-span-3">
-                    <label className="block text-sm font-medium text-stone-700 mb-1">
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">
                       City
                     </label>
                     <input
                       type="text"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-stone-700 mb-1">
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">
                       State
                     </label>
                     <input
                       type="text"
                       value={formData.state}
                       onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       maxLength={2}
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-stone-700 mb-1">
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">
                       ZIP Code
                     </label>
                     <input
                       type="text"
                       value={formData.zipCode}
                       onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                 </div>
@@ -251,51 +251,51 @@ export default function CreateBarnPage() {
             </>
           ) : step === 2 ? (
             <>
-              <h2 className="font-semibold text-stone-900 mb-4">Contact Information</h2>
+              <h2 className="font-semibold text-foreground mb-4">Contact Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Phone Number
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="(555) 123-4567"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="barn@example.com"
                     />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-stone-50">
-                  <h3 className="font-medium text-stone-900 mb-2">Summary</h3>
+                <div className="p-4 rounded-xl bg-background">
+                  <h3 className="font-medium text-foreground mb-2">Summary</h3>
                   <dl className="text-sm space-y-1">
                     <div className="flex justify-between">
-                      <dt className="text-stone-500">Barn Name:</dt>
-                      <dd className="text-stone-900">{formData.name || 'Not set'}</dd>
+                      <dt className="text-muted-foreground">Barn Name:</dt>
+                      <dd className="text-foreground">{formData.name || 'Not set'}</dd>
                     </div>
                     {formData.city && (
                       <div className="flex justify-between">
-                        <dt className="text-stone-500">Location:</dt>
-                        <dd className="text-stone-900">{formData.city}, {formData.state}</dd>
+                        <dt className="text-muted-foreground">Location:</dt>
+                        <dd className="text-foreground">{formData.city}, {formData.state}</dd>
                       </div>
                     )}
                   </dl>
@@ -304,8 +304,8 @@ export default function CreateBarnPage() {
             </>
           ) : (
             <>
-              <h2 className="font-semibold text-stone-900 mb-4">Choose Your Plan</h2>
-              <p className="text-sm text-stone-600 mb-4">
+              <h2 className="font-semibold text-foreground mb-4">Choose Your Plan</h2>
+              <p className="text-sm text-muted-foreground mb-4">
                 Select the subscription tier that best fits your barn's needs
               </p>
               {error && error.includes('Stripe is not configured') && (
@@ -341,7 +341,7 @@ export default function CreateBarnPage() {
                         w-full text-left p-4 rounded-xl border-2 transition-all relative
                         ${isSelected
                           ? 'border-amber-500 bg-amber-50'
-                          : 'border-stone-200 hover:border-stone-300 bg-white'
+                          : 'border-border hover:border-border bg-card'
                         }
                       `}
                     >
@@ -355,7 +355,7 @@ export default function CreateBarnPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-stone-900">
+                            <h3 className="font-semibold text-foreground">
                               {pricing.displayName}
                             </h3>
                             {isSelected && (
@@ -364,14 +364,14 @@ export default function CreateBarnPage() {
                               </div>
                             )}
                           </div>
-                          <p className="text-sm text-stone-600 mb-3">
+                          <p className="text-sm text-muted-foreground mb-3">
                             {pricing.description}
                           </p>
                           <div className="flex flex-wrap gap-2 mb-2">
                             {keyFeatures.slice(0, 3).map((feature, idx) => (
                               <span
                                 key={idx}
-                                className="text-xs px-2 py-1 bg-stone-100 text-stone-700 rounded"
+                                className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
                               >
                                 {feature}
                               </span>
@@ -379,10 +379,10 @@ export default function CreateBarnPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-stone-900">
+                          <div className="text-2xl font-bold text-foreground">
                             {formatPrice(pricing.monthlyPriceCents)}
                           </div>
-                          <div className="text-xs text-stone-500">
+                          <div className="text-xs text-muted-foreground">
                             {tier === 'FREE' ? 'Forever' : 'per month'}
                           </div>
                         </div>
@@ -399,7 +399,7 @@ export default function CreateBarnPage() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="flex-1 px-4 py-2 border border-stone-300 rounded-lg text-stone-700 hover:bg-stone-50 font-medium"
+                className="flex-1 px-4 py-2 border border-border rounded-lg text-muted-foreground hover:bg-accent font-medium"
               >
                 Back
               </button>
@@ -428,7 +428,7 @@ export default function CreateBarnPage() {
         </form>
 
         {/* Help Text */}
-        <p className="text-center text-sm text-stone-500 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Want to join an existing barn instead?{' '}
           <Link href="/onboarding/join-barn" className="text-amber-600 hover:text-amber-700 font-medium">
             Enter invite code

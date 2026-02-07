@@ -95,48 +95,48 @@ export default function NotificationSettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Notification Settings</h1>
-        <p className="text-stone-500 mt-1">Configure how you receive alerts and reminders</p>
+        <h1 className="text-2xl font-bold text-foreground">Notification Settings</h1>
+        <p className="text-muted-foreground mt-1">Configure how you receive alerts and reminders</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Notification Channels */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Notification Channels</h3>
+          <h3 className="font-medium text-foreground mb-4">Notification Channels</h3>
           <div className="space-y-4">
-            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-background hover:bg-accent transition-all cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100">
                   <Mail className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-stone-900">Email Notifications</p>
-                  <p className="text-sm text-stone-500">Receive updates via email</p>
+                  <p className="font-medium text-foreground">Email Notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive updates via email</p>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={settings.emailNotifications}
                 onChange={() => toggleSetting('emailNotifications')}
-                className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                className="w-5 h-5 rounded border-border text-amber-600 focus:ring-amber-500"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-background hover:bg-accent transition-all cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-100">
                   <Smartphone className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-stone-900">SMS Notifications</p>
-                  <p className="text-sm text-stone-500">Get text alerts for urgent items</p>
+                  <p className="font-medium text-foreground">SMS Notifications</p>
+                  <p className="text-sm text-muted-foreground">Get text alerts for urgent items</p>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={settings.smsNotifications}
                 onChange={() => toggleSetting('smsNotifications')}
-                className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                className="w-5 h-5 rounded border-border text-amber-600 focus:ring-amber-500"
               />
             </label>
           </div>
@@ -144,7 +144,7 @@ export default function NotificationSettingsPage() {
 
         {/* Alert Types */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Alert Types</h3>
+          <h3 className="font-medium text-foreground mb-4">Alert Types</h3>
           <div className="space-y-3">
             {[
               { key: 'dailyDigest', label: 'Daily Digest', desc: 'Summary of daily activities', icon: Bell },
@@ -157,20 +157,20 @@ export default function NotificationSettingsPage() {
             ].map(({ key, label, desc, icon: Icon }) => (
               <label
                 key={key}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 transition-all cursor-pointer"
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-accent transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 text-stone-400" />
+                  <Icon className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="font-medium text-stone-900">{label}</p>
-                    <p className="text-xs text-stone-500">{desc}</p>
+                    <p className="font-medium text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={settings[key as keyof typeof settings]}
                   onChange={() => toggleSetting(key as keyof typeof settings)}
-                  className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  className="w-5 h-5 rounded border-border text-amber-600 focus:ring-amber-500"
                 />
               </label>
             ))}

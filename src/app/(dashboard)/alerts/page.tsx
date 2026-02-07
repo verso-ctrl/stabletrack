@@ -67,7 +67,7 @@ export default function AlertsPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -77,8 +77,8 @@ export default function AlertsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Alerts</h1>
-          <p className="text-stone-500 mt-1">Stay on top of important notifications</p>
+          <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
+          <p className="text-muted-foreground mt-1">Stay on top of important notifications</p>
         </div>
         {filteredAlerts.length > 0 && (
           <button
@@ -102,8 +102,8 @@ export default function AlertsPage() {
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">{urgentCount}</p>
-              <p className="text-sm text-stone-500">Urgent</p>
+              <p className="text-2xl font-bold text-foreground">{urgentCount}</p>
+              <p className="text-sm text-muted-foreground">Urgent</p>
             </div>
           </div>
         </button>
@@ -116,8 +116,8 @@ export default function AlertsPage() {
               <AlertCircle className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">{warningCount}</p>
-              <p className="text-sm text-stone-500">Warnings</p>
+              <p className="text-2xl font-bold text-foreground">{warningCount}</p>
+              <p className="text-sm text-muted-foreground">Warnings</p>
             </div>
           </div>
         </button>
@@ -130,8 +130,8 @@ export default function AlertsPage() {
               <Info className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">{infoCount}</p>
-              <p className="text-sm text-stone-500">Info</p>
+              <p className="text-2xl font-bold text-foreground">{infoCount}</p>
+              <p className="text-sm text-muted-foreground">Info</p>
             </div>
           </div>
         </button>
@@ -159,7 +159,7 @@ export default function AlertsPage() {
                     <h3 className={`font-medium ${config.textColor}`}>{alert.title}</h3>
                     <p className={`text-sm mt-1 ${config.textColor} opacity-80`}>{alert.message}</p>
                     {alert.horseName && (
-                      <p className="text-sm mt-2 text-stone-600">
+                      <p className="text-sm mt-2 text-muted-foreground">
                         Horse: <span className="font-medium">{alert.horseName}</span>
                       </p>
                     )}
@@ -168,7 +168,7 @@ export default function AlertsPage() {
                     {alert.actionUrl && (
                       <Link
                         href={alert.actionUrl}
-                        className="flex items-center gap-1 text-sm font-medium text-stone-600 hover:text-stone-900"
+                        className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
                       >
                         View
                         <ChevronRight className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function AlertsPage() {
                     )}
                     <button
                       onClick={() => dismissAlert(alert.id)}
-                      className="p-1 rounded text-stone-400 hover:text-stone-600 hover:bg-white/50"
+                      className="p-1 rounded text-muted-foreground hover:text-muted-foreground hover:bg-card/50"
                       title="Dismiss"
                     >
                       <CheckCircle className="w-4 h-4" />
@@ -189,9 +189,9 @@ export default function AlertsPage() {
         </div>
       ) : (
         <div className="card p-12 text-center">
-          <Bell className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <h3 className="font-medium text-stone-900 mb-2">All caught up!</h3>
-          <p className="text-stone-500">
+          <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-medium text-foreground mb-2">All caught up!</h3>
+          <p className="text-muted-foreground">
             {dismissedAlerts.length > 0 
               ? "You've dismissed all alerts" 
               : "No alerts at the moment"}

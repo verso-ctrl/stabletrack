@@ -6,6 +6,6 @@ export { OverviewTab } from './OverviewTab';
 export { HealthTab } from './HealthTab';
 export { CareTab } from './CareTab';
 export { EventsTab } from './EventsTab';
+export { TasksTab } from './TasksTab';
 export { DocumentsTab } from './DocumentsTab';
-export { CompetitionsTab } from './CompetitionsTab';
 export { ActivityTab } from './ActivityTab';

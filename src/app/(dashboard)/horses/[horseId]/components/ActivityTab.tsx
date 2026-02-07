@@ -48,8 +48,8 @@ function getCategoryIcon(category: string) {
     case 'health': return <Stethoscope className="w-4 h-4 text-red-500" />;
     case 'event': return <Calendar className="w-4 h-4 text-blue-600" />;
     case 'training': return <Activity className="w-4 h-4 text-amber-600" />;
-    case 'weight': return <Weight className="w-4 h-4 text-stone-600" />;
-    default: return <Clock className="w-4 h-4 text-stone-400" />;
+    case 'weight': return <Weight className="w-4 h-4 text-muted-foreground" />;
+    default: return <Clock className="w-4 h-4 text-muted-foreground" />;
   }
 }
 
@@ -60,8 +60,8 @@ function getCategoryColor(category: string) {
     case 'health': return 'bg-red-50 border-red-200';
     case 'event': return 'bg-blue-50 border-blue-200';
     case 'training': return 'bg-amber-50 border-amber-200';
-    case 'weight': return 'bg-stone-50 border-stone-200';
-    default: return 'bg-stone-50 border-stone-200';
+    case 'weight': return 'bg-background border-border';
+    default: return 'bg-background border-border';
   }
 }
 
@@ -131,8 +131,8 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
               onClick={() => setFilter(opt.value)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 filter === opt.value
-                  ? 'bg-stone-900 text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-accent'
               }`}
             >
               {opt.label}
@@ -144,14 +144,14 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
       {/* Activity List */}
       {filteredActivities.length === 0 ? (
         <div className="card p-8 text-center">
-          <Clock className="w-12 h-12 text-stone-200 mx-auto mb-2" />
-          <p className="text-stone-500">No activity recorded yet</p>
+          <Clock className="w-12 h-12 text-muted-foreground/20 mx-auto mb-2" />
+          <p className="text-muted-foreground">No activity recorded yet</p>
         </div>
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedActivities).map(([date, dayActivities]) => (
             <div key={date}>
-              <h3 className="text-sm font-medium text-stone-500 mb-3">{date}</h3>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">{date}</h3>
               <div className="space-y-2">
                 {dayActivities.map((activity) => {
                   const activityDate = activity.date ? new Date(activity.date) : null;
@@ -168,8 +168,8 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="font-medium text-stone-900">{activity.title}</p>
-                            <span className="text-xs text-stone-400 whitespace-nowrap">
+                            <p className="font-medium text-foreground">{activity.title}</p>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {isValidDate ? activityDate.toLocaleTimeString('en-US', {
                                 hour: 'numeric',
                                 minute: '2-digit',
@@ -177,11 +177,11 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
                             </span>
                           </div>
                           {activity.description && (
-                            <p className="text-sm text-stone-600 mt-0.5">{activity.description}</p>
+                            <p className="text-sm text-muted-foreground mt-0.5">{activity.description}</p>
                           )}
                           {/* Health check details */}
                           {activity.category === 'health' && activity.metadata && (
-                            <div className="mt-2 text-sm text-stone-600 grid grid-cols-2 gap-x-4 gap-y-1">
+                            <div className="mt-2 text-sm text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
                               {activity.metadata.temperature && (
                                 <span>Temp: {activity.metadata.temperature}°F</span>
                               )}
@@ -203,16 +203,16 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
                             </div>
                           )}
                           {activity.metadata?.notes && (
-                            <p className="text-xs text-stone-500 mt-1 italic">{activity.metadata.notes}</p>
+                            <p className="text-xs text-muted-foreground mt-1 italic">{activity.metadata.notes}</p>
                           )}
                           {activity.metadata?.givenBy && (
-                            <p className="text-xs text-stone-400 mt-1">By {activity.metadata.givenBy}</p>
+                            <p className="text-xs text-muted-foreground mt-1">By {activity.metadata.givenBy}</p>
                           )}
                           {activity.metadata?.fedBy && (
-                            <p className="text-xs text-stone-400 mt-1">By {activity.metadata.fedBy}</p>
+                            <p className="text-xs text-muted-foreground mt-1">By {activity.metadata.fedBy}</p>
                           )}
                           {activity.metadata?.checkedBy && (
-                            <p className="text-xs text-stone-400 mt-1">Checked by {activity.metadata.checkedBy}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Checked by {activity.metadata.checkedBy}</p>
                           )}
                         </div>
                       </div>

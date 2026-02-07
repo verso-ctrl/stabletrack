@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { toast } from '@/lib/toast';
 import {
   User,
@@ -151,21 +152,21 @@ export default function ProfileSettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Profile Settings</h1>
-        <p className="text-stone-500 mt-1">Manage your personal information</p>
+        <h1 className="text-2xl font-bold text-foreground">Profile Settings</h1>
+        <p className="text-muted-foreground mt-1">Manage your personal information</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Profile Photo</h3>
+          <h3 className="font-medium text-foreground mb-4">Profile Photo</h3>
           <div className="flex items-center gap-6">
             <div className="relative">
-              <div className="avatar w-24 h-24">
+              <div className="avatar w-24 h-24 relative overflow-hidden">
                 {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  <Image src={formData.avatarUrl} alt="" fill className="object-cover" unoptimized />
                 ) : (
-                  <span className="text-stone-500 text-2xl">
+                  <span className="text-muted-foreground text-2xl">
                     {formData.firstName?.[0] || 'U'}
                   </span>
                 )}
@@ -173,7 +174,7 @@ export default function ProfileSettingsPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 p-2 rounded-full bg-stone-900 text-white hover:bg-stone-800 transition-all"
+                className="absolute -bottom-2 -right-2 p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
                 disabled={isSaving}
               >
                 <Camera className="w-4 h-4" />
@@ -187,21 +188,21 @@ export default function ProfileSettingsPage() {
               />
             </div>
             <div>
-              <p className="text-sm text-stone-600">Upload a new profile photo</p>
-              <p className="text-xs text-stone-400 mt-1">JPG, PNG, or GIF. Max 5MB.</p>
+              <p className="text-sm text-muted-foreground">Upload a new profile photo</p>
+              <p className="text-xs text-muted-foreground mt-1">JPG, PNG, or GIF. Max 5MB.</p>
             </div>
           </div>
         </div>
 
         {/* Personal Info */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Personal Information</h3>
+          <h3 className="font-medium text-foreground mb-4">Personal Information</h3>
           <div className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">First Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={formData.firstName}
@@ -212,9 +213,9 @@ export default function ProfileSettingsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Last Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={formData.lastName}
@@ -227,23 +228,23 @@ export default function ProfileSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="email"
                   value={formData.email}
-                  className="input pl-10 w-full bg-stone-50"
+                  className="input pl-10 w-full bg-background"
                   disabled
                 />
               </div>
-              <p className="text-xs text-stone-500 mt-1">Email cannot be changed</p>
+              <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Phone Number</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Phone Number</label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="tel"
                   value={formData.phone}
@@ -258,11 +259,11 @@ export default function ProfileSettingsPage() {
 
         {/* Preferences */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Preferences</h3>
+          <h3 className="font-medium text-foreground mb-4">Preferences</h3>
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Timezone</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Timezone</label>
             <div className="relative">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <select
                 value={formData.timezone}
                 onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}

@@ -198,7 +198,7 @@ export default function DocumentsPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -208,8 +208,8 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Documents</h1>
-          <p className="text-stone-500 mt-1">{canEdit ? 'Store and manage important files' : 'View documents'}</p>
+          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
+          <p className="text-muted-foreground mt-1">{canEdit ? 'Store and manage important files' : 'View documents'}</p>
         </div>
         {canEdit && (
           <button
@@ -225,7 +225,7 @@ export default function DocumentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search documents..."
@@ -253,11 +253,11 @@ export default function DocumentsPage() {
         </div>
       ) : filteredDocs.length === 0 ? (
         <div className="card p-12 text-center">
-          <FolderOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-stone-900 mb-2">
+          <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No Documents Found
           </h3>
-          <p className="text-stone-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             {searchQuery || typeFilter ? 'Try adjusting your filters' : 'Upload your first document to get started'}
           </p>
           {!searchQuery && !typeFilter && canEdit && (
@@ -271,15 +271,15 @@ export default function DocumentsPage() {
         </div>
       ) : (
         <div className="card overflow-hidden">
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-border">
             {filteredDocs.map((doc) => (
-              <div key={doc.id} className="p-4 hover:bg-stone-50 transition-all">
+              <div key={doc.id} className="p-4 hover:bg-accent transition-all">
                 <div className="flex items-center gap-4">
                   <div className="text-2xl">{getFileIcon(doc.fileName)}</div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-stone-900 truncate">{doc.title}</h3>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-500 mt-1">
+                    <h3 className="font-medium text-foreground truncate">{doc.title}</h3>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
                       <span>{doc.fileName}</span>
                       <span>{formatFileSize(doc.fileSize)}</span>
                       {doc.horse && (
@@ -301,7 +301,7 @@ export default function DocumentsPage() {
                       href={doc.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-all"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-muted-foreground hover:bg-accent transition-all"
                       title="View"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -309,14 +309,14 @@ export default function DocumentsPage() {
                     <a
                       href={doc.fileUrl}
                       download={doc.fileName}
-                      className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-all"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-muted-foreground hover:bg-accent transition-all"
                       title="Download"
                     >
                       <Download className="w-4 h-4" />
                     </a>
                     <button
                       onClick={() => handleDelete(doc.id)}
-                      className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-all"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -332,12 +332,12 @@ export default function DocumentsPage() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Upload Document</h3>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="p-1 rounded hover:bg-stone-100"
+                className="p-1 rounded hover:bg-accent"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -347,20 +347,20 @@ export default function DocumentsPage() {
             <div
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                uploadForm.file ? 'border-green-300 bg-green-50' : 'border-stone-300 hover:border-amber-400'
+                uploadForm.file ? 'border-green-300 bg-green-50' : 'border-border hover:border-amber-400'
               }`}
             >
               {uploadForm.file ? (
                 <>
                   <div className="text-4xl mb-2">{getFileIcon(uploadForm.file.name)}</div>
-                  <p className="text-stone-900 font-medium">{uploadForm.file.name}</p>
-                  <p className="text-sm text-stone-500">{formatFileSize(uploadForm.file.size)}</p>
+                  <p className="text-foreground font-medium">{uploadForm.file.name}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(uploadForm.file.size)}</p>
                 </>
               ) : (
                 <>
-                  <Upload className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-                  <p className="text-stone-600 font-medium">Click to select a file</p>
-                  <p className="text-sm text-stone-500 mt-1">PDF, DOC, XLS, JPG up to 10MB</p>
+                  <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground font-medium">Click to select a file</p>
+                  <p className="text-sm text-muted-foreground mt-1">PDF, DOC, XLS, JPG up to 10MB</p>
                 </>
               )}
               <input
@@ -374,7 +374,7 @@ export default function DocumentsPage() {
             
             <div className="space-y-4 mt-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Document Title *
                 </label>
                 <input
@@ -387,7 +387,7 @@ export default function DocumentsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Horse *
                 </label>
                 <select
@@ -403,7 +403,7 @@ export default function DocumentsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Type
                 </label>
                 <select
@@ -418,7 +418,7 @@ export default function DocumentsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Expiry Date (optional)
                 </label>
                 <input

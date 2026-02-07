@@ -2,10 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useHorses } from '@/hooks/useData';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useBarn } from '@/contexts/BarnContext';
-import { Plus, Search, Grid, List, ChevronRight, Loader2, Filter } from 'lucide-react';
+import { Plus, Search, Grid, List, ChevronRight, Loader2, Filter, Download } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
+import { toCsv, downloadCsv } from '@/lib/csv';
 import { hasPermission, BarnRole } from '@/types';
 
 const HorseIcon = ({ className }: { className?: string }) => (
@@ -21,7 +24,7 @@ type StatusFilter = 'all' | 'ACTIVE' | 'LAYUP' | 'RETIRED';
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
   ACTIVE: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
   LAYUP: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  RETIRED: { bg: 'bg-stone-100', text: 'text-stone-600', dot: 'bg-stone-400' },
+  RETIRED: { bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
   SOLD: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
 };
 
@@ -29,12 +32,25 @@ export default function HorsesPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
   const { currentBarn } = useBarn();
-  
-  const { horses, total, isLoading, error } = useHorses({
+
+  const { horses, total, totalPages, isLoading, error } = useHorses({
     status: statusFilter === 'all' ? undefined : statusFilter,
     search: searchQuery || undefined,
+    page,
+    pageSize: 20,
   });
+
+  // Reset to page 1 when filters change
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
+  const handleStatusFilter = (value: StatusFilter) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
   
   const { canAddHorses } = useSubscription();
   const canAdd = canAddHorses(total);
@@ -42,6 +58,19 @@ export default function HorsesPage() {
   // Check if user has permission to add horses
   const currentRole = (currentBarn?.role || 'CLIENT') as BarnRole;
   const canWrite = hasPermission(currentRole, 'horses:write');
+
+  const handleExportCsv = () => {
+    const csv = toCsv(horses, [
+      { key: 'barnName', header: 'Name' },
+      { key: 'registeredName', header: 'Registered Name' },
+      { key: 'breed', header: 'Breed' },
+      { key: 'age', header: 'Age' },
+      { key: 'sex', header: 'Sex' },
+      { key: 'status', header: 'Status' },
+      { key: 'stallName', header: 'Stall' },
+    ]);
+    downloadCsv(csv, 'horses.csv');
+  };
 
   if (error) {
     return (
@@ -56,8 +85,8 @@ export default function HorsesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">Horses</h1>
-          <p className="text-stone-500 mt-0.5 text-sm">{total} total in barn</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Horses</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{total} total in barn</p>
         </div>
 
         {canWrite && (
@@ -78,12 +107,12 @@ export default function HorsesPage() {
       <div className="card p-3">
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search horses..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="input pl-10 text-sm h-10"
             />
           </div>
@@ -91,7 +120,7 @@ export default function HorsesPage() {
           <div className="flex gap-2">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              onChange={(e) => handleStatusFilter(e.target.value as StatusFilter)}
               className="input flex-1 sm:flex-initial text-sm h-10"
             >
               <option value="all">All Status</option>
@@ -100,22 +129,33 @@ export default function HorsesPage() {
               <option value="RETIRED">Retired</option>
             </select>
 
-            <div className="flex border border-stone-200 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="flex border border-border rounded-lg overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 transition-colors touch-target ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50 active:bg-stone-100'}`}
+                className={`p-2.5 transition-colors touch-target ${viewMode === 'grid' ? 'bg-amber-50 text-amber-600' : 'bg-card text-muted-foreground hover:bg-accent active:bg-accent'}`}
                 aria-label="Grid view"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 transition-colors touch-target ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-white text-stone-400 hover:bg-stone-50 active:bg-stone-100'}`}
+                className={`p-2.5 transition-colors touch-target ${viewMode === 'list' ? 'bg-amber-50 text-amber-600' : 'bg-card text-muted-foreground hover:bg-accent active:bg-accent'}`}
                 aria-label="List view"
               >
                 <List className="w-4 h-4" />
               </button>
             </div>
+
+            {horses.length > 0 && (
+              <button
+                onClick={handleExportCsv}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors"
+                title="Download CSV"
+              >
+                <Download className="w-4 h-4" />
+                CSV
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -133,10 +173,10 @@ export default function HorsesPage() {
           <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
             <HorseIcon className="w-8 h-8 text-amber-600" />
           </div>
-          <h2 className="text-lg font-semibold text-stone-900 mb-1">
+          <h2 className="text-lg font-semibold text-foreground mb-1">
             {searchQuery || statusFilter !== 'all' ? 'No horses found' : 'No horses yet'}
           </h2>
-          <p className="text-stone-500 mb-6">
+          <p className="text-muted-foreground mb-6">
             {searchQuery || statusFilter !== 'all' 
               ? 'Try adjusting your search or filters'
               : 'Add your first horse to get started'
@@ -160,15 +200,17 @@ export default function HorsesPage() {
               <Link
                 key={horse.id}
                 href={`/horses/${horse.id}`}
-                className="card overflow-hidden hover:shadow-md hover:border-stone-300 transition-all group active:scale-[0.98] no-tap-highlight"
+                className="card overflow-hidden hover:shadow-md hover:border-border transition-all group active:scale-[0.98] no-tap-highlight"
               >
                 {/* Photo */}
-                <div className="aspect-square sm:aspect-[4/3] bg-stone-100 relative overflow-hidden">
+                <div className="aspect-square sm:aspect-[4/3] bg-muted relative overflow-hidden">
                   {horse.profilePhotoUrl ? (
-                    <img
+                    <Image
                       src={horse.profilePhotoUrl}
                       alt={horse.barnName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
@@ -187,16 +229,16 @@ export default function HorsesPage() {
 
                 {/* Info */}
                 <div className="p-3 sm:p-4">
-                  <h3 className="font-semibold text-sm sm:text-base text-stone-900 group-hover:text-amber-600 transition-colors truncate">
+                  <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-amber-600 transition-colors truncate">
                     {horse.barnName}
                   </h3>
-                  <p className="text-xs sm:text-sm text-stone-500 mt-0.5 truncate">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
                     {horse.breed || 'Unknown breed'}
                     {horse.age && ` · ${horse.age} yrs`}
                   </p>
 
                   {horse.stallName && (
-                    <p className="text-[10px] sm:text-xs text-stone-400 mt-1.5 sm:mt-2 truncate">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 sm:mt-2 truncate">
                       Stall {horse.stallName}
                     </p>
                   )}
@@ -209,19 +251,19 @@ export default function HorsesPage() {
 
       {/* List View */}
       {!isLoading && horses.length > 0 && viewMode === 'list' && (
-        <div className="card divide-y divide-stone-100">
+        <div className="card divide-y divide-border">
           {horses.map((horse) => {
             const status = statusConfig[horse.status] || statusConfig.ACTIVE;
             return (
               <Link
                 key={horse.id}
                 href={`/horses/${horse.id}`}
-                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors group no-tap-highlight"
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-accent active:bg-accent transition-colors group no-tap-highlight"
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {horse.profilePhotoUrl ? (
-                    <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                    <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
                   ) : (
                     <span className="text-base sm:text-lg font-bold text-amber-600">
                       {horse.barnName?.charAt(0) || '?'}
@@ -232,11 +274,11 @@ export default function HorsesPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-sm sm:text-base text-stone-900 group-hover:text-amber-600 transition-colors truncate">
+                    <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-amber-600 transition-colors truncate">
                       {horse.barnName}
                     </h3>
                   </div>
-                  <p className="text-xs sm:text-sm text-stone-500 mt-0.5 truncate">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
                     {horse.breed || 'Unknown breed'}
                     {horse.age && ` · ${horse.age} yrs`}
                     {horse.stallName && ` · Stall ${horse.stallName}`}
@@ -252,12 +294,15 @@ export default function HorsesPage() {
                 {/* Status dot on mobile */}
                 <div className={`sm:hidden w-2 h-2 rounded-full ${status.dot}`} />
 
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-stone-300 group-hover:text-stone-400 transition-colors flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-muted-foreground transition-colors flex-shrink-0" />
               </Link>
             );
           })}
         </div>
       )}
+
+      {/* Pagination */}
+      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

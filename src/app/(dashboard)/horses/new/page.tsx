@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCurrentBarn } from '@/contexts/BarnContext';
 import { ArrowLeft, Loader2, Upload, X, Camera } from 'lucide-react';
@@ -142,13 +143,13 @@ export default function NewHorsePage() {
       <div className="flex items-center gap-4 mb-6">
         <Link 
           href="/horses"
-          className="p-2 rounded-xl hover:bg-stone-100 transition-all"
+          className="p-2 rounded-xl hover:bg-accent transition-all"
         >
-          <ArrowLeft className="w-5 h-5 text-stone-600" />
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Add New Horse</h1>
-          <p className="text-stone-500">Enter your horse's information</p>
+          <h1 className="text-2xl font-bold text-foreground">Add New Horse</h1>
+          <p className="text-muted-foreground">Enter your horse's information</p>
         </div>
       </div>
 
@@ -182,10 +183,12 @@ export default function NewHorsePage() {
           />
           {photoPreview ? (
             <div className="relative w-32 h-32">
-              <img 
-                src={photoPreview} 
-                alt="Preview" 
-                className="w-full h-full object-cover rounded-xl"
+              <Image
+                src={photoPreview}
+                alt="Preview"
+                fill
+                className="object-cover rounded-xl"
+                unoptimized
               />
               <button
                 type="button"
@@ -203,18 +206,18 @@ export default function NewHorsePage() {
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
-                className="absolute bottom-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white"
+                className="absolute bottom-2 right-2 w-8 h-8 bg-card/90 rounded-full flex items-center justify-center shadow hover:bg-card"
               >
-                <Camera className="w-4 h-4 text-stone-600" />
+                <Camera className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
           ) : (
             <div 
               onClick={() => photoInputRef.current?.click()}
-              className="w-32 h-32 rounded-xl bg-stone-100 border-2 border-dashed border-stone-300 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-stone-50 hover:border-emerald-400 transition-all"
+              className="w-32 h-32 rounded-xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-accent hover:border-emerald-400 transition-all"
             >
-              <Upload className="w-8 h-8 text-stone-400" />
-              <span className="text-xs text-stone-500">Add Photo</span>
+              <Upload className="w-8 h-8 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Add Photo</span>
             </div>
           )}
         </div>
@@ -350,8 +353,8 @@ export default function NewHorsePage() {
         </div>
 
         {/* Additional Info */}
-        <div className="border-t border-stone-200 pt-6">
-          <h3 className="font-semibold text-stone-900 mb-4">Additional Information</h3>
+        <div className="border-t border-border pt-6">
+          <h3 className="font-semibold text-foreground mb-4">Additional Information</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -380,7 +383,7 @@ export default function NewHorsePage() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <Link href="/horses" className="btn-secondary btn-md">
             Cancel
           </Link>

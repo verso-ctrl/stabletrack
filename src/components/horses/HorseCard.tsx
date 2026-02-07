@@ -18,12 +18,12 @@ interface HorseCardProps {
 }
 
 export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProps) {
-  const compactClassName = "group w-full text-left p-3 rounded-xl bg-white border border-stone-200 hover:shadow-md hover:border-stone-300 transition-all flex items-center gap-4";
+  const compactClassName = "group w-full text-left p-3 rounded-xl bg-card border border-border hover:shadow-md hover:border-border transition-all flex items-center gap-4";
   
   const CompactContent = () => (
     <>
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0">
         {horse.profilePhotoUrl ? (
           <img
             src={horse.profilePhotoUrl}
@@ -31,7 +31,7 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             {horse.barnName.charAt(0)}
           </span>
         )}
@@ -39,8 +39,8 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
 
       {/* Name & breed */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-stone-900 truncate">{horse.barnName}</h3>
-        <p className="text-xs text-stone-500 truncate">
+        <h3 className="font-medium text-foreground truncate">{horse.barnName}</h3>
+        <p className="text-xs text-muted-foreground truncate">
           {horse.breed || 'Unknown breed'}
           {horse.age && ` • ${horse.age} yo`}
         </p>
@@ -58,7 +58,7 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
 
       {/* Stall */}
       {horse.stallName && (
-        <span className="text-xs text-stone-500 flex-shrink-0">
+        <span className="text-xs text-muted-foreground flex-shrink-0">
           Stall {horse.stallName}
         </span>
       )}
@@ -70,7 +70,7 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
         </span>
       )}
 
-      <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-stone-400 transition-colors flex-shrink-0" />
+      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-muted-foreground transition-colors flex-shrink-0" />
     </>
   );
 
@@ -90,12 +90,12 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
   }
 
   // Default variant
-  const defaultClassName = "group w-full text-left p-4 rounded-2xl bg-white border border-stone-200 hover:shadow-lg hover:-translate-y-0.5 transition-all";
+  const defaultClassName = "group w-full text-left p-4 rounded-2xl bg-card border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all";
   
   const DefaultContent = () => (
     <div className="flex items-start gap-4">
       {/* Avatar */}
-      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0">
         {horse.profilePhotoUrl ? (
           <img
             src={horse.profilePhotoUrl}
@@ -103,7 +103,7 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-xl font-semibold text-stone-500">
+          <span className="text-xl font-semibold text-muted-foreground">
             {horse.barnName.charAt(0)}
           </span>
         )}
@@ -113,10 +113,10 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="font-semibold text-stone-900 truncate">
+            <h3 className="font-semibold text-foreground truncate">
               {horse.barnName}
             </h3>
-            <p className="text-sm text-stone-500 truncate">
+            <p className="text-sm text-muted-foreground truncate">
               {horse.breed || 'Unknown breed'}
               {horse.age && ` • ${horse.age} yo`}
             </p>
@@ -132,10 +132,10 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
           </div>
 
           {/* Details row */}
-          <div className="flex items-center gap-4 mt-3 text-xs text-stone-500">
+          <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
             {horse.stallName && (
               <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
                 Stall {horse.stallName}
               </span>
             )}
@@ -170,7 +170,7 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
         </div>
 
         {/* Arrow */}
-        <ChevronRight className="w-5 h-5 text-stone-300 group-hover:text-stone-400 transition-colors flex-shrink-0" />
+        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-muted-foreground transition-colors flex-shrink-0" />
       </div>
     );
 
@@ -199,16 +199,16 @@ export function HorseCardSkeleton({ count = 3 }: HorseCardSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="p-4 rounded-2xl bg-white border border-stone-200 animate-pulse"
+          className="p-4 rounded-2xl bg-card border border-border animate-pulse"
         >
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-xl bg-stone-200" />
+            <div className="w-14 h-14 rounded-xl bg-muted" />
             <div className="flex-1">
-              <div className="h-5 w-32 bg-stone-200 rounded mb-2" />
-              <div className="h-4 w-48 bg-stone-100 rounded mb-3" />
+              <div className="h-5 w-32 bg-muted rounded mb-2" />
+              <div className="h-4 w-48 bg-muted rounded mb-3" />
               <div className="flex gap-3">
-                <div className="h-3 w-16 bg-stone-100 rounded" />
-                <div className="h-3 w-20 bg-stone-100 rounded" />
+                <div className="h-3 w-16 bg-muted rounded" />
+                <div className="h-3 w-20 bg-muted rounded" />
               </div>
             </div>
           </div>
@@ -232,16 +232,16 @@ export function HorseGrid({ horses, onHorseClick }: HorseGridProps) {
   if (horses.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">🐴</span>
         </div>
-        <h3 className="text-lg font-semibold text-stone-900 mb-1">No horses yet</h3>
-        <p className="text-stone-500 mb-4">
+        <h3 className="text-lg font-semibold text-foreground mb-1">No horses yet</h3>
+        <p className="text-muted-foreground mb-4">
           Add your first horse to get started
         </p>
         <Link
           href="/horses/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-xl font-medium hover:bg-stone-800 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
         >
           Add Horse
         </Link>

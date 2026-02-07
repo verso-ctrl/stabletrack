@@ -265,7 +265,7 @@ export function DocumentManager({
       {/* Upload modal */}
       {showUpload && selectedType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-card rounded-lg p-6 max-w-md w-full">
             <h4 className="font-medium mb-4">
               Upload {getDocumentTypeDisplayName(selectedType)}
             </h4>
@@ -282,8 +282,8 @@ export function DocumentManager({
             ) : uploading ? (
               <div className="py-8 text-center">
                 <Loader2 className="w-12 h-12 mx-auto mb-4 text-amber-500 animate-spin" />
-                <p className="text-sm text-stone-600">Uploading document...</p>
-                <div className="w-full max-w-xs mx-auto bg-stone-200 rounded-full h-2 overflow-hidden mt-4">
+                <p className="text-sm text-muted-foreground">Uploading document...</p>
+                <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2 overflow-hidden mt-4">
                   <div
                     className="h-full bg-amber-500 transition-all duration-300"
                     style={{ width: `${progress}%` }}
@@ -299,7 +299,7 @@ export function DocumentManager({
                     setShowUpload(false)
                     setSelectedType(null)
                   }}
-                  className="px-4 py-2 bg-stone-100 text-stone-700 rounded hover:bg-stone-200"
+                  className="px-4 py-2 bg-muted text-muted-foreground rounded hover:bg-accent"
                 >
                   Close
                 </button>
@@ -326,7 +326,7 @@ export function DocumentManager({
                     setShowUpload(false)
                     setSelectedType(null)
                   }}
-                  className="flex-1 px-4 py-2 border rounded text-sm hover:bg-stone-50"
+                  className="flex-1 px-4 py-2 border rounded text-sm hover:bg-accent"
                 >
                   Cancel
                 </button>

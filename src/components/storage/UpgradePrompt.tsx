@@ -45,18 +45,18 @@ export function UpgradePrompt({
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+      <div className="relative bg-card rounded-xl shadow-xl max-w-md w-full overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded"
+            className="absolute top-4 right-4 p-1 hover:bg-card/20 rounded"
           >
             <X className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-full">
+            <div className="p-2 bg-card/20 rounded-full">
               <Crown className="w-6 h-6" />
             </div>
             <div>
@@ -208,7 +208,7 @@ export function FeatureLocked({
       {/* Overlay */}
       <div className={cn(
         "flex flex-col items-center justify-center text-center p-8",
-        children ? "absolute inset-0 bg-white/80" : "bg-muted rounded-lg"
+        children ? "absolute inset-0 bg-card/80" : "bg-muted rounded-lg"
       )}>
         <div className="p-3 bg-amber-100 rounded-full mb-4">
           <Crown className="w-8 h-8 text-amber-600" />

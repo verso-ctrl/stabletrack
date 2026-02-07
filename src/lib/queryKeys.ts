@@ -36,6 +36,8 @@ export const queryKeys = {
     list: (barnId: string, filters?: {
       status?: string;
       assigneeId?: string;
+      horseId?: string;
+      farmOnly?: boolean;
       dueDate?: string
     }) => ['tasks', barnId, 'list', filters] as const,
     detail: (barnId: string, taskId: string) => ['tasks', barnId, taskId] as const,
@@ -132,21 +134,22 @@ export const queryKeys = {
 } as const;
 
 // Stale time constants (in milliseconds)
+// Data stays fresh during navigation — mutations invalidate the cache when changes happen
 export const staleTimes = {
-  horses: 2 * 60 * 1000,      // 2 minutes - static, rarely changes
-  events: 30 * 1000,          // 30 seconds - schedule-sensitive
-  tasks: 30 * 1000,           // 30 seconds - active workflow
+  horses: 5 * 60 * 1000,      // 5 minutes - rarely changes without a mutation
+  events: 3 * 60 * 1000,      // 3 minutes - invalidated on create/update
+  tasks: 3 * 60 * 1000,       // 3 minutes - invalidated on create/update
   clients: 5 * 60 * 1000,     // 5 minutes - very static
-  lessons: 60 * 1000,         // 1 minute
-  invoices: 60 * 1000,        // 1 minute
-  alerts: 30 * 1000,          // 30 seconds - time-sensitive
-  activity: 60 * 1000,        // 1 minute
+  lessons: 3 * 60 * 1000,     // 3 minutes
+  invoices: 3 * 60 * 1000,    // 3 minutes
+  alerts: 2 * 60 * 1000,      // 2 minutes - time-sensitive but not instant
+  activity: 2 * 60 * 1000,    // 2 minutes
   team: 5 * 60 * 1000,        // 5 minutes - static
   services: 5 * 60 * 1000,    // 5 minutes - static
-  dashboard: 60 * 1000,       // 1 minute
-  paddocks: 2 * 60 * 1000,    // 2 minutes - facility data
-  stalls: 2 * 60 * 1000,      // 2 minutes - facility data
-  turnouts: 30 * 1000,        // 30 seconds - active tracking
+  dashboard: 2 * 60 * 1000,   // 2 minutes
+  paddocks: 5 * 60 * 1000,    // 5 minutes - facility data
+  stalls: 5 * 60 * 1000,      // 5 minutes - facility data
+  turnouts: 2 * 60 * 1000,    // 2 minutes - active tracking
 } as const;
 
 // Helper to invalidate all data for a barn

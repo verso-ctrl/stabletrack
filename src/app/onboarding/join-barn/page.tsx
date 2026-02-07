@@ -59,14 +59,14 @@ export default function JoinBarnPage() {
   // Show pending approval message
   if (pendingBarn) {
     return (
-      <div className="min-h-screen bg-stone-100 py-12 px-4">
+      <div className="min-h-screen bg-muted py-12 px-4">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center">
+          <div className="bg-card rounded-xl shadow-sm border border-border p-8 text-center">
             <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
               <Clock className="w-8 h-8 text-amber-600" />
             </div>
-            <h1 className="text-2xl font-bold text-stone-900 mb-2">Request Submitted!</h1>
-            <p className="text-stone-600 mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-2">Request Submitted!</h1>
+            <p className="text-muted-foreground mb-6">
               Your request to join <span className="font-semibold">{pendingBarn}</span> has been sent to the barn owner for approval.
             </p>
             
@@ -86,7 +86,7 @@ export default function JoinBarnPage() {
               </Link>
               <Link
                 href="/dashboard"
-                className="block w-full px-4 py-3 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 font-medium"
+                className="block w-full px-4 py-3 bg-muted text-muted-foreground rounded-lg hover:bg-accent font-medium"
               >
                 Go to Dashboard
               </Link>
@@ -98,12 +98,12 @@ export default function JoinBarnPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 py-12 px-4">
+    <div className="min-h-screen bg-muted py-12 px-4">
       <div className="max-w-md mx-auto">
         {/* Back Link */}
         <Link 
           href="/onboarding" 
-          className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 mb-8"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
@@ -111,11 +111,11 @@ export default function JoinBarnPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-stone-200 flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-stone-600" />
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">Join a Barn</h1>
-          <p className="text-stone-500 mt-2">
+          <h1 className="text-2xl font-bold text-foreground">Join a Barn</h1>
+          <p className="text-muted-foreground mt-2">
             Enter the invite code you received from your barn manager
           </p>
         </div>
@@ -128,24 +128,24 @@ export default function JoinBarnPage() {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+        <form onSubmit={handleSubmit} className="bg-card rounded-xl shadow-sm border border-border p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Invite Code
               </label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   type="text"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                  className="w-full pl-10 pr-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center font-mono text-lg tracking-wider"
+                  className="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center font-mono text-lg tracking-wider"
                   placeholder="STABLE-XXXXXX"
                   maxLength={14}
                 />
               </div>
-              <p className="mt-2 text-xs text-stone-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 The invite code looks like "STABLE-ABC123"
               </p>
             </div>
@@ -187,7 +187,7 @@ export default function JoinBarnPage() {
         </div>
 
         {/* Alternative */}
-        <p className="text-center text-sm text-stone-500 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Want to create your own barn instead?{' '}
           <Link href="/onboarding/create-barn" className="text-amber-600 hover:text-amber-700 font-medium">
             Create a barn

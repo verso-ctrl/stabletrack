@@ -33,7 +33,7 @@ export function OverviewTab({ horse, onNavigateToHealth }: OverviewTabProps) {
       {/* Active Medications */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
             <Pill className="w-4 h-4 text-purple-500" />
             Active Medications
           </h3>
@@ -45,20 +45,20 @@ export function OverviewTab({ horse, onNavigateToHealth }: OverviewTabProps) {
           <ul className="space-y-2">
             {horse.activeMedications.map((med) => (
               <li key={med.id} className="p-3 rounded-xl bg-purple-50 border border-purple-100">
-                <p className="font-medium text-stone-900">{med.name}</p>
-                <p className="text-sm text-stone-500">{med.dosage} • {med.frequency}</p>
+                <p className="font-medium text-foreground">{med.name}</p>
+                <p className="text-sm text-muted-foreground">{med.dosage} • {med.frequency}</p>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-stone-500 text-sm py-4">No active medications</p>
+          <p className="text-muted-foreground text-sm py-4">No active medications</p>
         )}
       </div>
 
       {/* Upcoming Events */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
             <Calendar className="w-4 h-4 text-blue-500" />
             Upcoming Events
           </h3>
@@ -69,10 +69,10 @@ export function OverviewTab({ horse, onNavigateToHealth }: OverviewTabProps) {
         {horse.upcomingEvents && horse.upcomingEvents.length > 0 ? (
           <ul className="space-y-2">
             {horse.upcomingEvents.slice(0, 3).map((event) => (
-              <li key={event.id} className="flex items-center gap-3 p-3 rounded-xl bg-stone-50">
+              <li key={event.id} className="flex items-center gap-3 p-3 rounded-xl bg-background">
                 <div className="flex-1">
-                  <p className="font-medium text-stone-900">{event.title}</p>
-                  <p className="text-sm text-stone-500">
+                  <p className="font-medium text-foreground">{event.title}</p>
+                  <p className="text-sm text-muted-foreground">
                     {new Date(event.scheduledDate).toLocaleDateString()}
                   </p>
                 </div>
@@ -81,14 +81,14 @@ export function OverviewTab({ horse, onNavigateToHealth }: OverviewTabProps) {
             ))}
           </ul>
         ) : (
-          <p className="text-stone-500 text-sm py-4">No upcoming events</p>
+          <p className="text-muted-foreground text-sm py-4">No upcoming events</p>
         )}
       </div>
 
       {/* Recent Health Records */}
       <div className="card p-5 lg:col-span-1">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
             <Stethoscope className="w-4 h-4 text-green-500" />
             Recent Health
           </h3>
@@ -102,17 +102,17 @@ export function OverviewTab({ horse, onNavigateToHealth }: OverviewTabProps) {
               <button
                 key={record.id}
                 onClick={onNavigateToHealth}
-                className="w-full p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+                className="w-full p-3 rounded-xl bg-background hover:bg-accent transition-colors text-left"
               >
-                <p className="font-medium text-stone-900">{record.type.replace(/_/g, ' ')}</p>
-                <p className="text-sm text-stone-500">
+                <p className="font-medium text-foreground">{record.type.replace(/_/g, ' ')}</p>
+                <p className="text-sm text-muted-foreground">
                   {new Date(record.date).toLocaleDateString()}
                 </p>
               </button>
             ))}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm py-4">No health records</p>
+          <p className="text-muted-foreground text-sm py-4">No health records</p>
         )}
         {horse.recentHealthRecords && horse.recentHealthRecords.length > 3 && (
           <button

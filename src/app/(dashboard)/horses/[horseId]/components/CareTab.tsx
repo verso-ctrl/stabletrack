@@ -35,7 +35,7 @@ export function CareTab({ horse, onEditFeed, canEdit = true }: CareTabProps) {
       {/* Feed Program */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Feed Program</h3>
+          <h3 className="font-semibold text-foreground">Feed Program</h3>
           {canEdit && (
             <button onClick={onEditFeed} className="btn-secondary btn-sm">
               <Edit className="w-4 h-4" />
@@ -50,29 +50,29 @@ export function CareTab({ horse, onEditFeed, canEdit = true }: CareTabProps) {
             )}
             <div className="space-y-3">
               {feedProgram.items?.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
+                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-background">
                   <div>
-                    <p className="font-medium text-stone-900">
+                    <p className="font-medium text-foreground">
                       {item.feedType?.name || item.supplement?.name || item.customName}
                     </p>
-                    <p className="text-sm text-stone-500">{item.feedingTime}</p>
+                    <p className="text-sm text-muted-foreground">{item.feedingTime}</p>
                   </div>
-                  <p className="font-medium text-stone-700">
+                  <p className="font-medium text-muted-foreground">
                     {item.amount} {item.unit}
                   </p>
                 </div>
               ))}
             </div>
             {feedProgram.instructions && (
-              <p className="text-sm text-stone-600 mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200">
+              <p className="text-sm text-muted-foreground mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200">
                 {feedProgram.instructions}
               </p>
             )}
           </div>
         ) : (
           <div className="text-center py-6">
-            <Utensils className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-            <p className="text-stone-500 text-sm mb-3">No feed program set up</p>
+            <Utensils className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm mb-3">No feed program set up</p>
             {canEdit && (
               <button onClick={onEditFeed} className="btn-primary btn-sm">
                 <Plus className="w-4 h-4" />

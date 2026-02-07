@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Trees,
   Home,
@@ -64,7 +65,7 @@ export default function PasturesPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -74,19 +75,19 @@ export default function PasturesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Pastures & Stalls</h1>
-          <p className="text-stone-500 mt-1">Manage where your horses live and graze</p>
+          <h1 className="text-2xl font-bold text-foreground">Pastures & Stalls</h1>
+          <p className="text-muted-foreground mt-1">Manage where your horses live and graze</p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex rounded-lg border border-stone-200 p-1 bg-white">
+          <div className="flex rounded-lg border border-border p-1 bg-card">
             <button
               onClick={() => setViewMode('pastures')}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'pastures'
                   ? 'bg-green-100 text-green-700'
-                  : 'text-stone-600 hover:bg-stone-50'
+                  : 'text-muted-foreground hover:bg-accent'
               }`}
             >
               <Trees className="w-4 h-4" />
@@ -97,7 +98,7 @@ export default function PasturesPage() {
               className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'stalls'
                   ? 'bg-amber-100 text-amber-700'
-                  : 'text-stone-600 hover:bg-stone-50'
+                  : 'text-muted-foreground hover:bg-accent'
               }`}
             >
               <Home className="w-4 h-4" />
@@ -107,7 +108,7 @@ export default function PasturesPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add {viewMode === 'pastures' ? 'Pasture' : 'Stall'}
@@ -117,7 +118,7 @@ export default function PasturesPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       ) : viewMode === 'pastures' ? (
         <PasturesView
@@ -139,31 +140,29 @@ export default function PasturesPage() {
 
       {/* Unassigned Horses */}
       {unassignedHorses.length > 0 && (
-        <div className="bg-stone-50 rounded-xl p-6 border border-stone-200">
-          <h3 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-stone-500" />
+        <div className="bg-background rounded-xl p-6 border border-border">
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Users className="w-5 h-5 text-muted-foreground" />
             Unassigned Horses ({unassignedHorses.length})
           </h3>
           <div className="flex flex-wrap gap-3">
             {unassignedHorses.map((horse) => (
               <div
                 key={horse.id}
-                className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-stone-200 shadow-sm"
+                className="flex items-center gap-2 bg-card px-3 py-2 rounded-lg border border-border shadow-sm"
               >
                 {horse.profilePhotoUrl ? (
-                  <img
-                    src={horse.profilePhotoUrl}
-                    alt={horse.barnName}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                    <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
+                  </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center">
-                    <span className="text-sm font-medium text-stone-600">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {horse.barnName.charAt(0)}
                     </span>
                   </div>
                 )}
-                <span className="font-medium text-stone-900">{horse.barnName}</span>
+                <span className="font-medium text-foreground">{horse.barnName}</span>
               </div>
             ))}
           </div>
@@ -226,10 +225,10 @@ function PasturesView({
 
   if (paddocks.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-12 text-center">
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
         <Trees className="w-16 h-16 text-green-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-stone-900 mb-2">No pastures yet</h3>
-        <p className="text-stone-500 mb-4">Create pastures to track where your horses graze</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">No pastures yet</h3>
+        <p className="text-muted-foreground mb-4">Create pastures to track where your horses graze</p>
       </div>
     );
   }
@@ -239,7 +238,7 @@ function PasturesView({
       {paddocks.map((paddock) => (
         <div
           key={paddock.id}
-          className="bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow"
+          className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow"
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 text-white">
@@ -275,7 +274,7 @@ function PasturesView({
           {/* Horses */}
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-stone-500">
+              <span className="text-sm text-muted-foreground">
                 {paddock.horseCount} horse{paddock.horseCount !== 1 ? 's' : ''}
                 {paddock.maxHorses && ` / ${paddock.maxHorses}`}
               </span>
@@ -293,15 +292,13 @@ function PasturesView({
                 {paddock.horses.map((horse) => (
                   <div
                     key={horse.id}
-                    className="flex items-center justify-between bg-stone-50 rounded-lg p-2"
+                    className="flex items-center justify-between bg-background rounded-lg p-2"
                   >
                     <div className="flex items-center gap-2">
                       {horse.profilePhotoUrl ? (
-                        <img
-                          src={horse.profilePhotoUrl}
-                          alt={horse.barnName}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                          <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
+                        </div>
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                           <span className="text-sm font-medium text-green-700">
@@ -309,11 +306,11 @@ function PasturesView({
                           </span>
                         </div>
                       )}
-                      <span className="font-medium text-stone-900">{horse.barnName}</span>
+                      <span className="font-medium text-foreground">{horse.barnName}</span>
                     </div>
                     <button
                       onClick={() => removeHorse.mutate({ horseId: horse.id, action: 'remove' })}
-                      className="p-1 text-stone-400 hover:text-red-500 transition-colors"
+                      className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
                       title="Remove from pasture"
                     >
                       <X className="w-4 h-4" />
@@ -322,7 +319,7 @@ function PasturesView({
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-stone-400 text-center py-4">No horses assigned</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No horses assigned</p>
             )}
           </div>
         </div>
@@ -349,10 +346,10 @@ function StallsView({
 
   if (stalls.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-12 text-center">
+      <div className="bg-card rounded-xl border border-border p-12 text-center">
         <Home className="w-16 h-16 text-amber-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-stone-900 mb-2">No stalls yet</h3>
-        <p className="text-stone-500 mb-4">Create stalls to track horse housing assignments</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">No stalls yet</h3>
+        <p className="text-muted-foreground mb-4">Create stalls to track horse housing assignments</p>
       </div>
     );
   }
@@ -372,10 +369,10 @@ function StallsView({
     <div className="space-y-8">
       {Object.entries(sections).map(([section, sectionStalls]) => (
         <div key={section}>
-          <h3 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <Home className="w-5 h-5 text-amber-500" />
             {section}
-            <span className="text-stone-400 font-normal">({sectionStalls.length})</span>
+            <span className="text-muted-foreground font-normal">({sectionStalls.length})</span>
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -385,16 +382,16 @@ function StallsView({
                 className={`rounded-xl border-2 overflow-hidden transition-all ${
                   stall.horse
                     ? 'border-amber-200 bg-amber-50'
-                    : 'border-stone-200 bg-white hover:border-amber-300'
+                    : 'border-border bg-card hover:border-amber-300'
                 }`}
               >
                 {/* Stall Header */}
                 <div
                   className={`px-3 py-2 flex items-center justify-between ${
-                    stall.horse ? 'bg-amber-100' : 'bg-stone-100'
+                    stall.horse ? 'bg-amber-100' : 'bg-muted'
                   }`}
                 >
-                  <span className="font-bold text-stone-900">{stall.name}</span>
+                  <span className="font-bold text-foreground">{stall.name}</span>
                   <DropdownMenu
                     onEdit={() => onEdit(stall)}
                     onDelete={() => {
@@ -410,11 +407,9 @@ function StallsView({
                   {stall.horse ? (
                     <div className="text-center">
                       {stall.horse.profilePhotoUrl ? (
-                        <img
-                          src={stall.horse.profilePhotoUrl}
-                          alt={stall.horse.barnName}
-                          className="w-16 h-16 rounded-full object-cover mx-auto mb-2"
-                        />
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden mx-auto mb-2">
+                          <Image src={stall.horse.profilePhotoUrl} alt={stall.horse.barnName} fill className="object-cover" unoptimized />
+                        </div>
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-amber-200 flex items-center justify-center mx-auto mb-2">
                           <span className="text-2xl font-bold text-amber-700">
@@ -422,14 +417,14 @@ function StallsView({
                           </span>
                         </div>
                       )}
-                      <p className="font-medium text-stone-900 text-sm truncate">
+                      <p className="font-medium text-foreground text-sm truncate">
                         {stall.horse.barnName}
                       </p>
                       <button
                         onClick={() =>
                           removeHorse.mutate({ horseId: stall.horse!.id, action: 'remove' })
                         }
-                        className="mt-2 text-xs text-stone-500 hover:text-red-500 transition-colors"
+                        className="mt-2 text-xs text-muted-foreground hover:text-red-500 transition-colors"
                       >
                         Remove
                       </button>
@@ -437,7 +432,7 @@ function StallsView({
                   ) : (
                     <button
                       onClick={() => onAssign(stall)}
-                      className="w-full py-6 text-center text-stone-400 hover:text-amber-600 transition-colors"
+                      className="w-full py-6 text-center text-muted-foreground hover:text-amber-600 transition-colors"
                     >
                       <Plus className="w-8 h-8 mx-auto mb-1" />
                       <span className="text-sm">Assign Horse</span>
@@ -472,13 +467,13 @@ function DropdownMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () =
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-stone-200 py-1 z-20 min-w-[120px]">
+          <div className="absolute right-0 top-full mt-1 bg-card rounded-lg shadow-lg border border-border py-1 z-20 min-w-[120px]">
             <button
               onClick={() => {
                 setOpen(false);
                 onEdit();
               }}
-              className="w-full px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent flex items-center gap-2"
             >
               <Pencil className="w-4 h-4" />
               Edit
@@ -542,25 +537,25 @@ function AddFacilityModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-4 border-b border-stone-200">
-          <h2 className="text-lg font-semibold text-stone-900">
+      <div className="bg-card rounded-xl shadow-xl max-w-md w-full">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
             Add {type === 'paddock' ? 'Pasture' : 'Stall'}
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-stone-500" />
+          <button onClick={onClose} className="p-1 hover:bg-accent rounded-lg transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Name *</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Name *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={type === 'paddock' ? 'e.g., North Pasture' : 'e.g., Stall 1'}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -568,7 +563,7 @@ function AddFacilityModal({
           {type === 'paddock' ? (
             <>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Acreage (optional)
                 </label>
                 <input
@@ -577,11 +572,11 @@ function AddFacilityModal({
                   value={acreage}
                   onChange={(e) => setAcreage(e.target.value)}
                   placeholder="e.g., 2.5"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Max Horses (optional)
                 </label>
                 <input
@@ -589,13 +584,13 @@ function AddFacilityModal({
                   value={maxHorses}
                   onChange={(e) => setMaxHorses(e.target.value)}
                   placeholder="e.g., 4"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Barn / Section
               </label>
               <input
@@ -603,9 +598,9 @@ function AddFacilityModal({
                 value={section}
                 onChange={(e) => setSection(e.target.value)}
                 placeholder="e.g., Main Barn, Barn 2, South Wing"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 You can use the same stall name in different sections
               </p>
             </div>
@@ -615,14 +610,14 @@ function AddFacilityModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !name}
-              className="px-4 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Creating...' : 'Create'}
             </button>
@@ -679,24 +674,24 @@ function EditFacilityModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex items-center justify-between p-4 border-b border-stone-200">
-          <h2 className="text-lg font-semibold text-stone-900">
+      <div className="bg-card rounded-xl shadow-xl max-w-md w-full">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
             Edit {type === 'paddock' ? 'Pasture' : 'Stall'}
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-stone-500" />
+          <button onClick={onClose} className="p-1 hover:bg-accent rounded-lg transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Name *</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Name *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -704,36 +699,36 @@ function EditFacilityModal({
           {type === 'paddock' ? (
             <>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Acreage</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Acreage</label>
                 <input
                   type="number"
                   step="0.1"
                   value={acreage}
                   onChange={(e) => setAcreage(e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Max Horses</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Max Horses</label>
                 <input
                   type="number"
                   value={maxHorses}
                   onChange={(e) => setMaxHorses(e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Barn / Section</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Barn / Section</label>
               <input
                 type="text"
                 value={section}
                 onChange={(e) => setSection(e.target.value)}
                 placeholder="e.g., Main Barn, Barn 2"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 You can use the same stall name in different sections
               </p>
             </div>
@@ -743,14 +738,14 @@ function EditFacilityModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !name}
-              className="px-4 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Saving...' : 'Save Changes'}
             </button>
@@ -801,32 +796,32 @@ function AssignHorseModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-stone-200">
+      <div className="bg-card rounded-xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
-            <h2 className="text-lg font-semibold text-stone-900">Assign Horse</h2>
-            <p className="text-sm text-stone-500">
+            <h2 className="text-lg font-semibold text-foreground">Assign Horse</h2>
+            <p className="text-sm text-muted-foreground">
               to {facilityName}
             </p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-stone-500" />
+          <button onClick={onClose} className="p-1 hover:bg-accent rounded-lg transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
-        <div className="p-4 border-b border-stone-200">
+        <div className="p-4 border-b border-border">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search horses..."
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {availableHorses.length === 0 ? (
-            <p className="text-center text-stone-500 py-8">
+            <p className="text-center text-muted-foreground py-8">
               {search ? 'No horses match your search' : 'All horses are already assigned'}
             </p>
           ) : (
@@ -836,23 +831,21 @@ function AssignHorseModal({
                   key={horse.id}
                   onClick={() => handleAssign(horse.id)}
                   disabled={isLoading}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:border-amber-300 hover:bg-amber-50 transition-colors text-left disabled:opacity-50"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-amber-300 hover:bg-amber-50 transition-colors text-left disabled:opacity-50"
                 >
                   {horse.profilePhotoUrl ? (
-                    <img
-                      src={horse.profilePhotoUrl}
-                      alt={horse.barnName}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                      <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
+                    </div>
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center">
-                      <span className="text-lg font-medium text-stone-600">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                      <span className="text-lg font-medium text-muted-foreground">
                         {horse.barnName.charAt(0)}
                       </span>
                     </div>
                   )}
-                  <span className="font-medium text-stone-900 flex-1">{horse.barnName}</span>
-                  <ArrowRight className="w-5 h-5 text-stone-400" />
+                  <span className="font-medium text-foreground flex-1">{horse.barnName}</span>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground" />
                 </button>
               ))}
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
 import {
   Utensils,
@@ -153,8 +154,8 @@ export default function FeedChartPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Feed Chart</h1>
-          <p className="text-stone-500">Daily feeding schedule and tracking</p>
+          <h1 className="text-2xl font-bold text-foreground">Feed Chart</h1>
+          <p className="text-muted-foreground">Daily feeding schedule and tracking</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={fetchFeedChart} className="btn-secondary btn-sm">
@@ -177,7 +178,7 @@ export default function FeedChartPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => changeDate(-1)}
-            className="p-2 rounded-lg hover:bg-stone-100"
+            className="p-2 rounded-lg hover:bg-accent"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -201,7 +202,7 @@ export default function FeedChartPage() {
 
           <button
             onClick={() => changeDate(1)}
-            className="p-2 rounded-lg hover:bg-stone-100"
+            className="p-2 rounded-lg hover:bg-accent"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -212,19 +213,19 @@ export default function FeedChartPage() {
       {chartData && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="card p-4">
-            <p className="text-sm text-stone-500">Total Horses</p>
-            <p className="text-2xl font-bold text-stone-900">{chartData.summary.totalHorses}</p>
+            <p className="text-sm text-muted-foreground">Total Horses</p>
+            <p className="text-2xl font-bold text-foreground">{chartData.summary.totalHorses}</p>
           </div>
           <div className="card p-4">
-            <p className="text-sm text-stone-500">With Feed Programs</p>
-            <p className="text-2xl font-bold text-stone-900">{chartData.summary.horsesWithPrograms}</p>
+            <p className="text-sm text-muted-foreground">With Feed Programs</p>
+            <p className="text-2xl font-bold text-foreground">{chartData.summary.horsesWithPrograms}</p>
           </div>
           <div className="card p-4">
-            <p className="text-sm text-stone-500">Feeding Times</p>
-            <p className="text-2xl font-bold text-stone-900">{chartData.feedingTimes.length}</p>
+            <p className="text-sm text-muted-foreground">Feeding Times</p>
+            <p className="text-2xl font-bold text-foreground">{chartData.feedingTimes.length}</p>
           </div>
           <div className="card p-4">
-            <p className="text-sm text-stone-500">Completed Today</p>
+            <p className="text-sm text-muted-foreground">Completed Today</p>
             <p className="text-2xl font-bold text-green-600">
               {chartData.horses.reduce((acc: number, horse: any) => {
                 return acc + Object.values(horse.feedSchedule).filter((s: any) => s.completed).length;
@@ -240,15 +241,15 @@ export default function FeedChartPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50 border-b border-stone-200">
-                  <th className="text-left py-3 px-4 font-medium text-stone-700 sticky left-0 bg-stone-50 z-10 min-w-[180px]">
+                <tr className="bg-background border-b border-border">
+                  <th className="text-left py-3 px-4 font-medium text-muted-foreground sticky left-0 bg-background z-10 min-w-[180px]">
                     Horse
                   </th>
                   {chartData.feedingTimes.map((time: string) => {
-                    const timeInfo = feedingTimeLabels[time] || { label: time, icon: Clock, color: 'bg-stone-100 text-stone-700' };
+                    const timeInfo = feedingTimeLabels[time] || { label: time, icon: Clock, color: 'bg-muted text-muted-foreground' };
                     const Icon = timeInfo.icon;
                     return (
-                      <th key={time} className="text-center py-3 px-2 font-medium text-stone-700 min-w-[140px]">
+                      <th key={time} className="text-center py-3 px-2 font-medium text-muted-foreground min-w-[140px]">
                         <div className="flex flex-col items-center gap-1">
                           <div className={`p-1.5 rounded-lg ${timeInfo.color}`}>
                             <Icon className="w-4 h-4" />
@@ -260,14 +261,14 @@ export default function FeedChartPage() {
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-border">
                 {chartData.horses.map((horse: any) => (
-                  <tr key={horse.id} className="hover:bg-stone-50">
-                    <td className="py-3 px-4 sticky left-0 bg-white z-10">
+                  <tr key={horse.id} className="hover:bg-accent">
+                    <td className="py-3 px-4 sticky left-0 bg-card z-10">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden">
+                        <div className="relative w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden">
                           {horse.profilePhotoUrl ? (
-                            <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                            <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
                           ) : (
                             <span className="text-amber-700 font-medium text-sm">
                               {horse.barnName.substring(0, 2).toUpperCase()}
@@ -275,8 +276,8 @@ export default function FeedChartPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-stone-900">{horse.barnName}</p>
-                          <p className="text-xs text-stone-500">
+                          <p className="font-medium text-foreground">{horse.barnName}</p>
+                          <p className="text-xs text-muted-foreground">
                             {horse.stall}
                             {horse.section && ` • ${horse.section}`}
                           </p>
@@ -291,7 +292,7 @@ export default function FeedChartPage() {
                       if (!schedule || schedule.items.length === 0) {
                         return (
                           <td key={time} className="py-3 px-2 text-center">
-                            <span className="text-stone-300">—</span>
+                            <span className="text-muted-foreground">—</span>
                           </td>
                         );
                       }
@@ -302,7 +303,7 @@ export default function FeedChartPage() {
                             rounded-lg p-2 text-xs
                             ${schedule.completed ? 'bg-green-50 border border-green-200' : 
                               schedule.skipped ? 'bg-red-50 border border-red-200' : 
-                              'bg-stone-50 border border-stone-200'}
+                              'bg-background border border-border'}
                           `}>
                             {/* Feed Items */}
                             <div className="space-y-1 mb-2">
@@ -311,11 +312,11 @@ export default function FeedChartPage() {
                                   <span className={`
                                     ${schedule.completed ? 'text-green-700' : 
                                       schedule.skipped ? 'text-red-400 line-through' : 
-                                      'text-stone-700'}
+                                      'text-muted-foreground'}
                                   `}>
                                     {item.name}
                                   </span>
-                                  <span className="text-stone-500 whitespace-nowrap">
+                                  <span className="text-muted-foreground whitespace-nowrap">
                                     {item.amount} {item.unit}
                                   </span>
                                 </div>
@@ -331,9 +332,9 @@ export default function FeedChartPage() {
                             )}
 
                             {/* Actions */}
-                            <div className="flex items-center justify-center gap-1 pt-1 border-t border-stone-200">
+                            <div className="flex items-center justify-center gap-1 pt-1 border-t border-border">
                               {isUpdatingCell ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-stone-400" />
+                                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                               ) : schedule.completed ? (
                                 <button
                                   onClick={() => handleToggleFeeding(horse.id, time, 'undo')}
@@ -391,9 +392,9 @@ export default function FeedChartPage() {
         </div>
       ) : (
         <div className="card p-8 text-center">
-          <Utensils className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-          <p className="text-stone-500">No horses with feed programs</p>
-          <p className="text-sm text-stone-400 mt-1">
+          <Utensils className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No horses with feed programs</p>
+          <p className="text-sm text-muted-foreground mt-1">
             Add feed programs to horses to see them here
           </p>
         </div>
@@ -402,7 +403,7 @@ export default function FeedChartPage() {
       {/* Special Instructions */}
       {chartData && chartData.horses.some((h: any) => h.specialNotes) && (
         <div className="card p-4">
-          <h3 className="font-medium text-stone-900 mb-3 flex items-center gap-2">
+          <h3 className="font-medium text-foreground mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-amber-500" />
             Special Instructions
           </h3>
@@ -420,8 +421,8 @@ export default function FeedChartPage() {
       {/* Notes Modal */}
       {showNotes && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-border">
               <h3 className="text-lg font-semibold">Add Feeding Note</h3>
             </div>
             <div className="p-6">
@@ -433,7 +434,7 @@ export default function FeedChartPage() {
                 placeholder="Enter any notes about this feeding..."
               />
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button
                 onClick={() => {
                   setShowNotes(null);

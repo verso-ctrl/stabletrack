@@ -105,7 +105,7 @@ export function CompetitionsTab({ horse, barnId, canEdit = true }: CompetitionsT
       {/* Competition List */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Competition History</h3>
+          <h3 className="font-semibold text-foreground">Competition History</h3>
           {canEdit && (
             <button onClick={() => setShowAddModal(true)} className="btn-primary btn-sm">
               <Plus className="w-4 h-4" />
@@ -116,8 +116,8 @@ export function CompetitionsTab({ horse, barnId, canEdit = true }: CompetitionsT
 
         {competitions.length === 0 ? (
           <div className="text-center py-8">
-            <Trophy className="w-12 h-12 text-stone-200 mx-auto mb-2" />
-            <p className="text-stone-500 text-sm">No competition records yet</p>
+            <Trophy className="w-12 h-12 text-muted-foreground/20 mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm">No competition records yet</p>
             {canEdit && (
               <button onClick={() => setShowAddModal(true)} className="btn-secondary btn-sm mt-3">
                 Add First Result
@@ -130,25 +130,25 @@ export function CompetitionsTab({ horse, barnId, canEdit = true }: CompetitionsT
               const placingBadge = getPlacingBadge(comp.placing, comp.isChampion, comp.isReserve);
 
               return (
-                <div key={comp.id} className="p-4 rounded-xl bg-stone-50">
+                <div key={comp.id} className="p-4 rounded-xl bg-background">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-stone-900">{comp.eventName}</p>
+                        <p className="font-medium text-foreground">{comp.eventName}</p>
                         {placingBadge && (
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${placingBadge.bg} ${placingBadge.text}`}>
                             {placingBadge.label}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-stone-500 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {comp.className && `${comp.className} · `}
                         {new Date(comp.eventDate).toLocaleDateString()}
                         {comp.location && ` · ${comp.location}`}
                       </p>
                       <div className="flex flex-wrap gap-3 mt-2 text-sm">
                         {comp.score && (
-                          <span className="text-stone-600">Score: <span className="font-medium">{comp.score}</span></span>
+                          <span className="text-muted-foreground">Score: <span className="font-medium">{comp.score}</span></span>
                         )}
                         {comp.points && (
                           <span className="text-emerald-600">+{comp.points} pts</span>
@@ -247,14 +247,14 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="p-6 border-b border-stone-100 flex items-center justify-between sticky top-0 bg-white">
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="p-6 border-b border-border flex items-center justify-between sticky top-0 bg-card">
           <div>
             <h3 className="text-lg font-semibold">Add Competition Result</h3>
-            <p className="text-sm text-stone-500 mt-0.5">for {horse.barnName}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">for {horse.barnName}</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-stone-100">
-            <X className="w-5 h-5 text-stone-500" />
+          <button onClick={onClose} className="p-1 rounded hover:bg-accent">
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
@@ -262,7 +262,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
           {/* Event Name & Date */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Event/Show Name *</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Event/Show Name *</label>
               <input
                 type="text"
                 value={formData.eventName}
@@ -273,7 +273,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Event Date *</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Event Date *</label>
               <input
                 type="date"
                 value={formData.eventDate}
@@ -287,7 +287,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
           {/* Location & Discipline */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Location</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Location</label>
               <input
                 type="text"
                 value={formData.location}
@@ -297,7 +297,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Discipline</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Discipline</label>
               <input
                 type="text"
                 value={formData.discipline}
@@ -310,7 +310,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
 
           {/* Class Name */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Class Name</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Class Name</label>
             <input
               type="text"
               value={formData.className}
@@ -321,11 +321,11 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
           </div>
 
           {/* Results */}
-          <div className="border-t border-stone-200 pt-4">
-            <h4 className="font-medium text-stone-900 mb-3">Results</h4>
+          <div className="border-t border-border pt-4">
+            <h4 className="font-medium text-foreground mb-3">Results</h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1">Placing</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Placing</label>
                 <input
                   type="number"
                   min="1"
@@ -336,7 +336,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1">Total Entries</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Total Entries</label>
                 <input
                   type="number"
                   min="1"
@@ -347,7 +347,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1">Score</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Score</label>
                 <input
                   type="number"
                   step="0.01"
@@ -358,7 +358,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1">Points</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Points</label>
                 <input
                   type="number"
                   step="0.5"
@@ -373,7 +373,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
 
           {/* Prize Money */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Prize Money ($)</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Prize Money ($)</label>
             <input
               type="number"
               step="0.01"
@@ -391,33 +391,33 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
                 type="checkbox"
                 checked={formData.isChampion}
                 onChange={(e) => setFormData({ ...formData, isChampion: e.target.checked })}
-                className="rounded border-stone-300"
+                className="rounded border-border"
               />
-              <span className="text-sm text-stone-700">🏆 Champion</span>
+              <span className="text-sm text-muted-foreground">🏆 Champion</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isReserve}
                 onChange={(e) => setFormData({ ...formData, isReserve: e.target.checked })}
-                className="rounded border-stone-300"
+                className="rounded border-border"
               />
-              <span className="text-sm text-stone-700">🥈 Reserve Champion</span>
+              <span className="text-sm text-muted-foreground">🥈 Reserve Champion</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isQualified}
                 onChange={(e) => setFormData({ ...formData, isQualified: e.target.checked })}
-                className="rounded border-stone-300"
+                className="rounded border-border"
               />
-              <span className="text-sm text-stone-700">✓ Qualified</span>
+              <span className="text-sm text-muted-foreground">✓ Qualified</span>
             </label>
           </div>
 
           {formData.isQualified && (
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Qualified For</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Qualified For</label>
               <input
                 type="text"
                 value={formData.qualifiedFor}
@@ -430,7 +430,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -441,7 +441,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
           </div>
         </form>
 
-        <div className="flex gap-3 p-6 border-t border-stone-100 sticky bottom-0 bg-white">
+        <div className="flex gap-3 p-6 border-t border-border sticky bottom-0 bg-card">
           <button type="button" onClick={onClose} className="btn-secondary flex-1">
             Cancel
           </button>

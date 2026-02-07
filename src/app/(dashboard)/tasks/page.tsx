@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
-import { useTasks } from '@/hooks/useData';
+import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
 import {
   Plus,
@@ -23,7 +23,7 @@ const priorityColors: Record<string, string> = {
   URGENT: 'bg-red-100 text-red-700 border-red-200',
   HIGH: 'bg-orange-100 text-orange-700 border-orange-200',
   MEDIUM: 'bg-blue-100 text-blue-700 border-blue-200',
-  LOW: 'bg-stone-100 text-stone-700 border-stone-200',
+  LOW: 'bg-muted text-muted-foreground border-border',
 };
 
 const DAYS_OF_WEEK = [
@@ -58,10 +58,12 @@ export default function TasksPage() {
     dueDate: '',
     dueTime: '',
     priority: 'MEDIUM',
+    horseId: '',
     isRecurring: false,
     recurringRule: null as RecurringRule | null,
   });
 
+  const { horses } = useHorses();
   const { tasks: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useTasks({ status: 'PENDING' });
   const { tasks: completedTasks, isLoading: completedLoading, refetch: refetchCompleted } = useTasks({ status: 'COMPLETED' });
 
@@ -100,7 +102,7 @@ export default function TasksPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -110,8 +112,8 @@ export default function TasksPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Tasks</h1>
-          <p className="text-stone-500 mt-1">Manage your daily tasks and reminders</p>
+          <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
+          <p className="text-muted-foreground mt-1">Manage your daily tasks and reminders</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -130,8 +132,8 @@ export default function TasksPage() {
               <ListTodo className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">{pendingTasks.length}</p>
-              <p className="text-sm text-stone-500">Pending</p>
+              <p className="text-2xl font-bold text-foreground">{pendingTasks.length}</p>
+              <p className="text-sm text-muted-foreground">Pending</p>
             </div>
           </div>
         </div>
@@ -141,8 +143,8 @@ export default function TasksPage() {
               <CheckCircle2 className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">{completedTasks.length}</p>
-              <p className="text-sm text-stone-500">Completed</p>
+              <p className="text-2xl font-bold text-foreground">{completedTasks.length}</p>
+              <p className="text-sm text-muted-foreground">Completed</p>
             </div>
           </div>
         </div>
@@ -152,10 +154,10 @@ export default function TasksPage() {
               <AlertCircle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-900">
+              <p className="text-2xl font-bold text-foreground">
                 {pendingTasks.filter(t => t.priority === 'URGENT').length}
               </p>
-              <p className="text-sm text-stone-500">Urgent</p>
+              <p className="text-sm text-muted-foreground">Urgent</p>
             </div>
           </div>
         </div>
@@ -164,7 +166,7 @@ export default function TasksPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search tasks..."
@@ -173,13 +175,13 @@ export default function TasksPage() {
             className="input pl-12 w-full"
           />
         </div>
-        <div className="flex rounded-xl bg-stone-100 p-1">
+        <div className="flex rounded-xl bg-muted p-1">
           {['ALL', 'PENDING', 'COMPLETED'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                statusFilter === status ? 'bg-white shadow text-stone-900' : 'text-stone-600'
+                statusFilter === status ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
               }`}
             >
               {status === 'ALL' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
@@ -194,11 +196,11 @@ export default function TasksPage() {
           <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
         </div>
       ) : filteredTasks.length > 0 ? (
-        <div className="card divide-y divide-stone-100">
+        <div className="card divide-y divide-border">
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              className="p-4 hover:bg-stone-50 transition-all flex items-center gap-4"
+              className="p-4 hover:bg-accent transition-all flex items-center gap-4"
             >
               <button
                 onClick={() => toggleTaskStatus(task.id, task.status)}
@@ -207,14 +209,14 @@ export default function TasksPage() {
                 {task.status === 'COMPLETED' ? (
                   <CheckCircle2 className="w-6 h-6 text-green-500" />
                 ) : (
-                  <Circle className="w-6 h-6 text-stone-300 hover:text-stone-400" />
+                  <Circle className="w-6 h-6 text-muted-foreground hover:text-muted-foreground" />
                 )}
               </button>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className={`font-medium ${
-                    task.status === 'COMPLETED' ? 'text-stone-400 line-through' : 'text-stone-900'
+                    task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'
                   }`}>
                     {task.title}
                   </p>
@@ -229,11 +231,16 @@ export default function TasksPage() {
                       {task.priority}
                     </span>
                   )}
+                  {task.horse && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">
+                      {task.horse.barnName}
+                    </span>
+                  )}
                 </div>
                 {task.description && (
-                  <p className="text-sm text-stone-500 mt-1 truncate">{task.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1 truncate">{task.description}</p>
                 )}
-                <div className="flex items-center gap-4 mt-2 text-xs text-stone-400">
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   {task.dueDate && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
@@ -255,7 +262,7 @@ export default function TasksPage() {
                 </div>
               </div>
               
-              <button className="p-2 rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-600 transition-all">
+              <button className="p-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-muted-foreground transition-all">
                 <MoreVertical className="w-4 h-4" />
               </button>
             </div>
@@ -263,8 +270,8 @@ export default function TasksPage() {
         </div>
       ) : (
         <div className="card p-12 text-center">
-          <ListTodo className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <p className="text-stone-500">No tasks found</p>
+          <ListTodo className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No tasks found</p>
           <button
             onClick={() => setShowAddModal(true)}
             className="btn-secondary mt-4"
@@ -278,12 +285,12 @@ export default function TasksPage() {
       {/* Add Task Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 className="text-lg font-semibold mb-4">Add Task</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Task Title *
                 </label>
                 <input 
@@ -296,7 +303,7 @@ export default function TasksPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Description
                 </label>
                 <textarea 
@@ -309,7 +316,7 @@ export default function TasksPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Due Date
                   </label>
                   <input 
@@ -320,7 +327,7 @@ export default function TasksPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Due Time
                   </label>
                   <input 
@@ -332,24 +339,43 @@ export default function TasksPage() {
                 </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Priority
-                </label>
-                <select
-                  className="input w-full"
-                  value={newTask.priority}
-                  onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                >
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
+                    Priority
+                  </label>
+                  <select
+                    className="input w-full"
+                    value={newTask.priority}
+                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                  >
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="URGENT">Urgent</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
+                    Horse (optional)
+                  </label>
+                  <select
+                    className="input w-full"
+                    value={newTask.horseId}
+                    onChange={(e) => setNewTask({ ...newTask, horseId: e.target.value })}
+                  >
+                    <option value="">No horse (barn task)</option>
+                    {horses.map((horse) => (
+                      <option key={horse.id} value={horse.id}>
+                        {horse.barnName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Recurring Task Toggle */}
-              <div className="border-t border-stone-200 pt-4">
+              <div className="border-t border-border pt-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -367,11 +393,11 @@ export default function TasksPage() {
                         } : null,
                       });
                     }}
-                    className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                    className="w-5 h-5 rounded border-border text-amber-600 focus:ring-amber-500"
                   />
                   <div className="flex items-center gap-2">
-                    <Repeat className="w-4 h-4 text-stone-500" />
-                    <span className="font-medium text-stone-700">Make this a repeating task</span>
+                    <Repeat className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium text-muted-foreground">Make this a repeating task</span>
                   </div>
                 </label>
               </div>
@@ -381,7 +407,7 @@ export default function TasksPage() {
                 <div className="bg-amber-50 rounded-xl p-4 space-y-4 border border-amber-200">
                   {/* Repeat Type */}
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                       Repeat
                     </label>
                     <div className="grid grid-cols-4 gap-2">
@@ -406,7 +432,7 @@ export default function TasksPage() {
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                             newTask.recurringRule?.type === option.value
                               ? 'bg-amber-500 text-white'
-                              : 'bg-white text-stone-700 border border-stone-200 hover:border-amber-300'
+                              : 'bg-card text-muted-foreground border border-border hover:border-amber-300'
                           }`}
                         >
                           {option.label}
@@ -418,7 +444,7 @@ export default function TasksPage() {
                   {/* Custom Interval */}
                   {newTask.recurringRule?.type === 'CUSTOM' && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-stone-600">Every</span>
+                      <span className="text-sm text-muted-foreground">Every</span>
                       <input
                         type="number"
                         min="1"
@@ -433,14 +459,14 @@ export default function TasksPage() {
                         })}
                         className="input w-20 text-center"
                       />
-                      <span className="text-sm text-stone-600">day(s)</span>
+                      <span className="text-sm text-muted-foreground">day(s)</span>
                     </div>
                   )}
 
                   {/* Days of Week (for Weekly) */}
                   {newTask.recurringRule?.type === 'WEEKLY' && (
                     <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">
                         Repeat on
                       </label>
                       <div className="flex gap-2">
@@ -470,7 +496,7 @@ export default function TasksPage() {
                               className={`w-10 h-10 rounded-full text-sm font-medium transition-all ${
                                 isSelected
                                   ? 'bg-amber-500 text-white'
-                                  : 'bg-white text-stone-700 border border-stone-200 hover:border-amber-300'
+                                  : 'bg-card text-muted-foreground border border-border hover:border-amber-300'
                               }`}
                             >
                               {day.label}
@@ -478,7 +504,7 @@ export default function TasksPage() {
                           );
                         })}
                       </div>
-                      <p className="text-xs text-stone-500 mt-2">
+                      <p className="text-xs text-muted-foreground mt-2">
                         Selected: {newTask.recurringRule?.daysOfWeek?.map(d =>
                           DAYS_OF_WEEK.find(day => day.key === d)?.full
                         ).join(', ') || 'None'}
@@ -489,7 +515,7 @@ export default function TasksPage() {
                   {/* Day of Month (for Monthly) */}
                   {newTask.recurringRule?.type === 'MONTHLY' && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-stone-600">On day</span>
+                      <span className="text-sm text-muted-foreground">On day</span>
                       <select
                         value={newTask.recurringRule?.dayOfMonth || 1}
                         onChange={(e) => setNewTask({
@@ -505,13 +531,13 @@ export default function TasksPage() {
                           <option key={day} value={day}>{day}</option>
                         ))}
                       </select>
-                      <span className="text-sm text-stone-600">of each month</span>
+                      <span className="text-sm text-muted-foreground">of each month</span>
                     </div>
                   )}
 
                   {/* End Condition */}
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                       Ends
                     </label>
                     <div className="space-y-2">
@@ -531,7 +557,7 @@ export default function TasksPage() {
                           })}
                           className="w-4 h-4 text-amber-600 focus:ring-amber-500"
                         />
-                        <span className="text-sm text-stone-700">Never</span>
+                        <span className="text-sm text-muted-foreground">Never</span>
                       </label>
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
@@ -548,7 +574,7 @@ export default function TasksPage() {
                           })}
                           className="w-4 h-4 text-amber-600 focus:ring-amber-500"
                         />
-                        <span className="text-sm text-stone-700">On</span>
+                        <span className="text-sm text-muted-foreground">On</span>
                         {newTask.recurringRule?.endType === 'ON_DATE' && (
                           <input
                             type="date"
@@ -581,7 +607,7 @@ export default function TasksPage() {
                           })}
                           className="w-4 h-4 text-amber-600 focus:ring-amber-500"
                         />
-                        <span className="text-sm text-stone-700">After</span>
+                        <span className="text-sm text-muted-foreground">After</span>
                         {newTask.recurringRule?.endType === 'AFTER_COUNT' && (
                           <>
                             <input
@@ -598,7 +624,7 @@ export default function TasksPage() {
                               })}
                               className="input w-20 text-center"
                             />
-                            <span className="text-sm text-stone-700">occurrences</span>
+                            <span className="text-sm text-muted-foreground">occurrences</span>
                           </>
                         )}
                       </label>
@@ -606,8 +632,8 @@ export default function TasksPage() {
                   </div>
 
                   {/* Summary */}
-                  <div className="bg-white rounded-lg p-3 border border-amber-200">
-                    <p className="text-sm text-stone-600">
+                  <div className="bg-card rounded-lg p-3 border border-amber-200">
+                    <p className="text-sm text-muted-foreground">
                       <span className="font-medium">Summary: </span>
                       {newTask.recurringRule?.type === 'DAILY' && 'Repeats every day'}
                       {newTask.recurringRule?.type === 'WEEKLY' && `Repeats weekly on ${
@@ -629,7 +655,7 @@ export default function TasksPage() {
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', isRecurring: false, recurringRule: null });
+                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', horseId: '', isRecurring: false, recurringRule: null });
                 }}
                 className="btn-secondary flex-1"
                 disabled={isCreating}
@@ -664,6 +690,7 @@ export default function TasksPage() {
                         dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null,
                         dueTime: newTask.dueTime || null,
                         priority: newTask.priority,
+                        horseId: newTask.horseId || null,
                         isRecurring: newTask.isRecurring,
                         recurringRule: newTask.isRecurring && newTask.recurringRule
                           ? JSON.stringify(newTask.recurringRule)
@@ -672,7 +699,7 @@ export default function TasksPage() {
                     });
                     if (!response.ok) throw new Error('Failed to create task');
                     setShowAddModal(false);
-                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', isRecurring: false, recurringRule: null });
+                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', horseId: '', isRecurring: false, recurringRule: null });
                     refetch();
                     toast.success(
                       newTask.isRecurring ? 'Recurring task created' : 'Task created',

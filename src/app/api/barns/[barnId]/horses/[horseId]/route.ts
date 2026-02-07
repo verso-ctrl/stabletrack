@@ -69,6 +69,7 @@ export async function GET(
         },
         vaccinations: {
           orderBy: { dateGiven: 'desc' },
+          take: 20,
         },
         events: {
           where: {
@@ -84,6 +85,7 @@ export async function GET(
         },
         documents: {
           orderBy: { uploadedAt: 'desc' },
+          take: 30,
         },
         notes: {
           orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],

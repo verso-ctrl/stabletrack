@@ -43,13 +43,13 @@ function getStatusColor(status: string) {
     case 'LAYUP':
       return 'bg-amber-100 text-amber-800';
     case 'RETIRED':
-      return 'bg-stone-100 text-stone-600';
+      return 'bg-muted text-muted-foreground';
     case 'SOLD':
       return 'bg-blue-100 text-blue-800';
     case 'DECEASED':
-      return 'bg-stone-200 text-stone-500';
+      return 'bg-muted text-muted-foreground';
     default:
-      return 'bg-stone-100 text-stone-600';
+      return 'bg-muted text-muted-foreground';
   }
 }
 
@@ -75,9 +75,9 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-8 w-48 bg-stone-200 rounded-lg" />
-        <div className="h-64 bg-stone-100 rounded-2xl" />
-        <div className="h-96 bg-stone-100 rounded-2xl" />
+        <div className="h-8 w-48 bg-muted rounded-lg" />
+        <div className="h-64 bg-muted rounded-2xl" />
+        <div className="h-96 bg-muted rounded-2xl" />
       </div>
     );
   }
@@ -86,10 +86,10 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
     return (
       <div className="text-center py-12">
         <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-stone-900 mb-2">
+        <h2 className="text-xl font-semibold text-foreground mb-2">
           Horse Not Found
         </h2>
-        <p className="text-stone-500 mb-6">
+        <p className="text-muted-foreground mb-6">
           {error || "We couldn't find the horse you're looking for."}
         </p>
         <Link href="/horses" className="btn-primary">
@@ -108,9 +108,9 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
         <div className="flex items-center gap-4">
           <Link
             href="/horses"
-            className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-accent transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-stone-600" />
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </Link>
           
           <div className="flex items-center gap-4">
@@ -129,7 +129,7 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
             
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-stone-900">
+                <h1 className="text-2xl font-bold text-foreground">
                   {horse.barnName}
                 </h1>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(horse.status)}`}>
@@ -138,12 +138,12 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
               </div>
               
               {horse.registeredName && (
-                <p className="text-stone-500 text-sm mt-0.5">
+                <p className="text-muted-foreground text-sm mt-0.5">
                   {horse.registeredName}
                 </p>
               )}
               
-              <div className="flex items-center gap-4 mt-2 text-sm text-stone-600">
+              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                 {horse.breed && <span>{horse.breed}</span>}
                 {horse.color && <span>• {horse.color}</span>}
                 {horse.sex && <span>• {horse.sex}</span>}
@@ -162,50 +162,50 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
             Edit
           </Link>
           
-          <button className="p-2 rounded-lg hover:bg-stone-100 transition-colors">
-            <MoreVertical className="w-5 h-5 text-stone-600" />
+          <button className="p-2 rounded-lg hover:bg-accent transition-colors">
+            <MoreVertical className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-stone-200 p-4">
-          <div className="flex items-center gap-2 text-stone-500 text-sm mb-1">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
             <Scale className="w-4 h-4" />
             Weight
           </div>
-          <p className="text-xl font-semibold text-stone-900">
+          <p className="text-xl font-semibold text-foreground">
             {(horse as any).currentWeight ? `${(horse as any).currentWeight} lbs` : '—'}
           </p>
         </div>
         
-        <div className="bg-white rounded-xl border border-stone-200 p-4">
-          <div className="flex items-center gap-2 text-stone-500 text-sm mb-1">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
             <Activity className="w-4 h-4" />
             Height
           </div>
-          <p className="text-xl font-semibold text-stone-900">
+          <p className="text-xl font-semibold text-foreground">
             {horse.heightHands ? `${horse.heightHands} hands` : '—'}
           </p>
         </div>
         
-        <div className="bg-white rounded-xl border border-stone-200 p-4">
-          <div className="flex items-center gap-2 text-stone-500 text-sm mb-1">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
             <Pill className="w-4 h-4" />
             Medications
           </div>
-          <p className="text-xl font-semibold text-stone-900">
+          <p className="text-xl font-semibold text-foreground">
             {horseDetail.currentMedications?.length || 0} active
           </p>
         </div>
         
-        <div className="bg-white rounded-xl border border-stone-200 p-4">
-          <div className="flex items-center gap-2 text-stone-500 text-sm mb-1">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
             <Calendar className="w-4 h-4" />
             Next Event
           </div>
-          <p className="text-xl font-semibold text-stone-900">
+          <p className="text-xl font-semibold text-foreground">
             {horseDetail.upcomingEvents?.[0]
               ? new Date(horseDetail.upcomingEvents[0].scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               : '—'}
@@ -214,7 +214,7 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-stone-200">
+      <div className="border-b border-border">
         <nav className="flex gap-1 -mb-px overflow-x-auto no-scrollbar">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -225,8 +225,8 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
                 className={`
                   flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                   ${activeTab === tab.id
-                    ? 'border-stone-900 text-stone-900'
-                    : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
+                    ? 'border-foreground text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border'
                   }
                 `}
               >
@@ -239,7 +239,7 @@ export function HorseDetailView({ horseId }: HorseDetailViewProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-6">
+      <div className="bg-card rounded-2xl border border-border p-6">
         {activeTab === 'overview' && (
           <OverviewTab horse={horseDetail} />
         )}
@@ -290,18 +290,18 @@ function OverviewTab({ horse }: { horse: HorseDetail }) {
       {/* Upcoming Events */}
       {horse.upcomingEvents && horse.upcomingEvents.length > 0 && (
         <div>
-          <h4 className="font-medium text-stone-900 mb-3">Upcoming Events</h4>
+          <h4 className="font-medium text-foreground mb-3">Upcoming Events</h4>
           <div className="space-y-2">
             {horse.upcomingEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-stone-50"
+                className="flex items-center justify-between p-3 rounded-lg bg-background"
               >
                 <div>
-                  <p className="font-medium text-stone-900">{event.title}</p>
-                  <p className="text-sm text-stone-500">{event.type}</p>
+                  <p className="font-medium text-foreground">{event.title}</p>
+                  <p className="text-sm text-muted-foreground">{event.type}</p>
                 </div>
-                <span className="text-sm text-stone-600">
+                <span className="text-sm text-muted-foreground">
                   {new Date(event.scheduledDate).toLocaleDateString()}
                 </span>
               </div>
@@ -312,31 +312,31 @@ function OverviewTab({ horse }: { horse: HorseDetail }) {
 
       {/* Basic Info */}
       <div>
-        <h4 className="font-medium text-stone-900 mb-3">Details</h4>
+        <h4 className="font-medium text-foreground mb-3">Details</h4>
         <dl className="grid grid-cols-2 gap-4">
           <div>
-            <dt className="text-sm text-stone-500">Date of Birth</dt>
-            <dd className="font-medium text-stone-900">
+            <dt className="text-sm text-muted-foreground">Date of Birth</dt>
+            <dd className="font-medium text-foreground">
               {horse.dateOfBirth
                 ? new Date(horse.dateOfBirth).toLocaleDateString()
                 : '—'}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-stone-500">Microchip</dt>
-            <dd className="font-medium text-stone-900">
+            <dt className="text-sm text-muted-foreground">Microchip</dt>
+            <dd className="font-medium text-foreground">
               {horse.microchipNumber || '—'}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-stone-500">Owner</dt>
-            <dd className="font-medium text-stone-900">
+            <dt className="text-sm text-muted-foreground">Owner</dt>
+            <dd className="font-medium text-foreground">
               {horse.ownerName || '—'}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-stone-500">Stall</dt>
-            <dd className="font-medium text-stone-900">
+            <dt className="text-sm text-muted-foreground">Stall</dt>
+            <dd className="font-medium text-foreground">
               {(horse as any).stall?.name || '—'}
             </dd>
           </div>
@@ -351,7 +351,7 @@ function HealthTab({ horse }: { horse: HorseDetail }) {
     <div className="space-y-6">
       {/* Vaccinations */}
       <div>
-        <h4 className="font-medium text-stone-900 mb-3 flex items-center gap-2">
+        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
           <Syringe className="w-4 h-4" />
           Vaccinations
         </h4>
@@ -360,18 +360,18 @@ function HealthTab({ horse }: { horse: HorseDetail }) {
             {horse.vaccinations.map((vax) => (
               <div
                 key={vax.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-stone-50"
+                className="flex items-center justify-between p-3 rounded-lg bg-background"
               >
                 <div>
-                  <p className="font-medium text-stone-900">
+                  <p className="font-medium text-foreground">
                     {vax.type.replace(/_/g, ' ')}
                   </p>
-                  <p className="text-sm text-stone-500">
+                  <p className="text-sm text-muted-foreground">
                     Given: {new Date(vax.dateGiven).toLocaleDateString()}
                   </p>
                 </div>
                 {vax.nextDueDate && (
-                  <span className="text-sm text-stone-600">
+                  <span className="text-sm text-muted-foreground">
                     Due: {new Date(vax.nextDueDate).toLocaleDateString()}
                   </span>
                 )}
@@ -379,13 +379,13 @@ function HealthTab({ horse }: { horse: HorseDetail }) {
             ))}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm">No vaccination records</p>
+          <p className="text-muted-foreground text-sm">No vaccination records</p>
         )}
       </div>
 
       {/* Recent Health Records */}
       <div>
-        <h4 className="font-medium text-stone-900 mb-3 flex items-center gap-2">
+        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
           <Stethoscope className="w-4 h-4" />
           Recent Health Records
         </h4>
@@ -394,21 +394,21 @@ function HealthTab({ horse }: { horse: HorseDetail }) {
             {horse.recentHealthRecords.map((record) => (
               <div
                 key={record.id}
-                className="p-3 rounded-lg bg-stone-50"
+                className="p-3 rounded-lg bg-background"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <p className="font-medium text-stone-900">
+                  <p className="font-medium text-foreground">
                     {record.type.replace(/_/g, ' ')}
                   </p>
-                  <span className="text-sm text-stone-500">
+                  <span className="text-sm text-muted-foreground">
                     {new Date(record.date).toLocaleDateString()}
                   </span>
                 </div>
                 {record.diagnosis && (
-                  <p className="text-sm text-stone-600">{record.diagnosis}</p>
+                  <p className="text-sm text-muted-foreground">{record.diagnosis}</p>
                 )}
                 {record.provider && (
-                  <p className="text-xs text-stone-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Provider: {record.provider}
                   </p>
                 )}
@@ -416,7 +416,7 @@ function HealthTab({ horse }: { horse: HorseDetail }) {
             ))}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm">No health records</p>
+          <p className="text-muted-foreground text-sm">No health records</p>
         )}
       </div>
     </div>
@@ -428,11 +428,11 @@ function CareTab({ horse }: { horse: HorseDetail }) {
     <div className="space-y-6">
       {/* Feed Program */}
       <div>
-        <h4 className="font-medium text-stone-900 mb-3">Feed Program</h4>
+        <h4 className="font-medium text-foreground mb-3">Feed Program</h4>
         {horse.feedProgram ? (
-          <div className="p-4 rounded-lg bg-stone-50">
+          <div className="p-4 rounded-lg bg-background">
             {horse.feedProgram.name && (
-              <p className="font-medium text-stone-900 mb-2">
+              <p className="font-medium text-foreground mb-2">
                 {horse.feedProgram.name}
               </p>
             )}
@@ -440,26 +440,26 @@ function CareTab({ horse }: { horse: HorseDetail }) {
               <div className="space-y-2">
                 {horse.feedProgram.items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-stone-600">
+                    <span className="text-muted-foreground">
                       {item.feedType?.name || item.supplement?.name}
                     </span>
-                    <span className="text-stone-900 font-medium">
+                    <span className="text-foreground font-medium">
                       {item.amount} {item.unit} ({item.feedingTime})
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-stone-500 text-sm">No feed items configured</p>
+              <p className="text-muted-foreground text-sm">No feed items configured</p>
             )}
             {horse.feedProgram.instructions && (
-              <p className="text-sm text-stone-500 mt-3 pt-3 border-t border-stone-200">
+              <p className="text-sm text-muted-foreground mt-3 pt-3 border-t border-border">
                 {horse.feedProgram.instructions}
               </p>
             )}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm">No feed program configured</p>
+          <p className="text-muted-foreground text-sm">No feed program configured</p>
         )}
       </div>
     </div>
@@ -474,16 +474,16 @@ function EventsTab({ horse }: { horse: HorseDetail }) {
           {horse.upcomingEvents.map((event) => (
             <div
               key={event.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-stone-50"
+              className="flex items-center justify-between p-4 rounded-lg bg-background"
             >
               <div>
-                <p className="font-medium text-stone-900">{event.title}</p>
-                <p className="text-sm text-stone-500">
+                <p className="font-medium text-foreground">{event.title}</p>
+                <p className="text-sm text-muted-foreground">
                   {event.type} {event.providerName && `• ${event.providerName}`}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium text-stone-900">
+                <p className="font-medium text-foreground">
                   {new Date(event.scheduledDate).toLocaleDateString()}
                 </p>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -491,7 +491,7 @@ function EventsTab({ horse }: { horse: HorseDetail }) {
                     ? 'bg-blue-100 text-blue-800'
                     : event.status === 'COMPLETED'
                     ? 'bg-green-100 text-green-800'
-                    : 'bg-stone-100 text-stone-600'
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {event.status}
                 </span>
@@ -500,7 +500,7 @@ function EventsTab({ horse }: { horse: HorseDetail }) {
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 text-sm text-center py-8">
+        <p className="text-muted-foreground text-sm text-center py-8">
           No upcoming events scheduled
         </p>
       )}
@@ -519,14 +519,14 @@ function DocumentsTab({ horse }: { horse: HorseDetail }) {
               href={doc.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors"
+              className="flex items-center gap-3 p-3 rounded-lg bg-background hover:bg-accent transition-colors"
             >
-              <FileText className="w-8 h-8 text-stone-400" />
+              <FileText className="w-8 h-8 text-muted-foreground" />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-stone-900 truncate">
+                <p className="font-medium text-foreground truncate">
                   {doc.title}
                 </p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   {doc.type} • {new Date(doc.uploadedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -534,7 +534,7 @@ function DocumentsTab({ horse }: { horse: HorseDetail }) {
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 text-sm text-center py-8">
+        <p className="text-muted-foreground text-sm text-center py-8">
           No documents uploaded
         </p>
       )}
@@ -550,7 +550,7 @@ function PhotosTab({ horse }: { horse: HorseDetail }) {
           {horse.photos.map((photo) => (
             <div
               key={photo.id}
-              className="aspect-square rounded-lg overflow-hidden bg-stone-100"
+              className="aspect-square rounded-lg overflow-hidden bg-muted"
             >
               <img
                 src={photo.url}
@@ -561,7 +561,7 @@ function PhotosTab({ horse }: { horse: HorseDetail }) {
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 text-sm text-center py-8">
+        <p className="text-muted-foreground text-sm text-center py-8">
           No photos uploaded
         </p>
       )}
@@ -578,18 +578,18 @@ function NotesTab({ horse }: { horse: HorseDetail }) {
             <div
               key={note.id}
               className={`p-4 rounded-lg ${
-                (note as any).isPinned ? 'bg-amber-50 border border-amber-200' : 'bg-stone-50'
+                (note as any).isPinned ? 'bg-amber-50 border border-amber-200' : 'bg-background'
               }`}
             >
-              <p className="text-stone-900">{note.content}</p>
-              <p className="text-xs text-stone-500 mt-2">
+              <p className="text-foreground">{note.content}</p>
+              <p className="text-xs text-muted-foreground mt-2">
                 {new Date(note.createdAt).toLocaleString()}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 text-sm text-center py-8">
+        <p className="text-muted-foreground text-sm text-center py-8">
           No notes added
         </p>
       )}

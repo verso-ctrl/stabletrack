@@ -289,7 +289,7 @@ export function HorsePhotoGallery({
                         e.stopPropagation()
                         handleSetPrimary(photo.url, photo.path)
                       }}
-                      className="p-2 bg-white/20 rounded-full hover:bg-white/30"
+                      className="p-2 bg-card/20 rounded-full hover:bg-card/30"
                       title="Set as primary"
                     >
                       <Star className="w-4 h-4 text-white" />
@@ -301,7 +301,7 @@ export function HorsePhotoGallery({
                         e.stopPropagation()
                         handleDownload(photo.url, photo.name || 'photo.jpg')
                       }}
-                      className="p-2 bg-white/20 rounded-full hover:bg-white/30"
+                      className="p-2 bg-card/20 rounded-full hover:bg-card/30"
                       title="Download original"
                     >
                       <Download className="w-4 h-4 text-white" />
@@ -312,7 +312,7 @@ export function HorsePhotoGallery({
                       e.stopPropagation()
                       handleDelete(photo.path)
                     }}
-                    className="p-2 bg-white/20 rounded-full hover:bg-red-500/50"
+                    className="p-2 bg-card/20 rounded-full hover:bg-red-500/50"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4 text-white" />
@@ -387,7 +387,7 @@ function PhotoLightbox({
           {canDownload && onDownload && (
             <button
               onClick={() => onDownload(currentPhoto.url, currentPhoto.name || `photo-${currentIndex + 1}.jpg`)}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded"
+              className="p-2 text-white/80 hover:text-white hover:bg-card/10 rounded"
               title="Download original"
             >
               <Download className="w-6 h-6" />
@@ -395,7 +395,7 @@ function PhotoLightbox({
           )}
           <button
             onClick={onClose}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded"
+            className="p-2 text-white/80 hover:text-white hover:bg-card/10 rounded"
           >
             <X className="w-6 h-6" />
           </button>

@@ -48,14 +48,14 @@ export default function AppearanceSettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Appearance</h1>
-        <p className="text-stone-500 mt-1">Customize how StableTrack looks for you</p>
+        <h1 className="text-2xl font-bold text-foreground">Appearance</h1>
+        <p className="text-muted-foreground mt-1">Customize how StableTrack looks for you</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Theme */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Theme</h3>
+          <h3 className="font-medium text-foreground mb-4">Theme</h3>
           <div className="grid grid-cols-3 gap-4">
             {[
               { id: 'light', name: 'Light', icon: Sun },
@@ -74,26 +74,26 @@ export default function AppearanceSettingsPage() {
                     p-4 rounded-xl border-2 transition-all text-center
                     ${isSelected 
                       ? 'border-amber-500 bg-amber-50' 
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-border hover:border-border'
                     }
                   `}
                 >
-                  <Icon className={`w-6 h-6 mx-auto mb-2 ${isSelected ? 'text-amber-600' : 'text-stone-400'}`} />
-                  <p className={`font-medium ${isSelected ? 'text-amber-700' : 'text-stone-700'}`}>
+                  <Icon className={`w-6 h-6 mx-auto mb-2 ${isSelected ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                  <p className={`font-medium ${isSelected ? 'text-amber-700' : 'text-muted-foreground'}`}>
                     {option.name}
                   </p>
                 </button>
               );
             })}
           </div>
-          <p className="text-xs text-stone-500 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             Dark mode coming soon! Currently using light theme.
           </p>
         </div>
 
         {/* Accent Color */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Accent Color</h3>
+          <h3 className="font-medium text-foreground mb-4">Accent Color</h3>
           <div className="flex flex-wrap gap-3">
             {themeColors.map((color) => (
               <button
@@ -102,7 +102,7 @@ export default function AppearanceSettingsPage() {
                 onClick={() => setAccentColor(color.id)}
                 className={`
                   relative w-12 h-12 rounded-xl ${color.color} transition-all
-                  ${accentColor === color.id ? 'ring-2 ring-offset-2 ring-stone-900' : ''}
+                  ${accentColor === color.id ? 'ring-2 ring-offset-2 ring-foreground' : ''}
                 `}
                 title={color.name}
               >
@@ -112,14 +112,14 @@ export default function AppearanceSettingsPage() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-stone-500 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             Color customization coming soon. Currently using Amber theme.
           </p>
         </div>
 
         {/* Font Size */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Font Size</h3>
+          <h3 className="font-medium text-foreground mb-4">Font Size</h3>
           <div className="space-y-2">
             {[
               { id: 'small', name: 'Small', description: 'Compact text size' },
@@ -130,7 +130,7 @@ export default function AppearanceSettingsPage() {
                 key={option.id}
                 className={`
                   flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all
-                  ${fontSize === option.id ? 'bg-amber-50 border-2 border-amber-500' : 'bg-stone-50 border-2 border-transparent hover:bg-stone-100'}
+                  ${fontSize === option.id ? 'bg-amber-50 border-2 border-amber-500' : 'bg-background border-2 border-transparent hover:bg-accent'}
                 `}
               >
                 <div className="flex items-center gap-3">
@@ -143,8 +143,8 @@ export default function AppearanceSettingsPage() {
                     className="w-4 h-4 text-amber-600 focus:ring-amber-500"
                   />
                   <div>
-                    <p className="font-medium text-stone-900">{option.name}</p>
-                    <p className="text-sm text-stone-500">{option.description}</p>
+                    <p className="font-medium text-foreground">{option.name}</p>
+                    <p className="text-sm text-muted-foreground">{option.description}</p>
                   </div>
                 </div>
               </label>
@@ -154,12 +154,12 @@ export default function AppearanceSettingsPage() {
 
         {/* Display Options */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Display Options</h3>
+          <h3 className="font-medium text-foreground mb-4">Display Options</h3>
           <div className="space-y-4">
-            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-background cursor-pointer">
               <div>
-                <p className="font-medium text-stone-900">Compact Mode</p>
-                <p className="text-sm text-stone-500">Show more content with smaller spacing</p>
+                <p className="font-medium text-foreground">Compact Mode</p>
+                <p className="text-sm text-muted-foreground">Show more content with smaller spacing</p>
               </div>
               <div className="relative">
                 <input
@@ -168,32 +168,32 @@ export default function AppearanceSettingsPage() {
                   onChange={(e) => setCompactMode(e.target.checked)}
                   className="sr-only"
                 />
-                <div className={`w-11 h-6 rounded-full transition-all ${compactMode ? 'bg-amber-500' : 'bg-stone-300'}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow transform transition-all ${compactMode ? 'translate-x-5' : 'translate-x-0.5'} mt-0.5`} />
+                <div className={`w-11 h-6 rounded-full transition-all ${compactMode ? 'bg-amber-500' : 'bg-border'}`}>
+                  <div className={`w-5 h-5 rounded-full bg-card shadow transform transition-all ${compactMode ? 'translate-x-5' : 'translate-x-0.5'} mt-0.5`} />
                 </div>
               </div>
             </label>
 
-            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-background cursor-pointer">
               <div>
-                <p className="font-medium text-stone-900">Reduce Motion</p>
-                <p className="text-sm text-stone-500">Minimize animations throughout the app</p>
+                <p className="font-medium text-foreground">Reduce Motion</p>
+                <p className="text-sm text-muted-foreground">Minimize animations throughout the app</p>
               </div>
               <div className="relative">
                 <input
                   type="checkbox"
                   className="sr-only"
                 />
-                <div className="w-11 h-6 rounded-full bg-stone-300">
-                  <div className="w-5 h-5 rounded-full bg-white shadow transform translate-x-0.5 mt-0.5" />
+                <div className="w-11 h-6 rounded-full bg-border">
+                  <div className="w-5 h-5 rounded-full bg-card shadow transform translate-x-0.5 mt-0.5" />
                 </div>
               </div>
             </label>
 
-            <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 rounded-xl bg-background cursor-pointer">
               <div>
-                <p className="font-medium text-stone-900">Show Horse Photos in Lists</p>
-                <p className="text-sm text-stone-500">Display profile photos in horse lists</p>
+                <p className="font-medium text-foreground">Show Horse Photos in Lists</p>
+                <p className="text-sm text-muted-foreground">Display profile photos in horse lists</p>
               </div>
               <div className="relative">
                 <input
@@ -202,7 +202,7 @@ export default function AppearanceSettingsPage() {
                   className="sr-only"
                 />
                 <div className="w-11 h-6 rounded-full bg-amber-500">
-                  <div className="w-5 h-5 rounded-full bg-white shadow transform translate-x-5 mt-0.5" />
+                  <div className="w-5 h-5 rounded-full bg-card shadow transform translate-x-5 mt-0.5" />
                 </div>
               </div>
             </label>
@@ -210,17 +210,17 @@ export default function AppearanceSettingsPage() {
         </div>
 
         {/* Preview */}
-        <div className="card p-6 bg-stone-50">
-          <h3 className="font-medium text-stone-900 mb-4">Preview</h3>
-          <div className="p-4 rounded-xl bg-white border border-stone-200">
+        <div className="card p-6 bg-background">
+          <h3 className="font-medium text-foreground mb-4">Preview</h3>
+          <div className="p-4 rounded-xl bg-card border border-border">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-amber-100" />
               <div>
-                <p className="font-semibold text-stone-900">Thunder</p>
-                <p className="text-sm text-stone-500">16.2h Thoroughbred Gelding</p>
+                <p className="font-semibold text-foreground">Thunder</p>
+                <p className="text-sm text-muted-foreground">16.2h Thoroughbred Gelding</p>
               </div>
             </div>
-            <p className="text-stone-600">
+            <p className="text-muted-foreground">
               This is how text and components will appear with your selected settings.
             </p>
           </div>

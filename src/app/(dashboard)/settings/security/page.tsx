@@ -71,25 +71,25 @@ export default function SecuritySettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Security Settings</h1>
-        <p className="text-stone-500 mt-1">Manage your account security</p>
+        <h1 className="text-2xl font-bold text-foreground">Security Settings</h1>
+        <p className="text-muted-foreground mt-1">Manage your account security</p>
       </div>
 
       {/* Change Password */}
       <div className="card p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-stone-100">
-            <Key className="w-5 h-5 text-stone-600" />
+          <div className="p-2 rounded-lg bg-muted">
+            <Key className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="font-medium text-stone-900">Change Password</h3>
-            <p className="text-sm text-stone-500">Update your account password</p>
+            <h3 className="font-medium text-foreground">Change Password</h3>
+            <p className="text-sm text-muted-foreground">Update your account password</p>
           </div>
         </div>
 
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Current Password
             </label>
             <div className="relative">
@@ -103,7 +103,7 @@ export default function SecuritySettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
               >
                 {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -111,7 +111,7 @@ export default function SecuritySettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               New Password
             </label>
             <div className="relative">
@@ -125,18 +125,18 @@ export default function SecuritySettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
               >
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Must be at least 8 characters with a mix of letters, numbers, and symbols
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Confirm New Password
             </label>
             <input
@@ -158,12 +158,12 @@ export default function SecuritySettingsPage() {
       <div className="card p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-stone-100">
-              <Smartphone className="w-5 h-5 text-stone-600" />
+            <div className="p-2 rounded-lg bg-muted">
+              <Smartphone className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="font-medium text-stone-900">Two-Factor Authentication</h3>
-              <p className="text-sm text-stone-500">Add an extra layer of security</p>
+              <h3 className="font-medium text-foreground">Two-Factor Authentication</h3>
+              <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export default function SecuritySettingsPage() {
                 Enabled
               </span>
             ) : (
-              <span className="text-sm text-stone-500">Disabled</span>
+              <span className="text-sm text-muted-foreground">Disabled</span>
             )}
             <button
               onClick={() => {
@@ -206,12 +206,12 @@ export default function SecuritySettingsPage() {
       <div className="card p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-stone-100">
-              <History className="w-5 h-5 text-stone-600" />
+            <div className="p-2 rounded-lg bg-muted">
+              <History className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="font-medium text-stone-900">Active Sessions</h3>
-              <p className="text-sm text-stone-500">Manage your logged-in devices</p>
+              <h3 className="font-medium text-foreground">Active Sessions</h3>
+              <p className="text-sm text-muted-foreground">Manage your logged-in devices</p>
             </div>
           </div>
           <button
@@ -226,15 +226,15 @@ export default function SecuritySettingsPage() {
           {demoSessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-center justify-between p-4 rounded-xl bg-stone-50"
+              className="flex items-center justify-between p-4 rounded-xl bg-background"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-white border border-stone-200">
-                  <Laptop className="w-5 h-5 text-stone-600" />
+                <div className="p-2 rounded-lg bg-card border border-border">
+                  <Laptop className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-stone-900">
+                    <p className="font-medium text-foreground">
                       {session.device} • {session.browser}
                     </p>
                     {session.current && (
@@ -243,10 +243,10 @@ export default function SecuritySettingsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-stone-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Globe className="w-3.5 h-3.5" />
                     {session.location}
-                    <span className="text-stone-300">•</span>
+                    <span className="text-muted-foreground">•</span>
                     {new Date(session.lastActive).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -271,7 +271,7 @@ export default function SecuritySettingsPage() {
 
       {/* Security Checklist */}
       <div className="card p-6">
-        <h3 className="font-medium text-stone-900 mb-4">Security Checklist</h3>
+        <h3 className="font-medium text-foreground mb-4">Security Checklist</h3>
         <div className="space-y-3">
           {[
             { label: 'Strong password set', done: true },
@@ -280,14 +280,14 @@ export default function SecuritySettingsPage() {
             { label: 'Recovery email added', done: false },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-3">
-              <div className={`p-1 rounded-full ${item.done ? 'bg-green-100' : 'bg-stone-100'}`}>
+              <div className={`p-1 rounded-full ${item.done ? 'bg-green-100' : 'bg-muted'}`}>
                 {item.done ? (
                   <Check className="w-4 h-4 text-green-600" />
                 ) : (
-                  <div className="w-4 h-4 rounded-full border-2 border-stone-300" />
+                  <div className="w-4 h-4 rounded-full border-2 border-border" />
                 )}
               </div>
-              <span className={item.done ? 'text-stone-700' : 'text-stone-500'}>
+              <span className={item.done ? 'text-muted-foreground' : 'text-muted-foreground'}>
                 {item.label}
               </span>
             </div>

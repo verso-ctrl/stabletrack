@@ -183,7 +183,7 @@ export function EventForm({
 
       {/* Event Type */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-2">
+        <label className="block text-sm font-medium text-muted-foreground mb-2">
           Event Type <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
@@ -199,12 +199,12 @@ export function EventForm({
                 p-3 rounded-xl border-2 text-center transition-all
                 ${formData.type === type.value
                   ? 'border-stable-500 bg-stable-50'
-                  : 'border-stone-200 hover:border-stone-300'
+                  : 'border-border hover:border-border'
                 }
               `}
             >
               <span className="text-2xl block mb-1">{type.icon}</span>
-              <span className="text-xs font-medium text-stone-700">
+              <span className="text-xs font-medium text-muted-foreground">
                 {type.label}
               </span>
             </button>
@@ -214,7 +214,7 @@ export function EventForm({
 
       {/* Horse Selection */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
+        <label className="block text-sm font-medium text-muted-foreground mb-1.5">
           Horse (optional)
         </label>
         <select
@@ -234,7 +234,7 @@ export function EventForm({
 
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
+        <label className="block text-sm font-medium text-muted-foreground mb-1.5">
           Title <span className="text-red-500">*</span>
         </label>
         <div className="flex gap-2">
@@ -250,7 +250,7 @@ export function EventForm({
           <button
             type="button"
             onClick={generateTitle}
-            className="px-3 py-2 text-sm bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
+            className="px-3 py-2 text-sm bg-muted rounded-xl hover:bg-accent transition-colors"
           >
             Auto
           </button>
@@ -260,7 +260,7 @@ export function EventForm({
       {/* Date & Time */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             Date <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -272,13 +272,13 @@ export function EventForm({
               className="input-base"
               required
             />
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 pointer-events-none" />
+            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
           </div>
         </div>
 
         {/* Cost */}
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             Cost ($)
           </label>
           <input
@@ -297,7 +297,7 @@ export function EventForm({
       {/* Type-specific fields */}
       {formData.type === 'FARRIER' && (
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             Farrier Work
           </label>
           <select
@@ -318,7 +318,7 @@ export function EventForm({
 
       {formData.type === 'DEWORMING' && (
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             Dewormer Product
           </label>
           <select
@@ -340,7 +340,7 @@ export function EventForm({
       {/* Provider Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             <User className="w-4 h-4 inline mr-1" />
             Provider Name
           </label>
@@ -355,7 +355,7 @@ export function EventForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
             <Phone className="w-4 h-4 inline mr-1" />
             Provider Phone
           </label>
@@ -372,7 +372,7 @@ export function EventForm({
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
+        <label className="block text-sm font-medium text-muted-foreground mb-1.5">
           Description
         </label>
         <textarea
@@ -387,7 +387,7 @@ export function EventForm({
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
+        <label className="block text-sm font-medium text-muted-foreground mb-1.5">
           Notes
         </label>
         <textarea
@@ -408,15 +408,15 @@ export function EventForm({
           id="isRecurring"
           checked={formData.isRecurring}
           onChange={handleChange}
-          className="w-4 h-4 rounded border-stone-300 text-stable-600 focus:ring-stable-500"
+          className="w-4 h-4 rounded border-border text-stable-600 focus:ring-stable-500"
         />
-        <label htmlFor="isRecurring" className="text-sm text-stone-700">
+        <label htmlFor="isRecurring" className="text-sm text-muted-foreground">
           This is a recurring event
         </label>
       </div>
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
         {onCancel && (
           <button
             type="button"

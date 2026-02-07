@@ -36,17 +36,17 @@ export default function OnboardingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-100">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto" />
-          <p className="mt-4 text-stone-600">Setting up your account...</p>
+          <p className="mt-4 text-muted-foreground">Setting up your account...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-8">
@@ -55,8 +55,8 @@ export default function OnboardingPage() {
               <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-stone-900">Welcome to StableTrack!</h1>
-          <p className="text-stone-600 mt-2">Let's get your barn set up so you can start managing your horses.</p>
+          <h1 className="text-3xl font-bold text-foreground">Welcome to StableTrack!</h1>
+          <p className="text-muted-foreground mt-2">Let's get your barn set up so you can start managing your horses.</p>
         </div>
 
         {/* Options */}
@@ -64,13 +64,13 @@ export default function OnboardingPage() {
           {/* Create New Barn */}
           <Link
             href="/onboarding/create-barn"
-            className="group bg-white rounded-xl border-2 border-stone-200 p-6 hover:border-amber-500 hover:shadow-lg transition-all"
+            className="group bg-card rounded-xl border-2 border-border p-6 hover:border-amber-500 hover:shadow-lg transition-all"
           >
             <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
               <Building2 className="w-6 h-6 text-amber-600" />
             </div>
-            <h2 className="text-xl font-semibold text-stone-900 mb-2">Create a New Barn</h2>
-            <p className="text-stone-600 text-sm mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-2">Create a New Barn</h2>
+            <p className="text-muted-foreground text-sm mb-4">
               Start fresh with your own barn. You'll be the owner and can invite team members later.
             </p>
             <div className="flex items-center text-amber-600 font-medium text-sm group-hover:gap-2 transition-all">
@@ -81,16 +81,16 @@ export default function OnboardingPage() {
           {/* Join Existing Barn */}
           <Link
             href="/onboarding/join-barn"
-            className="group bg-white rounded-xl border-2 border-stone-200 p-6 hover:border-amber-500 hover:shadow-lg transition-all"
+            className="group bg-card rounded-xl border-2 border-border p-6 hover:border-amber-500 hover:shadow-lg transition-all"
           >
-            <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-stone-200 transition-colors">
-              <Users className="w-6 h-6 text-stone-600" />
+            <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
+              <Users className="w-6 h-6 text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-semibold text-stone-900 mb-2">Join an Existing Barn</h2>
-            <p className="text-stone-600 text-sm mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-2">Join an Existing Barn</h2>
+            <p className="text-muted-foreground text-sm mb-4">
               Have an invite code? Join a barn that's already set up and start collaborating.
             </p>
-            <div className="flex items-center text-stone-600 font-medium text-sm group-hover:gap-2 transition-all">
+            <div className="flex items-center text-muted-foreground font-medium text-sm group-hover:gap-2 transition-all">
               Enter Code <ArrowRight className="w-4 h-4 ml-1" />
             </div>
           </Link>
@@ -100,7 +100,7 @@ export default function OnboardingPage() {
         <div className="text-center mt-6">
           <button
             onClick={() => router.push('/dashboard')}
-            className="text-sm text-stone-500 hover:text-stone-700 underline"
+            className="text-sm text-muted-foreground hover:text-muted-foreground underline"
           >
             Skip for now
           </button>

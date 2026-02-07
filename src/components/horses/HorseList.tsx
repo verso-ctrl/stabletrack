@@ -64,8 +64,8 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Horses</h1>
-          <p className="text-stone-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Horses</h1>
+          <p className="text-muted-foreground mt-1">
             {total} {total === 1 ? 'horse' : 'horses'} in your barn
           </p>
         </div>
@@ -99,8 +99,8 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
                 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all
                 ${
                   statusFilter === filter.value
-                    ? 'bg-stone-900 text-white'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent'
                 }
               `}
             >
@@ -110,13 +110,13 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
         </div>
 
         {/* View mode toggle */}
-        <div className="flex gap-1 bg-stone-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-muted rounded-xl p-1">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 rounded-lg transition-all ${
               viewMode === 'grid'
-                ? 'bg-white shadow-sm text-stone-900'
-                : 'text-stone-500 hover:text-stone-700'
+                ? 'bg-card shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-muted-foreground'
             }`}
           >
             <Grid3X3 className="w-4 h-4" />
@@ -125,8 +125,8 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
             onClick={() => setViewMode('list')}
             className={`p-2 rounded-lg transition-all ${
               viewMode === 'list'
-                ? 'bg-white shadow-sm text-stone-900'
-                : 'text-stone-500 hover:text-stone-700'
+                ? 'bg-card shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-muted-foreground'
             }`}
           >
             <List className="w-4 h-4" />
@@ -152,22 +152,22 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
       {/* Loading state */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
       {/* Empty state */}
       {!isLoading && !error && horses.length === 0 && (
-        <div className="text-center py-12 bg-stone-50 rounded-2xl">
-          <div className="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-12 bg-background rounded-2xl">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             🐴
           </div>
-          <h3 className="text-lg font-semibold text-stone-900 mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             {search || statusFilter !== 'ALL'
               ? 'No horses found'
               : 'No horses yet'}
           </h3>
-          <p className="text-stone-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             {search || statusFilter !== 'ALL'
               ? 'Try adjusting your search or filters'
               : 'Add your first horse to get started'}
@@ -202,8 +202,8 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-stone-200">
-              <p className="text-sm text-stone-500">
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">
                 Showing {(page - 1) * pageSize + 1} to{' '}
                 {Math.min(page * pageSize, total)} of {total} horses
               </p>
@@ -238,8 +238,8 @@ export function HorseList({ onAddHorse, onSelectHorse }: HorseListProps) {
                         onClick={() => setPage(pageNum)}
                         className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
                           page === pageNum
-                            ? 'bg-stone-900 text-white'
-                            : 'hover:bg-stone-100'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'hover:bg-accent'
                         }`}
                       >
                         {pageNum}

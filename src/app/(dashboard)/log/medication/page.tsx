@@ -90,7 +90,7 @@ export default function LogMedicationPage() {
       }
 
       toast.success('Medication logged', skipped ? 'Medication skipped and recorded' : 'Medication recorded successfully');
-      router.push('/dashboard');
+      router.push('/daily-care');
     } catch (error) {
       console.error('Error logging medication:', error);
       toast.error('Failed to log medication', error instanceof Error ? error.message : 'Please try again');
@@ -102,7 +102,7 @@ export default function LogMedicationPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -113,19 +113,19 @@ export default function LogMedicationPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold text-stone-900">Log Medication</h1>
-          <p className="text-stone-500 mt-0.5">Record medication given to a horse</p>
+          <h1 className="text-2xl font-semibold text-foreground">Log Medication</h1>
+          <p className="text-muted-foreground mt-0.5">Record medication given to a horse</p>
         </div>
       </div>
 
       {/* Select Horse */}
       <div className="card p-6">
-        <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
+        <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
           <Pill className="w-5 h-5 text-purple-500" />
           Select Horse
         </h3>
@@ -136,9 +136,9 @@ export default function LogMedicationPage() {
           </div>
         ) : horsesWithMeds.length === 0 ? (
           <div className="text-center py-8">
-            <AlertCircle className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <p className="text-stone-500 mb-1">No horses currently on medication</p>
-            <p className="text-sm text-stone-400 mb-4">Add medications from a horse's health tab first</p>
+            <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground mb-1">No horses currently on medication</p>
+            <p className="text-sm text-muted-foreground mb-4">Add medications from a horse's health tab first</p>
             <Link href="/horses" className="btn-secondary btn-sm">
               View Horses
             </Link>
@@ -152,11 +152,11 @@ export default function LogMedicationPage() {
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
                   selectedHorse === horse.id
                     ? 'border-purple-500 bg-purple-50'
-                    : 'border-stone-200 hover:border-stone-300'
+                    : 'border-border hover:border-border'
                 }`}
               >
-                <p className="font-medium text-stone-900">{horse.barnName}</p>
-                <p className="text-sm text-stone-500">{horse.activeMedicationCount} active medication(s)</p>
+                <p className="font-medium text-foreground">{horse.barnName}</p>
+                <p className="text-sm text-muted-foreground">{horse.activeMedicationCount} active medication(s)</p>
               </button>
             ))}
           </div>
@@ -166,14 +166,14 @@ export default function LogMedicationPage() {
       {/* Select Medication */}
       {selectedHorse && (
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Select Medication</h3>
+          <h3 className="font-medium text-foreground mb-4">Select Medication</h3>
           
           {loadingMeds ? (
             <div className="flex items-center justify-center h-24">
               <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
             </div>
           ) : medications.length === 0 ? (
-            <p className="text-stone-500 text-center py-4">No active medications found</p>
+            <p className="text-muted-foreground text-center py-4">No active medications found</p>
           ) : (
             <div className="space-y-3">
               {medications.filter(m => m.status === 'ACTIVE').map((med) => (
@@ -183,13 +183,13 @@ export default function LogMedicationPage() {
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
                     selectedMedication === med.id
                       ? 'border-purple-500 bg-purple-50'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-border hover:border-border'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-stone-900">{med.name}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="font-medium text-foreground">{med.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {med.dosage} • {med.frequency} • {med.route || 'Oral'}
                       </p>
                     </div>
@@ -207,14 +207,14 @@ export default function LogMedicationPage() {
       {/* Time and Status */}
       {selectedMedication && (
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-muted-foreground" />
             Administration Details
           </h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Date & Time
               </label>
               <input
@@ -226,23 +226,23 @@ export default function LogMedicationPage() {
             </div>
             
             <div>
-              <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl bg-stone-50">
+              <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl bg-background">
                 <input
                   type="checkbox"
                   checked={skipped}
                   onChange={(e) => setSkipped(e.target.checked)}
-                  className="w-5 h-5 rounded border-stone-300 text-red-600 focus:ring-red-500"
+                  className="w-5 h-5 rounded border-border text-red-600 focus:ring-red-500"
                 />
                 <div>
-                  <p className="font-medium text-stone-900">Skipped this dose</p>
-                  <p className="text-sm text-stone-500">Mark if the medication was not given</p>
+                  <p className="font-medium text-foreground">Skipped this dose</p>
+                  <p className="text-sm text-muted-foreground">Mark if the medication was not given</p>
                 </div>
               </label>
             </div>
             
             {skipped && (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Reason for Skipping *
                 </label>
                 <select
@@ -261,7 +261,7 @@ export default function LogMedicationPage() {
             )}
             
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Notes (Optional)
               </label>
               <textarea

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
@@ -196,7 +197,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -224,38 +225,38 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       <div className="flex items-center gap-4">
         <Link
           href={`/horses/${horseId}`}
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Edit {horse.barnName}</h1>
-          <p className="text-stone-500 mt-1">Update horse information</p>
+          <h1 className="text-2xl font-bold text-foreground">Edit {horse.barnName}</h1>
+          <p className="text-muted-foreground mt-1">Update horse information</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Profile Photo */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Profile Photo</h3>
+          <h3 className="font-medium text-foreground mb-4">Profile Photo</h3>
           <div className="flex items-center gap-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-stone-200 flex items-center justify-center overflow-hidden">
+              <div className="relative w-24 h-24 rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
                 {horse.profilePhotoUrl ? (
-                  <img src={horse.profilePhotoUrl} alt="" className="w-full h-full object-cover" />
+                  <Image src={horse.profilePhotoUrl} alt="" fill className="object-cover" unoptimized />
                 ) : (
-                  <span className="text-3xl text-stone-400">{formData.barnName[0] || '?'}</span>
+                  <span className="text-3xl text-muted-foreground">{formData.barnName[0] || '?'}</span>
                 )}
               </div>
               <button
                 type="button"
-                className="absolute -bottom-2 -right-2 p-2 rounded-full bg-stone-900 text-white hover:bg-stone-800 transition-all"
+                className="absolute -bottom-2 -right-2 p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
               >
                 <Camera className="w-4 h-4" />
               </button>
             </div>
             <div>
-              <p className="text-sm text-stone-600">Upload a new profile photo</p>
+              <p className="text-sm text-muted-foreground">Upload a new profile photo</p>
               <input
                 ref={photoInputRef}
                 type="file"
@@ -287,11 +288,11 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
         {/* Basic Information */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Basic Information</h3>
+          <h3 className="font-medium text-foreground mb-4">Basic Information</h3>
           <div className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Barn Name *
                 </label>
                 <input
@@ -303,7 +304,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Registered Name
                 </label>
                 <input
@@ -317,7 +318,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Breed
                 </label>
                 <AutocompleteInput
@@ -328,7 +329,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Color
                 </label>
                 <AutocompleteInput
@@ -341,7 +342,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Markings
               </label>
               <AutocompleteInput
@@ -355,7 +356,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
             <div className="grid sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Date of Birth
                 </label>
                 <input
@@ -366,7 +367,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Sex
                 </label>
                 <select
@@ -381,7 +382,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Height (hands)
                 </label>
                 <input
@@ -399,11 +400,11 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
         {/* Status & Ownership */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Status & Ownership</h3>
+          <h3 className="font-medium text-foreground mb-4">Status & Ownership</h3>
           <div className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Status
                 </label>
                 <select
@@ -418,7 +419,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Stall
                 </label>
                 <input
@@ -432,7 +433,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Owner Name
               </label>
               <AutocompleteInput
@@ -444,7 +445,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Microchip Number
               </label>
               <input
@@ -459,7 +460,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
         {/* Bio */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Bio</h3>
+          <h3 className="font-medium text-foreground mb-4">Bio</h3>
           <textarea
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
@@ -500,8 +501,8 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
           </h3>
           <div className="flex items-center justify-between p-4 rounded-xl bg-red-50">
             <div>
-              <p className="font-medium text-stone-900">Delete Horse</p>
-              <p className="text-sm text-stone-600">Permanently remove this horse and all records</p>
+              <p className="font-medium text-foreground">Delete Horse</p>
+              <p className="text-sm text-muted-foreground">Permanently remove this horse and all records</p>
             </div>
             <button
               type="button"
@@ -518,18 +519,18 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 rounded-full bg-red-100">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-stone-900">Delete Horse?</h3>
-                <p className="text-sm text-stone-500">This action cannot be undone</p>
+                <h3 className="text-lg font-semibold text-foreground">Delete Horse?</h3>
+                <p className="text-sm text-muted-foreground">This action cannot be undone</p>
               </div>
             </div>
             
-            <p className="text-stone-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Are you sure you want to delete <strong>{horse.barnName}</strong>? All health records, 
               events, and data associated with this horse will be permanently removed.
             </p>

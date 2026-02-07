@@ -75,9 +75,9 @@ export function UpgradeModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+      <div className="relative bg-card rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -103,7 +103,7 @@ export function UpgradeModal({
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors',
                 billingCycle === 'monthly' 
-                  ? 'bg-white shadow text-foreground' 
+                  ? 'bg-card shadow text-foreground' 
                   : 'text-muted-foreground'
               )}
             >
@@ -114,7 +114,7 @@ export function UpgradeModal({
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors',
                 billingCycle === 'annual' 
-                  ? 'bg-white shadow text-foreground' 
+                  ? 'bg-card shadow text-foreground' 
                   : 'text-muted-foreground'
               )}
             >
@@ -218,7 +218,7 @@ export function UpgradeModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex items-center justify-between">
+        <div className="sticky bottom-0 bg-card border-t px-6 py-4 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             You can cancel or change your plan anytime.
           </p>

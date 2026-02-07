@@ -100,7 +100,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
       {/* Coggins Status */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Coggins Test</h3>
+          <h3 className="font-semibold text-foreground">Coggins Test</h3>
           {canEdit && (
             <button onClick={onLogCoggins} className="btn-secondary btn-sm">
               <Plus className="w-4 h-4" />
@@ -110,7 +110,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
         </div>
         {cogginsLoading ? (
           <div className="flex items-center justify-center py-4">
-            <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : coggins?.current ? (
           <div className={`p-4 rounded-xl ${coggins.isExpired ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}>
@@ -132,22 +132,22 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-stone-500">Test Date</p>
+                <p className="text-muted-foreground">Test Date</p>
                 <p className="font-medium">{new Date(coggins.current.testDate).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className="text-stone-500">Expiry Date</p>
+                <p className="text-muted-foreground">Expiry Date</p>
                 <p className="font-medium">{new Date(coggins.current.expiryDate).toLocaleDateString()}</p>
               </div>
               {coggins.current.veterinarian && (
                 <div>
-                  <p className="text-stone-500">Veterinarian</p>
+                  <p className="text-muted-foreground">Veterinarian</p>
                   <p className="font-medium">{coggins.current.veterinarian}</p>
                 </div>
               )}
               {coggins.current.accessionNumber && (
                 <div>
-                  <p className="text-stone-500">Accession #</p>
+                  <p className="text-muted-foreground">Accession #</p>
                   <p className="font-medium">{coggins.current.accessionNumber}</p>
                 </div>
               )}
@@ -165,9 +165,9 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             )}
           </div>
         ) : (
-          <div className="text-center py-6 bg-stone-50 rounded-xl">
-            <FileText className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-            <p className="text-stone-500 text-sm mb-3">No Coggins on file</p>
+          <div className="text-center py-6 bg-background rounded-xl">
+            <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm mb-3">No Coggins on file</p>
             {canEdit && (
               <button onClick={onLogCoggins} className="btn-primary btn-sm">
                 <Plus className="w-4 h-4" />
@@ -179,13 +179,13 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
         {/* Coggins History */}
         {coggins?.data && coggins.data.length > 1 && (
-          <div className="mt-4 pt-4 border-t border-stone-200">
-            <p className="text-sm font-medium text-stone-700 mb-2">History</p>
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-sm font-medium text-muted-foreground mb-2">History</p>
             <div className="space-y-2">
               {coggins.data.slice(1, 4).map((c) => (
-                <div key={c.id} className="flex items-center justify-between text-sm p-2 rounded bg-stone-50">
-                  <span className="text-stone-500">{new Date(c.testDate).toLocaleDateString()}</span>
-                  <span className={new Date(c.expiryDate) > new Date() ? 'text-green-600' : 'text-stone-400'}>
+                <div key={c.id} className="flex items-center justify-between text-sm p-2 rounded bg-background">
+                  <span className="text-muted-foreground">{new Date(c.testDate).toLocaleDateString()}</span>
+                  <span className={new Date(c.expiryDate) > new Date() ? 'text-green-600' : 'text-muted-foreground'}>
                     Exp: {new Date(c.expiryDate).toLocaleDateString()}
                   </span>
                 </div>
@@ -198,7 +198,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
       {/* Vaccinations */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Vaccinations</h3>
+          <h3 className="font-semibold text-foreground">Vaccinations</h3>
           {canEdit && (
             <button onClick={onLogVaccination} className="btn-secondary btn-sm">
               <Plus className="w-4 h-4" />
@@ -213,18 +213,18 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                 new Date(vax.nextDueDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
               return (
-                <div key={vax.id} className="p-3 rounded-xl bg-stone-50">
+                <div key={vax.id} className="p-3 rounded-xl bg-background">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-stone-900">
+                    <p className="font-medium text-foreground">
                       {vax.type.replace(/_/g, ' ')}
                     </p>
                     {isExpiringSoon && <span className="badge-warning">Due Soon</span>}
                   </div>
-                  <p className="text-sm text-stone-500 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Given: {new Date(vax.dateGiven).toLocaleDateString()}
                   </p>
                   {vax.nextDueDate && (
-                    <p className="text-sm text-stone-500">
+                    <p className="text-sm text-muted-foreground">
                       Next due: {new Date(vax.nextDueDate).toLocaleDateString()}
                     </p>
                   )}
@@ -233,14 +233,14 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             })}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm">No vaccination records</p>
+          <p className="text-muted-foreground text-sm">No vaccination records</p>
         )}
       </div>
 
       {/* Weight History */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Weight History</h3>
+          <h3 className="font-semibold text-foreground">Weight History</h3>
           {canEdit && (
             <button onClick={onLogWeight} className="btn-secondary btn-sm">
               <Plus className="w-4 h-4" />
@@ -251,24 +251,24 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
         {horse.weights && horse.weights.length > 0 ? (
           <div className="space-y-2">
             {horse.weights.slice(0, 5).map((w) => (
-              <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
-                <span className="text-stone-500">{new Date(w.date).toLocaleDateString()}</span>
-                <span className="font-medium text-stone-900">{w.weight} lbs</span>
+              <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-background">
+                <span className="text-muted-foreground">{new Date(w.date).toLocaleDateString()}</span>
+                <span className="font-medium text-foreground">{w.weight} lbs</span>
                 {w.bodyScore && (
-                  <span className="text-sm text-stone-500">BCS: {w.bodyScore.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground">BCS: {w.bodyScore.toFixed(1)}</span>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-stone-500 text-sm">No weight records</p>
+          <p className="text-muted-foreground text-sm">No weight records</p>
         )}
       </div>
 
       {/* All Health Records */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-stone-900">Health Records</h3>
+          <h3 className="font-semibold text-foreground">Health Records</h3>
           {canEdit && (
             <Link href={`/horses/${horse.id}/health/new`} className="btn-secondary btn-sm">
               <Plus className="w-4 h-4" />
@@ -278,7 +278,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
         </div>
         {healthRecordsLoading ? (
           <div className="flex items-center justify-center py-4">
-            <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : healthRecords.length > 0 ? (
           <div className="space-y-2">
@@ -289,25 +289,25 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                   setSelectedHealthRecord(record);
                   setShowHealthRecordModal(true);
                 }}
-                className="w-full p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+                className="w-full p-3 rounded-xl bg-background hover:bg-accent transition-colors text-left"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-stone-900">{record.type.replace(/_/g, ' ')}</p>
-                    <p className="text-sm text-stone-500">{new Date(record.date).toLocaleDateString()}</p>
+                    <p className="font-medium text-foreground">{record.type.replace(/_/g, ' ')}</p>
+                    <p className="text-sm text-muted-foreground">{new Date(record.date).toLocaleDateString()}</p>
                     {record.provider && (
-                      <p className="text-xs text-stone-400 mt-1">Provider: {record.provider}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Provider: {record.provider}</p>
                     )}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-stone-400" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </div>
               </button>
             ))}
           </div>
         ) : (
           <div className="text-center py-6">
-            <FileText className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-            <p className="text-stone-500 text-sm mb-3">No health records</p>
+            <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+            <p className="text-muted-foreground text-sm mb-3">No health records</p>
             {canEdit && (
               <Link href={`/horses/${horse.id}/health/new`} className="btn-primary btn-sm inline-flex items-center gap-2">
                 <Plus className="w-4 h-4" />
@@ -321,9 +321,9 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
       {/* Health Record Detail Modal */}
       {showHealthRecordModal && selectedHealthRecord && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-stone-200 p-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-stone-900">
+          <div className="bg-card rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-card border-b border-border p-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">
                 {selectedHealthRecord.type.replace(/_/g, ' ')}
               </h2>
               <button
@@ -331,7 +331,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                   setShowHealthRecordModal(false);
                   setSelectedHealthRecord(null);
                 }}
-                className="text-stone-400 hover:text-stone-600"
+                className="text-muted-foreground hover:text-muted-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -339,62 +339,62 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-sm font-medium text-stone-700">Date</label>
-                <p className="text-stone-900">{new Date(selectedHealthRecord.date).toLocaleDateString()}</p>
+                <label className="text-sm font-medium text-muted-foreground">Date</label>
+                <p className="text-foreground">{new Date(selectedHealthRecord.date).toLocaleDateString()}</p>
               </div>
 
               {selectedHealthRecord.provider && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Provider</label>
-                  <p className="text-stone-900">{selectedHealthRecord.provider}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Provider</label>
+                  <p className="text-foreground">{selectedHealthRecord.provider}</p>
                 </div>
               )}
 
               {selectedHealthRecord.diagnosis && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Diagnosis</label>
-                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.diagnosis}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Diagnosis</label>
+                  <p className="text-foreground whitespace-pre-wrap">{selectedHealthRecord.diagnosis}</p>
                 </div>
               )}
 
               {selectedHealthRecord.treatment && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Treatment</label>
-                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.treatment}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Treatment</label>
+                  <p className="text-foreground whitespace-pre-wrap">{selectedHealthRecord.treatment}</p>
                 </div>
               )}
 
               {selectedHealthRecord.findings && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Findings</label>
-                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.findings}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Findings</label>
+                  <p className="text-foreground whitespace-pre-wrap">{selectedHealthRecord.findings}</p>
                 </div>
               )}
 
               {selectedHealthRecord.followUpNotes && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Notes</label>
-                  <p className="text-stone-900 whitespace-pre-wrap">{selectedHealthRecord.followUpNotes}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                  <p className="text-foreground whitespace-pre-wrap">{selectedHealthRecord.followUpNotes}</p>
                 </div>
               )}
 
               {selectedHealthRecord.followUpDate && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Follow-up Date</label>
-                  <p className="text-stone-900">{new Date(selectedHealthRecord.followUpDate).toLocaleDateString()}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Follow-up Date</label>
+                  <p className="text-foreground">{new Date(selectedHealthRecord.followUpDate).toLocaleDateString()}</p>
                 </div>
               )}
 
               {selectedHealthRecord.cost && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700">Cost</label>
-                  <p className="text-stone-900">${selectedHealthRecord.cost.toFixed(2)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Cost</label>
+                  <p className="text-foreground">${selectedHealthRecord.cost.toFixed(2)}</p>
                 </div>
               )}
 
               {selectedHealthRecord.attachments && selectedHealthRecord.attachments.length > 0 && (
                 <div>
-                  <label className="text-sm font-medium text-stone-700 block mb-2">Attachments</label>
+                  <label className="text-sm font-medium text-muted-foreground block mb-2">Attachments</label>
                   <div className="space-y-2">
                     {selectedHealthRecord.attachments.map((att) => (
                       <a
@@ -402,7 +402,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                         href={att.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 p-2 rounded bg-stone-50 hover:bg-stone-100 text-amber-600 hover:text-amber-700"
+                        className="flex items-center gap-2 p-2 rounded bg-background hover:bg-accent text-amber-600 hover:text-amber-700"
                       >
                         <FileText className="w-4 h-4" />
                         <span className="text-sm">{att.filename || 'View Document'}</span>

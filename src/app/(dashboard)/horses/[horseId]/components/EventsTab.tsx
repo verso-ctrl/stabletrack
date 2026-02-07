@@ -22,7 +22,7 @@ export function EventsTab({ horse, canEdit = true }: EventsTabProps) {
   return (
     <div className="card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-stone-900">Event History</h3>
+        <h3 className="font-semibold text-foreground">Event History</h3>
         {canEdit && (
           <Link href={`/calendar?horseId=${horse.id}&addEvent=true`} className="btn-primary btn-sm">
             <Plus className="w-4 h-4" />
@@ -33,10 +33,10 @@ export function EventsTab({ horse, canEdit = true }: EventsTabProps) {
       {horse.upcomingEvents && horse.upcomingEvents.length > 0 ? (
         <div className="space-y-2">
           {horse.upcomingEvents.map((event) => (
-            <div key={event.id} className="flex items-center gap-3 p-3 rounded-xl bg-stone-50">
+            <div key={event.id} className="flex items-center gap-3 p-3 rounded-xl bg-background">
               <div className="flex-1">
-                <p className="font-medium text-stone-900">{event.title}</p>
-                <p className="text-sm text-stone-500">
+                <p className="font-medium text-foreground">{event.title}</p>
+                <p className="text-sm text-muted-foreground">
                   {new Date(event.scheduledDate).toLocaleDateString()}
                 </p>
               </div>
@@ -45,7 +45,7 @@ export function EventsTab({ horse, canEdit = true }: EventsTabProps) {
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 text-sm">No events scheduled</p>
+        <p className="text-muted-foreground text-sm">No events scheduled</p>
       )}
     </div>
   );

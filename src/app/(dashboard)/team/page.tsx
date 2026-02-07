@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import {
@@ -216,7 +217,7 @@ export default function TeamPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -234,8 +235,8 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Team</h1>
-          <p className="text-stone-500 mt-1">Manage barn members and permissions</p>
+          <h1 className="text-2xl font-bold text-foreground">Team</h1>
+          <p className="text-muted-foreground mt-1">Manage barn members and permissions</p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
@@ -259,16 +260,16 @@ export default function TeamPage() {
             {pendingMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-amber-200"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-card rounded-xl border border-amber-200"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                     <Clock className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-stone-900">{getMemberName(member)}</p>
-                    <p className="text-sm text-stone-500">{member.user.email}</p>
-                    <p className="text-xs text-stone-400 mt-1">
+                    <p className="font-medium text-foreground">{getMemberName(member)}</p>
+                    <p className="text-sm text-muted-foreground">{member.user.email}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       Requested {new Date(member.joinedAt).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -314,18 +315,18 @@ export default function TeamPage() {
       <div className="card p-6 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="font-semibold text-stone-900">Barn Invite Code</h3>
-            <p className="text-sm text-stone-600 mt-1">
+            <h3 className="font-semibold text-foreground">Barn Invite Code</h3>
+            <p className="text-sm text-muted-foreground mt-1">
               Share this code with people you want to invite. You'll need to approve their request.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <code className="px-4 py-2 bg-white rounded-lg font-mono text-lg font-semibold text-amber-700 border border-amber-200">
+            <code className="px-4 py-2 bg-card rounded-lg font-mono text-lg font-semibold text-amber-700 border border-amber-200">
               {currentBarn.inviteCode}
             </code>
             <button
               onClick={copyInviteCode}
-              className="p-2 rounded-lg bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 transition-all"
+              className="p-2 rounded-lg bg-card border border-amber-200 text-amber-700 hover:bg-amber-50 transition-all"
             >
               {copiedCode ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
             </button>
@@ -335,7 +336,7 @@ export default function TeamPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search team members..."
@@ -347,7 +348,7 @@ export default function TeamPage() {
 
       {/* Active Team Members */}
       <div>
-        <h2 className="font-semibold text-stone-900 mb-4">
+        <h2 className="font-semibold text-foreground mb-4">
           Active Members ({activeMembers.length})
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -359,17 +360,17 @@ export default function TeamPage() {
               <div key={member.id} className="card p-6 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center">
+                    <div className="relative w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                       {member.user.avatarUrl ? (
-                        <img src={member.user.avatarUrl} alt="" className="w-full h-full object-cover rounded-full" />
+                        <Image src={member.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
                       ) : (
-                        <span className="text-stone-500 text-lg font-medium">
+                        <span className="text-muted-foreground text-lg font-medium">
                           {(member.user.firstName?.[0] || member.user.email[0]).toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-stone-900">{getMemberName(member)}</h3>
+                      <h3 className="font-semibold text-foreground">{getMemberName(member)}</h3>
                       <button
                         onClick={() => {
                           setSelectedMember(member);
@@ -386,20 +387,20 @@ export default function TeamPage() {
                 </div>
                 
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-stone-600">
-                    <Mail className="w-4 h-4 text-stone-400" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
                     {member.user.email}
                   </div>
                   {member.user.phone && (
-                    <div className="flex items-center gap-2 text-stone-600">
-                      <Phone className="w-4 h-4 text-stone-400" />
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
                       {member.user.phone}
                     </div>
                   )}
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-stone-100">
-                  <p className="text-xs text-stone-500">
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
                     Joined {new Date(member.approvedAt || member.joinedAt).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -414,9 +415,12 @@ export default function TeamPage() {
 
         {filteredActiveMembers.length === 0 && (
           <div className="card p-12 text-center">
-            <Users className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-            <p className="text-stone-500">
-              {searchQuery ? 'No team members found' : 'No active team members yet'}
+            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="font-medium text-muted-foreground">
+              {searchQuery ? 'No team members found' : 'No team members yet'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {searchQuery ? 'Try a different search term.' : 'Invite someone to help manage your barn.'}
             </p>
           </div>
         )}
@@ -424,18 +428,18 @@ export default function TeamPage() {
 
       {/* Role Permissions Info */}
       <div className="card p-6">
-        <h3 className="font-semibold text-stone-900 mb-4">Role Permissions</h3>
+        <h3 className="font-semibold text-foreground mb-4">Role Permissions</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ROLES.map((role) => {
             const RoleIcon = role.icon;
             
             return (
-              <div key={role.id} className="p-4 rounded-xl bg-stone-50">
+              <div key={role.id} className="p-4 rounded-xl bg-background">
                 <div className={`inline-flex items-center gap-2 px-2 py-1 rounded-lg text-sm font-medium ${role.color} mb-2`}>
                   <RoleIcon className="w-4 h-4" />
                   {role.name}
                 </div>
-                <p className="text-sm text-stone-600">{role.description}</p>
+                <p className="text-sm text-muted-foreground">{role.description}</p>
               </div>
             );
           })}
@@ -445,7 +449,7 @@ export default function TeamPage() {
       {/* Role Change Modal */}
       {showRoleModal && selectedMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Change Role</h3>
               <button
@@ -454,13 +458,13 @@ export default function TeamPage() {
                   setSelectedMember(null);
                   setError('');
                 }}
-                className="p-2 hover:bg-stone-100 rounded-lg"
+                className="p-2 hover:bg-accent rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-sm text-stone-600 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Change role for{' '}
               <span className="font-medium">{getMemberName(selectedMember)}</span>
             </p>
@@ -485,7 +489,7 @@ export default function TeamPage() {
                     className={`w-full p-3 rounded-xl border text-left transition-all ${
                       isSelected
                         ? 'border-amber-500 bg-amber-50'
-                        : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                        : 'border-border hover:border-border hover:bg-accent'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -493,8 +497,8 @@ export default function TeamPage() {
                         <RoleIcon className="w-4 h-4" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-stone-900">{role.name}</p>
-                        <p className="text-xs text-stone-500">{role.description}</p>
+                        <p className="font-medium text-foreground">{role.name}</p>
+                        <p className="text-xs text-muted-foreground">{role.description}</p>
                       </div>
                       {isSelected && <Check className="w-5 h-5 text-amber-500" />}
                     </div>
@@ -582,22 +586,22 @@ function InviteModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Invite Team Member</h3>
-          <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg">
+          <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Share Code Option */}
-        <div className="mb-6 p-4 bg-stone-50 rounded-xl">
-          <p className="text-sm font-medium text-stone-700 mb-2">Option 1: Share Invite Code</p>
-          <p className="text-xs text-stone-500 mb-3">
+        <div className="mb-6 p-4 bg-background rounded-xl">
+          <p className="text-sm font-medium text-muted-foreground mb-2">Option 1: Share Invite Code</p>
+          <p className="text-xs text-muted-foreground mb-3">
             They'll request to join and you can approve with a role:
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 px-4 py-2 bg-white rounded-lg font-mono text-lg font-semibold text-center border border-stone-200">
+            <code className="flex-1 px-4 py-2 bg-card rounded-lg font-mono text-lg font-semibold text-center border border-border">
               {inviteCode}
             </code>
             <button onClick={copyInviteCode} className="btn-secondary p-2">
@@ -608,7 +612,7 @@ function InviteModal({
 
         {/* Direct Invite Option */}
         <form onSubmit={handleInvite}>
-          <p className="text-sm font-medium text-stone-700 mb-3">Option 2: Add Directly (No Approval)</p>
+          <p className="text-sm font-medium text-muted-foreground mb-3">Option 2: Add Directly (No Approval)</p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
@@ -619,7 +623,7 @@ function InviteModal({
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Email *
               </label>
               <input
@@ -634,7 +638,7 @@ function InviteModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   First Name
                 </label>
                 <input
@@ -645,7 +649,7 @@ function InviteModal({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Last Name
                 </label>
                 <input
@@ -658,7 +662,7 @@ function InviteModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Role *
               </label>
               <select

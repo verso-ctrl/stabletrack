@@ -4,6 +4,7 @@
 'use client'
 
 import React, { useRef, useCallback } from 'react'
+import NextImage from 'next/image'
 import { Upload, X, Check, AlertCircle, Loader2, Image, FileText } from 'lucide-react'
 import { useDragDrop } from '@/hooks/useStorage'
 import { formatBytes } from '@/lib/storage'
@@ -341,9 +342,9 @@ export function FileListItem({
 
   return (
     <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-      <div className="flex-shrink-0 w-12 h-12 rounded overflow-hidden bg-muted">
+      <div className="relative flex-shrink-0 w-12 h-12 rounded overflow-hidden bg-muted">
         {isImage ? (
-          <img src={url} alt={name} className="w-full h-full object-cover" />
+          <NextImage src={url} alt={name} fill className="object-cover" unoptimized />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <FileText className="w-6 h-6 text-muted-foreground" />

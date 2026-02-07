@@ -191,7 +191,7 @@ function AlertsBanner({ alerts }: { alerts: any[] }) {
         </div>
         <button
           onClick={() => setDismissed(alerts.map((a) => a.id))}
-          className="p-1 rounded-lg hover:bg-white/20 transition-colors"
+          className="p-1 rounded-lg hover:bg-card/20 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -283,7 +283,7 @@ function TasksWidget({ tasks, onTaskComplete }: TasksWidgetProps) {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-stone-600">
+          <span className="text-sm font-medium text-muted-foreground">
             {Math.round(progress)}%
           </span>
         </div>

@@ -67,7 +67,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const [barnSwitcherOpen, setBarnSwitcherOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -79,52 +79,52 @@ export function DashboardShell({ children }: DashboardShellProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-stone-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-stone-200">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-border">
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">ST</span>
               </div>
-              <span className="text-xl font-semibold text-stone-900">
+              <span className="text-xl font-semibold text-foreground">
                 StableTrack
               </span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 rounded-lg hover:bg-stone-100"
+              className="lg:hidden p-1 rounded-lg hover:bg-accent"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Barn Switcher */}
-          <div className="p-4 border-b border-stone-200">
+          <div className="p-4 border-b border-border">
             <div className="relative">
               <button
                 onClick={() => setBarnSwitcherOpen(!barnSwitcherOpen)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-background hover:bg-accent transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-stone-700 to-stone-900 flex items-center justify-center">
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-stone-900 text-sm">
+                    <p className="font-medium text-foreground text-sm">
                       {currentBarn?.name || 'Select Barn'}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-muted-foreground">
                       {currentBarn?.inviteCode || '—'}
                     </p>
                   </div>
                 </div>
                 <ChevronDown
                   className={cn(
-                    'w-4 h-4 text-stone-400 transition-transform',
+                    'w-4 h-4 text-muted-foreground transition-transform',
                     barnSwitcherOpen && 'rotate-180'
                   )}
                 />
@@ -132,7 +132,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
               {/* Barn dropdown */}
               {barnSwitcherOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-stone-200 shadow-lg z-10 py-2">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl border border-border shadow-lg z-10 py-2">
                   {barns.map((barn) => (
                     <button
                       key={barn.id}
@@ -141,19 +141,19 @@ export function DashboardShell({ children }: DashboardShellProps) {
                         setBarnSwitcherOpen(false);
                       }}
                       className={cn(
-                        'w-full px-4 py-2 text-left hover:bg-stone-50 flex items-center justify-between',
+                        'w-full px-4 py-2 text-left hover:bg-accent flex items-center justify-between',
                         barn.id === currentBarn?.id && 'bg-amber-50'
                       )}
                     >
-                      <span className="text-sm font-medium text-stone-700">
+                      <span className="text-sm font-medium text-muted-foreground">
                         {barn.name}
                       </span>
-                      <span className="text-xs text-stone-400">
+                      <span className="text-xs text-muted-foreground">
                         {barn.horseCount} horses
                       </span>
                     </button>
                   ))}
-                  <div className="border-t border-stone-100 mt-2 pt-2 px-4">
+                  <div className="border-t border-border mt-2 pt-2 px-4">
                     <Link
                       href="/barns/new"
                       className="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 py-1"
@@ -178,8 +178,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-stone-900 text-white'
-                      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -188,7 +188,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               );
             })}
 
-            <div className="pt-4 mt-4 border-t border-stone-200">
+            <div className="pt-4 mt-4 border-t border-border">
               {settingsNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -198,8 +198,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-stone-900 text-white'
-                        : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     )}
                   >
                     <item.icon className="w-5 h-5" />
@@ -211,7 +211,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </nav>
 
           {/* Subscription badge */}
-          <div className="p-4 border-t border-stone-200">
+          <div className="p-4 border-t border-border">
             <div className="p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-amber-800">
@@ -230,24 +230,24 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
 
           {/* User */}
-          <div className="p-4 border-t border-stone-200">
+          <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center">
-                <span className="text-stone-600 font-medium">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground font-medium">
                   {user?.firstName?.[0] || 'D'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-stone-500 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {currentBarn?.role || 'Owner'}
                 </p>
               </div>
               <button
                 onClick={() => toast.info('Demo Mode', 'Sign out is disabled in demo mode')}
-                className="p-2 rounded-lg hover:bg-stone-100 text-stone-400"
+                className="p-2 rounded-lg hover:bg-accent text-muted-foreground"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -259,12 +259,12 @@ export function DashboardShell({ children }: DashboardShellProps) {
       {/* Main content */}
       <div className="lg:pl-72">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-stone-200">
+        <header className="sticky top-0 z-30 h-16 bg-card/80 backdrop-blur-md border-b border-border">
           <div className="flex items-center justify-between h-full px-4 lg:px-8">
             {/* Mobile menu button */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-stone-100"
+              className="lg:hidden p-2 rounded-lg hover:bg-accent"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -272,24 +272,24 @@ export function DashboardShell({ children }: DashboardShellProps) {
             {/* Search */}
             <div className="flex-1 max-w-xl mx-4 lg:mx-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search horses, events..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-stone-100 border-0 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-muted border-0 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <button className="relative p-2 rounded-xl hover:bg-stone-100 transition-colors">
-                <Bell className="w-5 h-5 text-stone-600" />
+              <button className="relative p-2 rounded-xl hover:bg-accent transition-colors">
+                <Bell className="w-5 h-5 text-muted-foreground" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
               <Link
                 href="/horses/new"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Quick Add

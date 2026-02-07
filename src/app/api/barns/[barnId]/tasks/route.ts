@@ -27,33 +27,41 @@ export async function GET(
     const assigneeId = searchParams.get('assigneeId');
     const dueDate = searchParams.get('dueDate');
     const priority = searchParams.get('priority');
-    
+    const horseId = searchParams.get('horseId');
+    const farmOnly = searchParams.get('farmOnly');
+
     // Build where clause
     const where: any = { barnId: barnId };
-    
+
     if (status) {
       where.status = status;
     }
-    
+
     if (assigneeId) {
       where.assigneeId = assigneeId;
     }
-    
+
+    if (farmOnly === 'true') {
+      where.horseId = null;
+    } else if (horseId) {
+      where.horseId = horseId;
+    }
+
     if (dueDate) {
       const date = new Date(dueDate);
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
-      
+
       where.dueDate = {
         gte: date,
         lt: nextDay,
       };
     }
-    
+
     if (priority) {
       where.priority = priority;
     }
-    
+
     const tasks = await prisma.task.findMany({
       where,
       include: {
@@ -64,12 +72,20 @@ export async function GET(
             avatarUrl: true,
           },
         },
+        horse: {
+          select: {
+            id: true,
+            barnName: true,
+            profilePhotoUrl: true,
+          },
+        },
       },
       orderBy: [
         { priority: 'desc' },
         { dueDate: 'asc' },
         { createdAt: 'desc' },
       ],
+      take: 200,
     });
     
     return NextResponse.json({ data: tasks });
@@ -108,21 +124,23 @@ export async function POST(
       dueDate,
       dueTime,
       priority,
+      horseId,
       assigneeId,
       isRecurring,
       recurringRule,
     } = body;
-    
+
     if (!title) {
       return NextResponse.json(
         { error: 'Title is required' },
         { status: 400 }
       );
     }
-    
+
     const task = await prisma.task.create({
       data: {
         barnId: barnId,
+        horseId: horseId || null,
         title,
         description,
         dueDate: dueDate ? new Date(dueDate) : null,
@@ -139,6 +157,13 @@ export async function POST(
             firstName: true,
             lastName: true,
             avatarUrl: true,
+          },
+        },
+        horse: {
+          select: {
+            id: true,
+            barnName: true,
+            profilePhotoUrl: true,
           },
         },
       },

@@ -98,7 +98,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -126,26 +126,26 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
       <div className="flex items-center gap-4">
         <Link
           href={`/horses/${horseId}`}
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Add Health Record</h1>
-          <p className="text-stone-500 mt-1">for {horse.barnName}</p>
+          <h1 className="text-2xl font-bold text-foreground">Add Health Record</h1>
+          <p className="text-muted-foreground mt-1">for {horse.barnName}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
             <Stethoscope className="w-5 h-5 text-blue-500" />
             Record Information
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Record Type *
               </label>
               <select
@@ -163,7 +163,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Date *
                 </label>
                 <input
@@ -175,11 +175,11 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Veterinarian / Provider
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={formData.provider}
@@ -195,13 +195,13 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
         {/* Medical Details */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-muted-foreground" />
             Medical Details
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Diagnosis
               </label>
               <input
@@ -214,7 +214,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Treatment / Procedures
               </label>
               <textarea
@@ -226,7 +226,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Findings / Notes
               </label>
               <textarea
@@ -241,13 +241,13 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
         {/* Follow-up */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-muted-foreground" />
             Follow-up
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Follow-up Date
               </label>
               <input
@@ -258,7 +258,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Follow-up Notes
               </label>
               <textarea
@@ -294,12 +294,12 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
         {/* Cost */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-muted-foreground" />
             Cost (Optional)
           </h3>
           <div className="relative max-w-xs">
-            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="number"
               step="0.01"
@@ -313,15 +313,15 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
 
         {/* Attachments */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <Upload className="w-5 h-5 text-muted-foreground" />
             Attachments
           </h3>
-          <div className="border-2 border-dashed border-stone-300 rounded-xl p-8 text-center">
-            <Upload className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-            <p className="text-stone-600 font-medium">Drop files here or click to upload</p>
-            <p className="text-sm text-stone-500 mt-1">PDF, images up to 10MB each</p>
-            <p className="text-xs text-stone-400 mt-3">File uploads disabled in demo mode</p>
+          <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
+            <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">Drop files here or click to upload</p>
+            <p className="text-sm text-muted-foreground mt-1">PDF, images up to 10MB each</p>
+            <p className="text-xs text-muted-foreground mt-3">File uploads disabled in demo mode</p>
           </div>
         </div>
 

@@ -122,6 +122,13 @@ export async function GET(
             email: true,
           },
         },
+        horse: {
+          select: {
+            id: true,
+            barnName: true,
+            profilePhotoUrl: true,
+          },
+        },
       },
     });
     
@@ -181,6 +188,13 @@ export async function PATCH(
             avatarUrl: true,
           },
         },
+        horse: {
+          select: {
+            id: true,
+            barnName: true,
+            profilePhotoUrl: true,
+          },
+        },
       },
     });
     
@@ -211,6 +225,7 @@ export async function PATCH(
             await prisma.task.create({
               data: {
                 barnId: barnId,
+                horseId: task.horseId,
                 title: task.title,
                 description: task.description,
                 dueDate: nextDueDate,

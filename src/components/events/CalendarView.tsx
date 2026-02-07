@@ -41,7 +41,7 @@ const EVENT_TYPE_COLORS: Record<EventType, { bg: string; text: string; dot: stri
   SHOW: { bg: 'bg-pink-100', text: 'text-pink-800', dot: 'bg-pink-500' },
   TRANSPORT: { bg: 'bg-indigo-100', text: 'text-indigo-800', dot: 'bg-indigo-500' },
   BREEDING: { bg: 'bg-rose-100', text: 'text-rose-800', dot: 'bg-rose-500' },
-  OTHER: { bg: 'bg-stone-100', text: 'text-stone-800', dot: 'bg-stone-500' },
+  OTHER: { bg: 'bg-muted', text: 'text-foreground', dot: 'bg-muted-foreground' },
 };
 
 export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
@@ -105,25 +105,25 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-stone-900">
+            <h2 className="text-xl font-semibold text-foreground">
               {format(currentMonth, 'MMMM yyyy')}
             </h2>
             <div className="flex items-center gap-1">
               <button
                 onClick={goToPreviousMonth}
-                className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+                className="p-2 rounded-lg hover:bg-accent transition-colors"
               >
-                <ChevronLeft className="w-5 h-5 text-stone-600" />
+                <ChevronLeft className="w-5 h-5 text-muted-foreground" />
               </button>
               <button
                 onClick={goToNextMonth}
-                className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+                className="p-2 rounded-lg hover:bg-accent transition-colors"
               >
-                <ChevronRight className="w-5 h-5 text-stone-600" />
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
               <button
                 onClick={goToToday}
-                className="ml-2 px-3 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+                className="ml-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors"
               >
                 Today
               </button>
@@ -135,7 +135,7 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as EventType | 'ALL')}
-              className="px-3 py-2 rounded-lg border border-stone-200 text-sm"
+              className="px-3 py-2 rounded-lg border border-border text-sm"
             >
               <option value="ALL">All Events</option>
               {Object.keys(EVENT_TYPE_COLORS).map((type) => (
@@ -156,13 +156,13 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
         </div>
 
         {/* Calendar */}
-        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
           {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-stone-200">
+          <div className="grid grid-cols-7 border-b border-border">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
-                className="py-3 text-center text-sm font-medium text-stone-500"
+                className="py-3 text-center text-sm font-medium text-muted-foreground"
               >
                 {day}
               </div>
@@ -183,17 +183,17 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
                   key={index}
                   onClick={() => setSelectedDate(day)}
                   className={`
-                    min-h-[100px] p-2 border-b border-r border-stone-100 text-left
-                    transition-colors hover:bg-stone-50
-                    ${!isCurrentMonth ? 'bg-stone-50/50' : ''}
+                    min-h-[100px] p-2 border-b border-r border-border text-left
+                    transition-colors hover:bg-accent
+                    ${!isCurrentMonth ? 'bg-background/50' : ''}
                     ${isSelected ? 'bg-stable-50 ring-2 ring-inset ring-stable-500' : ''}
                   `}
                 >
                   <span
                     className={`
                       inline-flex items-center justify-center w-7 h-7 rounded-full text-sm
-                      ${isDayToday ? 'bg-stone-900 text-white font-medium' : ''}
-                      ${!isCurrentMonth ? 'text-stone-400' : 'text-stone-900'}
+                      ${isDayToday ? 'bg-primary text-primary-foreground font-medium' : ''}
+                      ${!isCurrentMonth ? 'text-muted-foreground' : 'text-foreground'}
                     `}
                   >
                     {format(day, 'd')}
@@ -216,7 +216,7 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
                       );
                     })}
                     {dayEvents.length > 3 && (
-                      <div className="text-xs text-stone-500 px-1.5">
+                      <div className="text-xs text-muted-foreground px-1.5">
                         +{dayEvents.length - 3} more
                       </div>
                     )}
@@ -230,8 +230,8 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
 
       {/* Selected Date Events Panel */}
       <div className="w-full lg:w-80">
-        <div className="bg-white rounded-2xl border border-stone-200 p-4 sticky top-6">
-          <h3 className="font-semibold text-stone-900 mb-4">
+        <div className="bg-card rounded-2xl border border-border p-4 sticky top-6">
+          <h3 className="font-semibold text-foreground mb-4">
             {selectedDate
               ? format(selectedDate, 'EEEE, MMMM d')
               : 'Select a date'}
@@ -239,7 +239,7 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : selectedDateEvents.length > 0 ? (
             <div className="space-y-3">
@@ -249,24 +249,24 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
                   <button
                     key={event.id}
                     onClick={() => onEventClick?.(event)}
-                    className="w-full text-left p-3 rounded-xl hover:bg-stone-50 transition-colors border border-stone-100"
+                    className="w-full text-left p-3 rounded-xl hover:bg-accent transition-colors border border-border"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-2 h-2 rounded-full mt-2 ${colors.dot}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-stone-900 truncate">
+                        <p className="font-medium text-foreground truncate">
                           {event.title}
                         </p>
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-muted-foreground">
                           {event.type.replace(/_/g, ' ')}
                         </p>
                         {event.horse && (
-                          <p className="text-sm text-stone-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             🐴 {event.horse.barnName}
                           </p>
                         )}
                         {event.providerName && (
-                          <p className="text-xs text-stone-400 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Provider: {event.providerName}
                           </p>
                         )}
@@ -278,7 +278,7 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
                             ? 'bg-blue-100 text-blue-800'
                             : event.status === 'COMPLETED'
                             ? 'bg-green-100 text-green-800'
-                            : 'bg-stone-100 text-stone-600'
+                            : 'bg-muted text-muted-foreground'
                           }
                         `}
                       >
@@ -291,8 +291,8 @@ export function CalendarView({ onAddEvent, onEventClick }: CalendarViewProps) {
             </div>
           ) : (
             <div className="text-center py-8">
-              <CalendarIcon className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-500 text-sm">
+              <CalendarIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground text-sm">
                 {selectedDate ? 'No events scheduled' : 'Click a date to view events'}
               </p>
             </div>
@@ -332,10 +332,10 @@ export function UpcomingEventsList({ limit = 5 }: { limit?: number }) {
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="animate-pulse flex gap-3">
-            <div className="w-12 h-12 bg-stone-200 rounded-lg" />
+            <div className="w-12 h-12 bg-muted rounded-lg" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-stone-200 rounded w-3/4" />
-              <div className="h-3 bg-stone-100 rounded w-1/2" />
+              <div className="h-4 bg-muted rounded w-3/4" />
+              <div className="h-3 bg-muted rounded w-1/2" />
             </div>
           </div>
         ))}
@@ -346,8 +346,8 @@ export function UpcomingEventsList({ limit = 5 }: { limit?: number }) {
   if (upcomingEvents.length === 0) {
     return (
       <div className="text-center py-6">
-        <CalendarIcon className="w-8 h-8 text-stone-300 mx-auto mb-2" />
-        <p className="text-sm text-stone-500">No upcoming events</p>
+        <CalendarIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">No upcoming events</p>
       </div>
     );
   }
@@ -361,22 +361,22 @@ export function UpcomingEventsList({ limit = 5 }: { limit?: number }) {
         return (
           <div
             key={event.id}
-            className="flex items-start gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors"
+            className="flex items-start gap-3 p-3 rounded-xl hover:bg-accent transition-colors"
           >
-            <div className="w-12 h-12 rounded-lg bg-stone-100 flex flex-col items-center justify-center text-center">
-              <span className="text-xs text-stone-500 uppercase">
+            <div className="w-12 h-12 rounded-lg bg-muted flex flex-col items-center justify-center text-center">
+              <span className="text-xs text-muted-foreground uppercase">
                 {format(eventDate, 'MMM')}
               </span>
-              <span className="text-lg font-bold text-stone-900 -mt-1">
+              <span className="text-lg font-bold text-foreground -mt-1">
                 {format(eventDate, 'd')}
               </span>
             </div>
             
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-stone-900 truncate">
+              <p className="font-medium text-foreground truncate">
                 {event.title}
               </p>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 {event.horse?.barnName || event.type.replace(/_/g, ' ')}
               </p>
             </div>

@@ -19,6 +19,7 @@ import {
   Activity,
   User,
   Trees,
+  Wrench,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -27,6 +28,7 @@ const ClerkUserButton = dynamic(
   { ssr: false, loading: () => <div className="w-8 h-8 rounded-full bg-muted animate-pulse" /> }
 );
 
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { hasPermission, BarnRole } from '@/types';
 
 const HorseIcon = ({ className }: { className?: string }) => (
@@ -44,6 +46,7 @@ const navItems = [
   { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read' },
   { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read' },
   { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read' },
+  { href: '/farm-maintenance', label: 'Farm Tasks', icon: Wrench, permission: 'tasks:read' },
   { href: '/pastures', label: 'Pastures', icon: Trees, permission: 'horses:read' },
   { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read' },
 ];
@@ -265,8 +268,11 @@ export function Sidebar() {
           <NavLink key={item.href} {...item} />
         ))}
 
-        {/* User */}
-        <UserProfile />
+        {/* Theme & User */}
+        <div className="flex items-center justify-between pt-1">
+          <UserProfile />
+          <ThemeToggle />
+        </div>
       </div>
     </>
   );

@@ -35,8 +35,8 @@ import { OverviewTab } from './components/OverviewTab';
 import { HealthTab } from './components/HealthTab';
 import { CareTab } from './components/CareTab';
 import { EventsTab } from './components/EventsTab';
+import { TasksTab } from './components/TasksTab';
 import { DocumentsTab } from './components/DocumentsTab';
-import { CompetitionsTab } from './components/CompetitionsTab';
 import { ActivityTab } from './components/ActivityTab';
 
 export default function HorseDetailPage() {
@@ -322,7 +322,7 @@ export default function HorseDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -330,9 +330,9 @@ export default function HorseDetailPage() {
   if (error || !horse) {
     return (
       <div className="text-center py-16">
-        <HorseIcon className="w-16 h-16 text-stone-300 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-stone-900 mb-2">Horse not found</h2>
-        <p className="text-stone-500 mb-6">{error || "This horse doesn't exist or you don't have access."}</p>
+        <HorseIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-foreground mb-2">Horse not found</h2>
+        <p className="text-muted-foreground mb-6">{error || "This horse doesn't exist or you don't have access."}</p>
         <Link href="/horses" className="btn-primary btn-md">
           <ArrowLeft className="w-4 h-4" />
           Back to Horses
@@ -347,13 +347,13 @@ export default function HorseDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Link
           href="/horses"
-          className="p-2 rounded-xl hover:bg-stone-100 transition-all self-start"
+          className="p-2 rounded-xl hover:bg-accent transition-all self-start"
         >
-          <ArrowLeft className="w-5 h-5 text-stone-600" />
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 truncate">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
               {horse.barnName}
             </h1>
             <span className={`${statusColors[horse.status] || 'badge-neutral'} text-xs sm:text-sm flex-shrink-0`}>
@@ -361,7 +361,7 @@ export default function HorseDetailPage() {
             </span>
           </div>
           {horse.registeredName && (
-            <p className="text-sm sm:text-base text-stone-500 truncate">{horse.registeredName}</p>
+            <p className="text-sm sm:text-base text-muted-foreground truncate">{horse.registeredName}</p>
           )}
         </div>
         {canEdit && (
@@ -370,8 +370,8 @@ export default function HorseDetailPage() {
               <Edit className="w-4 h-4" />
               <span className="sm:inline">Edit</span>
             </Link>
-            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-stone-100 transition-all flex-shrink-0">
-              <MoreVertical className="w-5 h-5 text-stone-600" />
+            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-accent transition-all flex-shrink-0">
+              <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
         )}
@@ -389,7 +389,7 @@ export default function HorseDetailPage() {
             className="hidden"
           />
           <div
-            className="relative w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0 group cursor-pointer"
+            className="relative w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-xl bg-muted overflow-hidden flex-shrink-0 group cursor-pointer"
             onClick={() => {
               if (horse.profilePhotoUrl) {
                 setActiveTab('photos');
@@ -416,8 +416,8 @@ export default function HorseDetailPage() {
                 </div>
               </>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center hover:bg-stone-50 transition-colors">
-                <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-stone-300" />
+              <div className="w-full h-full flex flex-col items-center justify-center hover:bg-accent transition-colors">
+                <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground" />
               </div>
             )}
           </div>
@@ -470,7 +470,7 @@ export default function HorseDetailPage() {
       </div>
 
       {/* Tabs - Grid on mobile, horizontal scroll on larger screens */}
-      <div className="border-b border-stone-200 -mx-3 sm:-mx-4 sm:mx-0">
+      <div className="border-b border-border -mx-3 sm:-mx-4 sm:mx-0">
         {/* Mobile: Grid layout */}
         <nav className="grid grid-cols-4 gap-1 px-2 pb-2 sm:hidden">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -480,8 +480,8 @@ export default function HorseDetailPage() {
               className={`
                 flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all no-tap-highlight
                 ${activeTab === id
-                  ? 'bg-stone-900 text-white'
-                  : 'bg-stone-100 text-stone-600 active:bg-stone-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground active:bg-accent'
                 }
               `}
             >
@@ -500,8 +500,8 @@ export default function HorseDetailPage() {
               className={`
                 flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
                 ${activeTab === id
-                  ? 'border-stone-900 text-stone-900'
-                  : 'border-transparent text-stone-500 hover:text-stone-700'
+                  ? 'border-foreground text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-muted-foreground'
                 }
               `}
             >
@@ -547,7 +547,7 @@ export default function HorseDetailPage() {
             canEdit={canEdit}
           />
         )}
-        {activeTab === 'competitions' && <CompetitionsTab horse={horse} barnId={currentBarn?.id || ''} canEdit={canEdit} />}
+        {activeTab === 'tasks' && <TasksTab horse={horse} canEdit={canEdit} />}
         {activeTab === 'events' && <EventsTab horse={horse} canEdit={canEdit} />}
         {activeTab === 'documents' && <DocumentsTab horse={horse} canEdit={canEdit} />}
       </div>
@@ -555,21 +555,21 @@ export default function HorseDetailPage() {
       {/* Weight Modal */}
       {showWeightModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Weight className="w-5 h-5 text-amber-500" />
                   Log Weight
                 </h3>
-                <button onClick={() => setShowWeightModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowWeightModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Weight (lbs) *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Weight (lbs) *</label>
                 <input
                   type="number"
                   value={weightForm.weight}
@@ -580,7 +580,7 @@ export default function HorseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Body Condition Score (1-9)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Body Condition Score (1-9)</label>
                 <input
                   type="number"
                   value={weightForm.bodyScore}
@@ -593,7 +593,7 @@ export default function HorseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Date</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
                 <input
                   type="date"
                   value={weightForm.date}
@@ -602,7 +602,7 @@ export default function HorseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={weightForm.notes}
                   onChange={(e) => setWeightForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -612,7 +612,7 @@ export default function HorseDetailPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowWeightModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -627,21 +627,21 @@ export default function HorseDetailPage() {
       {/* Vaccination Modal */}
       {showVaccinationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Syringe className="w-5 h-5 text-green-500" />
                   Log Vaccination
                 </h3>
-                <button onClick={() => setShowVaccinationModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowVaccinationModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Vaccine Type *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Vaccine Type *</label>
                 <select
                   value={vaccinationForm.type}
                   onChange={(e) => setVaccinationForm(prev => ({ ...prev, type: e.target.value }))}
@@ -654,7 +654,7 @@ export default function HorseDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Date Given *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date Given *</label>
                   <input
                     type="date"
                     value={vaccinationForm.dateGiven}
@@ -663,7 +663,7 @@ export default function HorseDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Next Due Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Next Due Date</label>
                   <input
                     type="date"
                     value={vaccinationForm.nextDueDate}
@@ -674,7 +674,7 @@ export default function HorseDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Manufacturer</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Manufacturer</label>
                   <input
                     type="text"
                     value={vaccinationForm.manufacturer}
@@ -684,7 +684,7 @@ export default function HorseDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Lot Number</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Lot Number</label>
                   <input
                     type="text"
                     value={vaccinationForm.lotNumber}
@@ -695,7 +695,7 @@ export default function HorseDetailPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Administered By</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Administered By</label>
                 <input
                   type="text"
                   value={vaccinationForm.administeredBy}
@@ -705,7 +705,7 @@ export default function HorseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={vaccinationForm.notes}
                   onChange={(e) => setVaccinationForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -715,7 +715,7 @@ export default function HorseDetailPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowVaccinationModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -730,21 +730,21 @@ export default function HorseDetailPage() {
       {/* Feed Program Modal */}
       {showFeedModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Utensils className="w-5 h-5 text-amber-500" />
                   Edit Feed Program
                 </h3>
-                <button onClick={() => setShowFeedModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowFeedModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Program Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Program Name</label>
                 <input
                   type="text"
                   value={feedForm.name}
@@ -756,7 +756,7 @@ export default function HorseDetailPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-stone-700">Feed Items</label>
+                  <label className="block text-sm font-medium text-muted-foreground">Feed Items</label>
                   <button
                     type="button"
                     onClick={addFeedItem}
@@ -767,7 +767,7 @@ export default function HorseDetailPage() {
                 </div>
                 <div className="space-y-3">
                   {feedForm.items.map((item, index) => (
-                    <div key={index} className="p-3 rounded-xl bg-stone-50 space-y-2">
+                    <div key={index} className="p-3 rounded-xl bg-background space-y-2">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -823,7 +823,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Special Instructions</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Special Instructions</label>
                 <textarea
                   value={feedForm.instructions}
                   onChange={(e) => setFeedForm(prev => ({ ...prev, instructions: e.target.value }))}
@@ -833,7 +833,7 @@ export default function HorseDetailPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowFeedModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -848,11 +848,11 @@ export default function HorseDetailPage() {
       {/* Coggins Modal */}
       {showCogginsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Add Coggins Record</h3>
-                <button onClick={() => setShowCogginsModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowCogginsModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -860,7 +860,7 @@ export default function HorseDetailPage() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Test Date *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Test Date *</label>
                   <input
                     type="date"
                     value={cogginsForm.testDate}
@@ -869,7 +869,7 @@ export default function HorseDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Expiry Date *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Expiry Date *</label>
                   <input
                     type="date"
                     value={cogginsForm.expiryDate}
@@ -880,7 +880,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Result</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Result</label>
                 <select
                   value={cogginsForm.result}
                   onChange={(e) => setCogginsForm(prev => ({ ...prev, result: e.target.value }))}
@@ -892,7 +892,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Veterinarian</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Veterinarian</label>
                 <input
                   type="text"
                   value={cogginsForm.veterinarian}
@@ -903,7 +903,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Lab Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Lab Name</label>
                 <input
                   type="text"
                   value={cogginsForm.labName}
@@ -914,7 +914,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Accession Number</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Accession Number</label>
                 <input
                   type="text"
                   value={cogginsForm.accessionNumber}
@@ -925,7 +925,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={cogginsForm.notes}
                   onChange={(e) => setCogginsForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -934,7 +934,7 @@ export default function HorseDetailPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowCogginsModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>

@@ -143,7 +143,7 @@ export default function TrainingPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -152,8 +152,8 @@ export default function TrainingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Training Logs</h1>
-          <p className="text-stone-500">Track rides, training sessions, and progress</p>
+          <h1 className="text-2xl font-bold text-foreground">Training Logs</h1>
+          <p className="text-muted-foreground">Track rides, training sessions, and progress</p>
         </div>
         {canEdit && (
           <button onClick={() => setShowModal(true)} className="btn-primary btn-md">
@@ -165,28 +165,28 @@ export default function TrainingPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card p-4">
-          <p className="text-sm text-stone-500">This Week</p>
-          <p className="text-2xl font-bold text-stone-900">{thisWeek.length} rides</p>
+          <p className="text-sm text-muted-foreground">This Week</p>
+          <p className="text-2xl font-bold text-foreground">{thisWeek.length} rides</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Total Time (Week)</p>
-          <p className="text-2xl font-bold text-stone-900">{Math.round(totalMinutesThisWeek / 60 * 10) / 10} hrs</p>
+          <p className="text-sm text-muted-foreground">Total Time (Week)</p>
+          <p className="text-2xl font-bold text-foreground">{Math.round(totalMinutesThisWeek / 60 * 10) / 10} hrs</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Total Logs</p>
-          <p className="text-2xl font-bold text-stone-900">{trainingLogs.length}</p>
+          <p className="text-sm text-muted-foreground">Total Logs</p>
+          <p className="text-2xl font-bold text-foreground">{trainingLogs.length}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Avg Rating</p>
+          <p className="text-sm text-muted-foreground">Avg Rating</p>
           <div className="flex items-center gap-1">
-            <p className="text-2xl font-bold text-stone-900">{avgRating.toFixed(1)}</p>
+            <p className="text-2xl font-bold text-foreground">{avgRating.toFixed(1)}</p>
             <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <Filter className="w-4 h-4 text-stone-400" />
+        <Filter className="w-4 h-4 text-muted-foreground" />
         <select value={filterHorse} onChange={(e) => setFilterHorse(e.target.value)} className="input">
           <option value="">All Horses</option>
           {horses.map(h => (
@@ -195,11 +195,11 @@ export default function TrainingPage() {
         </select>
       </div>
 
-      <div className="card divide-y divide-stone-100">
+      <div className="card divide-y divide-border">
         {filteredLogs.length === 0 ? (
           <div className="p-8 text-center">
-            <Activity className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <p className="text-stone-500">No training logs yet</p>
+            <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No training logs yet</p>
             {canEdit && (
               <button onClick={() => setShowModal(true)} className="btn-primary btn-sm mt-4">
                 Log First Training
@@ -208,15 +208,15 @@ export default function TrainingPage() {
           </div>
         ) : (
           filteredLogs.map(log => (
-            <div key={log.id} className="p-4 hover:bg-stone-50">
+            <div key={log.id} className="p-4 hover:bg-accent">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
                   <HorseIcon className="w-6 h-6 text-amber-700" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-stone-900">{log.horse?.barnName}</p>
-                    <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-xs">
+                    <p className="font-medium text-foreground">{log.horse?.barnName}</p>
+                    <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
                       {log.type.replace(/_/g, ' ')}
                     </span>
                     {log.discipline && (
@@ -225,7 +225,7 @@ export default function TrainingPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-stone-500 mt-1">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {new Date(log.date).toLocaleDateString()}
@@ -244,7 +244,7 @@ export default function TrainingPage() {
                     )}
                   </div>
                   {(log.goals || log.notes) && (
-                    <p className="text-sm text-stone-600 mt-2 line-clamp-2">
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                       {log.goals || log.notes}
                     </p>
                   )}
@@ -257,18 +257,18 @@ export default function TrainingPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Log Training Session</h3>
-                <button onClick={() => setShowModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Horse *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Horse *</label>
                 <select
                   value={form.horseId}
                   onChange={(e) => setForm(prev => ({ ...prev, horseId: e.target.value }))}
@@ -283,7 +283,7 @@ export default function TrainingPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
                   <input
                     type="date"
                     value={form.date}
@@ -292,7 +292,7 @@ export default function TrainingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Duration (min)</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Duration (min)</label>
                   <input
                     type="number"
                     value={form.duration}
@@ -304,7 +304,7 @@ export default function TrainingPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Type</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))}
@@ -316,7 +316,7 @@ export default function TrainingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Discipline</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Discipline</label>
                   <select
                     value={form.discipline}
                     onChange={(e) => setForm(prev => ({ ...prev, discipline: e.target.value }))}
@@ -331,7 +331,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Location</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Location</label>
                 <input
                   type="text"
                   value={form.location}
@@ -342,7 +342,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Goals</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Goals</label>
                 <textarea
                   value={form.goals}
                   onChange={(e) => setForm(prev => ({ ...prev, goals: e.target.value }))}
@@ -353,7 +353,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Rating</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Rating</label>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
@@ -363,7 +363,7 @@ export default function TrainingPage() {
                       className="p-1"
                     >
                       <Star 
-                        className={`w-6 h-6 ${star <= form.rating ? 'text-amber-500 fill-amber-500' : 'text-stone-300'}`} 
+                        className={`w-6 h-6 ${star <= form.rating ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground'}`} 
                       />
                     </button>
                   ))}
@@ -371,7 +371,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -380,7 +380,7 @@ export default function TrainingPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>

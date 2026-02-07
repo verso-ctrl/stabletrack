@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BarnProvider, useBarn } from '@/contexts/BarnContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { useState } from 'react';
 import type { SubscriptionTier } from '@/lib/tiers';
 
@@ -24,8 +25,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // Data stays fresh for 1 minute
-            gcTime: 5 * 60 * 1000, // Cache kept for 5 minutes
+            staleTime: 3 * 60 * 1000, // Data stays fresh for 3 minutes (per-query staleTimes override)
+            gcTime: 10 * 60 * 1000, // Cache kept for 10 minutes
             refetchOnWindowFocus: false,
             retry: 1,
           },
@@ -34,12 +35,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BarnProvider>
-        <SubscriptionProviderWithBarn>
-          {children}
-        </SubscriptionProviderWithBarn>
-      </BarnProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BarnProvider>
+          <SubscriptionProviderWithBarn>
+            {children}
+          </SubscriptionProviderWithBarn>
+        </BarnProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

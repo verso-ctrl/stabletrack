@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
-import { useEvents, useHorses, useLessons } from '@/hooks/useData';
+import { useEvents, useHorses } from '@/hooks/useData';
+import { PrintableCalendar } from '@/components/events/PrintableCalendar';
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,6 +27,7 @@ import {
   Check,
   Trophy,
   GraduationCap,
+  Printer,
 } from 'lucide-react';
 import {
   format,
@@ -56,7 +57,6 @@ const eventTypeIcons: Record<string, any> = {
   TRANSPORT: CalendarIcon,
   BREEDING: CalendarIcon,
   OTHER: CalendarIcon,
-  LESSON: GraduationCap,
 };
 
 const eventTypeColors: Record<string, string> = {
@@ -71,17 +71,19 @@ const eventTypeColors: Record<string, string> = {
   TRAINING: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   TRANSPORT: 'bg-slate-100 text-slate-700 border-slate-200',
   BREEDING: 'bg-pink-100 text-pink-700 border-pink-200',
-  OTHER: 'bg-stone-100 text-stone-700 border-stone-200',
-  LESSON: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  OTHER: 'bg-muted text-muted-foreground border-border',
 };
 
 const eventTypes = [
-  { id: 'VET', name: 'Veterinary', icon: Stethoscope },
+  { id: 'VET_APPOINTMENT', name: 'Veterinary', icon: Stethoscope },
   { id: 'FARRIER', name: 'Farrier', icon: Scissors },
   { id: 'VACCINATION', name: 'Vaccination', icon: Syringe },
   { id: 'DENTAL', name: 'Dental', icon: FileText },
   { id: 'DEWORMING', name: 'Deworming', icon: FileText },
-  { id: 'COMPETITION', name: 'Competition', icon: Trophy },
+  { id: 'SHOW', name: 'Show/Competition', icon: Trophy },
+  { id: 'TRAINING', name: 'Training', icon: GraduationCap },
+  { id: 'TRANSPORT', name: 'Transport', icon: CalendarIcon },
+  { id: 'BREEDING', name: 'Breeding', icon: CalendarIcon },
   { id: 'OTHER', name: 'Other', icon: CalendarIcon },
 ];
 
@@ -98,10 +100,10 @@ export default function CalendarPage() {
   const [iCalCopied, setICalCopied] = useState(false);
   const [googleStatus, setGoogleStatus] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [showLessonModal, setShowLessonModal] = useState(false);
-  const [clients, setClients] = useState<any[]>([]);
-  const [instructors, setInstructors] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [preselectedHorseId, setPreselectedHorseId] = useState<string | null>(null);
+  const [showPrintView, setShowPrintView] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   // Initialize date on client side only
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function CalendarPage() {
 
   // Event form state
   const [eventForm, setEventForm] = useState({
-    type: 'VET',
+    type: 'VET_APPOINTMENT',
     title: '',
     description: '',
     horseIds: [] as string[],
@@ -123,33 +125,11 @@ export default function CalendarPage() {
     assignedToId: '',
   });
 
-  // Lesson form state
-  const [lessonForm, setLessonForm] = useState({
-    clientId: '',
-    horseId: '',
-    instructorId: '',
-    type: 'PRIVATE',
-    scheduledDate: '',
-    scheduledTime: '09:00',
-    duration: 60,
-    discipline: '',
-    level: '',
-    price: '',
-    location: '',
-    notes: '',
-  });
-
-  const { data: eventsData, isLoading: eventsLoading, refetch: refetchEvents } = useEvents({
-    barnId: currentBarn?.id,
-    enabled: !!currentBarn?.id,
-  });
-  const { data: lessonsData, isLoading: lessonsLoading, refetch: refetchLessons } = useLessons({
+  const { data: eventsData, isLoading, refetch: refetchEvents } = useEvents({
     barnId: currentBarn?.id,
     enabled: !!currentBarn?.id,
   });
   const { horses } = useHorses();
-
-  const isLoading = eventsLoading || lessonsLoading;
 
   // Handle URL params for pre-selecting horse and auto-opening modal
   useEffect(() => {
@@ -171,52 +151,25 @@ export default function CalendarPage() {
     }
   }, [searchParams]);
 
-  // Merge events and lessons into a single calendar items array
-  const calendarItems = useMemo(() => {
-    const events = (eventsData?.data || []).map((event: any) => ({
-      ...event,
-      itemType: 'event' as const,
-    }));
+  const events = eventsData?.data || [];
 
-    const lessons = (lessonsData?.data || []).map((lesson: any) => ({
-      ...lesson,
-      itemType: 'lesson' as const,
-      type: 'LESSON',
-      title: `Lesson - ${lesson.client?.firstName || ''} ${lesson.client?.lastName || ''}`.trim(),
-      horse: lesson.horse,
-    }));
-
-    return [...events, ...lessons];
-  }, [eventsData, lessonsData]);
-
-  const events = calendarItems;
-
-  // Fetch Google Calendar status, clients, and instructors
+  // Fetch Google Calendar status and team members
   useEffect(() => {
     if (currentBarn?.id) {
       fetchGoogleStatus();
-      fetchClientsAndInstructors();
+      fetchTeamMembers();
     }
   }, [currentBarn?.id]);
 
-  const fetchClientsAndInstructors = async () => {
+  const fetchTeamMembers = async () => {
     try {
-      const [clientsRes, teamRes] = await Promise.all([
-        fetch(`/api/barns/${currentBarn?.id}/clients`),
-        fetch(`/api/barns/${currentBarn?.id}/team`),
-      ]);
-
-      if (clientsRes.ok) {
-        const data = await clientsRes.json();
-        setClients(data.data || []);
-      }
-
-      if (teamRes.ok) {
-        const data = await teamRes.json();
-        setInstructors(data.data || []);
+      const res = await fetch(`/api/barns/${currentBarn?.id}/team`);
+      if (res.ok) {
+        const data = await res.json();
+        setTeamMembers(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching clients/instructors:', error);
+      console.error('Error fetching team members:', error);
     }
   };
 
@@ -290,6 +243,17 @@ export default function CalendarPage() {
     }
   };
 
+  const handlePrint = () => {
+    setShowPrintView(true);
+    // Wait for the print view to render, then trigger print
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+        setShowPrintView(false);
+      });
+    });
+  };
+
   // Generate calendar days
   const calendarDays = useMemo(() => {
     if (!currentMonth) return [];
@@ -342,30 +306,18 @@ export default function CalendarPage() {
     setShowAddModal(true);
   };
 
-  // Open lesson modal with selected date pre-filled
-  const openLessonModal = (date?: Date) => {
-    const targetDate = date || selectedDate || new Date();
-    setLessonForm(prev => ({
-      ...prev,
-      scheduledDate: format(targetDate, 'yyyy-MM-dd'),
-      clientId: '',
-      horseId: '',
-      instructorId: '',
-      discipline: '',
-      notes: '',
-    }));
-    setShowLessonModal(true);
-  };
-
   // Handle event type change - auto-fill title
   const handleTypeChange = (type: string) => {
     const typeNames: Record<string, string> = {
-      VET: 'Vet Visit',
+      VET_APPOINTMENT: 'Vet Visit',
       FARRIER: 'Farrier Appointment',
       VACCINATION: 'Vaccination',
       DENTAL: 'Dental Exam',
       DEWORMING: 'Deworming',
-      COMPETITION: 'Competition',
+      SHOW: 'Show/Competition',
+      TRAINING: 'Training Session',
+      TRANSPORT: 'Transport',
+      BREEDING: 'Breeding',
       OTHER: '',
     };
     setEventForm(prev => ({
@@ -433,7 +385,7 @@ export default function CalendarPage() {
 
       // Reset form
       setEventForm({
-        type: 'VET',
+        type: 'VET_APPOINTMENT',
         title: '',
         description: '',
         horseIds: [],
@@ -451,70 +403,11 @@ export default function CalendarPage() {
     }
   };
 
-  // Submit lesson
-  const handleLessonSubmit = async () => {
-    if (!lessonForm.clientId || !lessonForm.scheduledDate) {
-      toast.warning('Missing fields', 'Please select a client and date');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const scheduledDateTime = new Date(`${lessonForm.scheduledDate}T${lessonForm.scheduledTime}:00`);
-
-      const response = await fetch(`/api/barns/${currentBarn?.id}/lessons`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientId: lessonForm.clientId,
-          horseId: lessonForm.horseId || null,
-          instructorId: lessonForm.instructorId || null,
-          type: lessonForm.type,
-          scheduledDate: scheduledDateTime.toISOString(),
-          duration: lessonForm.duration,
-          discipline: lessonForm.discipline || null,
-          level: lessonForm.level || null,
-          price: lessonForm.price ? parseFloat(lessonForm.price) : null,
-          location: lessonForm.location || null,
-          notes: lessonForm.notes || null,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create lesson');
-      }
-
-      setShowLessonModal(false);
-      refetchLessons();
-
-      // Reset form
-      setLessonForm({
-        clientId: '',
-        horseId: '',
-        instructorId: '',
-        type: 'PRIVATE',
-        scheduledDate: '',
-        scheduledTime: '09:00',
-        duration: 60,
-        discipline: '',
-        level: '',
-        price: '',
-        location: '',
-        notes: '',
-      });
-    } catch (error) {
-      console.error('Error creating lesson:', error);
-      toast.error('Failed to create lesson', error instanceof Error ? error.message : 'Please try again');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -534,10 +427,18 @@ export default function CalendarPage() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900">Schedule</h1>
-            <p className="text-stone-500 text-sm sm:text-base mt-0.5">Events, appointments & lessons</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Schedule</h1>
+            <p className="text-muted-foreground text-sm sm:text-base mt-0.5">Events, appointments & lessons</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              className="btn-secondary btn-sm flex items-center gap-2 touch-target"
+              title="Print Calendar"
+            >
+              <Printer className="w-4 h-4" />
+              <span className="hidden sm:inline">Print</span>
+            </button>
             <button
               onClick={() => setShowCalendarSettings(true)}
               className="btn-secondary btn-sm flex items-center gap-2 touch-target"
@@ -546,11 +447,11 @@ export default function CalendarPage() {
               <Settings className="w-4 h-4" />
               <span className="hidden sm:inline">Sync</span>
             </button>
-            <div className="flex rounded-xl bg-stone-100 p-1">
+            <div className="flex rounded-xl bg-muted p-1">
               <button
                 onClick={() => setView('month')}
                 className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  view === 'month' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
+                  view === 'month' ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
                 }`}
               >
                 Month
@@ -558,7 +459,7 @@ export default function CalendarPage() {
               <button
                 onClick={() => setView('list')}
                 className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  view === 'list' ? 'bg-white shadow text-stone-900' : 'text-stone-600'
+                  view === 'list' ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
                 }`}
               >
                 List
@@ -567,18 +468,8 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Action buttons - stacked on mobile */}
+        {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-          <Link href="/lessons" className="text-xs font-medium text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors text-center sm:text-left">
-            Manage Lessons →
-          </Link>
-          <button
-            onClick={() => openLessonModal()}
-            className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <GraduationCap className="w-4 h-4" />
-            <span>Schedule Lesson</span>
-          </button>
           <button
             onClick={() => openAddModal()}
             className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -594,12 +485,13 @@ export default function CalendarPage() {
           <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
         </div>
       ) : view === 'month' ? (
+        <>
         <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Calendar Grid */}
           <div className="lg:col-span-2 card p-3 sm:p-6">
             {/* Month Navigation */}
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-stone-900">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground">
                 {format(currentMonth, 'MMMM yyyy')}
               </h2>
               <div className="flex items-center gap-1 sm:gap-2">
@@ -611,13 +503,13 @@ export default function CalendarPage() {
                 </button>
                 <button
                   onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="p-2 rounded-lg hover:bg-stone-100 active:bg-stone-200 transition-all touch-target"
+                  className="p-2 rounded-lg hover:bg-accent active:bg-accent transition-all touch-target"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="p-2 rounded-lg hover:bg-stone-100 active:bg-stone-200 transition-all touch-target"
+                  className="p-2 rounded-lg hover:bg-accent active:bg-accent transition-all touch-target"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -627,7 +519,7 @@ export default function CalendarPage() {
             {/* Day Headers */}
             <div className="grid grid-cols-7 mb-1 sm:mb-2">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                <div key={i} className="text-center text-xs sm:text-sm font-medium text-stone-500 py-1 sm:py-2">
+                <div key={i} className="text-center text-xs sm:text-sm font-medium text-muted-foreground py-1 sm:py-2">
                   <span className="sm:hidden">{day}</span>
                   <span className="hidden sm:inline">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i]}</span>
                 </div>
@@ -649,8 +541,8 @@ export default function CalendarPage() {
                     onDoubleClick={() => openAddModal(day)}
                     className={`
                       aspect-square p-0.5 sm:p-1 rounded-lg sm:rounded-xl text-left transition-all relative no-tap-highlight
-                      ${!isCurrentMonth ? 'text-stone-300' : 'text-stone-900'}
-                      ${isSelected ? 'bg-stone-900 text-white' : 'hover:bg-stone-100 active:bg-stone-200'}
+                      ${!isCurrentMonth ? 'text-muted-foreground' : 'text-foreground'}
+                      ${isSelected ? 'bg-primary text-primary-foreground' : 'hover:bg-accent active:bg-accent'}
                       ${dayIsToday && !isSelected ? 'ring-2 ring-amber-500 ring-inset' : ''}
                     `}
                   >
@@ -663,12 +555,12 @@ export default function CalendarPage() {
                           <div
                             key={i}
                             className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                              isSelected ? 'bg-white' : 'bg-amber-500'
+                              isSelected ? 'bg-card' : 'bg-amber-500'
                             }`}
                           />
                         ))}
                         {dayEvents.length > 3 && (
-                          <span className={`text-[8px] sm:text-[10px] ${isSelected ? 'text-white' : 'text-stone-500'}`}>
+                          <span className={`text-[8px] sm:text-[10px] ${isSelected ? 'text-white' : 'text-muted-foreground'}`}>
                             +{dayEvents.length - 3}
                           </span>
                         )}
@@ -683,13 +575,13 @@ export default function CalendarPage() {
           {/* Selected Date Events */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-stone-900">
+              <h3 className="font-semibold text-foreground">
                 {selectedDate ? format(selectedDate, 'EEEE, MMMM d') : 'Select a date'}
               </h3>
               {selectedDate && (
                 <button
                   onClick={() => openAddModal(selectedDate)}
-                  className="p-1.5 rounded-lg hover:bg-stone-100 text-stone-500 hover:text-stone-700 transition-all"
+                  className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-muted-foreground transition-all"
                   title="Add event on this date"
                 >
                   <Plus className="w-4 h-4" />
@@ -741,7 +633,9 @@ export default function CalendarPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-stone-500 mb-3">No events scheduled</p>
+                  <CalendarIcon className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+                  <p className="text-muted-foreground mb-1">Nothing on the schedule</p>
+                  <p className="text-sm text-muted-foreground mb-3">This day is wide open.</p>
                   <button
                     onClick={() => openAddModal(selectedDate)}
                     className="text-sm text-amber-600 hover:text-amber-700 font-medium"
@@ -751,43 +645,125 @@ export default function CalendarPage() {
                 </div>
               )
             ) : (
-              <p className="text-stone-500 text-center py-8">Click a date to view events</p>
+              <p className="text-muted-foreground text-center py-8">Click a date to view events</p>
             )}
           </div>
         </div>
+
+        {/* Itemized list of all events this month */}
+        {(() => {
+          const monthStart = startOfMonth(currentMonth);
+          const monthEnd = endOfMonth(currentMonth);
+          const monthEvents = events
+            .filter((e: any) => {
+              const d = new Date(e.scheduledDate);
+              return d >= monthStart && d <= monthEnd;
+            })
+            .sort((a: any, b: any) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
+
+          if (monthEvents.length === 0) return null;
+
+          // Group by date
+          const grouped: { date: string; events: any[] }[] = [];
+          let lastKey = '';
+          for (const evt of monthEvents) {
+            const key = format(new Date((evt as any).scheduledDate), 'yyyy-MM-dd');
+            if (key !== lastKey) {
+              grouped.push({ date: key, events: [evt] });
+              lastKey = key;
+            } else {
+              grouped[grouped.length - 1].events.push(evt);
+            }
+          }
+
+          return (
+            <div className="card">
+              <div className="p-4 border-b border-border">
+                <h2 className="font-semibold text-foreground">
+                  {format(currentMonth, 'MMMM')} Schedule — {monthEvents.length} event{monthEvents.length !== 1 ? 's' : ''}
+                </h2>
+              </div>
+              <div className="divide-y divide-border">
+                {grouped.map((group) => (
+                  <div key={group.date}>
+                    <div className="px-4 py-2 bg-muted/50">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        {format(new Date(group.date), 'EEEE, MMMM d')}
+                      </p>
+                    </div>
+                    {group.events.map((event: any) => {
+                      const Icon = eventTypeIcons[event.type] || CalendarIcon;
+                      const colorClass = eventTypeColors[event.type] || eventTypeColors.OTHER;
+                      const time = new Date(event.scheduledDate);
+                      const hasTime = time.getHours() !== 0 || time.getMinutes() !== 0;
+                      const horseNames = event.horses?.length > 0
+                        ? event.horses.map((eh: any) => eh.horse.barnName).join(', ')
+                        : event.horse?.barnName || null;
+
+                      return (
+                        <div key={event.id} className="flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors">
+                          <div className={`p-2 rounded-lg ${colorClass}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground">{event.title}</p>
+                            {horseNames && (
+                              <p className="text-xs text-muted-foreground">{horseNames}</p>
+                            )}
+                          </div>
+                          {hasTime && (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {format(time, 'h:mm a')}
+                            </span>
+                          )}
+                          {event.providerName && (
+                            <span className="text-xs text-muted-foreground hidden sm:block truncate max-w-[120px]">
+                              {event.providerName}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+        </>
       ) : (
         /* List View */
-        <div className="card divide-y divide-stone-100">
+        <div className="card divide-y divide-border">
           {upcomingEvents.length > 0 ? (
             upcomingEvents.map((event: any) => {
               const Icon = eventTypeIcons[event.type] || CalendarIcon;
               const colorClass = eventTypeColors[event.type] || eventTypeColors.OTHER;
               return (
-                <div key={event.id} className="p-4 hover:bg-stone-50 transition-all">
+                <div key={event.id} className="p-4 hover:bg-accent transition-all">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-xl ${colorClass}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-stone-900">{event.title}</p>
+                      <p className="font-medium text-foreground">{event.title}</p>
                       {event.horses && event.horses.length > 0 ? (
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-muted-foreground">
                           {event.horses.length === 1
                             ? event.horses[0].horse.barnName
                             : `${event.horses.length} horses: ${event.horses.slice(0, 3).map((eh: any) => eh.horse.barnName).join(', ')}${event.horses.length > 3 ? '...' : ''}`
                           }
                         </p>
                       ) : event.horse ? (
-                        <p className="text-sm text-stone-500">{event.horse.barnName}</p>
+                        <p className="text-sm text-muted-foreground">{event.horse.barnName}</p>
                       ) : (
-                        <p className="text-sm text-stone-500">All horses / Barn-wide</p>
+                        <p className="text-sm text-muted-foreground">All horses / Barn-wide</p>
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-stone-900">
+                      <p className="font-medium text-foreground">
                         {format(parseISO(event.scheduledDate), 'MMM d')}
                       </p>
-                      <p className="text-sm text-stone-500">
+                      <p className="text-sm text-muted-foreground">
                         {format(parseISO(event.scheduledDate), 'h:mm a')}
                       </p>
                     </div>
@@ -797,8 +773,8 @@ export default function CalendarPage() {
             })
           ) : (
             <div className="p-12 text-center">
-              <CalendarIcon className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-              <p className="text-stone-500 mb-3">No upcoming events</p>
+              <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-3">No upcoming events</p>
               <button
                 onClick={() => openAddModal()}
                 className="text-amber-600 hover:text-amber-700 font-medium"
@@ -813,14 +789,14 @@ export default function CalendarPage() {
       {/* Add Event Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
-          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">
                     {modalStep === 1 ? 'Event Details' : 'Select Horses'}
                   </h3>
-                  <p className="text-xs text-stone-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Step {modalStep} of 2
                   </p>
                 </div>
@@ -833,7 +809,7 @@ export default function CalendarPage() {
                       window.history.replaceState({}, '', '/calendar');
                     }
                   }}
-                  className="p-1 rounded hover:bg-stone-100"
+                  className="p-1 rounded hover:bg-accent"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -863,7 +839,7 @@ export default function CalendarPage() {
                 <>
               {/* Event Type */}
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Event Type</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Event Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {eventTypes.map((type) => {
                     const Icon = type.icon;
@@ -876,11 +852,11 @@ export default function CalendarPage() {
                         className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${
                           isSelected
                             ? 'border-amber-500 bg-amber-50'
-                            : 'border-stone-200 hover:border-stone-300'
+                            : 'border-border hover:border-border'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-amber-600' : 'text-stone-500'}`} />
-                        <span className={`text-xs font-medium ${isSelected ? 'text-amber-600' : 'text-stone-600'}`}>
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                        <span className={`text-xs font-medium ${isSelected ? 'text-amber-600' : 'text-muted-foreground'}`}>
                           {type.name}
                         </span>
                       </button>
@@ -891,7 +867,7 @@ export default function CalendarPage() {
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Title *</label>
                 <input
                   type="text"
                   value={eventForm.title}
@@ -904,7 +880,7 @@ export default function CalendarPage() {
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Date *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date *</label>
                   <input
                     type="date"
                     value={eventForm.scheduledDate}
@@ -913,7 +889,7 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Time</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Time</label>
                   <input
                     type="time"
                     value={eventForm.scheduledTime}
@@ -927,7 +903,7 @@ export default function CalendarPage() {
               {['VET', 'FARRIER', 'VACCINATION', 'DENTAL', 'DEWORMING'].includes(eventForm.type) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">Provider Name</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Provider Name</label>
                     <input
                       type="text"
                       value={eventForm.providerName}
@@ -937,7 +913,7 @@ export default function CalendarPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">Provider Phone</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Provider Phone</label>
                     <input
                       type="tel"
                       value={eventForm.providerPhone}
@@ -952,7 +928,7 @@ export default function CalendarPage() {
               {/* Location - Show for Competition */}
               {eventForm.type === 'COMPETITION' && (
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Location</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Location</label>
                   <input
                     type="text"
                     value={eventForm.providerName}
@@ -965,27 +941,27 @@ export default function CalendarPage() {
 
               {/* Assign To */}
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Assign To (optional)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Assign To (optional)</label>
                 <select
                   value={eventForm.assignedToId}
                   onChange={(e) => setEventForm(prev => ({ ...prev, assignedToId: e.target.value }))}
                   className="input w-full"
                 >
                   <option value="">Unassigned (visible to all)</option>
-                  {instructors.map((member: any) => (
+                  {teamMembers.map((member: any) => (
                     <option key={member.userId} value={member.userId}>
                       {member.user.firstName} {member.user.lastName} ({member.role === 'OWNER' ? 'Owner' : member.role === 'MANAGER' ? 'Manager' : member.role === 'TRAINER' ? 'Trainer' : 'Staff'})
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-stone-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Assign this event to a specific team member. If unassigned, everyone can see it.
                 </p>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={eventForm.description}
                   onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
@@ -999,9 +975,9 @@ export default function CalendarPage() {
                 // Step 2: Select Horses
                 <>
                   {/* Summary of Event Details */}
-                  <div className="bg-stone-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-semibold text-stone-700 mb-2">Event Summary</h4>
-                    <div className="space-y-1 text-sm text-stone-600">
+                  <div className="bg-background rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Event Summary</h4>
+                    <div className="space-y-1 text-sm text-muted-foreground">
                       <p><span className="font-medium">Title:</span> {eventForm.title}</p>
                       <p><span className="font-medium">Date:</span> {eventForm.scheduledDate} at {eventForm.scheduledTime}</p>
                       {eventForm.providerName && (
@@ -1012,11 +988,11 @@ export default function CalendarPage() {
 
                   {/* Horses Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                       Select Horses
                     </label>
-                    <div className="border border-stone-200 rounded-lg p-3 max-h-64 overflow-y-auto space-y-2">
-                      <label className="flex items-center gap-2 p-2 hover:bg-stone-50 rounded cursor-pointer">
+                    <div className="border border-border rounded-lg p-3 max-h-64 overflow-y-auto space-y-2">
+                      <label className="flex items-center gap-2 p-2 hover:bg-accent rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={eventForm.horseIds.length === 0}
@@ -1027,10 +1003,10 @@ export default function CalendarPage() {
                           }}
                           className="w-4 h-4 text-amber-600 rounded"
                         />
-                        <span className="text-sm font-medium text-stone-600">All horses / Barn-wide</span>
+                        <span className="text-sm font-medium text-muted-foreground">All horses / Barn-wide</span>
                       </label>
                       {horses.map((horse: any) => (
-                        <label key={horse.id} className="flex items-center gap-2 p-2 hover:bg-stone-50 rounded cursor-pointer">
+                        <label key={horse.id} className="flex items-center gap-2 p-2 hover:bg-accent rounded cursor-pointer">
                           <input
                             type="checkbox"
                             checked={eventForm.horseIds.includes(horse.id)}
@@ -1049,12 +1025,12 @@ export default function CalendarPage() {
                             }}
                             className="w-4 h-4 text-amber-600 rounded"
                           />
-                          <span className="text-sm text-stone-700">{horse.barnName}</span>
+                          <span className="text-sm text-muted-foreground">{horse.barnName}</span>
                         </label>
                       ))}
                     </div>
                     {eventForm.horseIds.length > 0 && (
-                      <p className="text-xs text-stone-500 mt-2">
+                      <p className="text-xs text-muted-foreground mt-2">
                         {eventForm.horseIds.length} horse{eventForm.horseIds.length > 1 ? 's' : ''} selected
                       </p>
                     )}
@@ -1063,7 +1039,7 @@ export default function CalendarPage() {
               )}
             </div>
 
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               {modalStep === 1 ? (
                 <>
                   <button
@@ -1120,224 +1096,15 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* Lesson Modal */}
-      {showLessonModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
-          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
-            <div className="p-6 border-b border-stone-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-amber-600" />
-                  <h3 className="text-lg font-semibold">Schedule Lesson</h3>
-                </div>
-                <button
-                  onClick={() => setShowLessonModal(false)}
-                  className="p-1 rounded hover:bg-stone-100"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              {/* Client */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Client *</label>
-                <select
-                  value={lessonForm.clientId}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, clientId: e.target.value }))}
-                  className="input w-full"
-                >
-                  <option value="">Select client...</option>
-                  {clients.map((client: any) => (
-                    <option key={client.id} value={client.id}>
-                      {client.user.firstName} {client.user.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Horse */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Horse (optional)</label>
-                <select
-                  value={lessonForm.horseId}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, horseId: e.target.value }))}
-                  className="input w-full"
-                >
-                  <option value="">Select horse...</option>
-                  {horses.map((horse: any) => (
-                    <option key={horse.id} value={horse.id}>
-                      {horse.barnName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Instructor */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Instructor/Trainer</label>
-                <select
-                  value={lessonForm.instructorId}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, instructorId: e.target.value }))}
-                  className="input w-full"
-                >
-                  <option value="">Select instructor...</option>
-                  {instructors.map((i: any) => (
-                    <option key={i.userId} value={i.userId}>
-                      {i.user.firstName} {i.user.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Lesson Type */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Lesson Type</label>
-                <select
-                  value={lessonForm.type}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, type: e.target.value }))}
-                  className="input w-full"
-                >
-                  <option value="PRIVATE">Private</option>
-                  <option value="SEMI_PRIVATE">Semi-Private</option>
-                  <option value="GROUP">Group</option>
-                </select>
-              </div>
-
-              {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Date *</label>
-                  <input
-                    type="date"
-                    value={lessonForm.scheduledDate}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
-                    className="input w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Time</label>
-                  <input
-                    type="time"
-                    value={lessonForm.scheduledTime}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
-                    className="input w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Duration & Price */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Duration (min)</label>
-                  <input
-                    type="number"
-                    value={lessonForm.duration}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    className="input w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Price ($)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={lessonForm.price}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, price: e.target.value }))}
-                    className="input w-full"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              {/* Discipline & Level */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Discipline</label>
-                  <input
-                    type="text"
-                    value={lessonForm.discipline}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, discipline: e.target.value }))}
-                    className="input w-full"
-                    placeholder="e.g. Dressage, Jumping"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Level</label>
-                  <input
-                    type="text"
-                    value={lessonForm.level}
-                    onChange={(e) => setLessonForm(prev => ({ ...prev, level: e.target.value }))}
-                    className="input w-full"
-                    placeholder="e.g. Beginner, Advanced"
-                  />
-                </div>
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Location</label>
-                <input
-                  type="text"
-                  value={lessonForm.location}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, location: e.target.value }))}
-                  className="input w-full"
-                  placeholder="e.g. Arena 1, Main Ring"
-                />
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
-                <textarea
-                  value={lessonForm.notes}
-                  onChange={(e) => setLessonForm(prev => ({ ...prev, notes: e.target.value }))}
-                  className="input w-full"
-                  rows={3}
-                  placeholder="Additional notes..."
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-stone-100 flex gap-3">
-              <button
-                onClick={() => setShowLessonModal(false)}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLessonSubmit}
-                className="btn-primary flex-1 flex items-center justify-center gap-2"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <GraduationCap className="w-4 h-4" />
-                    Schedule Lesson
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Calendar Settings Modal */}
       {showCalendarSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl sm:m-4 max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+          <div className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl sm:m-4 max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <h3 className="text-lg font-semibold">Calendar Sync</h3>
               <button
                 onClick={() => setShowCalendarSettings(false)}
-                className="p-1 rounded hover:bg-stone-100"
+                className="p-1 rounded hover:bg-accent"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1346,11 +1113,11 @@ export default function CalendarPage() {
             <div className="p-6 space-y-6">
               {/* iCal Export */}
               <div className="space-y-3">
-                <h4 className="font-medium text-stone-900 flex items-center gap-2">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <CalendarIcon className="w-5 h-5 text-amber-500" />
                   Subscribe to Calendar (iCal)
                 </h4>
-                <p className="text-sm text-stone-500">
+                <p className="text-sm text-muted-foreground">
                   Add this URL to Apple Calendar, Google Calendar, Outlook, or any calendar app that supports iCal feeds.
                 </p>
                 <div className="flex gap-2">
@@ -1358,7 +1125,7 @@ export default function CalendarPage() {
                     type="text"
                     readOnly
                     value={getICalUrl()}
-                    className="input flex-1 text-sm bg-stone-50"
+                    className="input flex-1 text-sm bg-background"
                   />
                   <button
                     onClick={copyICalUrl}
@@ -1387,8 +1154,8 @@ export default function CalendarPage() {
               </div>
 
               {/* Google Calendar Sync */}
-              <div className="space-y-3 pt-4 border-t border-stone-200">
-                <h4 className="font-medium text-stone-900 flex items-center gap-2">
+              <div className="space-y-3 pt-4 border-t border-border">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
                     <path d="M22 12C22 6.48 17.52 2 12 2S2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.07-1.38" stroke="#4285F4" strokeWidth="2"/>
                     <path d="M12 6v6l4 2" stroke="#EA4335" strokeWidth="2" strokeLinecap="round"/>
@@ -1399,14 +1166,14 @@ export default function CalendarPage() {
                 {googleStatus ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${googleStatus.connected ? 'bg-green-500' : 'bg-stone-300'}`} />
-                      <span className="text-sm text-stone-600">
+                      <span className={`w-2 h-2 rounded-full ${googleStatus.connected ? 'bg-green-500' : 'bg-border'}`} />
+                      <span className="text-sm text-muted-foreground">
                         {googleStatus.connected ? 'Connected' : 'Not connected'}
                       </span>
                     </div>
                     
                     {googleStatus.lastSync && (
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-muted-foreground">
                         Last synced: {new Date(googleStatus.lastSync).toLocaleString()}
                       </p>
                     )}
@@ -1443,7 +1210,7 @@ export default function CalendarPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-stone-500">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading...
                   </div>
@@ -1452,42 +1219,42 @@ export default function CalendarPage() {
 
               {/* Sync Options */}
               {googleStatus?.connected && (
-                <div className="space-y-3 pt-4 border-t border-stone-200">
-                  <h4 className="font-medium text-stone-900">Sync Options</h4>
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <h4 className="font-medium text-foreground">Sync Options</h4>
                   <div className="space-y-2">
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={googleStatus.syncSettings?.events ?? true}
                         onChange={() => {}}
-                        className="rounded border-stone-300"
+                        className="rounded border-border"
                       />
-                      <span className="text-sm text-stone-700">Sync Events (vet, farrier, etc.)</span>
+                      <span className="text-sm text-muted-foreground">Sync Events (vet, farrier, etc.)</span>
                     </label>
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={googleStatus.syncSettings?.lessons ?? true}
                         onChange={() => {}}
-                        className="rounded border-stone-300"
+                        className="rounded border-border"
                       />
-                      <span className="text-sm text-stone-700">Sync Lessons</span>
+                      <span className="text-sm text-muted-foreground">Sync Lessons</span>
                     </label>
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={googleStatus.syncSettings?.tasks ?? false}
                         onChange={() => {}}
-                        className="rounded border-stone-300"
+                        className="rounded border-border"
                       />
-                      <span className="text-sm text-stone-700">Sync Tasks (as all-day events)</span>
+                      <span className="text-sm text-muted-foreground">Sync Tasks (as all-day events)</span>
                     </label>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-stone-100">
+            <div className="p-6 border-t border-border">
               <button
                 onClick={() => setShowCalendarSettings(false)}
                 className="btn-secondary w-full"
@@ -1496,6 +1263,17 @@ export default function CalendarPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Printable Calendar (hidden on screen, visible only when printing) */}
+      {showPrintView && currentMonth && (
+        <div ref={printRef} className="printable-calendar-wrapper">
+          <PrintableCalendar
+            month={currentMonth}
+            events={events as any}
+            barnName={currentBarn?.name}
+          />
         </div>
       )}
     </div>

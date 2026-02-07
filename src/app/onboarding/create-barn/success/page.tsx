@@ -52,13 +52,13 @@ function SuccessPageContent() {
   }, [sessionId, router])
 
   return (
-    <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center">
+    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-card rounded-xl shadow-sm border border-border p-8 text-center">
         {status === 'loading' && (
           <>
             <Loader2 className="w-16 h-16 text-amber-500 animate-spin mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-stone-900 mb-2">Processing Payment</h1>
-            <p className="text-stone-600">{message}</p>
+            <h1 className="text-xl font-bold text-foreground mb-2">Processing Payment</h1>
+            <p className="text-muted-foreground">{message}</p>
           </>
         )}
 
@@ -67,9 +67,9 @@ function SuccessPageContent() {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h1 className="text-xl font-bold text-stone-900 mb-2">Success!</h1>
-            <p className="text-stone-600">{message}</p>
-            <p className="text-sm text-stone-500 mt-4">Redirecting to dashboard...</p>
+            <h1 className="text-xl font-bold text-foreground mb-2">Success!</h1>
+            <p className="text-muted-foreground">{message}</p>
+            <p className="text-sm text-muted-foreground mt-4">Redirecting to dashboard...</p>
           </>
         )}
 
@@ -78,8 +78,8 @@ function SuccessPageContent() {
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-10 h-10 text-red-600" />
             </div>
-            <h1 className="text-xl font-bold text-stone-900 mb-2">Payment Failed</h1>
-            <p className="text-stone-600 mb-6">{message}</p>
+            <h1 className="text-xl font-bold text-foreground mb-2">Payment Failed</h1>
+            <p className="text-muted-foreground mb-6">{message}</p>
             <button
               onClick={() => router.push('/onboarding/create-barn')}
               className="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium"
@@ -97,11 +97,11 @@ export default function BarnCreationSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center">
+        <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-card rounded-xl shadow-sm border border-border p-8 text-center">
             <Loader2 className="w-16 h-16 text-amber-500 animate-spin mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-stone-900 mb-2">Loading...</h1>
-            <p className="text-stone-600">Please wait while we process your request.</p>
+            <h1 className="text-xl font-bold text-foreground mb-2">Loading...</h1>
+            <p className="text-muted-foreground">Please wait while we process your request.</p>
           </div>
         </div>
       }

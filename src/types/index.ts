@@ -455,6 +455,7 @@ export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
 export interface Task {
   id: string;
   barnId: string;
+  horseId: string | null;
   title: string;
   description: string | null;
   dueDate: Date | null;
@@ -467,6 +468,11 @@ export interface Task {
     firstName: string | null;
     lastName: string | null;
     avatarUrl: string | null;
+  };
+  horse?: {
+    id: string;
+    barnName: string;
+    profilePhotoUrl: string | null;
   };
 }
 

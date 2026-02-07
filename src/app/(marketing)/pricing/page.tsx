@@ -4,11 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Check,
-  X,
-  Zap,
-  Building2,
-  Crown,
   HelpCircle,
+  ClipboardList,
 } from 'lucide-react';
 
 const HorseIcon = ({ className }: { className?: string }) => (
@@ -18,104 +15,62 @@ const HorseIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const plans = [
+const coreFeatures = [
+  'Unlimited horses',
+  'Horse profiles & management',
+  'Feed tracking & feed charts',
+  'Stall assignments',
+  'Pasture & paddock assignments',
+  'Vaccinations & health records',
+  'Medication tracking & schedules',
+  'Daily health checks',
+  'Daily care logs',
+  'Calendar & scheduling',
+  'Task management',
+  'Document storage',
+  'Activity log',
+  'Mobile access',
+];
+
+const addOns = [
   {
-    id: 'free',
-    name: 'Free',
-    description: 'For individual horse owners',
-    price: { monthly: 0, yearly: 0 },
-    icon: HorseIcon,
-    features: [
-      { name: 'Up to 5 horses', included: true },
-      { name: '1 barn', included: true },
-      { name: 'Basic health records', included: true },
-      { name: 'Event calendar', included: true },
-      { name: 'Mobile access', included: true },
-      { name: 'Team members', included: false },
-      { name: 'Billing & invoicing', included: false },
-      { name: 'Client portal', included: false },
-      { name: 'Advanced reports', included: false },
-    ],
+    name: 'Breeding Tracker',
+    description: 'Heat cycles, breeding records, and foaling management.',
   },
   {
-    id: 'professional',
-    name: 'Professional',
-    description: 'For small boarding & training facilities',
-    price: { monthly: 49, yearly: 39 },
-    icon: Zap,
-    popular: true,
-    features: [
-      { name: 'Up to 25 horses', included: true },
-      { name: '1 barn', included: true },
-      { name: 'Complete health records', included: true },
-      { name: 'Event calendar', included: true },
-      { name: 'Mobile access', included: true },
-      { name: 'Up to 5 team members', included: true },
-      { name: 'Billing & invoicing', included: true },
-      { name: 'Client portal', included: true },
-      { name: 'Advanced reports', included: false },
-    ],
+    name: 'Training & Lessons',
+    description: 'Training logs, lesson scheduling, and competition tracking.',
   },
   {
-    id: 'farm',
-    name: 'Farm',
-    description: 'For established equestrian facilities',
-    price: { monthly: 99, yearly: 79 },
-    icon: Building2,
-    features: [
-      { name: 'Up to 100 horses', included: true },
-      { name: 'Up to 3 barns', included: true },
-      { name: 'Complete health records', included: true },
-      { name: 'Event calendar', included: true },
-      { name: 'Mobile access', included: true },
-      { name: 'Unlimited team members', included: true },
-      { name: 'Billing & invoicing', included: true },
-      { name: 'Client portal', included: true },
-      { name: 'Advanced reports', included: true },
-    ],
+    name: 'Client & Billing',
+    description: 'Client management, invoicing, payments, and recurring billing.',
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    description: 'For large operations',
-    price: { monthly: 249, yearly: 199 },
-    icon: Crown,
-    features: [
-      { name: 'Unlimited horses', included: true },
-      { name: 'Unlimited barns', included: true },
-      { name: 'Complete health records', included: true },
-      { name: 'Event calendar', included: true },
-      { name: 'Mobile access', included: true },
-      { name: 'Unlimited team members', included: true },
-      { name: 'Billing & invoicing', included: true },
-      { name: 'Client portal', included: true },
-      { name: 'Advanced reports', included: true },
-      { name: 'API access', included: true },
-    ],
+    name: 'Team Management',
+    description: 'Multi-user access, role-based permissions, and team coordination.',
   },
 ];
 
 const faqs = [
   {
-    question: 'Can I switch plans anytime?',
-    answer: 'Yes! You can upgrade or downgrade at any time. Changes take effect immediately, and we\'ll prorate your billing accordingly.',
+    question: 'Is there a horse limit?',
+    answer: 'Nope! The core plan includes unlimited horses. Whether you have 2 or 20, you pay the same $25/month.',
   },
   {
-    question: 'What happens when I reach my horse limit?',
-    answer: 'We\'ll notify you as you approach your limit. You can upgrade anytime or archive inactive horses to free up space.',
+    question: 'Can I cancel anytime?',
+    answer: 'Absolutely. No contracts, no commitments. Cancel anytime and your data stays yours — you can export everything before you go.',
   },
   {
-    question: 'Is there a contract or commitment?',
-    answer: 'No contracts! All plans are month-to-month or yearly (with 20% savings). Cancel anytime.',
+    question: 'What are add-ons?',
+    answer: 'Add-ons are optional features you can purchase on top of the core plan. They\'re designed for farms that need extras like breeding tracking, training logs, client billing, or team access. Only pay for what you actually use.',
   },
   {
-    question: 'Can I get a refund?',
-    answer: 'We offer a 30-day money-back guarantee on all paid plans. Contact us for a full refund if unsatisfied.',
+    question: 'Do I need a credit card for the trial?',
+    answer: 'No! Start your 14-day free trial without entering any payment info. We\'ll only ask for payment if you want to continue after the trial.',
   },
 ];
 
 export default function PricingPage() {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -149,110 +104,77 @@ export default function PricingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight">
-            Simple, transparent pricing
+            One plan. One price. No surprises.
           </h1>
           <p className="mt-4 text-muted-foreground text-lg">
-            Choose the plan that fits your barn. All plans include a 14-day free trial.
+            Everything your barn needs for $25 a month. Start with a free 14-day trial.
           </p>
+        </div>
+      </section>
 
-          {/* Billing Toggle */}
-          <div className="mt-8 inline-flex items-center p-1 rounded-lg bg-muted">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${
-                billingPeriod === 'monthly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              }`}
+      {/* Core Plan */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="rounded-xl border-2 border-primary/50 bg-primary/5 p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-display text-xl font-semibold text-foreground">StableTrack Core</h2>
+                <p className="text-sm text-muted-foreground mt-1">Everything you need to manage your barn</p>
+              </div>
+              <div className="text-left sm:text-right">
+                <span className="text-4xl font-display font-semibold text-foreground">$25</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+            </div>
+
+            <Link
+              href="/sign-up"
+              className="block w-full py-3 rounded-lg text-sm font-medium text-center bg-primary text-primary-foreground hover:opacity-90 transition-opacity mb-6"
             >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingPeriod('yearly')}
-              className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${
-                billingPeriod === 'yearly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Yearly
-              <span className="ml-2 text-xs text-emerald-600 font-medium">Save 20%</span>
-            </button>
+              Start free 14-day trial
+            </Link>
+
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
+              {coreFeatures.map((feature) => (
+                <div
+                  key={feature}
+                  className="flex items-center gap-2.5 text-sm text-foreground"
+                >
+                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                  {feature}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Plans */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => {
-              const Icon = plan.icon;
-              const price = plan.price[billingPeriod];
+      {/* Add-Ons */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="font-display text-2xl font-semibold text-foreground tracking-tight">
+              Optional add-ons
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Need more? Add features as your farm grows. Only pay for what you use.
+            </p>
+          </div>
 
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative rounded-lg border p-6 ${
-                    plan.popular ? 'border-primary/50 bg-primary/5' : 'border-border/60 bg-card'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                      <span className="px-2.5 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-md">
-                        Most popular
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5" />
-                  </div>
-
-                  <h3 className="font-display font-medium text-foreground">{plan.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1 mb-4">{plan.description}</p>
-
-                  <div className="mb-6">
-                    <span className="text-3xl font-display font-semibold text-foreground">
-                      ${price}
-                    </span>
-                    {price > 0 && (
-                      <span className="text-muted-foreground">/month</span>
-                    )}
-                    {billingPeriod === 'yearly' && price > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Billed annually (${price * 12}/year)
-                      </p>
-                    )}
-                  </div>
-
-                  <Link
-                    href="/sign-up"
-                    className={`block w-full py-2.5 rounded-lg text-sm font-medium text-center transition-opacity ${
-                      plan.popular
-                        ? 'bg-primary text-primary-foreground hover:opacity-90'
-                        : 'bg-muted text-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    {price === 0 ? 'Get started' : 'Start free trial'}
-                  </Link>
-
-                  <ul className="mt-6 space-y-2.5">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature.name}
-                        className={`flex items-center gap-2 text-sm ${
-                          feature.included ? 'text-foreground' : 'text-muted-foreground/70'
-                        }`}
-                      >
-                        {feature.included ? (
-                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                        ) : (
-                          <X className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
-                        )}
-                        {feature.name}
-                      </li>
-                    ))}
-                  </ul>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {addOns.map((addon) => (
+              <div
+                key={addon.name}
+                className="rounded-lg border border-border/60 bg-card p-5"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <ClipboardList className="w-4 h-4 text-primary" />
+                  <h3 className="font-display font-medium text-foreground text-sm">{addon.name}</h3>
                 </div>
-              );
-            })}
+                <p className="text-sm text-muted-foreground leading-relaxed">{addon.description}</p>
+                <p className="mt-3 text-xs font-medium text-primary">Coming Soon</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -261,7 +183,7 @@ export default function PricingPage() {
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-2xl mx-auto">
           <h2 className="font-display text-2xl font-semibold text-foreground tracking-tight mb-8">
-            Frequently asked questions
+            Common questions
           </h2>
 
           <div className="space-y-3">
@@ -294,10 +216,10 @@ export default function PricingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border/40">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="font-display text-2xl font-semibold text-foreground tracking-tight">
-            Ready to get started?
+            Ready to simplify your barn?
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Start your 14-day free trial. No credit card required.
+            14-day free trial. No credit card required. Just $25/month after that.
           </p>
           <Link
             href="/sign-up"

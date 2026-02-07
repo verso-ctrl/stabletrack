@@ -1,14 +1,22 @@
+import type { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'StableTrack - Simple Barn Management for Small Farms',
+  description: 'Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — all for $25/month. No enterprise pricing, no feature walls.',
+};
 import {
   Check,
   ChevronRight,
   Calendar,
   FileText,
   Heart,
-  Users,
   Shield,
-  BarChart3,
+  Wheat,
+  Home,
+  Pill,
+  ClipboardList,
 } from 'lucide-react';
 
 const HorseIcon = ({ className }: { className?: string }) => (
@@ -21,35 +29,41 @@ const HorseIcon = ({ className }: { className?: string }) => (
 const features = [
   {
     icon: Heart,
-    title: 'Health Tracking',
-    description: 'Medical records, vaccinations, coggins, and medication schedules in one place.',
+    title: 'Health & Vet Records',
+    description: 'Vaccinations, coggins, medications, daily health checks — all in one place so nothing falls through the cracks.',
+  },
+  {
+    icon: Wheat,
+    title: 'Feed Tracking',
+    description: 'Set up feed programs, track daily feedings, and keep notes on supplements and dietary changes.',
+  },
+  {
+    icon: Home,
+    title: 'Stall & Pasture Assignments',
+    description: 'See who\'s where at a glance. Assign stalls, rotate pastures, and track turnout schedules.',
+  },
+  {
+    icon: Pill,
+    title: 'Medication Schedules',
+    description: 'Never miss a dose. Track medications, set reminders, and log when treatments are given.',
   },
   {
     icon: Calendar,
-    title: 'Smart Scheduling',
-    description: 'Vet visits, farrier appointments, lessons, and competitions with automated reminders.',
+    title: 'Calendar & Tasks',
+    description: 'Vet visits, farrier appointments, and daily to-dos. Keep your barn running smoothly.',
   },
   {
     icon: FileText,
-    title: 'Digital Records',
-    description: 'Documents, photos, and certificates stored securely. Access from anywhere.',
-  },
-  {
-    icon: Users,
-    title: 'Team Management',
-    description: 'Role-based access for owners, managers, caretakers, vets, and clients.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Billing & Invoicing',
-    description: 'Create invoices, track payments, and set up recurring charges effortlessly.',
+    title: 'Documents & Records',
+    description: 'Store registration papers, coggins, and photos. Access everything from your phone.',
   },
 ];
 
-const stats = [
-  { value: '10,000+', label: 'Horses Managed' },
-  { value: '500+', label: 'Active Barns' },
-  { value: '99.9%', label: 'Uptime' },
+const addOns = [
+  { name: 'Breeding Tracker', description: 'Heat cycles, breeding records, and foaling management.' },
+  { name: 'Training & Lessons', description: 'Training logs, lesson scheduling, and competition tracking.' },
+  { name: 'Client & Billing', description: 'Invoicing, payments, and recurring billing for boarders.' },
+  { name: 'Team Management', description: 'Multi-user access with role-based permissions.' },
 ];
 
 export default function LandingPage() {
@@ -93,28 +107,28 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl">
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-[1.1] tracking-tight">
-              Horse farm management, refined.
+              Barn management that doesn't break the bank.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
-              The platform trusted by boarding facilities, training barns, and equestrian centers. Manage horses, health records, scheduling, and billing in one place.
+              Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — all for one simple price. No enterprise pricing, no feature walls.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/sign-up"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity"
               >
-                Start free trial
+                Try it free for 14 days
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/pricing"
                 className="inline-flex items-center px-6 py-3 text-foreground font-medium rounded-lg border border-border hover:bg-muted/50 transition-colors"
               >
-                View pricing
+                See what's included
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              14-day trial · No credit card required
+              Then just $25/month. No credit card required to start.
             </p>
           </div>
 
@@ -129,10 +143,10 @@ export default function LandingPage() {
               <div className="p-6 bg-muted/20">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   {[
-                    { label: 'Active Horses', value: '24' },
-                    { label: 'Upcoming Events', value: '8' },
-                    { label: 'Pending Tasks', value: '12' },
-                    { label: 'Health Alerts', value: '2' },
+                    { label: 'Your Horses', value: '6' },
+                    { label: 'Upcoming Events', value: '3' },
+                    { label: 'Tasks Today', value: '4' },
+                    { label: 'Health Alerts', value: '1' },
                   ].map((stat) => (
                     <div key={stat.label} className="rounded-lg bg-card border border-border/40 p-4">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</p>
@@ -150,16 +164,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Simple Pricing Callout */}
       <section className="py-12 border-y border-border/40 bg-muted/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="font-display text-2xl sm:text-3xl font-semibold text-foreground">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+            <div>
+              <p className="font-display text-3xl font-semibold text-foreground">$25<span className="text-lg text-muted-foreground">/mo</span></p>
+              <p className="text-sm text-muted-foreground mt-0.5">One plan, everything included</p>
+            </div>
+            <div>
+              <p className="font-display text-3xl font-semibold text-foreground">14 days</p>
+              <p className="text-sm text-muted-foreground mt-0.5">Free trial, no card required</p>
+            </div>
+            <div>
+              <p className="font-display text-3xl font-semibold text-foreground">Cancel anytime</p>
+              <p className="text-sm text-muted-foreground mt-0.5">No contracts, no commitments</p>
+            </div>
           </div>
         </div>
       </section>
@@ -169,10 +189,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-16">
             <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-              Everything you need
+              Everything your small farm needs
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              From daily care to complex billing, StableTrack handles it all.
+              No complicated setup. No features you'll never use. Just the tools that actually matter for day-to-day barn life.
             </p>
           </div>
 
@@ -198,18 +218,18 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-16">
             <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-              Get started in minutes
+              Up and running in minutes
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              No complex setup. No training required.
+              No training required. If you can use your phone, you can use StableTrack.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 md:gap-12">
             {[
-              { step: '01', title: 'Create your barn', description: 'Sign up and set up your barn profile in under 2 minutes.' },
-              { step: '02', title: 'Add your horses', description: 'Import or manually add horses with all their details and records.' },
-              { step: '03', title: 'Invite your team', description: 'Add staff, vets, farriers, and clients with custom permissions.' },
+              { step: '01', title: 'Create your barn', description: 'Sign up and set up your barn profile. Takes about 2 minutes.' },
+              { step: '02', title: 'Add your horses', description: 'Add each horse with their details, feed info, and health records.' },
+              { step: '03', title: 'Start managing', description: 'Assign stalls, log feedings, track medications, and stay organized.' },
             ].map((item) => (
               <div key={item.step}>
                 <span className="text-sm font-medium text-primary">{item.step}</span>
@@ -221,8 +241,38 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Security */}
+      {/* Add-Ons Preview */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mb-16">
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
+              Need more? Add it on.
+            </h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              The core plan covers daily barn life. When you're ready for more, add only what you need.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {addOns.map((addon) => (
+              <div
+                key={addon.name}
+                className="p-5 rounded-lg border border-border/60 bg-card"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <ClipboardList className="w-4 h-4 text-primary" />
+                  <h3 className="font-display font-medium text-foreground text-sm">{addon.name}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{addon.description}</p>
+                <p className="mt-3 text-xs font-medium text-primary">Coming Soon</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Security */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
@@ -230,10 +280,10 @@ export default function LandingPage() {
                 Your data is safe with us
               </h2>
               <p className="mt-4 text-muted-foreground text-lg">
-                Enterprise-grade security protects your horses' records and business data.
+                We take security seriously so you can focus on your horses.
               </p>
               <ul className="mt-8 space-y-3">
-                {['256-bit SSL encryption', 'Daily automated backups', 'SOC 2 Type II compliant', 'GDPR ready'].map((item) => (
+                {['256-bit SSL encryption', 'Daily automated backups', 'Your data is always yours', 'Cancel anytime and export everything'].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-muted-foreground">
                     <Check className="w-4 h-4 text-primary flex-shrink-0" />
                     <span>{item}</span>
@@ -254,10 +304,10 @@ export default function LandingPage() {
       <section className="py-24 px-4 sm:px-6 lg:px-8 border-t border-border/40">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-            Ready to get started?
+            Your barn deserves better than a spreadsheet.
           </h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            Join hundreds of equestrian facilities using StableTrack.
+            Try StableTrack free for 14 days. Just $25/month after that.
           </p>
           <Link
             href="/sign-up"
@@ -281,7 +331,7 @@ export default function LandingPage() {
                 <span className="font-display font-semibold text-foreground">StableTrack</span>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
-                Horse farm management for the modern equestrian.
+                Simple barn management for small farms.
               </p>
             </div>
             <div>

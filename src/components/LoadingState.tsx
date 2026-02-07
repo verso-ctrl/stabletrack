@@ -18,14 +18,14 @@ export function LoadingState({
   };
 
   const containerClasses = fullScreen
-    ? 'flex items-center justify-center min-h-screen bg-stone-50'
+    ? 'flex items-center justify-center min-h-screen bg-background'
     : 'flex items-center justify-center h-64';
 
   return (
     <div className={containerClasses}>
       <div className="text-center">
         <Loader2 className={`${sizeClasses[size]} animate-spin text-amber-500 mx-auto mb-3`} />
-        <p className="text-stone-600 text-sm">{message}</p>
+        <p className="text-muted-foreground text-sm">{message}</p>
       </div>
     </div>
   );
@@ -52,9 +52,9 @@ export function LoadingSpinner({
 export function LoadingOverlay({ message = 'Processing...' }: { message?: string }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl p-8 flex flex-col items-center gap-4">
+      <div className="bg-card rounded-xl shadow-xl p-8 flex flex-col items-center gap-4">
         <Loader2 className="w-12 h-12 animate-spin text-amber-500" />
-        <p className="text-stone-700 font-medium">{message}</p>
+        <p className="text-muted-foreground font-medium">{message}</p>
       </div>
     </div>
   );
@@ -62,7 +62,7 @@ export function LoadingOverlay({ message = 'Processing...' }: { message?: string
 
 export function InlineLoader({ message }: { message?: string }) {
   return (
-    <div className="flex items-center gap-3 text-stone-600">
+    <div className="flex items-center gap-3 text-muted-foreground">
       <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
       {message && <span className="text-sm">{message}</span>}
     </div>
@@ -76,9 +76,9 @@ export function ButtonLoader() {
 export function SkeletonCard() {
   return (
     <div className="card p-6 animate-pulse">
-      <div className="h-4 bg-stone-200 rounded w-3/4 mb-4"></div>
-      <div className="h-4 bg-stone-200 rounded w-1/2 mb-2"></div>
-      <div className="h-4 bg-stone-200 rounded w-2/3"></div>
+      <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
+      <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+      <div className="h-4 bg-muted rounded w-2/3"></div>
     </div>
   );
 }
@@ -87,12 +87,12 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="border border-stone-200 rounded-lg p-4 animate-pulse">
+        <div key={i} className="border border-border rounded-lg p-4 animate-pulse">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-stone-200 rounded-full"></div>
+            <div className="w-12 h-12 bg-muted rounded-full"></div>
             <div className="flex-1">
-              <div className="h-4 bg-stone-200 rounded w-1/3 mb-2"></div>
-              <div className="h-3 bg-stone-200 rounded w-1/2"></div>
+              <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-1/2"></div>
             </div>
           </div>
         </div>

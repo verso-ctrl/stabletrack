@@ -185,10 +185,10 @@ export function getStatusColor(status: string): string {
     LAYUP: 'status-layup',
     RETIRED: 'status-retired',
     SOLD: 'status-sold',
-    DECEASED: 'bg-stone-200 text-stone-600',
+    DECEASED: 'bg-muted text-muted-foreground',
     LEASED_OUT: 'bg-purple-100 text-purple-700',
   };
-  return colors[status] || 'bg-stone-100 text-stone-600';
+  return colors[status] || 'bg-muted text-muted-foreground';
 }
 
 /**

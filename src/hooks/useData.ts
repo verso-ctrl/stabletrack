@@ -294,6 +294,8 @@ export function useLessons(options: UseLessonsOptions = {}): UseLessonsResult {
 interface UseTasksOptions {
   status?: string;
   assigneeId?: string;
+  horseId?: string;
+  farmOnly?: boolean;
   dueDate?: Date;
 }
 
@@ -311,6 +313,8 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
   const filters = {
     status: options.status,
     assigneeId: options.assigneeId,
+    horseId: options.horseId,
+    farmOnly: options.farmOnly,
     dueDate: options.dueDate?.toISOString(),
   };
 
@@ -320,6 +324,8 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
       const params = new URLSearchParams();
       if (options.status) params.set('status', options.status);
       if (options.assigneeId) params.set('assigneeId', options.assigneeId);
+      if (options.horseId) params.set('horseId', options.horseId);
+      if (options.farmOnly) params.set('farmOnly', 'true');
       if (options.dueDate) params.set('dueDate', options.dueDate.toISOString());
 
       return fetchApi<{ data: Task[] }>(`/api/barns/${barn!.id}/tasks?${params.toString()}`);
@@ -386,6 +392,35 @@ export function useActivityLog(limit: number = 20): {
 
   return {
     activities: data?.data ?? [],
+    isLoading,
+    error: error ? (error as Error).message : null,
+  };
+}
+
+// ============================================================================
+// useDashboard - Single consolidated fetch for the dashboard page
+// ============================================================================
+
+export function useDashboard() {
+  const { barn } = useCurrentBarn();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.dashboard.stats(barn?.id || ''),
+    queryFn: () => fetchApi<{ data: any }>(`/api/barns/${barn!.id}/dashboard`),
+    enabled: !!barn?.id,
+    staleTime: staleTimes.dashboard,
+  });
+
+  const d = data?.data;
+
+  return {
+    horses: d?.horses ?? [],
+    events: d?.events ?? [],
+    tasks: d?.tasks ?? [],
+    alerts: d?.alerts ?? [],
+    stalls: d?.stalls ?? [],
+    paddocks: d?.paddocks ?? [],
+    stats: d?.stats ?? null,
     isLoading,
     error: error ? (error as Error).message : null,
   };

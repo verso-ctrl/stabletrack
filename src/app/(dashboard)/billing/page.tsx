@@ -42,11 +42,11 @@ const tabs: { id: TabId; label: string; icon: any }[] = [
 ];
 
 const statusColors: Record<string, string> = {
-  DRAFT: 'bg-stone-100 text-stone-600',
+  DRAFT: 'bg-muted text-muted-foreground',
   SENT: 'bg-blue-100 text-blue-700',
   PAID: 'bg-green-100 text-green-700',
   OVERDUE: 'bg-red-100 text-red-700',
-  CANCELLED: 'bg-stone-100 text-stone-500',
+  CANCELLED: 'bg-muted text-muted-foreground',
 };
 
 const serviceCategories = [
@@ -549,7 +549,7 @@ export default function BillingPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -559,8 +559,8 @@ export default function BillingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Billing</h1>
-          <p className="text-stone-500">Manage invoices, clients, and services</p>
+          <h1 className="text-2xl font-bold text-foreground">Billing</h1>
+          <p className="text-muted-foreground">Manage invoices, clients, and services</p>
         </div>
         <div className="flex gap-2">
           {/* QuickBooks Export */}
@@ -597,25 +597,25 @@ export default function BillingPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Outstanding</p>
-          <p className="text-2xl font-bold text-stone-900">${stats.totalOutstanding.toFixed(2)}</p>
+          <p className="text-sm text-muted-foreground">Outstanding</p>
+          <p className="text-2xl font-bold text-foreground">${stats.totalOutstanding.toFixed(2)}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Overdue</p>
+          <p className="text-sm text-muted-foreground">Overdue</p>
           <p className="text-2xl font-bold text-red-600">{stats.overdueCount}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Paid (30 days)</p>
+          <p className="text-sm text-muted-foreground">Paid (30 days)</p>
           <p className="text-2xl font-bold text-green-600">${stats.paidThisMonth.toFixed(2)}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-stone-500">Total Clients</p>
-          <p className="text-2xl font-bold text-stone-900">{stats.totalClients}</p>
+          <p className="text-sm text-muted-foreground">Total Clients</p>
+          <p className="text-2xl font-bold text-foreground">{stats.totalClients}</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-stone-200">
+      <div className="border-b border-border">
         <nav className="flex gap-1">
           {tabs
             .filter(tab => canEdit || tab.id === 'invoices')
@@ -627,7 +627,7 @@ export default function BillingPage() {
                 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all
                 ${activeTab === id 
                   ? 'border-amber-500 text-amber-600' 
-                  : 'border-transparent text-stone-500 hover:text-stone-700'
+                  : 'border-transparent text-muted-foreground hover:text-muted-foreground'
                 }
               `}
             >
@@ -640,11 +640,11 @@ export default function BillingPage() {
 
       {/* Tab Content */}
       {activeTab === 'invoices' && (
-        <div className="card divide-y divide-stone-100">
+        <div className="card divide-y divide-border">
           {invoices.length === 0 ? (
             <div className="p-8 text-center">
-              <FileText className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-500">{canEdit ? 'No invoices yet' : 'No invoices found'}</p>
+              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">{canEdit ? 'No invoices yet' : 'No invoices found'}</p>
               {canEdit && (
                 <button onClick={() => setShowInvoiceModal(true)} className="btn-primary btn-sm mt-4">
                   Create First Invoice
@@ -653,22 +653,22 @@ export default function BillingPage() {
             </div>
           ) : (
             invoices.map(invoice => (
-              <div key={invoice.id} className="p-4 flex items-center gap-4 hover:bg-stone-50">
+              <div key={invoice.id} className="p-4 flex items-center gap-4 hover:bg-accent">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-stone-900">{invoice.invoiceNumber}</p>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[invoice.status] || 'bg-stone-100 text-stone-600'}`}>
+                    <p className="font-medium text-foreground">{invoice.invoiceNumber}</p>
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[invoice.status] || 'bg-muted text-muted-foreground'}`}>
                       {invoice.status}
                     </span>
                   </div>
-                  <p className="text-sm text-stone-500">
+                  <p className="text-sm text-muted-foreground">
                     {invoice.client.firstName} {invoice.client.lastName} • Due {new Date(invoice.dueDate).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-stone-900">${invoice.total.toFixed(2)}</p>
+                  <p className="font-semibold text-foreground">${invoice.total.toFixed(2)}</p>
                   {invoice.amountPaid > 0 && invoice.amountPaid < invoice.total && (
-                    <p className="text-sm text-stone-500">Paid: ${invoice.amountPaid.toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">Paid: ${invoice.amountPaid.toFixed(2)}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
@@ -676,7 +676,7 @@ export default function BillingPage() {
                   <button
                     onClick={() => handleDownloadPDF(invoice)}
                     disabled={isDownloading === invoice.id}
-                    className="p-2 rounded-lg hover:bg-stone-100 text-stone-600"
+                    className="p-2 rounded-lg hover:bg-accent text-muted-foreground"
                     title="Download PDF"
                   >
                     {isDownloading === invoice.id ? (
@@ -691,7 +691,7 @@ export default function BillingPage() {
                     <button
                       onClick={() => handleCreatePaymentLink(invoice)}
                       disabled={isCreatingPaymentLink === invoice.id}
-                      className="p-2 rounded-lg hover:bg-stone-100 text-purple-600"
+                      className="p-2 rounded-lg hover:bg-accent text-purple-600"
                       title={invoice.stripePaymentLinkUrl ? 'Copy Payment Link' : 'Create Payment Link'}
                     >
                       {isCreatingPaymentLink === invoice.id ? (
@@ -708,7 +708,7 @@ export default function BillingPage() {
                       href={invoice.stripePaymentLinkUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg hover:bg-stone-100 text-blue-600"
+                      className="p-2 rounded-lg hover:bg-accent text-blue-600"
                       title="Open Payment Link"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -718,7 +718,7 @@ export default function BillingPage() {
                   {invoice.status === 'DRAFT' && (
                     <button
                       onClick={() => handleUpdateInvoiceStatus(invoice.id, 'SENT')}
-                      className="p-2 rounded-lg hover:bg-stone-100 text-blue-600"
+                      className="p-2 rounded-lg hover:bg-accent text-blue-600"
                       title="Send Invoice"
                     >
                       <Send className="w-4 h-4" />
@@ -731,7 +731,7 @@ export default function BillingPage() {
                         setPaymentForm({ ...paymentForm, amount: (invoice.total - invoice.amountPaid).toFixed(2) });
                         setShowPaymentModal(true);
                       }}
-                      className="p-2 rounded-lg hover:bg-stone-100 text-green-600"
+                      className="p-2 rounded-lg hover:bg-accent text-green-600"
                       title="Record Payment"
                     >
                       <CreditCard className="w-4 h-4" />
@@ -748,21 +748,21 @@ export default function BillingPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 {unbilledLessons.length} unbilled lesson{unbilledLessons.length !== 1 ? 's' : ''}
               </p>
-              <p className="text-xs text-stone-400 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Completed lessons that haven't been added to an invoice
               </p>
             </div>
           </div>
 
-          <div className="card divide-y divide-stone-100">
+          <div className="card divide-y divide-border">
             {unbilledLessons.length === 0 ? (
               <div className="p-8 text-center">
-                <GraduationCap className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                <p className="text-stone-500">No unbilled lessons</p>
-                <p className="text-sm text-stone-400 mt-1">
+                <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No unbilled lessons</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Completed lessons will appear here for billing
                 </p>
               </div>
@@ -791,10 +791,10 @@ export default function BillingPage() {
                           <GraduationCap className="w-5 h-5 text-purple-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-stone-900">
+                          <p className="font-medium text-foreground">
                             {group.client ? `${group.client.firstName} ${group.client.lastName}` : 'No Client Assigned'}
                           </p>
-                          <p className="text-sm text-stone-500">
+                          <p className="text-sm text-muted-foreground">
                             {group.lessons.length} lesson{group.lessons.length !== 1 ? 's' : ''} • ${group.total.toFixed(2)} total
                           </p>
                         </div>
@@ -827,18 +827,18 @@ export default function BillingPage() {
                     </div>
                     <div className="pl-13 space-y-2">
                       {group.lessons.map((lesson: any) => (
-                        <div key={lesson.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
+                        <div key={lesson.id} className="flex items-center justify-between p-3 bg-background rounded-lg">
                           <div>
-                            <p className="text-sm text-stone-900">
+                            <p className="text-sm text-foreground">
                               {lesson.type} Lesson
-                              {lesson.horse && <span className="text-stone-500"> with {lesson.horse.barnName}</span>}
+                              {lesson.horse && <span className="text-muted-foreground"> with {lesson.horse.barnName}</span>}
                             </p>
-                            <p className="text-xs text-stone-500">
+                            <p className="text-xs text-muted-foreground">
                               {new Date(lesson.scheduledDate).toLocaleDateString()} • {lesson.duration} min
                               {lesson.discipline && ` • ${lesson.discipline}`}
                             </p>
                           </div>
-                          <p className="font-medium text-stone-900">
+                          <p className="font-medium text-foreground">
                             ${(lesson.price || 0).toFixed(2)}
                           </p>
                         </div>
@@ -856,7 +856,7 @@ export default function BillingPage() {
         <div className="space-y-4">
           {/* Recurring Invoices Header */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-muted-foreground">
               {recurringInvoices.filter(r => r.isActive).length} active recurring invoices
             </p>
             <button
@@ -873,12 +873,12 @@ export default function BillingPage() {
             </button>
           </div>
 
-          <div className="card divide-y divide-stone-100">
+          <div className="card divide-y divide-border">
             {recurringInvoices.length === 0 ? (
               <div className="p-8 text-center">
-                <RefreshCw className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                <p className="text-stone-500">No recurring invoices yet</p>
-                <p className="text-sm text-stone-400 mt-1">
+                <RefreshCw className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No recurring invoices yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Set up automatic monthly billing for board and services
                 </p>
                 <button onClick={() => setShowRecurringModal(true)} className="btn-primary btn-sm mt-4">
@@ -887,32 +887,32 @@ export default function BillingPage() {
               </div>
             ) : (
               recurringInvoices.map(recurring => (
-                <div key={recurring.id} className="p-4 flex items-center gap-4 hover:bg-stone-50">
+                <div key={recurring.id} className="p-4 flex items-center gap-4 hover:bg-accent">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    recurring.isActive ? 'bg-green-100' : 'bg-stone-100'
+                    recurring.isActive ? 'bg-green-100' : 'bg-muted'
                   }`}>
                     <RefreshCw className={`w-5 h-5 ${
-                      recurring.isActive ? 'text-green-600' : 'text-stone-400'
+                      recurring.isActive ? 'text-green-600' : 'text-muted-foreground'
                     }`} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-stone-900">{recurring.name}</p>
+                      <p className="font-medium text-foreground">{recurring.name}</p>
                       <span className={recurring.isActive ? 'badge-success' : 'badge-neutral'}>
                         {recurring.isActive ? 'Active' : 'Paused'}
                       </span>
                       <span className="badge-neutral">{recurring.frequency}</span>
                     </div>
-                    <p className="text-sm text-stone-500">
+                    <p className="text-sm text-muted-foreground">
                       {recurring.client.firstName} {recurring.client.lastName} • 
                       Next: {new Date(recurring.nextRunDate).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-stone-900">
+                    <p className="font-semibold text-foreground">
                       ${recurring.items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0).toFixed(2)}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-muted-foreground">
                       {recurring._count?.generatedInvoices || 0} generated
                     </p>
                   </div>
@@ -920,14 +920,14 @@ export default function BillingPage() {
                     <button
                       onClick={() => handleGenerateInvoices(recurring.id)}
                       disabled={isGenerating}
-                      className="p-2 rounded-lg hover:bg-stone-100 text-blue-600"
+                      className="p-2 rounded-lg hover:bg-accent text-blue-600"
                       title="Generate Invoice Now"
                     >
                       <Play className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleToggleRecurring(recurring)}
-                      className={`p-2 rounded-lg hover:bg-stone-100 ${
+                      className={`p-2 rounded-lg hover:bg-accent ${
                         recurring.isActive ? 'text-amber-600' : 'text-green-600'
                       }`}
                       title={recurring.isActive ? 'Pause' : 'Resume'}
@@ -943,23 +943,23 @@ export default function BillingPage() {
       )}
 
       {activeTab === 'services' && (
-        <div className="card divide-y divide-stone-100">
+        <div className="card divide-y divide-border">
           {services.length === 0 ? (
             <div className="p-8 text-center">
-              <DollarSign className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-500">No services defined</p>
+              <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">No services defined</p>
               <button onClick={() => setShowServiceModal(true)} className="btn-primary btn-sm mt-4">
                 Add First Service
               </button>
             </div>
           ) : (
             services.map(service => (
-              <div key={service.id} className="p-4 flex items-center gap-4 hover:bg-stone-50">
+              <div key={service.id} className="p-4 flex items-center gap-4 hover:bg-accent">
                 <div className="flex-1">
-                  <p className="font-medium text-stone-900">{service.name}</p>
-                  <p className="text-sm text-stone-500">{service.category.replace(/_/g, ' ')}</p>
+                  <p className="font-medium text-foreground">{service.name}</p>
+                  <p className="text-sm text-muted-foreground">{service.category.replace(/_/g, ' ')}</p>
                 </div>
-                <p className="font-semibold text-stone-900">
+                <p className="font-semibold text-foreground">
                   ${service.price.toFixed(2)}/{service.unit}
                 </p>
               </div>
@@ -971,11 +971,11 @@ export default function BillingPage() {
       {/* Invoice Modal */}
       {showInvoiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">New Invoice</h3>
-                <button onClick={() => setShowInvoiceModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowInvoiceModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -983,7 +983,7 @@ export default function BillingPage() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Client *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Client *</label>
                   <select
                     value={invoiceForm.clientId}
                     onChange={(e) => setInvoiceForm(prev => ({ ...prev, clientId: e.target.value }))}
@@ -998,7 +998,7 @@ export default function BillingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Due Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Due Date</label>
                   <input
                     type="date"
                     value={invoiceForm.dueDate}
@@ -1010,14 +1010,14 @@ export default function BillingPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-stone-700">Line Items</label>
+                  <label className="block text-sm font-medium text-muted-foreground">Line Items</label>
                   <button onClick={addInvoiceItem} className="text-sm text-amber-600 hover:text-amber-700">
                     + Add Item
                   </button>
                 </div>
                 <div className="space-y-3">
                   {invoiceForm.items.map((item, index) => (
-                    <div key={index} className="p-3 rounded-xl bg-stone-50 space-y-2">
+                    <div key={index} className="p-3 rounded-xl bg-background space-y-2">
                       <div className="grid grid-cols-12 gap-2">
                         <div className="col-span-4">
                           <select
@@ -1082,12 +1082,12 @@ export default function BillingPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end p-3 bg-stone-100 rounded-xl">
+              <div className="flex justify-end p-3 bg-muted rounded-xl">
                 <p className="text-lg font-semibold">Total: ${calculateInvoiceTotal().toFixed(2)}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={invoiceForm.notes}
                   onChange={(e) => setInvoiceForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -1096,7 +1096,7 @@ export default function BillingPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowInvoiceModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -1111,18 +1111,18 @@ export default function BillingPage() {
       {/* Service Modal */}
       {showServiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Add Service</h3>
-                <button onClick={() => setShowServiceModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowServiceModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Service Name *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Service Name *</label>
                 <input
                   type="text"
                   value={serviceForm.name}
@@ -1132,7 +1132,7 @@ export default function BillingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Category</label>
                 <select
                   value={serviceForm.category}
                   onChange={(e) => setServiceForm(prev => ({ ...prev, category: e.target.value }))}
@@ -1145,7 +1145,7 @@ export default function BillingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Price *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Price *</label>
                   <input
                     type="number"
                     value={serviceForm.price}
@@ -1156,7 +1156,7 @@ export default function BillingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Unit</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Unit</label>
                   <select
                     value={serviceForm.unit}
                     onChange={(e) => setServiceForm(prev => ({ ...prev, unit: e.target.value }))}
@@ -1171,7 +1171,7 @@ export default function BillingPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
                 <textarea
                   value={serviceForm.description}
                   onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
@@ -1180,7 +1180,7 @@ export default function BillingPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowServiceModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -1195,21 +1195,21 @@ export default function BillingPage() {
       {/* Payment Modal */}
       {showPaymentModal && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
-            <div className="p-6 border-b border-stone-100">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Record Payment</h3>
-                <button onClick={() => setShowPaymentModal(false)} className="p-1 rounded hover:bg-stone-100">
+                <button onClick={() => setShowPaymentModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <p className="text-sm text-stone-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Invoice {selectedInvoice.invoiceNumber} • Balance: ${(selectedInvoice.total - selectedInvoice.amountPaid).toFixed(2)}
               </p>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Amount *</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Amount *</label>
                 <input
                   type="number"
                   value={paymentForm.amount}
@@ -1219,7 +1219,7 @@ export default function BillingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Payment Method</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Payment Method</label>
                 <select
                   value={paymentForm.method}
                   onChange={(e) => setPaymentForm(prev => ({ ...prev, method: e.target.value }))}
@@ -1235,7 +1235,7 @@ export default function BillingPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Reference #</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Reference #</label>
                 <input
                   type="text"
                   value={paymentForm.reference}
@@ -1245,7 +1245,7 @@ export default function BillingPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowPaymentModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -1260,17 +1260,17 @@ export default function BillingPage() {
       {/* Recurring Invoice Modal */}
       {showRecurringModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <h3 className="text-lg font-semibold">Create Recurring Invoice</h3>
-              <button onClick={() => setShowRecurringModal(false)} className="p-1 rounded hover:bg-stone-100">
+              <button onClick={() => setShowRecurringModal(false)} className="p-1 rounded hover:bg-accent">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Client *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Client *</label>
                   <select
                     value={recurringForm.clientId}
                     onChange={(e) => setRecurringForm(prev => ({ ...prev, clientId: e.target.value }))}
@@ -1285,7 +1285,7 @@ export default function BillingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Name *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Name *</label>
                   <input
                     type="text"
                     value={recurringForm.name}
@@ -1298,7 +1298,7 @@ export default function BillingPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Frequency</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Frequency</label>
                   <select
                     value={recurringForm.frequency}
                     onChange={(e) => setRecurringForm(prev => ({ ...prev, frequency: e.target.value }))}
@@ -1312,7 +1312,7 @@ export default function BillingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Day of Month</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Day of Month</label>
                   <input
                     type="number"
                     min="1"
@@ -1323,7 +1323,7 @@ export default function BillingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Start Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Start Date</label>
                   <input
                     type="date"
                     value={recurringForm.startDate}
@@ -1339,16 +1339,16 @@ export default function BillingPage() {
                   id="autoSend"
                   checked={recurringForm.autoSend}
                   onChange={(e) => setRecurringForm(prev => ({ ...prev, autoSend: e.target.checked }))}
-                  className="rounded border-stone-300"
+                  className="rounded border-border"
                 />
-                <label htmlFor="autoSend" className="text-sm text-stone-700">
+                <label htmlFor="autoSend" className="text-sm text-muted-foreground">
                   Automatically send invoice when generated
                 </label>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-stone-700">Line Items</label>
+                  <label className="block text-sm font-medium text-muted-foreground">Line Items</label>
                   <button
                     type="button"
                     onClick={addRecurringItem}
@@ -1413,7 +1413,7 @@ export default function BillingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
                   value={recurringForm.notes}
                   onChange={(e) => setRecurringForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -1423,7 +1423,7 @@ export default function BillingPage() {
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button onClick={() => setShowRecurringModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
                 Cancel
               </button>
@@ -1438,20 +1438,20 @@ export default function BillingPage() {
       {/* Export Modal */}
       {showExportModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <h3 className="text-lg font-semibold">Export to QuickBooks</h3>
-              <button onClick={() => setShowExportModal(false)} className="p-1 rounded hover:bg-stone-100">
+              <button onClick={() => setShowExportModal(false)} className="p-1 rounded hover:bg-accent">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 Export your data for import into QuickBooks Desktop or QuickBooks Online.
               </p>
               
               <div className="space-y-3">
-                <p className="text-sm font-medium text-stone-700">IIF Format (QuickBooks Desktop)</p>
+                <p className="text-sm font-medium text-muted-foreground">IIF Format (QuickBooks Desktop)</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => handleQuickBooksExport('invoices', 'iif')}
@@ -1484,8 +1484,8 @@ export default function BillingPage() {
                 </div>
               </div>
               
-              <div className="space-y-3 pt-4 border-t border-stone-100">
-                <p className="text-sm font-medium text-stone-700">CSV Format (QuickBooks Online)</p>
+              <div className="space-y-3 pt-4 border-t border-border">
+                <p className="text-sm font-medium text-muted-foreground">CSV Format (QuickBooks Online)</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => handleQuickBooksExport('invoices', 'csv')}
@@ -1511,7 +1511,7 @@ export default function BillingPage() {
                 </div>
               </div>
             </div>
-            <div className="p-6 border-t border-stone-100">
+            <div className="p-6 border-t border-border">
               <button onClick={() => setShowExportModal(false)} className="btn-secondary w-full">
                 Close
               </button>

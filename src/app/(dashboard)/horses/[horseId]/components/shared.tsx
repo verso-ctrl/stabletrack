@@ -5,10 +5,11 @@ import {
   Activity,
   Calendar,
   Camera,
+  CheckSquare,
   Clock,
   FileText,
   Stethoscope,
-  Trophy,
+  Utensils,
 } from 'lucide-react';
 
 // Horse icon component
@@ -20,18 +21,18 @@ export const HorseIcon = ({ className }: { className?: string }) => (
 );
 
 // Tab types and configuration
-export type TabId = 'overview' | 'photos' | 'activity' | 'health' | 'care' | 'competitions' | 'events' | 'documents';
+export type TabId = 'overview' | 'health' | 'tasks' | 'events' | 'care' | 'activity' | 'photos' | 'documents';
 
 export type TabIcon = LucideIcon | typeof HorseIcon;
 
 export const tabs: { id: TabId; label: string; icon: TabIcon }[] = [
   { id: 'overview', label: 'Overview', icon: Activity },
-  { id: 'photos', label: 'Photos', icon: Camera },
+  { id: 'health', label: 'Health Records', icon: Stethoscope },
+  { id: 'tasks', label: 'Horse Tasks', icon: CheckSquare },
+  { id: 'events', label: 'Horse Events', icon: Calendar },
+  { id: 'care', label: 'Feeding Plan', icon: Utensils },
   { id: 'activity', label: 'Activity Log', icon: Clock },
-  { id: 'health', label: 'Health', icon: Stethoscope },
-  { id: 'care', label: 'Care', icon: HorseIcon },
-  { id: 'competitions', label: 'Competitions', icon: Trophy },
-  { id: 'events', label: 'Events', icon: Calendar },
+  { id: 'photos', label: 'Photos', icon: Camera },
   { id: 'documents', label: 'Documents', icon: FileText },
 ];
 
@@ -70,14 +71,14 @@ export function InfoItem({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-[10px] sm:text-xs text-stone-500 uppercase tracking-wide mb-0.5 sm:mb-1 truncate">{label}</p>
+      <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide mb-0.5 sm:mb-1 truncate">{label}</p>
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400 flex-shrink-0" />}
-        <p className="text-xs sm:text-sm font-medium text-stone-900 truncate">
+        {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />}
+        <p className="text-xs sm:text-sm font-medium text-foreground truncate">
           {value || '—'}
         </p>
       </div>
-      {subValue && <p className="text-[10px] sm:text-xs text-stone-500 mt-0.5 truncate">{subValue}</p>}
+      {subValue && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{subValue}</p>}
     </div>
   );
 }

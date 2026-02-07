@@ -83,7 +83,7 @@ export default function LogFeedPage() {
       }
 
       toast.success('Feeding logged', `Logged ${feedingTime.toLowerCase()} feeding for ${selectedHorses.length} horse${selectedHorses.length > 1 ? 's' : ''}`);
-      router.push('/dashboard');
+      router.push('/daily-care');
     } catch (error) {
       console.error('Error logging feed:', error);
       toast.error('Failed to log feed', error instanceof Error ? error.message : 'Please try again');
@@ -95,7 +95,7 @@ export default function LogFeedPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -106,20 +106,20 @@ export default function LogFeedPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Log Feeding</h1>
-          <p className="text-stone-500 mt-1">Record feed given to horses</p>
+          <h1 className="text-2xl font-bold text-foreground">Log Feeding</h1>
+          <p className="text-muted-foreground mt-1">Record feed given to horses</p>
         </div>
       </div>
 
       {/* Feeding Time */}
       <div className="card p-6">
-        <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-stone-500" />
+        <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-muted-foreground" />
           Feeding Time
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export default function LogFeedPage() {
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 feedingTime === time
                   ? 'bg-amber-500 text-white'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  : 'bg-muted text-muted-foreground hover:bg-accent'
               }`}
             >
               {time}
@@ -142,8 +142,8 @@ export default function LogFeedPage() {
       {/* Horse Selection */}
       <div className="card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-medium text-stone-900 flex items-center gap-2">
-            <Utensils className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground flex items-center gap-2">
+            <Utensils className="w-5 h-5 text-muted-foreground" />
             Select Horses
           </h3>
           <button
@@ -158,6 +158,12 @@ export default function LogFeedPage() {
           <div className="flex items-center justify-center h-32">
             <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
           </div>
+        ) : horses.length === 0 ? (
+          <div className="text-center py-8">
+            <Utensils className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No horses in this barn yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Add your first horse to start logging feedings</p>
+          </div>
         ) : (
           <div className="space-y-3">
             {horses.map((horse) => {
@@ -168,20 +174,20 @@ export default function LogFeedPage() {
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                     isSelected
                       ? 'border-amber-500 bg-amber-50'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-border hover:border-border'
                   }`}
                   onClick={() => toggleHorse(horse.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        isSelected ? 'border-amber-500 bg-amber-500' : 'border-stone-300'
+                        isSelected ? 'border-amber-500 bg-amber-500' : 'border-border'
                       }`}>
                         {isSelected && <Check className="w-4 h-4 text-white" />}
                       </div>
                       <div>
-                        <p className="font-medium text-stone-900">{horse.barnName}</p>
-                        <p className="text-sm text-stone-500">{horse.breed}</p>
+                        <p className="font-medium text-foreground">{horse.barnName}</p>
+                        <p className="text-sm text-muted-foreground">{horse.breed}</p>
                       </div>
                     </div>
                     
@@ -194,7 +200,7 @@ export default function LogFeedPage() {
                             className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                               amounts[horse.id] === amount
                                 ? 'bg-amber-500 text-white'
-                                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                : 'bg-muted text-muted-foreground hover:bg-accent'
                             }`}
                           >
                             {amount}
@@ -212,7 +218,7 @@ export default function LogFeedPage() {
 
       {/* Notes */}
       <div className="card p-6">
-        <h3 className="font-medium text-stone-900 mb-4">Notes (Optional)</h3>
+        <h3 className="font-medium text-foreground mb-4">Notes (Optional)</h3>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}

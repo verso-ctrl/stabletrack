@@ -217,6 +217,7 @@ model Horse {
   lessons         Lesson[]
   trainingLogs    TrainingLog[]
   competitions    Competition[]
+  tasks           Task[]
 
   @@index([barnId])
   @@index([status])
@@ -274,8 +275,9 @@ model FeedType {
   barn        Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
   feedItems   FeedProgramItem[]
   feedLogs    FeedLog[]
-  
+
   @@unique([barnId, name])
+  @@index([barnId])
 }
 
 model Supplement {
@@ -286,11 +288,12 @@ model Supplement {
   unit        String   @default("scoops")
   costPerUnit Float?
   notes       String?
-  
+
   barn        Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
   feedItems   FeedProgramItem[]
-  
+
   @@unique([barnId, name])
+  @@index([barnId])
 }
 
 model FeedProgram {
@@ -318,6 +321,8 @@ model FeedProgramItem {
   feedProgram   FeedProgram @relation(fields: [feedProgramId], references: [id], onDelete: Cascade)
   feedType      FeedType?   @relation(fields: [feedTypeId], references: [id])
   supplement    Supplement? @relation(fields: [supplementId], references: [id])
+
+  @@index([feedProgramId])
 }
 
 model FeedLog {
@@ -444,6 +449,8 @@ model HealthAttachment {
   uploadedAt     DateTime     @default(now())
   
   healthRecord   HealthRecord @relation(fields: [healthRecordId], references: [id], onDelete: Cascade)
+
+  @@index([healthRecordId])
 }
 
 // ============================================================================
@@ -528,6 +535,7 @@ model EventReminder {
 model Task {
   id          String    @id @default(cuid())
   barnId      String
+  horseId     String?
   title       String
   description String?
   dueDate     DateTime?
@@ -544,6 +552,7 @@ model Task {
   updatedAt   DateTime  @updatedAt
 
   barn        Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse       Horse?    @relation(fields: [horseId], references: [id], onDelete: SetNull)
   assignee    User?     @relation(fields: [assigneeId], references: [id])
 
   @@index([barnId])
@@ -551,6 +560,7 @@ model Task {
   @@index([barnId, dueDate(sort: Asc)])
   @@index([barnId, status, dueDate])
   @@index([barnId, assigneeId, status])
+  @@index([barnId, horseId])
   @@index([assigneeId])
   @@index([priority])
 }
@@ -649,6 +659,7 @@ model WaterLog {
   horse       Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
   @@index([horseId])
+  @@index([horseId, date(sort: Desc)])
 }
 
 // Daily health observations
@@ -700,6 +711,15 @@ model Client {
   portalEnabled Boolean  @default(false)
   portalToken   String?
   balance       Float    @default(0)
+
+  // Payment method (Stripe tokenized — never store raw card/bank numbers)
+  stripePaymentMethodId String?
+  paymentMethodType     String?   // "card" or "us_bank_account"
+  paymentMethodLast4    String?
+  paymentMethodBrand    String?   // e.g. "Visa", "Mastercard", or bank name
+  paymentConsentGiven   Boolean   @default(false)
+  paymentConsentDate    DateTime?
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
@@ -712,6 +732,7 @@ model Client {
   @@unique([barnId, email])
   @@index([barnId])
   @@index([status])
+  @@index([barnId, status])
 }
 
 model ClientHorse {
@@ -749,6 +770,8 @@ model Service {
   barn         Barn          @relation(fields: [barnId], references: [id], onDelete: Cascade)
   invoiceItems InvoiceItem[]
   recurringItems RecurringInvoiceItem[]
+
+  @@index([barnId])
 }
 
 model Invoice {
@@ -843,6 +866,7 @@ model RecurringInvoice {
   @@index([clientId])
   @@index([nextDate])
   @@index([status])
+  @@index([barnId, status, nextDate])
 }
 
 model RecurringInvoiceItem {
@@ -858,6 +882,7 @@ model RecurringInvoiceItem {
   service          Service?         @relation(fields: [serviceId], references: [id])
 
   @@index([recurringInvoiceId])
+  @@index([serviceId])
 }
 
 // ============================================================================
@@ -896,6 +921,8 @@ model Lesson {
   @@index([date(sort: Desc)])
   @@index([status])
   @@index([barnId, billed])
+  @@index([barnId, date(sort: Desc)])
+  @@index([barnId, status, date])
 }
 
 // ============================================================================
@@ -928,6 +955,7 @@ model TrainingLog {
   @@index([trainerId])
   @@index([date(sort: Desc)])
   @@index([type])
+  @@index([barnId, horseId])
 }
 
 // ============================================================================
@@ -962,4 +990,5 @@ model Competition {
   @@index([barnId])
   @@index([horseId])
   @@index([eventDate(sort: Desc)])
+  @@index([barnId, horseId])
 }

@@ -153,7 +153,7 @@ export default function DailyCheckPage() {
       }
 
       toast.success('Daily checks logged', `Logged checks for ${selectedHorses.length} horse${selectedHorses.length > 1 ? 's' : ''}`);
-      router.push('/dashboard');
+      router.push('/daily-care');
     } catch (error) {
       console.error('Error logging daily checks:', error);
       toast.error('Failed to log checks', error instanceof Error ? error.message : 'Please try again');
@@ -167,7 +167,7 @@ export default function DailyCheckPage() {
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -178,13 +178,13 @@ export default function DailyCheckPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Daily Check</h1>
-          <p className="text-stone-500 mt-0.5">Log health observations and water checks</p>
+          <h1 className="text-2xl font-bold text-foreground">Daily Check</h1>
+          <p className="text-muted-foreground mt-0.5">Log health observations and water checks</p>
         </div>
       </div>
 
@@ -193,8 +193,8 @@ export default function DailyCheckPage() {
         <div className="flex items-center gap-3">
           <Clock className="w-5 h-5 text-blue-600" />
           <div>
-            <p className="font-medium text-stone-800">Logging at {currentTime || '...'}</p>
-            <p className="text-sm text-stone-600">{currentDate || 'Loading...'}</p>
+            <p className="font-medium text-foreground">Logging at {currentTime || '...'}</p>
+            <p className="text-sm text-muted-foreground">{currentDate || 'Loading...'}</p>
           </div>
         </div>
       </div>
@@ -202,7 +202,7 @@ export default function DailyCheckPage() {
       {/* Horse Selection */}
       <div className="card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-medium text-stone-900 flex items-center gap-2">
+          <h3 className="font-medium text-foreground flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-500" />
             Select Horses to Check
           </h3>
@@ -218,6 +218,12 @@ export default function DailyCheckPage() {
           <div className="flex items-center justify-center h-32">
             <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
           </div>
+        ) : horses.length === 0 ? (
+          <div className="text-center py-8">
+            <Heart className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No horses in this barn yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Add your first horse to start logging daily checks</p>
+          </div>
         ) : (
           <div className="space-y-3">
             {horses.map((horse) => {
@@ -230,7 +236,7 @@ export default function DailyCheckPage() {
                   className={`rounded-xl border-2 transition-all ${
                     obs.selected
                       ? 'border-amber-500 bg-amber-50'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-border hover:border-border'
                   }`}
                 >
                   <div
@@ -239,30 +245,30 @@ export default function DailyCheckPage() {
                   >
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        obs.selected ? 'border-amber-500 bg-amber-500' : 'border-stone-300'
+                        obs.selected ? 'border-amber-500 bg-amber-500' : 'border-border'
                       }`}
                     >
                       {obs.selected && <Check className="w-4 h-4 text-white" />}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-stone-900">{horse.barnName}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="font-medium text-foreground">{horse.barnName}</p>
+                      <p className="text-sm text-muted-foreground">
                         {horse.breed} • {horse.stallName || 'No stall assigned'}
                       </p>
                     </div>
                   </div>
 
                   {obs.selected && (
-                    <div className="px-4 pb-4 space-y-5 border-t border-stone-200 pt-4 mt-2">
+                    <div className="px-4 pb-4 space-y-5 border-t border-border pt-4 mt-2">
                       {/* Health Observations */}
                       <div className="space-y-4">
-                        <h4 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                           <Eye className="w-4 h-4" />
                           Health Observations
                         </h4>
 
                         <div>
-                          <label className="block text-xs font-medium text-stone-600 mb-2">
+                          <label className="block text-xs font-medium text-muted-foreground mb-2">
                             Overall Condition
                           </label>
                           <div className="flex flex-wrap gap-1">
@@ -273,8 +279,8 @@ export default function DailyCheckPage() {
                                 onClick={() => updateObservation(horse.id, 'overallCondition', value)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                                   obs.overallCondition === value
-                                    ? 'bg-stone-900 text-white'
-                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-accent'
                                 }`}
                               >
                                 <span className={`w-1.5 h-1.5 rounded-full ${color}`} />
@@ -286,7 +292,7 @@ export default function DailyCheckPage() {
 
                         <div className="grid sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-stone-600 mb-2">
+                            <label className="block text-xs font-medium text-muted-foreground mb-2">
                               Appetite
                             </label>
                             <div className="flex flex-wrap gap-1">
@@ -297,8 +303,8 @@ export default function DailyCheckPage() {
                                   onClick={() => updateObservation(horse.id, 'appetite', option)}
                                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                     obs.appetite === option
-                                      ? 'bg-stone-900 text-white'
-                                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-muted text-muted-foreground hover:bg-accent'
                                   }`}
                                 >
                                   {option}
@@ -308,7 +314,7 @@ export default function DailyCheckPage() {
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-stone-600 mb-2">
+                            <label className="block text-xs font-medium text-muted-foreground mb-2">
                               Attitude
                             </label>
                             <div className="flex flex-wrap gap-1">
@@ -319,8 +325,8 @@ export default function DailyCheckPage() {
                                   onClick={() => updateObservation(horse.id, 'attitude', option)}
                                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                     obs.attitude === option
-                                      ? 'bg-stone-900 text-white'
-                                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-muted text-muted-foreground hover:bg-accent'
                                   }`}
                                 >
                                   {option}
@@ -331,7 +337,7 @@ export default function DailyCheckPage() {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-medium text-stone-600 mb-2">
+                          <label className="block text-xs font-medium text-muted-foreground mb-2">
                             Manure
                           </label>
                           <div className="flex flex-wrap gap-1">
@@ -342,8 +348,8 @@ export default function DailyCheckPage() {
                                 onClick={() => updateObservation(horse.id, 'manure', option)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                   obs.manure === option
-                                    ? 'bg-stone-900 text-white'
-                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-accent'
                                 }`}
                               >
                                 {option}
@@ -354,15 +360,15 @@ export default function DailyCheckPage() {
                       </div>
 
                       {/* Water Check */}
-                      <div className="space-y-4 pt-4 border-t border-stone-200">
-                        <h4 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                      <div className="space-y-4 pt-4 border-t border-border">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                           <Droplets className="w-4 h-4 text-blue-500" />
                           Water Check
                         </h4>
 
                         <div className="grid sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-stone-600 mb-2">
+                            <label className="block text-xs font-medium text-muted-foreground mb-2">
                               Water Level
                             </label>
                             <div className="flex flex-wrap gap-1">
@@ -374,7 +380,7 @@ export default function DailyCheckPage() {
                                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                     obs.waterLevel === level
                                       ? 'bg-blue-500 text-white'
-                                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                      : 'bg-muted text-muted-foreground hover:bg-accent'
                                   }`}
                                 >
                                   {level}
@@ -384,7 +390,7 @@ export default function DailyCheckPage() {
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-stone-600 mb-2">
+                            <label className="block text-xs font-medium text-muted-foreground mb-2">
                               Water Quality
                             </label>
                             <div className="flex flex-wrap gap-1">
@@ -396,7 +402,7 @@ export default function DailyCheckPage() {
                                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                     obs.waterQuality === quality
                                       ? 'bg-blue-500 text-white'
-                                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                      : 'bg-muted text-muted-foreground hover:bg-accent'
                                   }`}
                                 >
                                   {quality}
@@ -413,15 +419,15 @@ export default function DailyCheckPage() {
                             onChange={(e) =>
                               updateObservation(horse.id, 'refilled', e.target.checked)
                             }
-                            className="w-4 h-4 rounded border-stone-300 text-blue-600 focus:ring-blue-500"
+                            className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-stone-700">Refilled water bucket</span>
+                          <span className="text-sm text-muted-foreground">Refilled water bucket</span>
                         </label>
                       </div>
 
                       {/* Notes */}
                       <div>
-                        <label className="block text-xs font-medium text-stone-600 mb-2">
+                        <label className="block text-xs font-medium text-muted-foreground mb-2">
                           Notes (optional)
                         </label>
                         <textarea
@@ -441,7 +447,7 @@ export default function DailyCheckPage() {
       </div>
 
       {/* Submit */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 shadow-lg md:relative md:border-0 md:shadow-none md:p-0">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 shadow-lg md:relative md:border-0 md:shadow-none md:p-0">
         <div className="max-w-4xl mx-auto flex gap-3">
           <Link href="/dashboard" className="btn-secondary flex-1">
             Cancel

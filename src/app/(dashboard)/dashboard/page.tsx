@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCurrentBarn, useBarn } from '@/contexts/BarnContext';
-import { useHorses, useEvents, useTasks, useAlerts } from '@/hooks/useData';
+import { useDashboard } from '@/hooks/useData';
+import { WelcomeChecklist } from '@/components/dashboard/WelcomeChecklist';
 import { hasPermission, BarnRole } from '@/types';
 import {
   AlertTriangle,
@@ -16,7 +18,6 @@ import {
   ArrowUpRight,
   Activity,
   Syringe,
-  Heart,
   DollarSign,
   Phone,
   Mail,
@@ -33,16 +34,12 @@ const HorseIcon = ({ className }: { className?: string }) => (
 export default function DashboardPage() {
   const { barn, isLoading: barnLoading } = useCurrentBarn();
   const { isClient, currentBarn } = useBarn();
-  const { horses } = useHorses();
-  const { events } = useEvents({ status: 'SCHEDULED' });
-  const { tasks } = useTasks({ status: 'PENDING' });
-  const { alerts } = useAlerts();
-  const [healthAlerts, setHealthAlerts] = useState<any[]>([]);
+  const { horses, events, tasks, alerts, stalls, paddocks, isLoading: dashboardLoading } = useDashboard();
   const [mounted, setMounted] = useState(false);
   const [greeting, setGreeting] = useState('Welcome');
   const [dateString, setDateString] = useState('');
   const [today, setToday] = useState<Date | null>(null);
-  
+
   // Client-specific state
   const [clientData, setClientData] = useState<any>(null);
   const [clientLoading, setClientLoading] = useState(false);
@@ -57,49 +54,27 @@ export default function DashboardPage() {
     setToday(now);
   }, []);
 
-  // Fetch dashboard data in parallel for better performance
+  // Client portal: fetch client-specific dashboard data separately
   useEffect(() => {
-    if (!barn?.id) return;
+    if (!barn?.id || !isClient || !currentBarn?.clientId) return;
 
-    const fetchDashboardData = async () => {
+    const fetchClientDashboard = async () => {
       setClientLoading(true);
-
-      const fetchHealthAlerts = async () => {
-        if (isClient) return null;
-        const response = await fetch(`/api/barns/${barn.id}/health-alerts`);
-        return response.json();
-      };
-
-      const fetchClientDashboard = async () => {
-        if (!isClient || !currentBarn?.clientId) return null;
-        const response = await fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`);
-        return response.json();
-      };
-
       try {
-        const [healthData, clientDashboardData] = await Promise.all([
-          fetchHealthAlerts(),
-          fetchClientDashboard(),
-        ]);
-
-        if (healthData) {
-          setHealthAlerts(healthData.data || []);
-        }
-        if (clientDashboardData) {
-          setClientData(clientDashboardData.data);
-        }
+        const response = await fetch(`/api/barns/${currentBarn.id}/clients/${currentBarn.clientId}/dashboard`);
+        const result = await response.json();
+        if (result.data) setClientData(result.data);
       } catch (error) {
-        console.error('Dashboard fetch error:', error);
-        setHealthAlerts([]);
+        console.error('Client dashboard fetch error:', error);
       } finally {
         setClientLoading(false);
       }
     };
 
-    fetchDashboardData();
+    fetchClientDashboard();
   }, [barn?.id, isClient, currentBarn?.id, currentBarn?.clientId]);
 
-  if (barnLoading || (isClient && clientLoading)) {
+  if (barnLoading || dashboardLoading || (isClient && clientLoading)) {
     return (
       <div className="space-y-6">
         <div className="h-8 w-48 skeleton" />
@@ -114,11 +89,11 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-full bg-amber-500/15 flex items-center justify-center mx-auto mb-4">
             <HorseIcon className="w-8 h-8 text-amber-600" />
           </div>
-          <h2 className="text-xl font-semibold text-stone-900 mb-2">Welcome to StableTrack</h2>
-          <p className="text-stone-500 mb-6">Get started by creating your first barn.</p>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Welcome to StableTrack</h2>
+          <p className="text-muted-foreground mb-6">Get started by creating your first barn.</p>
           <div className="flex gap-3 justify-center">
             <Link href="/onboarding/create-barn" className="btn-primary">Create Barn</Link>
             <Link href="/onboarding/join-barn" className="btn-secondary">Join Existing</Link>
@@ -135,12 +110,12 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">{greeting}</h1>
-            <p className="text-stone-500 text-sm sm:text-base mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{greeting}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base mt-0.5">
               {dateString || 'Loading...'} · {barn.name}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/15 text-blue-700 dark:text-blue-300 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto">
             <span>Client Portal</span>
           </div>
         </div>
@@ -150,10 +125,10 @@ export default function DashboardPage() {
           <div className="stat-card">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-stone-500">Your Horses</p>
-                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{clientData?.horses?.length || 0}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Your Horses</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{clientData?.horses?.length || 0}</p>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
                 <HorseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
               </div>
             </div>
@@ -162,10 +137,10 @@ export default function DashboardPage() {
           <div className="stat-card">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-stone-500">Events</p>
-                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{clientData?.stats?.upcomingEvents || 0}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Events</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{clientData?.stats?.upcomingEvents || 0}</p>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
               </div>
             </div>
@@ -174,12 +149,12 @@ export default function DashboardPage() {
           <div className="stat-card col-span-2 md:col-span-1">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-stone-500">Balance Due</p>
-                <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">Balance Due</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">
                   ${(clientData?.stats?.balanceDue || 0).toLocaleString()}
                 </p>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
                 <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
               </div>
             </div>
@@ -188,12 +163,12 @@ export default function DashboardPage() {
 
         {/* Balance Alert */}
         {clientData?.stats?.balanceDue > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6 text-amber-600" />
+              <DollarSign className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               <div>
-                <p className="font-medium text-amber-900">Outstanding Balance</p>
-                <p className="text-sm text-amber-700">{clientData?.stats?.pendingInvoices || 0} invoice(s) pending</p>
+                <p className="font-medium text-amber-900 dark:text-amber-200">Outstanding Balance</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400">{clientData?.stats?.pendingInvoices || 0} invoice(s) pending</p>
               </div>
             </div>
             <Link href="/billing" className="btn-primary btn-sm">
@@ -205,8 +180,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Your Horses */}
           <div className="lg:col-span-2 card">
-            <div className="flex items-center justify-between p-4 border-b border-stone-100">
-              <h2 className="font-semibold text-stone-900">Your Horses</h2>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold text-foreground">Your Horses</h2>
               <Link href="/horses" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
                 View all <ChevronRight className="w-4 h-4" />
               </Link>
@@ -214,33 +189,33 @@ export default function DashboardPage() {
             
             {!clientData?.horses || clientData.horses.length === 0 ? (
               <div className="p-8 text-center">
-                <HorseIcon className="w-10 h-10 text-stone-200 mx-auto mb-2" />
-                <p className="text-stone-500">No horses assigned to you</p>
-                <p className="text-sm text-stone-400 mt-1">Contact the barn to add your horses</p>
+                <HorseIcon className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-muted-foreground">No horses assigned to you</p>
+                <p className="text-sm text-muted-foreground mt-1">Contact the barn to add your horses</p>
               </div>
             ) : (
-              <div className="divide-y divide-stone-100">
+              <div className="divide-y divide-border">
                 {clientData.horses.slice(0, 5).map((horse: any) => (
                   <Link 
                     key={horse.id} 
                     href={`/horses/${horse.id}`}
-                    className="flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors"
+                    className="flex items-center gap-4 p-4 hover:bg-accent transition-colors"
                   >
-                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="relative w-12 h-12 rounded-full bg-amber-500/15 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {horse.profilePhotoUrl ? (
-                        <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                        <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
                       ) : (
                         <HorseIcon className="w-6 h-6 text-amber-600" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-stone-900">{horse.barnName}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="font-medium text-foreground">{horse.barnName}</p>
+                      <p className="text-sm text-muted-foreground">
                         {horse.breed || 'Unknown breed'}
                         {horse.stallName && ` · Stall ${horse.stallName}`}
                       </p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-stone-300" />
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </Link>
                 ))}
               </div>
@@ -251,26 +226,26 @@ export default function DashboardPage() {
           <div className="space-y-6">
             {/* Upcoming Events */}
             <div className="card">
-              <div className="flex items-center justify-between p-4 border-b border-stone-100">
-                <h2 className="font-semibold text-stone-900">Upcoming</h2>
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="font-semibold text-foreground">Upcoming</h2>
                 <Link href="/calendar" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
                   Calendar
                 </Link>
               </div>
               {!clientData?.upcomingEvents || clientData.upcomingEvents.length === 0 ? (
                 <div className="p-6 text-center">
-                  <p className="text-sm text-stone-400">No upcoming events</p>
+                  <p className="text-sm text-muted-foreground">No upcoming events</p>
                 </div>
               ) : (
-                <div className="divide-y divide-stone-100">
+                <div className="divide-y divide-border">
                   {clientData.upcomingEvents.slice(0, 4).map((event: any) => {
                     const date = new Date(event.scheduledDate);
                     const isToday = today ? date.toDateString() === today.toDateString() : false;
                     
                     return (
                       <div key={event.id} className="p-4">
-                        <p className="text-sm font-medium text-stone-900">{event.title}</p>
-                        <p className="text-xs text-stone-500 mt-0.5">
+                        <p className="text-sm font-medium text-foreground">{event.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {event.horseName && `${event.horseName} · `}
                           {isToday ? (
                             <span className="text-amber-600 font-medium">Today</span>
@@ -287,32 +262,32 @@ export default function DashboardPage() {
 
             {/* Recent Invoices */}
             <div className="card">
-              <div className="flex items-center justify-between p-4 border-b border-stone-100">
-                <h2 className="font-semibold text-stone-900">Recent Invoices</h2>
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="font-semibold text-foreground">Recent Invoices</h2>
                 <Link href="/billing" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
                   View all
                 </Link>
               </div>
               {!clientData?.recentInvoices || clientData.recentInvoices.length === 0 ? (
                 <div className="p-6 text-center">
-                  <p className="text-sm text-stone-400">No invoices yet</p>
+                  <p className="text-sm text-muted-foreground">No invoices yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-stone-100">
+                <div className="divide-y divide-border">
                   {clientData.recentInvoices.slice(0, 3).map((invoice: any) => (
                     <div key={invoice.id} className="p-4 flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-stone-900">#{invoice.invoiceNumber}</p>
-                        <p className="text-xs text-stone-500">
+                        <p className="text-sm font-medium text-foreground">#{invoice.invoiceNumber}</p>
+                        <p className="text-xs text-muted-foreground">
                           {new Date(invoice.issueDate).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-stone-900">${invoice.total.toFixed(2)}</p>
+                        <p className="text-sm font-medium text-foreground">${invoice.total.toFixed(2)}</p>
                         <span className={`text-xs px-2 py-0.5 rounded ${
-                          invoice.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                          invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-700' :
-                          'bg-amber-100 text-amber-700'
+                          invoice.status === 'PAID' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
+                          invoice.status === 'OVERDUE' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
+                          'bg-amber-500/10 text-amber-700 dark:text-amber-400'
                         }`}>
                           {invoice.status}
                         </span>
@@ -325,22 +300,22 @@ export default function DashboardPage() {
 
             {/* Contact Barn */}
             <div className="card p-4">
-              <h2 className="font-semibold text-stone-900 mb-3">Contact {barn.name}</h2>
+              <h2 className="font-semibold text-foreground mb-3">Contact {barn.name}</h2>
               <div className="space-y-2">
                 {barn.phone && (
-                  <a href={`tel:${barn.phone}`} className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900">
+                  <a href={`tel:${barn.phone}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                     <Phone className="w-4 h-4" />
                     {barn.phone}
                   </a>
                 )}
                 {barn.email && (
-                  <a href={`mailto:${barn.email}`} className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900">
+                  <a href={`mailto:${barn.email}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                     <Mail className="w-4 h-4" />
                     {barn.email}
                   </a>
                 )}
                 {barn.city && barn.state && (
-                  <div className="flex items-center gap-2 text-sm text-stone-600">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4" />
                     {barn.city}, {barn.state}
                   </div>
@@ -354,11 +329,18 @@ export default function DashboardPage() {
   }
 
   // REGULAR MEMBER DASHBOARD
-  const activeHorses = horses.filter(h => h.status === 'ACTIVE').length;
-  const layupHorses = horses.filter(h => h.status === 'LAYUP').length;
-  const pendingTasks = tasks.filter(t => t.status !== 'COMPLETED').length;
-  const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
-  const urgentAlerts = alerts.filter(a => a.type === 'urgent');
+  const activeHorses = horses.filter((h: any) => h.status === 'ACTIVE').length;
+  const layupCount = horses.filter((h: any) => h.status === 'LAYUP').length;
+  const pendingTasks = tasks.filter((t: any) => t.status !== 'COMPLETED').length;
+  const completedTasks = tasks.filter((t: any) => t.status === 'COMPLETED').length;
+  // Filter events scheduled for today only
+  const todayEvents = events.filter((e: any) => {
+    const eventDate = new Date(e.scheduledDate);
+    const now = new Date();
+    return eventDate.getFullYear() === now.getFullYear()
+      && eventDate.getMonth() === now.getMonth()
+      && eventDate.getDate() === now.getDate();
+  });
 
   // Check if user has permission to add horses
   const userRole = (currentBarn?.role || 'CARETAKER') as BarnRole;
@@ -369,8 +351,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-stone-900">{greeting}</h1>
-          <p className="text-stone-500 text-sm sm:text-base mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{greeting}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base mt-0.5">
             {dateString || 'Loading...'} · {barn.name}
           </p>
         </div>
@@ -382,123 +364,85 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Alert Banner */}
-      {urgentAlerts.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      {/* Today's Events Alert */}
+      {todayEvents.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <Calendar className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium text-red-800">Attention Required</p>
+              <p className="font-medium text-amber-800 dark:text-amber-200">Today's Schedule</p>
               <ul className="mt-1 space-y-1">
-                {urgentAlerts.slice(0, 2).map((alert, i) => (
-                  <li key={i} className="text-sm text-red-700">{alert.message}</li>
+                {todayEvents.slice(0, 3).map((event: any) => (
+                  <li key={event.id} className="text-sm text-amber-700 dark:text-amber-300">
+                    {event.title}
+                    {event.horse?.barnName ? ` — ${event.horse.barnName}` : ''}
+                    {event.startTime ? ` at ${event.startTime}` : ''}
+                  </li>
                 ))}
+                {todayEvents.length > 3 && (
+                  <li className="text-sm text-amber-600 dark:text-amber-400">
+                    +{todayEvents.length - 3} more
+                  </li>
+                )}
               </ul>
             </div>
-            <Link href="/alerts" className="text-sm font-medium text-red-600 hover:text-red-700">
+            <Link href="/calendar" className="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300">
               View all →
             </Link>
           </div>
         </div>
       )}
 
-      {/* Health Alerts */}
-      {healthAlerts.length > 0 && (
-        <div className={`border rounded-lg p-4 ${healthAlerts.some(a => a.hasCritical) ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
-          <div className="flex items-start gap-3">
-            <Heart className={`w-5 h-5 flex-shrink-0 mt-0.5 ${healthAlerts.some(a => a.hasCritical) ? 'text-red-500' : 'text-orange-500'}`} />
-            <div className="flex-1">
-              <p className={`font-medium ${healthAlerts.some(a => a.hasCritical) ? 'text-red-800' : 'text-orange-800'}`}>
-                {healthAlerts.some(a => a.hasCritical) ? 'Horse Health Alert' : 'Health Concerns'}
-              </p>
-              <div className="mt-2 space-y-2">
-                {healthAlerts.slice(0, 3).map((alert, i) => (
-                  <Link 
-                    key={i} 
-                    href={`/horses/${alert.horse.id}`}
-                    className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                      healthAlerts.some(a => a.hasCritical) ? 'bg-red-100/50 hover:bg-red-100' : 'bg-orange-100/50 hover:bg-orange-100'
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {alert.horse.profilePhotoUrl ? (
-                        <img src={alert.horse.profilePhotoUrl} alt={alert.horse.barnName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-sm font-medium text-stone-600">
-                          {alert.horse.barnName?.charAt(0) || '?'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${healthAlerts.some(a => a.hasCritical) ? 'text-red-900' : 'text-orange-900'}`}>
-                        {alert.horse.barnName}
-                      </p>
-                      <p className={`text-xs ${healthAlerts.some(a => a.hasCritical) ? 'text-red-700' : 'text-orange-700'}`}>
-                        {alert.concerns.map((c: any) => c.message).join(' · ')}
-                      </p>
-                    </div>
-                    {alert.hasCritical && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-red-500 text-white rounded-full">
-                        Critical
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-              {healthAlerts.length > 3 && (
-                <p className={`text-xs mt-2 ${healthAlerts.some(a => a.hasCritical) ? 'text-red-600' : 'text-orange-600'}`}>
-                  +{healthAlerts.length - 3} more horses with concerns
-                </p>
-              )}
-            </div>
-            <Link href="/log/daily-check" className={`text-sm font-medium ${healthAlerts.some(a => a.hasCritical) ? 'text-red-600 hover:text-red-700' : 'text-orange-600 hover:text-orange-700'}`}>
-              Log check →
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Welcome Checklist (new barns) */}
+      <WelcomeChecklist
+        barnName={barn.name}
+        horsesCount={horses.length}
+        stallsCount={stalls.length}
+        paddocksCount={paddocks.length}
+        eventsCount={events.length}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="stat-card">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-stone-500">Active Horses</p>
-              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{activeHorses}</p>
-              {layupHorses > 0 && (
-                <p className="text-[10px] sm:text-xs text-amber-600 mt-0.5 sm:mt-1 truncate">{layupHorses} on layup</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Active Horses</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{activeHorses}</p>
+              {layupCount > 0 && (
+                <p className="text-[10px] sm:text-xs text-amber-600 mt-0.5 sm:mt-1 truncate">{layupCount} on layup</p>
               )}
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-              <HorseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+              <HorseIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
         </div>
 
-        <Link href="/calendar" className="stat-card hover:border-stone-300 transition-colors active:scale-[0.98]">
+        <Link href="/calendar" className="stat-card hover:border-border transition-colors active:scale-[0.98]">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-stone-500">Events</p>
-              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{events.length}</p>
-              <p className="text-[10px] sm:text-xs text-stone-400 mt-0.5 sm:mt-1 truncate">This week</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Events</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{events.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">This week</p>
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </Link>
 
-        <Link href="/daily-care" className="stat-card hover:border-stone-300 transition-colors active:scale-[0.98]">
+        <Link href="/daily-care" className="stat-card hover:border-border transition-colors active:scale-[0.98]">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-stone-500">Tasks</p>
-              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{pendingTasks}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Tasks</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{pendingTasks}</p>
               {completedTasks > 0 && (
                 <p className="text-[10px] sm:text-xs text-emerald-600 mt-0.5 sm:mt-1 truncate">{completedTasks} done</p>
               )}
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </Link>
@@ -506,14 +450,14 @@ export default function DashboardPage() {
         <div className="stat-card">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-stone-500">Alerts</p>
-              <p className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-0.5 sm:mt-1">{alerts.length}</p>
-              {urgentAlerts.length > 0 && (
-                <p className="text-[10px] sm:text-xs text-red-600 mt-0.5 sm:mt-1 truncate">{urgentAlerts.length} urgent</p>
-              )}
+              <p className="text-xs sm:text-sm text-muted-foreground">Today</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">{todayEvents.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">
+                {todayEvents.length === 1 ? 'event' : 'events'} scheduled
+              </p>
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
             </div>
           </div>
         </div>
@@ -523,8 +467,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Tasks */}
         <div className="lg:col-span-2 card">
-          <div className="flex items-center justify-between p-4 border-b border-stone-100">
-            <h2 className="font-semibold text-stone-900">Today's Tasks</h2>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">Today's Tasks</h2>
             <Link href="/daily-care" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
               View all <ChevronRight className="w-4 h-4" />
             </Link>
@@ -532,26 +476,26 @@ export default function DashboardPage() {
           
           {tasks.length === 0 ? (
             <div className="p-8 text-center">
-              <CheckCircle2 className="w-10 h-10 text-stone-200 mx-auto mb-2" />
-              <p className="text-stone-500">No tasks for today</p>
-              <p className="text-sm text-stone-400 mt-1">All caught up!</p>
+              <CheckCircle2 className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
+              <p className="text-muted-foreground">No tasks for today</p>
+              <p className="text-sm text-muted-foreground mt-1">All caught up!</p>
             </div>
           ) : (
-            <div className="divide-y divide-stone-100">
-              {tasks.slice(0, 5).map((task) => (
-                <div key={task.id} className="flex items-center gap-3 p-4 hover:bg-stone-50 transition-colors">
+            <div className="divide-y divide-border">
+              {tasks.slice(0, 5).map((task: any) => (
+                <div key={task.id} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
                   {task.status === 'COMPLETED' ? (
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                   ) : (
-                    <Circle className="w-5 h-5 text-stone-300 flex-shrink-0" />
+                    <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${task.status === 'COMPLETED' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+                    <p className={`text-sm ${task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </p>
                   </div>
                   {task.dueTime && (
-                    <span className="text-xs text-stone-400 flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {task.dueTime}
                     </span>
                   )}
@@ -568,52 +512,52 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Quick Actions */}
           <div className="card p-4">
-            <h2 className="font-semibold text-stone-900 mb-3">Quick Actions</h2>
+            <h2 className="font-semibold text-foreground mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/log/daily-check" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+              <Link href="/log/daily-check" className="flex items-center gap-2 p-3 rounded-lg bg-background hover:bg-accent transition-colors">
                 <Activity className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm text-stone-700">Health Check</span>
+                <span className="text-sm text-muted-foreground">Health Check</span>
               </Link>
-              <Link href="/calendar" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+              <Link href="/calendar" className="flex items-center gap-2 p-3 rounded-lg bg-background hover:bg-accent transition-colors">
                 <Calendar className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-stone-700">Add Event</span>
+                <span className="text-sm text-muted-foreground">Add Event</span>
               </Link>
-              <Link href="/log/medication" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+              <Link href="/log/medication" className="flex items-center gap-2 p-3 rounded-lg bg-background hover:bg-accent transition-colors">
                 <Syringe className="w-4 h-4 text-purple-600" />
-                <span className="text-sm text-stone-700">Log Meds</span>
+                <span className="text-sm text-muted-foreground">Log Meds</span>
               </Link>
-              <Link href="/daily-care" className="flex items-center gap-2 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+              <Link href="/daily-care" className="flex items-center gap-2 p-3 rounded-lg bg-background hover:bg-accent transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-amber-600" />
-                <span className="text-sm text-stone-700">Tasks</span>
+                <span className="text-sm text-muted-foreground">Tasks</span>
               </Link>
             </div>
           </div>
 
           {/* Upcoming Events */}
           <div className="card">
-            <div className="flex items-center justify-between p-4 border-b border-stone-100">
-              <h2 className="font-semibold text-stone-900">Upcoming</h2>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold text-foreground">Upcoming</h2>
               <Link href="/calendar" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
                 Calendar
               </Link>
             </div>
             {events.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-sm text-stone-400">No upcoming events</p>
+                <p className="text-sm text-muted-foreground">No upcoming events</p>
               </div>
             ) : (
-              <div className="divide-y divide-stone-100">
-                {events.slice(0, 4).map((event) => {
+              <div className="divide-y divide-border">
+                {events.slice(0, 4).map((event: any) => {
                   const date = new Date(event.scheduledDate);
                   const isToday = today ? date.toDateString() === today.toDateString() : false;
                   const isTomorrow = today ? date.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
                   
                   return (
-                    <div key={event.id} className="p-4 hover:bg-stone-50 transition-colors">
+                    <div key={event.id} className="p-4 hover:bg-accent transition-colors">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-stone-900">{event.title}</p>
-                          <p className="text-xs text-stone-500 mt-0.5">
+                          <p className="text-sm font-medium text-foreground">{event.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             {event.horse?.barnName && `${event.horse.barnName} · `}
                             {isToday ? (
                               <span className="text-amber-600 font-medium">Today</span>
@@ -624,7 +568,7 @@ export default function DashboardPage() {
                             )}
                           </p>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-stone-300 flex-shrink-0" />
+                        <ArrowUpRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       </div>
                     </div>
                   );
@@ -635,24 +579,24 @@ export default function DashboardPage() {
 
           {/* Horses Preview */}
           <div className="card">
-            <div className="flex items-center justify-between p-4 border-b border-stone-100">
-              <h2 className="font-semibold text-stone-900">Horses</h2>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold text-foreground">Horses</h2>
               <Link href="/horses" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
                 View all
               </Link>
             </div>
             {horses.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-sm text-stone-400 mb-3">No horses yet</p>
+                <p className="text-sm text-muted-foreground mb-3">No horses yet</p>
                 <Link href="/horses/new" className="btn-secondary btn-sm">Add Horse</Link>
               </div>
             ) : (
-              <div className="divide-y divide-stone-100">
-                {horses.slice(0, 4).map((horse) => (
-                  <Link key={horse.id} href={`/horses/${horse.id}`} className="flex items-center gap-3 p-4 hover:bg-stone-50 transition-colors">
-                    <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden">
+              <div className="divide-y divide-border">
+                {horses.slice(0, 4).map((horse: any) => (
+                  <Link key={horse.id} href={`/horses/${horse.id}`} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
+                    <div className="relative w-9 h-9 rounded-full bg-amber-500/15 flex items-center justify-center overflow-hidden">
                       {horse.profilePhotoUrl ? (
-                        <img src={horse.profilePhotoUrl} alt={horse.barnName} className="w-full h-full object-cover" />
+                        <Image src={horse.profilePhotoUrl} alt={horse.barnName} fill className="object-cover" unoptimized />
                       ) : (
                         <span className="text-amber-700 font-medium text-sm">
                           {horse.barnName?.charAt(0) || '?'}
@@ -660,8 +604,8 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-stone-900">{horse.barnName}</p>
-                      <p className="text-xs text-stone-500">{horse.breed || 'Unknown breed'}</p>
+                      <p className="text-sm font-medium text-foreground">{horse.barnName}</p>
+                      <p className="text-xs text-muted-foreground">{horse.breed || 'Unknown breed'}</p>
                     </div>
                     {horse.status === 'LAYUP' && (
                       <span className="badge-warning">Layup</span>

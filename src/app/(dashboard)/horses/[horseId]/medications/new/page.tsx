@@ -104,7 +104,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
   if (!currentBarn) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-stone-500">Please select a barn first</p>
+        <p className="text-muted-foreground">Please select a barn first</p>
       </div>
     );
   }
@@ -132,26 +132,26 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
       <div className="flex items-center gap-4">
         <Link
           href={`/horses/${horseId}`}
-          className="p-2 rounded-lg text-stone-600 hover:bg-stone-100 transition-all"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Add Medication</h1>
-          <p className="text-stone-500 mt-1">for {horse.barnName}</p>
+          <h1 className="text-2xl font-bold text-foreground">Add Medication</h1>
+          <p className="text-muted-foreground mt-1">for {horse.barnName}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Medication Info */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
             <Pill className="w-5 h-5 text-purple-500" />
             Medication Information
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Medication Name *
               </label>
               <input
@@ -166,7 +166,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Dosage *
                 </label>
                 <input
@@ -179,7 +179,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Route
                 </label>
                 <select
@@ -195,7 +195,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Frequency
               </label>
               <select
@@ -210,7 +210,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Instructions
               </label>
               <textarea
@@ -225,13 +225,13 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
 
         {/* Schedule */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-stone-500" />
+          <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-muted-foreground" />
             Schedule
           </h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Start Date *
               </label>
               <input
@@ -243,7 +243,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 End Date (optional)
               </label>
               <input
@@ -252,17 +252,17 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                 className="input w-full"
               />
-              <p className="text-xs text-stone-500 mt-1">Leave blank for ongoing medication</p>
+              <p className="text-xs text-muted-foreground mt-1">Leave blank for ongoing medication</p>
             </div>
           </div>
         </div>
 
         {/* Prescriber & Pharmacy */}
         <div className="card p-6">
-          <h3 className="font-medium text-stone-900 mb-4">Prescriber & Pharmacy</h3>
+          <h3 className="font-medium text-foreground mb-4">Prescriber & Pharmacy</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Prescribing Veterinarian
               </label>
               <input
@@ -276,7 +276,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Pharmacy
                 </label>
                 <input
@@ -288,7 +288,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Refills Remaining
                 </label>
                 <input
@@ -307,7 +307,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                 type="checkbox"
                 checked={formData.isControlled}
                 onChange={(e) => setFormData({ ...formData, isControlled: e.target.checked })}
-                className="w-5 h-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                className="w-5 h-5 rounded border-border text-amber-600 focus:ring-amber-500"
               />
               <div>
                 <p className="font-medium text-amber-800">Controlled Substance</p>

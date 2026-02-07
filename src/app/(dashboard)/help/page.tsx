@@ -156,8 +156,8 @@ export default function HelpPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-stone-900">Help & Support</h1>
-        <p className="text-stone-500 mt-2">
+        <h1 className="text-2xl font-bold text-foreground">Help & Support</h1>
+        <p className="text-muted-foreground mt-2">
           Find answers to common questions or get in touch with our support team
         </p>
       </div>
@@ -165,7 +165,7 @@ export default function HelpPage() {
       {/* Search */}
       <div className="max-w-xl mx-auto">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search help articles..."
@@ -191,10 +191,10 @@ export default function HelpPage() {
                   <Icon className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-all">
+                  <h3 className="font-semibold text-foreground group-hover:text-amber-600 transition-all">
                     {resource.title}
                   </h3>
-                  <p className="text-sm text-stone-500 mt-1">{resource.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
                 </div>
               </div>
             </a>
@@ -204,7 +204,7 @@ export default function HelpPage() {
 
       {/* FAQ Section */}
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-stone-900 mb-4">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
           Frequently Asked Questions
         </h2>
         
@@ -217,44 +217,44 @@ export default function HelpPage() {
               <div key={category.id} className="card overflow-hidden">
                 <button
                   onClick={() => setExpandedCategory(isExpanded ? null : category.id)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-stone-50 transition-all"
+                  className="w-full flex items-center justify-between p-4 hover:bg-accent transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-stone-100">
-                      <Icon className="w-5 h-5 text-stone-600" />
+                    <div className="p-2 rounded-lg bg-muted">
+                      <Icon className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <span className="font-medium text-stone-900">{category.name}</span>
-                    <span className="text-sm text-stone-400">({category.faqs.length})</span>
+                    <span className="font-medium text-foreground">{category.name}</span>
+                    <span className="text-sm text-muted-foreground">({category.faqs.length})</span>
                   </div>
                   <ChevronDown
-                    className={`w-5 h-5 text-stone-400 transition-transform ${
+                    className={`w-5 h-5 text-muted-foreground transition-transform ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
                 
                 {isExpanded && (
-                  <div className="border-t border-stone-100">
+                  <div className="border-t border-border">
                     {category.faqs.map((faq, index) => {
                       const faqId = `${category.id}-${index}`;
                       const isFaqExpanded = expandedFaq === faqId;
                       
                       return (
-                        <div key={index} className="border-b border-stone-100 last:border-b-0">
+                        <div key={index} className="border-b border-border last:border-b-0">
                           <button
                             onClick={() => setExpandedFaq(isFaqExpanded ? null : faqId)}
-                            className="w-full flex items-center justify-between p-4 text-left hover:bg-stone-50 transition-all"
+                            className="w-full flex items-center justify-between p-4 text-left hover:bg-accent transition-all"
                           >
-                            <span className="font-medium text-stone-700 pr-4">{faq.question}</span>
+                            <span className="font-medium text-muted-foreground pr-4">{faq.question}</span>
                             <ChevronRight
-                              className={`w-4 h-4 text-stone-400 flex-shrink-0 transition-transform ${
+                              className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${
                                 isFaqExpanded ? 'rotate-90' : ''
                               }`}
                             />
                           </button>
                           {isFaqExpanded && (
                             <div className="px-4 pb-4">
-                              <p className="text-stone-600 bg-stone-50 rounded-xl p-4">
+                              <p className="text-muted-foreground bg-background rounded-xl p-4">
                                 {faq.answer}
                               </p>
                             </div>
@@ -275,12 +275,12 @@ export default function HelpPage() {
         <div className="card p-8 bg-gradient-to-r from-stone-900 to-stone-800 text-white">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-white/10">
+              <div className="p-4 rounded-2xl bg-card/10">
                 <MessageCircle className="w-8 h-8" />
               </div>
               <div>
                 <h3 className="text-xl font-semibold">Still need help?</h3>
-                <p className="text-stone-300 mt-1">
+                <p className="text-muted-foreground mt-1">
                   Our support team is here to help you succeed
                 </p>
               </div>
@@ -288,14 +288,14 @@ export default function HelpPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => toast.info('Demo Mode', 'Email support is disabled in demo mode')}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-stone-900 rounded-xl font-medium hover:bg-stone-100 transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-card text-foreground rounded-xl font-medium hover:bg-accent transition-all"
               >
                 <Mail className="w-4 h-4" />
                 Email Support
               </button>
               <button
                 onClick={() => toast.info('Demo Mode', 'Live chat is disabled in demo mode')}
-                className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-card/10 text-white rounded-xl font-medium hover:bg-card/20 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
                 Live Chat
@@ -306,7 +306,7 @@ export default function HelpPage() {
       </div>
 
       {/* Demo Notice */}
-      <div className="text-center text-sm text-stone-500">
+      <div className="text-center text-sm text-muted-foreground">
         <p>This is a demo version. Some support features are disabled.</p>
       </div>
     </div>

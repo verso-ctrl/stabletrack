@@ -102,9 +102,9 @@ export function AutocompleteInput({
       />
       
       {isOpen && filteredSuggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-stone-200 max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-card rounded-xl shadow-lg border border-border max-h-60 overflow-y-auto">
           {!value.trim() && (
-            <div className="px-3 py-2 text-xs font-medium text-stone-400 border-b border-stone-100">
+            <div className="px-3 py-2 text-xs font-medium text-muted-foreground border-b border-border">
               Suggestions
             </div>
           )}
@@ -116,7 +116,7 @@ export function AutocompleteInput({
               className={`w-full px-3 py-2 text-left text-sm transition-colors ${
                 index === highlightedIndex
                   ? 'bg-amber-50 text-amber-900'
-                  : 'hover:bg-stone-50 text-stone-700'
+                  : 'hover:bg-accent text-muted-foreground'
               }`}
             >
               {suggestion}
