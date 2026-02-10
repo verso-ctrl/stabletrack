@@ -36,6 +36,8 @@ const horseSchema = z.object({
   microchipNumber: z.string().max(50).optional(),
   status: z.enum(['ACTIVE', 'LAYUP', 'RETIRED', 'SOLD', 'DECEASED', 'LEASED_OUT']).optional(),
   ownerName: z.string().max(200).optional(),
+  ownerEmail: z.string().email().max(200).optional().or(z.literal('')),
+  ownerPhone: z.string().max(30).optional(),
 });
 
 type HorseFormData = z.infer<typeof horseSchema>;
@@ -164,7 +166,7 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Barn Name *"
+                label="Nickname *"
                 placeholder="Thunder"
                 error={errors.barnName?.message}
                 {...register('barnName')}
@@ -273,25 +275,46 @@ export function AddHorseForm({ open, onOpenChange, onSuccess }: AddHorseFormProp
             </div>
           </div>
 
-          {/* Additional Info */}
+          {/* Owner Info */}
           <div className="space-y-4">
-            <h3 className="font-medium text-foreground">Additional Information</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Microchip Number"
-                placeholder="985141001234567"
-                error={errors.microchipNumber?.message}
-                {...register('microchipNumber')}
-              />
+            <h3 className="font-medium text-foreground">Owner Information</h3>
 
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Input
                 label="Owner Name"
                 placeholder="John Smith"
                 error={errors.ownerName?.message}
                 {...register('ownerName')}
               />
+
+              <Input
+                label="Owner Email"
+                type="email"
+                placeholder="john@example.com"
+                error={errors.ownerEmail?.message}
+                {...register('ownerEmail')}
+              />
+
+              <Input
+                label="Owner Phone"
+                type="tel"
+                placeholder="(555) 123-4567"
+                error={errors.ownerPhone?.message}
+                {...register('ownerPhone')}
+              />
             </div>
+          </div>
+
+          {/* Additional Info */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-foreground">Additional Information</h3>
+
+            <Input
+              label="Microchip Number"
+              placeholder="985141001234567"
+              error={errors.microchipNumber?.message}
+              {...register('microchipNumber')}
+            />
           </div>
 
           <DialogFooter>

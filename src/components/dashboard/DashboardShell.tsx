@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { getTierDisplayName } from '@/lib/tiers';
 import { toast } from '@/lib/toast';
 
 // Demo user (no Clerk in demo mode)
@@ -215,16 +216,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <div className="p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-amber-800">
-                  {tier} Plan
+                  {getTierDisplayName(tier)} Plan
                 </span>
-                {tier === 'FREE' && (
-                  <Link
-                    href="/settings/billing"
-                    className="text-xs font-medium text-amber-600 hover:text-amber-700"
-                  >
-                    Upgrade
-                  </Link>
-                )}
               </div>
             </div>
           </div>

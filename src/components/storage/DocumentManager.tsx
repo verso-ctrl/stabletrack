@@ -32,6 +32,7 @@ import {
   type DocumentType 
 } from '@/lib/tiers'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface DocumentManagerProps {
   barnId: string
@@ -60,6 +61,7 @@ export function DocumentManager({
   const [selectedType, setSelectedType] = useState<DocumentType | null>(null)
   const [documents, setDocuments] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteDocId, setDeleteDocId] = useState<string | null>(null)
 
   // Tier permissions
   const {
@@ -109,7 +111,7 @@ export function DocumentManager({
     return (
       <FeatureLocked
         feature="Document Management"
-        requiredTier="BASIC"
+        requiredTier="CORE"
         onUpgrade={() => window.location.href = '/settings/billing'}
       />
     )
@@ -129,8 +131,14 @@ export function DocumentManager({
     }
   }
 
-  const handleDelete = async (docId: string) => {
-    if (!confirm('Delete this document?')) return
+  const handleDeleteClick = (docId: string) => {
+    setDeleteDocId(docId)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDocId) return
+    const docId = deleteDocId
+    setDeleteDocId(null)
 
     try {
       await fetch(`/api/barns/${barnId}/documents/${docId}`, { method: 'DELETE' })
@@ -142,7 +150,7 @@ export function DocumentManager({
 
   const handleShare = async (doc: DocumentItem) => {
     if (!features.canShareDocuments) {
-      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('BASIC')} plan`)
+      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('CORE')} plan`)
       return
     }
     // Implement sharing logic
@@ -354,12 +362,22 @@ export function DocumentManager({
               document={doc}
               canShare={features.canShareDocuments}
               canTrackDocumentExpiry={canTrackDocumentExpiry}
-              onDelete={() => handleDelete(doc.id)}
+              onDelete={() => handleDeleteClick(doc.id)}
               onShare={() => handleShare(doc)}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteDocId}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDocId(null)}
+        title="Delete document?"
+        description="This document will be permanently removed. This action cannot be undone."
+        variant="danger"
+        confirmLabel="Delete"
+      />
     </div>
   )
 }

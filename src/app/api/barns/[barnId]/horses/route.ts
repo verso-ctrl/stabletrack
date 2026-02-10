@@ -177,6 +177,8 @@ export async function POST(
       microchipNumber,
       status,
       ownerName,
+      ownerEmail,
+      ownerPhone,
       stall,
     } = body;
     
@@ -201,6 +203,8 @@ export async function POST(
         microchipNumber,
         status: status || 'ACTIVE',
         ownerName,
+        ownerEmail,
+        ownerPhone,
         stall,
       },
     });

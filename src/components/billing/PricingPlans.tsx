@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Loader2, ArrowUp, ArrowDown, CreditCard, Sparkles } from 'lucide-react';
+import { Check, Loader2, ArrowUp, CreditCard, Sparkles, Crown } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useBarn } from '@/contexts/BarnContext';
 import {
@@ -19,20 +19,17 @@ const HorseIcon = ({ className }: { className?: string }) => (
 
 const TIER_INFO: Record<
   SubscriptionTier,
-  { name: string; description: string; highlighted?: boolean }
+  { name: string; description: string; highlighted?: boolean; icon?: React.ReactNode }
 > = {
-  FREE: {
-    name: 'Free',
-    description: 'Perfect for getting started',
-  },
-  BASIC: {
-    name: 'Basic',
-    description: 'For growing operations',
+  CORE: {
+    name: 'Core',
+    description: 'Everything you need for a small barn',
     highlighted: true,
   },
-  ADVANCED: {
-    name: 'Advanced',
-    description: 'Unlimited horses for larger farms',
+  PRO: {
+    name: 'Pro',
+    description: 'Unlimited horses for growing operations',
+    icon: <Crown className="w-4 h-4 text-amber-500" />,
   },
 };
 
@@ -49,40 +46,8 @@ export function PricingPlans() {
   const { tier: currentTier, isLoading } = useSubscription();
   const { currentBarn, refreshBarn } = useBarn();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState<{ tier: SubscriptionTier; isDowngrade: boolean } | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState<SubscriptionTier | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const handleDowngrade = async (tier: SubscriptionTier) => {
-    if (!currentBarn?.id) return;
-
-    try {
-      setLoadingTier(tier);
-      setError(null);
-
-      // Downgrade is immediate - just update the barn tier
-      const response = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to change plan');
-      }
-
-      // Refresh barn data to get updated tier
-      await refreshBarn?.();
-      setShowConfirmModal(null);
-    } catch (err) {
-      console.error('Downgrade failed:', err);
-      setError(err instanceof Error ? err.message : 'Failed to change plan');
-    } finally {
-      setLoadingTier(null);
-    }
-  };
 
   const handleUpgrade = async (tier: SubscriptionTier) => {
     if (!currentBarn?.id) return;
@@ -91,7 +56,6 @@ export function PricingPlans() {
       setLoadingTier(tier);
       setError(null);
 
-      // Call the Stripe checkout API for upgrades
       const response = await fetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,7 +73,7 @@ export function PricingPlans() {
       }
 
       if (data.demoMode) {
-        // Demo mode: Simulate the upgrade by calling the subscription endpoint
+        // Demo mode: Simulate the upgrade
         const upgradeResponse = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -121,7 +85,6 @@ export function PricingPlans() {
           setShowUpgradeModal(null);
         }
       } else if (data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
@@ -134,18 +97,7 @@ export function PricingPlans() {
     }
   };
 
-  const handlePlanClick = (tier: SubscriptionTier, isDowngrade: boolean) => {
-    if (tier === currentTier) return;
-    setError(null);
-
-    if (isDowngrade) {
-      setShowConfirmModal({ tier, isDowngrade });
-    } else {
-      setShowUpgradeModal(tier);
-    }
-  };
-
-  const tiers: SubscriptionTier[] = ['FREE', 'BASIC', 'ADVANCED'];
+  const tiers: SubscriptionTier[] = ['CORE', 'PRO'];
 
   return (
     <div className="py-8">
@@ -154,24 +106,23 @@ export function PricingPlans() {
           Simple, transparent pricing
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
-          All features included. Only pay for the horses you need.
+          All features included. Pick the plan that fits your barn.
         </p>
       </div>
 
       {error && (
-        <div className="max-w-5xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="max-w-4xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
         {tiers.map((tier) => {
           const info = TIER_INFO[tier];
           const limits = TIER_LIMITS[tier];
           const price = TIER_PRICING[tier];
           const isCurrent = tier === currentTier;
-          const isDowngrade =
-            tiers.indexOf(tier) < tiers.indexOf(currentTier);
+          const isUpgrade = tiers.indexOf(tier) > tiers.indexOf(currentTier);
 
           return (
             <div
@@ -199,7 +150,10 @@ export function PricingPlans() {
               )}
 
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-foreground">{info.name}</h3>
+                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                  {info.icon}
+                  {info.name}
+                </h3>
                 <p className="text-muted-foreground text-sm mt-1">{info.description}</p>
               </div>
 
@@ -207,9 +161,7 @@ export function PricingPlans() {
                 <span className="text-4xl font-bold text-foreground">
                   {formatPrice(price)}
                 </span>
-                {price > 0 && (
-                  <span className="text-muted-foreground ml-1">/month</span>
-                )}
+                <span className="text-muted-foreground ml-1">/month</span>
               </div>
 
               {/* Horse limit highlight */}
@@ -239,19 +191,17 @@ export function PricingPlans() {
               </ul>
 
               <button
-                onClick={() => handlePlanClick(tier, isDowngrade)}
-                disabled={isCurrent || loadingTier !== null || isLoading}
+                onClick={() => isUpgrade && handleUpgrade(tier)}
+                disabled={isCurrent || loadingTier !== null || isLoading || !isUpgrade}
                 className={`
                   w-full py-3 px-4 rounded-xl font-medium transition-all
                   flex items-center justify-center gap-2
                   ${
                     isCurrent
                       ? 'bg-green-100 text-green-700 cursor-default'
-                      : isDowngrade
-                      ? 'bg-muted text-muted-foreground hover:bg-accent'
-                      : info.highlighted
+                      : isUpgrade
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-muted text-muted-foreground cursor-default'
                   }
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
@@ -263,16 +213,13 @@ export function PricingPlans() {
                   </>
                 ) : isCurrent ? (
                   'Current Plan'
-                ) : isDowngrade ? (
-                  <>
-                    <ArrowDown className="w-4 h-4" />
-                    Downgrade to {info.name}
-                  </>
-                ) : (
+                ) : isUpgrade ? (
                   <>
                     <ArrowUp className="w-4 h-4" />
                     Upgrade to {info.name}
                   </>
+                ) : (
+                  info.name
                 )}
               </button>
             </div>
@@ -281,125 +228,8 @@ export function PricingPlans() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground mt-8">
-        All plans include full access to every feature. Only the number of horses differs.
+        All plans include every feature. 14-day free trial, no credit card required.
       </p>
-
-      {/* Downgrade Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Confirm Plan Change
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Are you sure you want to downgrade to the{' '}
-              <span className="font-semibold">{TIER_INFO[showConfirmModal.tier].name}</span> plan?
-            </p>
-
-            {showConfirmModal.tier === 'FREE' && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-amber-800">
-                  <strong>Note:</strong> The Free plan only supports up to 3 horses.
-                  If you have more than 3 horses, you will need to archive some before downgrading.
-                </p>
-              </div>
-            )}
-
-            {showConfirmModal.tier === 'BASIC' && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-amber-800">
-                  <strong>Note:</strong> The Basic plan supports up to 15 horses.
-                  If you have more horses, you will need to archive some before downgrading.
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirmModal(null)}
-                disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDowngrade(showConfirmModal.tier)}
-                disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loadingTier === showConfirmModal.tier ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  'Confirm Downgrade'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upgrade Confirmation Modal */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Upgrade to {TIER_INFO[showUpgradeModal].name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {formatPrice(TIER_PRICING[showUpgradeModal])}/month
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-background rounded-lg p-4 mb-4">
-              <h4 className="font-medium text-foreground mb-2">What you'll get:</h4>
-              <ul className="space-y-2">
-                {TIER_LIMITS[showUpgradeModal].features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowUpgradeModal(null)}
-                disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleUpgrade(showUpgradeModal)}
-                disabled={loadingTier !== null}
-                className="flex-1 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-medium hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loadingTier === showUpgradeModal ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4" />
-                    Continue to Payment
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -446,6 +276,7 @@ export function CurrentPlanCard() {
 
   const info = TIER_INFO[tier];
   const limits = TIER_LIMITS[tier];
+  const price = TIER_PRICING[tier];
 
   return (
     <div className="bg-card rounded-2xl border border-border p-6">
@@ -475,11 +306,9 @@ export function CurrentPlanCard() {
 
         <div className="text-right">
           <span className="text-2xl font-bold text-foreground">
-            {formatPrice(TIER_PRICING[tier])}
+            {formatPrice(price)}
           </span>
-          {TIER_PRICING[tier] > 0 && (
-            <span className="text-muted-foreground">/month</span>
-          )}
+          <span className="text-muted-foreground">/month</span>
         </div>
       </div>
 
@@ -510,22 +339,20 @@ export function CurrentPlanCard() {
         </div>
       </div>
 
-      {tier !== 'FREE' && (
-        <button
-          onClick={handleManageBilling}
-          disabled={isOpening}
-          className="mt-4 w-full py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {isOpening ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Opening...
-            </>
-          ) : (
-            'Manage Billing'
-          )}
-        </button>
-      )}
+      <button
+        onClick={handleManageBilling}
+        disabled={isOpening}
+        className="mt-4 w-full py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+      >
+        {isOpening ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Opening...
+          </>
+        ) : (
+          'Manage Billing'
+        )}
+      </button>
     </div>
   );
 }

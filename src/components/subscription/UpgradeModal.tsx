@@ -1,15 +1,14 @@
 // src/components/subscription/UpgradeModal.tsx
-// Modal for upgrading subscription tier
+// Modal for upgrading from Core to Pro
 
 'use client'
 
 import React, { useState } from 'react'
-import { X, Check, Sparkles, Crown, Zap } from 'lucide-react'
+import { X, Check, Sparkles, Crown } from 'lucide-react'
 import { useSubscription } from '@/contexts/SubscriptionContext'
-import { 
-  SubscriptionTier, 
-  TierFeatures, 
-  FEATURE_LABELS,
+import {
+  type TierFeatures,
+  getNextTier,
   getTierPricing,
   getTierLimits,
   formatBytes,
@@ -26,31 +25,32 @@ interface UpgradeModalProps {
 export function UpgradeModal({
   open,
   onClose,
-  highlightedFeature,
   highlightedLimit,
 }: UpgradeModalProps) {
   const { tier: currentTier } = useSubscription()
-  const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null)
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState(false)
 
   if (!open) return null
 
-  const tierOrder: SubscriptionTier[] = ['FREE', 'BASIC', 'ADVANCED']
-  const currentIndex = tierOrder.indexOf(currentTier)
-  const availableTiers = tierOrder.slice(currentIndex + 1)
+  const nextTier = getNextTier(currentTier)
+  if (!nextTier) return null // Already on highest tier
+
+  const pricing = getTierPricing(nextTier)
+  const limits = getTierLimits(nextTier)
+  const currentLimits = getTierLimits(currentTier)
+  const price = billingCycle === 'annual'
+    ? pricing.annualPriceCents / 12
+    : pricing.monthlyPriceCents
 
   const handleUpgrade = async () => {
-    if (!selectedTier) return
-    
     setLoading(true)
     try {
-      // Redirect to Stripe checkout
       const response = await fetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tier: selectedTier,
+          tier: nextTier,
           billingCycle,
         }),
       })
@@ -69,25 +69,25 @@ export function UpgradeModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50" 
+      <div
+        className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-card rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+      <div className="relative bg-card rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-auto">
         {/* Header */}
         <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              Upgrade Your Plan
+              <Crown className="w-5 h-5 text-amber-500" />
+              Upgrade to {pricing.displayName}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Unlock more features and increase your limits
+              Remove all limits and grow your operation
             </p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-muted rounded-full"
           >
@@ -102,8 +102,8 @@ export function UpgradeModal({
               onClick={() => setBillingCycle('monthly')}
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors',
-                billingCycle === 'monthly' 
-                  ? 'bg-card shadow text-foreground' 
+                billingCycle === 'monthly'
+                  ? 'bg-card shadow text-foreground'
                   : 'text-muted-foreground'
               )}
             >
@@ -113,8 +113,8 @@ export function UpgradeModal({
               onClick={() => setBillingCycle('annual')}
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors',
-                billingCycle === 'annual' 
-                  ? 'bg-card shadow text-foreground' 
+                billingCycle === 'annual'
+                  ? 'bg-card shadow text-foreground'
                   : 'text-muted-foreground'
               )}
             >
@@ -124,103 +124,67 @@ export function UpgradeModal({
           </div>
         </div>
 
-        {/* Tier cards */}
-        <div className="px-6 pb-6 grid gap-4 md:grid-cols-3">
-          {availableTiers.map((tierName) => {
-            const pricing = getTierPricing(tierName)
-            const limits = getTierLimits(tierName)
-            const isSelected = selectedTier === tierName
-            const price = billingCycle === 'annual' 
-              ? pricing.annualPriceCents / 12 
-              : pricing.monthlyPriceCents
+        {/* Pro card */}
+        <div className="px-6 pb-6">
+          <div className="border-2 border-primary rounded-xl p-5 bg-primary/5">
+            <div className="flex items-center gap-2 mb-2">
+              <Crown className="w-5 h-5 text-amber-500" />
+              <h3 className="font-semibold">{pricing.displayName}</h3>
+            </div>
 
-            return (
-              <div
-                key={tierName}
-                onClick={() => setSelectedTier(tierName)}
-                className={cn(
-                  'relative border-2 rounded-xl p-5 cursor-pointer transition-all',
-                  isSelected 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted hover:border-muted-foreground/50',
-                  pricing.popular && 'ring-2 ring-primary ring-offset-2'
-                )}
-              >
-                {pricing.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                    Most Popular
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 mb-2">
-                  {tierName === 'ADVANCED' && <Crown className="w-5 h-5 text-green-500" />}
-                  {tierName === 'BASIC' && <Zap className="w-5 h-5 text-blue-500" />}
-                  <h3 className="font-semibold">{pricing.displayName}</h3>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-3xl font-bold">${Math.round(price / 100)}</span>
-                  <span className="text-muted-foreground">/month</span>
-                  {billingCycle === 'annual' && (
-                    <p className="text-xs text-green-600">
-                      Billed ${pricing.annualPriceCents / 100}/year
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-sm text-muted-foreground mb-4">
-                  {pricing.description}
+            <div className="mb-4">
+              <span className="text-3xl font-bold">${Math.round(price / 100)}</span>
+              <span className="text-muted-foreground">/month</span>
+              {billingCycle === 'annual' && (
+                <p className="text-xs text-green-600">
+                  Billed ${pricing.annualPriceCents / 100}/year
                 </p>
+              )}
+            </div>
 
-                {/* Limits */}
-                <div className="space-y-2 mb-4 text-sm">
-                  <div className={cn(
-                    'flex items-center gap-2',
-                    highlightedLimit === 'horses' && 'text-primary font-medium'
-                  )}>
-                    <Check className="w-4 h-4 text-green-500" />
-                    {limits.maxHorses === -1 ? 'Unlimited' : limits.maxHorses} horses
-                  </div>
-                  <div className={cn(
-                    'flex items-center gap-2',
-                    highlightedLimit === 'teamMembers' && 'text-primary font-medium'
-                  )}>
-                    <Check className="w-4 h-4 text-green-500" />
-                    {limits.maxTeamMembers === -1 ? 'Unlimited' : limits.maxTeamMembers} team members
-                  </div>
-                  <div className={cn(
-                    'flex items-center gap-2',
-                    highlightedLimit === 'storage' && 'text-primary font-medium'
-                  )}>
-                    <Check className="w-4 h-4 text-green-500" />
-                    {formatBytes(limits.maxStorageBytes)} storage
-                  </div>
-                </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {pricing.description}
+            </p>
 
-                {/* Key features */}
-                <div className="space-y-1 text-sm">
-                  {getKeyFeatures(tierName).map((feature) => (
-                    <div 
-                      key={feature}
-                      className={cn(
-                        'flex items-center gap-2',
-                        highlightedFeature === feature && 'text-primary font-medium'
-                      )}
-                    >
-                      <Check className="w-4 h-4 text-green-500" />
-                      {FEATURE_LABELS[feature]}
-                    </div>
-                  ))}
-                </div>
+            {/* What you get */}
+            <div className="space-y-2 text-sm">
+              <div className={cn(
+                'flex items-center gap-2',
+                highlightedLimit === 'horses' && 'text-primary font-medium'
+              )}>
+                <Check className="w-4 h-4 text-green-500" />
+                Unlimited horses (you have up to {currentLimits.maxHorses} now)
               </div>
-            )
-          })}
+              <div className={cn(
+                'flex items-center gap-2',
+                highlightedLimit === 'teamMembers' && 'text-primary font-medium'
+              )}>
+                <Check className="w-4 h-4 text-green-500" />
+                Unlimited team members
+              </div>
+              <div className={cn(
+                'flex items-center gap-2',
+                highlightedLimit === 'storage' && 'text-primary font-medium'
+              )}>
+                <Check className="w-4 h-4 text-green-500" />
+                {formatBytes(limits.maxStorageBytes)} storage
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                Unlimited photos per horse
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                Priority support
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="sticky bottom-0 bg-card border-t px-6 py-4 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            You can cancel or change your plan anytime.
+            Cancel or change your plan anytime.
           </p>
           <div className="flex gap-3">
             <button
@@ -231,7 +195,7 @@ export function UpgradeModal({
             </button>
             <button
               onClick={handleUpgrade}
-              disabled={!selectedTier || loading}
+              disabled={loading}
               className={cn(
                 'px-6 py-2 bg-primary text-primary-foreground rounded-lg',
                 'hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed',
@@ -246,7 +210,7 @@ export function UpgradeModal({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Upgrade to {selectedTier ? getTierPricing(selectedTier).displayName : 'Selected Plan'}
+                  Upgrade to {pricing.displayName}
                 </>
               )}
             </button>
@@ -255,17 +219,4 @@ export function UpgradeModal({
       </div>
     </div>
   )
-}
-
-// Helper to get key differentiating features for each tier
-// Note: All features are now available on all tiers - only horse limits differ
-function getKeyFeatures(tier: SubscriptionTier): (keyof TierFeatures)[] {
-  switch (tier) {
-    case 'BASIC':
-      return ['taskManagement', 'feedCalendar', 'basicReporting']
-    case 'ADVANCED':
-      return ['trainingScheduling', 'lessonManagement', 'invoicing']
-    default:
-      return []
-  }
 }

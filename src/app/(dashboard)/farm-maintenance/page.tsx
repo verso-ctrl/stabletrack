@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
-import { useTasks } from '@/hooks/useData';
+import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
 import {
   Plus,
   CheckCircle2,
   Circle,
+  Calendar,
+  Clock,
   User,
   Loader2,
   Wrench,
@@ -59,23 +61,37 @@ const SUGGESTED_TASKS = [
 export default function FarmMaintenancePage() {
   const { currentBarn } = useBarn();
   const [statusFilter, setStatusFilter] = useState<string>('PENDING');
+  const [taskType, setTaskType] = useState<'ALL' | 'FARM' | 'HORSE'>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
-    priority: 'MEDIUM',
+    priority: '',
+    horseId: '',
+    dueDate: '',
+    dueTime: '',
     isRecurring: false,
     recurringRule: null as RecurringRule | null,
   });
 
-  const { tasks: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useTasks({ status: 'PENDING', farmOnly: true });
-  const { tasks: completedTasks, isLoading: completedLoading, refetch: refetchCompleted } = useTasks({ status: 'COMPLETED', farmOnly: true });
+  const { horses } = useHorses();
+  const { tasks: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useTasks({ status: 'PENDING' });
+  const { tasks: completedTasks, isLoading: completedLoading, refetch: refetchCompleted } = useTasks({ status: 'COMPLETED' });
 
   const isLoading = pendingLoading || completedLoading;
   const refetch = () => { refetchPending(); refetchCompleted(); };
 
-  const displayTasks = statusFilter === 'COMPLETED' ? completedTasks : pendingTasks;
+  // Apply task type filter
+  const filterByType = (tasks: typeof pendingTasks) => {
+    if (taskType === 'FARM') return tasks.filter(t => !t.horseId);
+    if (taskType === 'HORSE') return tasks.filter(t => !!t.horseId);
+    return tasks;
+  };
+
+  const filteredPending = filterByType(pendingTasks);
+  const filteredCompleted = filterByType(completedTasks);
+  const displayTasks = statusFilter === 'COMPLETED' ? filteredCompleted : filteredPending;
 
   const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
@@ -111,10 +127,10 @@ export default function FarmMaintenancePage() {
         body: JSON.stringify({
           title: newTask.title,
           description: newTask.description || null,
-          dueDate: null,
-          dueTime: null,
-          priority: newTask.priority,
-          horseId: null, // Farm tasks have no horse
+          dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null,
+          dueTime: newTask.dueTime || null,
+          priority: newTask.priority || null,
+          horseId: newTask.horseId || null,
           isRecurring: newTask.isRecurring,
           recurringRule: newTask.isRecurring && newTask.recurringRule
             ? JSON.stringify(newTask.recurringRule)
@@ -123,9 +139,9 @@ export default function FarmMaintenancePage() {
       });
       if (!response.ok) throw new Error('Failed to create task');
       setShowAddModal(false);
-      setNewTask({ title: '', description: '', priority: 'MEDIUM', isRecurring: false, recurringRule: null });
+      setNewTask({ title: '', description: '', priority: '', horseId: '', dueDate: '', dueTime: '', isRecurring: false, recurringRule: null });
       refetch();
-      toast.success('Farm task created', newTask.isRecurring ? 'Recurring task set up' : 'Task added');
+      toast.success('Task created', newTask.isRecurring ? 'Recurring task set up' : 'Task added');
     } catch {
       toast.error('Failed to create task', 'Please try again');
     } finally {
@@ -147,14 +163,14 @@ export default function FarmMaintenancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Farm Tasks</h1>
-          <p className="text-muted-foreground mt-1">Ongoing property upkeep and barn chores</p>
+          <p className="text-muted-foreground mt-1">Manage farm chores and horse tasks</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
           className="btn-primary flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Add Farm Task
+          Add Task
         </button>
       </div>
 
@@ -166,7 +182,7 @@ export default function FarmMaintenancePage() {
               <Wrench className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{pendingTasks.length}</p>
+              <p className="text-2xl font-bold text-foreground">{filteredPending.length}</p>
               <p className="text-sm text-muted-foreground">Pending</p>
             </div>
           </div>
@@ -177,7 +193,7 @@ export default function FarmMaintenancePage() {
               <CheckCircle2 className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{completedTasks.length}</p>
+              <p className="text-2xl font-bold text-foreground">{filteredCompleted.length}</p>
               <p className="text-sm text-muted-foreground">Completed</p>
             </div>
           </div>
@@ -189,7 +205,7 @@ export default function FarmMaintenancePage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">
-                {pendingTasks.filter(t => t.isRecurring).length}
+                {filteredPending.filter(t => t.isRecurring).length}
               </p>
               <p className="text-sm text-muted-foreground">Recurring</p>
             </div>
@@ -198,18 +214,33 @@ export default function FarmMaintenancePage() {
       </div>
 
       {/* Filters */}
-      <div className="flex rounded-xl bg-muted p-1 w-fit">
-        {['PENDING', 'COMPLETED'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              statusFilter === status ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
-            }`}
-          >
-            {status.charAt(0) + status.slice(1).toLowerCase()}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-3">
+        <div className="flex rounded-xl bg-muted p-1">
+          {['PENDING', 'COMPLETED'].map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                statusFilter === status ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {status.charAt(0) + status.slice(1).toLowerCase()}
+            </button>
+          ))}
+        </div>
+        <div className="flex rounded-xl bg-muted p-1">
+          {([['ALL', 'All'], ['FARM', 'Farm Only'], ['HORSE', 'Horse Tasks']] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setTaskType(key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                taskType === key ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Task List */}
@@ -253,18 +284,35 @@ export default function FarmMaintenancePage() {
                       {task.priority}
                     </span>
                   )}
+                  {task.horse && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">
+                      {task.horse.barnName}
+                    </span>
+                  )}
                 </div>
                 {task.description && (
                   <p className="text-sm text-muted-foreground mt-1 truncate">{task.description}</p>
                 )}
-                {task.assignee && (
-                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+                  {task.dueDate && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(task.dueDate).toLocaleDateString()}
+                    </span>
+                  )}
+                  {task.dueTime && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {task.dueTime}
+                    </span>
+                  )}
+                  {task.assignee && (
                     <span className="flex items-center gap-1">
                       <User className="w-3.5 h-3.5" />
                       {task.assignee.firstName} {task.assignee.lastName}
                     </span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -273,10 +321,10 @@ export default function FarmMaintenancePage() {
         <div className="card p-12 text-center">
           <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-lg font-medium text-foreground mb-1">
-            {statusFilter === 'COMPLETED' ? 'No completed farm tasks' : 'No pending farm tasks'}
+            {statusFilter === 'COMPLETED' ? 'No completed tasks' : 'No pending tasks'}
           </p>
           <p className="text-muted-foreground text-sm mb-6">
-            Farm tasks cover property maintenance like fences, troughs, and barn upkeep.
+            Create tasks for farm maintenance, horse care, or any barn chore.
           </p>
           {statusFilter === 'PENDING' && (
             <button
@@ -298,7 +346,7 @@ export default function FarmMaintenancePage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Wrench className="w-5 h-5 text-amber-500" />
-                  Add Farm Task
+                  Add Task
                 </h3>
                 <button onClick={() => setShowAddModal(false)} className="p-1 rounded hover:bg-accent">
                   <X className="w-5 h-5" />
@@ -345,12 +393,48 @@ export default function FarmMaintenancePage() {
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Assign to Horse</label>
+                <select
+                  className="input w-full"
+                  value={newTask.horseId}
+                  onChange={(e) => setNewTask({ ...newTask, horseId: e.target.value })}
+                >
+                  <option value="">Barn task (no horse)</option>
+                  {horses.map((h) => (
+                    <option key={h.id} value={h.id}>{h.barnName}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Due Date</label>
+                  <input
+                    type="date"
+                    className="input w-full"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Due Time</label>
+                  <input
+                    type="time"
+                    className="input w-full"
+                    value={newTask.dueTime}
+                    onChange={(e) => setNewTask({ ...newTask, dueTime: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Priority</label>
                 <select
                   className="input w-full"
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                 >
+                  <option value="">No Priority</option>
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
                   <option value="HIGH">High</option>

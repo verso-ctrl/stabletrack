@@ -112,13 +112,13 @@ export async function POST(req: NextRequest) {
           await prisma.barn.update({
             where: { id: barn.id },
             data: {
-              tier: 'FREE',
+              tier: 'CORE',
               subscriptionStatus: 'CANCELED',
               stripeSubscriptionId: null,
             },
           })
 
-          console.log(`Barn ${barn.id} subscription canceled, downgraded to FREE`)
+          console.log(`Barn ${barn.id} subscription canceled`)
         }
         break
       }

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { getTierDisplayName } from '@/lib/tiers';
 import {
   LayoutDashboard,
   Calendar,
@@ -249,7 +250,7 @@ export function Sidebar() {
         ) : tier && (
           <div className="mt-3 px-2">
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary">
-              {tier} Plan
+              {getTierDisplayName(tier)} Plan
             </span>
           </div>
         )}
@@ -324,6 +325,7 @@ export function Sidebar() {
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 rounded-lg text-muted-foreground hover:bg-muted"
+                aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
               </button>

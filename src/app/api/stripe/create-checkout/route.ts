@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { tier, barnData } = body
 
-    if (!tier || tier === 'FREE') {
+    if (!tier) {
       return NextResponse.json(
-        { error: 'Stripe checkout not needed for FREE tier' },
+        { error: 'Tier is required' },
         { status: 400 }
       )
     }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `StableTrack ${pricing.displayName} Plan`,
+              name: 'StableTrack Core Plan',
               description: pricing.description,
             },
             unit_amount: pricing.monthlyPriceCents,

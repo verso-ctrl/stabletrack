@@ -45,7 +45,7 @@ model Subscription {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  tier      String   @default("BASIC") // FREE, BASIC, ADVANCED
+  tier      String   @default("CORE")
   status    String   @default("ACTIVE")
 
   maxHorses Int      @default(15)
@@ -75,7 +75,7 @@ model Barn {
   logoUrl     String?
 
   // Subscription (per-barn, not per-user)
-  tier                 String   @default("FREE") // FREE, BASIC, ADVANCED
+  tier                 String   @default("CORE")
   subscriptionStatus   String   @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
   stripeCustomerId     String?  // Stripe customer ID
   stripeSubscriptionId String?  // Stripe subscription ID
@@ -181,6 +181,8 @@ model Horse {
   status          String    @default("ACTIVE")
   isPrivate       Boolean   @default(false)
   ownerName       String?
+  ownerEmail      String?
+  ownerPhone      String?
   profilePhotoUrl String?
   bio             String?
   stall           String?

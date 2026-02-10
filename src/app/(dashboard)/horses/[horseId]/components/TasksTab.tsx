@@ -40,7 +40,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
     description: '',
     dueDate: '',
     dueTime: '',
-    priority: 'MEDIUM',
+    priority: '',
   });
 
   const pendingTasks = tasks.filter(t => t.status !== 'COMPLETED');
@@ -76,13 +76,13 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
           description: newTask.description || null,
           dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null,
           dueTime: newTask.dueTime || null,
-          priority: newTask.priority,
+          priority: newTask.priority || null,
           horseId: horse.id,
         }),
       });
       if (!response.ok) throw new Error('Failed to create task');
       setShowAddForm(false);
-      setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM' });
+      setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: '' });
       refetch();
       toast.success('Task created', `Task added for ${horse.barnName}`);
     } catch {
@@ -153,6 +153,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
                 value={newTask.priority}
                 onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
               >
+                <option value="">No Priority</option>
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="HIGH">High</option>
@@ -163,7 +164,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
               <button
                 onClick={() => {
                   setShowAddForm(false);
-                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM' });
+                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: '' });
                 }}
                 className="btn-secondary btn-sm"
                 disabled={isCreating}

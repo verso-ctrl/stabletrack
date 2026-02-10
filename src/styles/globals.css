@@ -326,6 +326,13 @@
   }
 }
 
+/* Global focus-visible indicator for interactive elements without custom focus styles */
+:where(a, button, [role="tab"], [role="button"]):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @layer components {
   /* Stat cards with mobile-first design */
   .stat-card {
@@ -419,6 +426,10 @@
   display: none;
 }
 
+.printable-medical-report-wrapper {
+  display: none;
+}
+
 /* Print styles */
 @media print {
   /* Hide everything on the page */
@@ -451,6 +462,24 @@
   }
 
   .printable-horse-sheet-wrapper {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    background: white;
+    overflow: visible;
+  }
+
+  /* Show the printable medical report and all its children */
+  .printable-medical-report-wrapper,
+  .printable-medical-report-wrapper * {
+    visibility: visible;
+  }
+
+  .printable-medical-report-wrapper {
     display: block !important;
     position: fixed;
     top: 0;

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const tier = barn.tier as SubscriptionTier
-    const limits = TIER_LIMITS[tier] || TIER_LIMITS.FREE
+    const limits = TIER_LIMITS[tier] || TIER_LIMITS.CORE
 
     return NextResponse.json({
       tier,
@@ -91,9 +91,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json()
     const { tier } = body
 
-    if (!tier || !['FREE', 'BASIC', 'ADVANCED'].includes(tier)) {
+    const validTiers: SubscriptionTier[] = ['CORE', 'PRO']
+    if (!tier || !validTiers.includes(tier)) {
       return NextResponse.json(
-        { error: 'Invalid tier' },
+        { error: 'Invalid tier. Must be CORE or PRO.' },
         { status: 400 }
       )
     }
@@ -129,10 +130,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: { id: barnId },
       data: {
         tier,
-        // If downgrading to FREE, clear Stripe subscription
-        ...(tier === 'FREE' && {
-          stripeSubscriptionId: null,
-        }),
       },
       select: {
         tier: true,

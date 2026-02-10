@@ -21,7 +21,10 @@ import { useHorsePhotoUpload, useFileList } from '@/hooks/useStorage'
 import { FileUpload } from './FileUpload'
 import { UpgradePrompt } from './UpgradePrompt'
 import { deleteFile, STORAGE_BUCKETS } from '@/lib/storage'
+import { getTierLimits, getTierDisplayName, getNextTier, type SubscriptionTier } from '@/lib/tiers'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { toast } from '@/lib/toast'
 
 interface HorsePhotoGalleryProps {
   barnId: string
@@ -44,15 +47,18 @@ export function HorsePhotoGallery({
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [showUpload, setShowUpload] = useState(false)
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
+  const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null)
+  const [isSettingPrimary, setIsSettingPrimary] = useState(false)
 
-  // Demo mode: BASIC tier always enabled
-  const tier = 'BASIC' as const
+  // Demo mode: CORE tier (use actual tier limits)
+  const tier: SubscriptionTier = 'CORE'
+  const tierLimits = getTierLimits(tier)
   const canUploadPhotos = true
   const canBulkUpload = true
   const canDownloadOriginals = true
-  const maxPhotosPerHorse = 50
-  const tierDisplayName = 'Basic'
-  const nextTier = 'ADVANCED' as const
+  const maxPhotosPerHorse = tierLimits.maxPhotosPerHorse
+  const tierDisplayName = getTierDisplayName(tier)
+  const nextTier = getNextTier(tier)
 
   // File list hook
   const { files, loading, refresh, remove } = useFileList({
@@ -75,6 +81,7 @@ export function HorsePhotoGallery({
     onSuccess: () => {
       refresh()
       setShowUpload(false)
+      toast.success('Photo uploaded', 'Your photo has been added to the gallery')
     },
   })
 
@@ -112,13 +119,55 @@ export function HorsePhotoGallery({
     }
   }
 
-  const handleSetPrimary = async (url: string, path: string) => {
-    onPrimaryPhotoChange?.(url)
+  const handleSetPrimary = async (url: string) => {
+    setIsSettingPrimary(true)
+    try {
+      const res = await fetch(`/api/barns/${barnId}/horses/${horseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profilePhotoUrl: url }),
+      })
+      if (!res.ok) throw new Error('Failed to set primary photo')
+      onPrimaryPhotoChange?.(url)
+      toast.success('Primary photo updated', 'This photo is now the profile photo')
+    } catch {
+      toast.error('Error', 'Failed to set primary photo')
+    } finally {
+      setIsSettingPrimary(false)
+    }
   }
 
-  const handleDelete = async (path: string) => {
-    if (confirm('Delete this photo?')) {
-      await remove(path)
+  const handleDeleteClick = (photoId: string) => {
+    setDeletePhotoId(photoId)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deletePhotoId) return
+    const id = deletePhotoId
+    setDeletePhotoId(null)
+
+    // If deleting the primary photo, clear it from the horse profile
+    if (id === '__primary__') {
+      try {
+        const res = await fetch(`/api/barns/${barnId}/horses/${horseId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profilePhotoUrl: null }),
+        })
+        if (!res.ok) throw new Error('Failed')
+        onPrimaryPhotoChange?.(null)
+        toast.success('Photo removed', 'Primary photo has been cleared')
+      } catch {
+        toast.error('Error', 'Failed to remove primary photo')
+      }
+      return
+    }
+
+    const success = await remove(id)
+    if (success) {
+      toast.success('Photo deleted', 'The photo has been removed')
+    } else {
+      toast.error('Error', 'Failed to delete photo')
     }
   }
 
@@ -140,8 +189,8 @@ export function HorsePhotoGallery({
     setLightboxOpen(true)
   }
 
-  const allPhotos = primaryPhotoUrl 
-    ? [{ url: primaryPhotoUrl, path: 'primary', name: 'primary.jpg', isPrimary: true }, ...files.map(f => ({ ...f, isPrimary: false }))]
+  const allPhotos = primaryPhotoUrl
+    ? [{ id: '__primary__', url: primaryPhotoUrl, path: 'primary', name: 'primary.jpg', isPrimary: true }, ...files.map(f => ({ ...f, isPrimary: false }))]
     : files.map(f => ({ ...f, isPrimary: false }))
 
   return (
@@ -192,7 +241,7 @@ export function HorsePhotoGallery({
             </p>
             <p className="text-xs text-amber-600 mt-0.5">
               {tierDisplayName} plan allows {limits.maxPhotosPerHorse} photos per horse.
-              {nextTier && ` Upgrade to Enterprise for more.`}
+              {nextTier && ` Upgrade to ${getTierDisplayName(nextTier)} for more.`}
             </p>
           </div>
         </div>
@@ -260,7 +309,7 @@ export function HorsePhotoGallery({
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
           {allPhotos.map((photo, index) => (
             <div
-              key={photo.path}
+              key={photo.id || photo.path}
               className={cn(
                 'relative aspect-square rounded-lg overflow-hidden group cursor-pointer',
                 photo.isPrimary && 'ring-2 ring-primary'
@@ -272,7 +321,7 @@ export function HorsePhotoGallery({
                 alt={`Photo ${index + 1}`}
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Primary badge */}
               {photo.isPrimary && (
                 <div className="absolute top-1 left-1 bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-xs font-medium">
@@ -287,10 +336,15 @@ export function HorsePhotoGallery({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleSetPrimary(photo.url, photo.path)
+                        handleSetPrimary(photo.url)
                       }}
-                      className="p-2 bg-card/20 rounded-full hover:bg-card/30"
+                      className={cn(
+                        "p-2 bg-card/20 rounded-full hover:bg-card/30",
+                        isSettingPrimary && "opacity-50 pointer-events-none"
+                      )}
                       title="Set as primary"
+                      aria-label="Set as primary photo"
+                      disabled={isSettingPrimary}
                     >
                       <Star className="w-4 h-4 text-white" />
                     </button>
@@ -303,6 +357,7 @@ export function HorsePhotoGallery({
                       }}
                       className="p-2 bg-card/20 rounded-full hover:bg-card/30"
                       title="Download original"
+                      aria-label="Download original photo"
                     >
                       <Download className="w-4 h-4 text-white" />
                     </button>
@@ -310,10 +365,11 @@ export function HorsePhotoGallery({
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleDelete(photo.path)
+                      handleDeleteClick(photo.id)
                     }}
                     className="p-2 bg-card/20 rounded-full hover:bg-red-500/50"
                     title="Delete"
+                    aria-label="Delete photo"
                   >
                     <Trash2 className="w-4 h-4 text-white" />
                   </button>
@@ -323,6 +379,16 @@ export function HorsePhotoGallery({
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deletePhotoId}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletePhotoId(null)}
+        title="Delete photo?"
+        description="This photo will be permanently removed. This action cannot be undone."
+        variant="danger"
+        confirmLabel="Delete"
+      />
 
       {/* Lightbox */}
       {lightboxOpen && (
@@ -389,6 +455,7 @@ function PhotoLightbox({
               onClick={() => onDownload(currentPhoto.url, currentPhoto.name || `photo-${currentIndex + 1}.jpg`)}
               className="p-2 text-white/80 hover:text-white hover:bg-card/10 rounded"
               title="Download original"
+              aria-label="Download original photo"
             >
               <Download className="w-6 h-6" />
             </button>
@@ -396,6 +463,7 @@ function PhotoLightbox({
           <button
             onClick={onClose}
             className="p-2 text-white/80 hover:text-white hover:bg-card/10 rounded"
+            aria-label="Close lightbox"
           >
             <X className="w-6 h-6" />
           </button>
@@ -407,6 +475,7 @@ function PhotoLightbox({
         <button
           onClick={() => onNavigate(currentIndex - 1)}
           className="absolute left-4 p-2 text-white/80 hover:text-white"
+          aria-label="Previous photo"
         >
           <ChevronLeft className="w-10 h-10" />
         </button>
@@ -415,6 +484,7 @@ function PhotoLightbox({
         <button
           onClick={() => onNavigate(currentIndex + 1)}
           className="absolute right-4 p-2 text-white/80 hover:text-white"
+          aria-label="Next photo"
         >
           <ChevronRight className="w-10 h-10" />
         </button>

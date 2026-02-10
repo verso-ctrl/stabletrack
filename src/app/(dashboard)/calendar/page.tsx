@@ -6,6 +6,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { useEvents, useHorses } from '@/hooks/useData';
 import { PrintableCalendar } from '@/components/events/PrintableCalendar';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,6 +29,8 @@ import {
   Trophy,
   GraduationCap,
   Printer,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import {
   format,
@@ -104,6 +107,17 @@ export default function CalendarPage() {
   const [preselectedHorseId, setPreselectedHorseId] = useState<string | null>(null);
   const [showPrintView, setShowPrintView] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  const [editForm, setEditForm] = useState({
+    type: 'VET_APPOINTMENT',
+    title: '',
+    description: '',
+    scheduledDate: '',
+    scheduledTime: '09:00',
+    providerName: '',
+  });
 
   // Initialize date on client side only
   useEffect(() => {
@@ -131,11 +145,20 @@ export default function CalendarPage() {
   });
   const { horses } = useHorses();
 
-  // Handle URL params for pre-selecting horse and auto-opening modal
+  // Handle URL params for pre-selecting horse, date, and auto-opening modal
   useEffect(() => {
     if (!searchParams) return;
     const horseId = searchParams.get('horseId');
     const addEvent = searchParams.get('addEvent');
+    const dateParam = searchParams.get('date');
+
+    if (dateParam) {
+      try {
+        const d = new Date(dateParam + 'T12:00:00');
+        setCurrentMonth(startOfMonth(d));
+        setSelectedDate(d);
+      } catch { /* ignore invalid dates */ }
+    }
 
     if (horseId) {
       setPreselectedHorseId(horseId);
@@ -324,7 +347,7 @@ export default function CalendarPage() {
     setEventForm(prev => ({
       ...prev,
       type,
-      title: prev.title || typeNames[type] || '',
+      title: typeNames[type] || prev.title || '',
     }));
   };
 
@@ -404,6 +427,68 @@ export default function CalendarPage() {
     }
   };
 
+  // Open event for editing
+  const openEditEvent = (event: any) => {
+    const eventDate = new Date(event.scheduledDate);
+    setEditForm({
+      type: event.type || 'OTHER',
+      title: event.title || '',
+      description: event.description || event.notes || '',
+      scheduledDate: format(eventDate, 'yyyy-MM-dd'),
+      scheduledTime: format(eventDate, 'HH:mm'),
+      providerName: event.providerName || '',
+    });
+    setEditingEvent(event);
+  };
+
+  // Save edited event
+  const handleEditSave = async () => {
+    if (!editingEvent || !currentBarn) return;
+    if (!editForm.title.trim()) {
+      toast.warning('Missing title', 'Please enter an event title');
+      return;
+    }
+    setIsEditSubmitting(true);
+    try {
+      const scheduledDateTime = `${editForm.scheduledDate}T${editForm.scheduledTime}:00`;
+      const res = await fetch(`/api/barns/${currentBarn.id}/events/${editingEvent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: editForm.type,
+          title: editForm.title,
+          description: editForm.description || null,
+          scheduledDate: new Date(scheduledDateTime).toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update event');
+      toast.success('Event Updated', `"${editForm.title}" has been updated.`);
+      setEditingEvent(null);
+      refetchEvents();
+    } catch (err) {
+      toast.error('Error', err instanceof Error ? err.message : 'Failed to update event');
+    } finally {
+      setIsEditSubmitting(false);
+    }
+  };
+
+  // Delete event
+  const handleDeleteEvent = async () => {
+    if (!deleteEventId || !currentBarn) return;
+    try {
+      const res = await fetch(`/api/barns/${currentBarn.id}/events/${deleteEventId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete event');
+      toast.success('Event Removed', 'The event has been removed.');
+      setDeleteEventId(null);
+      refetchEvents();
+    } catch (err) {
+      toast.error('Error', err instanceof Error ? err.message : 'Failed to delete event');
+    }
+  };
+
+  const deleteEventName = events.find((e: any) => e.id === deleteEventId)?.title;
 
   if (!currentBarn) {
     return (
@@ -505,12 +590,14 @@ export default function CalendarPage() {
                 <button
                   onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
                   className="p-2 rounded-lg hover:bg-accent active:bg-accent transition-all touch-target"
+                  aria-label="Previous month"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                   className="p-2 rounded-lg hover:bg-accent active:bg-accent transition-all touch-target"
+                  aria-label="Next month"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -584,6 +671,7 @@ export default function CalendarPage() {
                   onClick={() => openAddModal(selectedDate)}
                   className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-muted-foreground transition-all"
                   title="Add event on this date"
+                  aria-label="Add event on this date"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -598,12 +686,31 @@ export default function CalendarPage() {
                     return (
                       <div
                         key={event.id}
-                        className={`p-4 rounded-xl border ${colorClass}`}
+                        className={`group p-4 rounded-xl border ${colorClass} cursor-pointer hover:shadow-md transition-shadow`}
+                        onClick={() => openEditEvent(event)}
                       >
                         <div className="flex items-start gap-3">
                           <Icon className="w-5 h-5 mt-0.5" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium">{event.title}</p>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-medium">{event.title}</p>
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); openEditEvent(event); }}
+                                  className="p-1 rounded hover:bg-black/10 transition-colors"
+                                  aria-label={`Edit ${event.title}`}
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setDeleteEventId(event.id); }}
+                                  className="p-1 rounded hover:bg-black/10 text-red-600 transition-colors"
+                                  aria-label={`Delete ${event.title}`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
                             {event.horses && event.horses.length > 0 ? (
                               <p className="text-sm opacity-75">
                                 {event.horses.length === 1
@@ -811,6 +918,7 @@ export default function CalendarPage() {
                     }
                   }}
                   className="p-1 rounded hover:bg-accent"
+                  aria-label="Close"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -939,26 +1047,6 @@ export default function CalendarPage() {
                   />
                 </div>
               )}
-
-              {/* Assign To */}
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Assign To (optional)</label>
-                <select
-                  value={eventForm.assignedToId}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, assignedToId: e.target.value }))}
-                  className="input w-full"
-                >
-                  <option value="">Unassigned (visible to all)</option>
-                  {teamMembers.map((member: any) => (
-                    <option key={member.userId} value={member.userId}>
-                      {member.user.firstName} {member.user.lastName} ({member.role === 'OWNER' ? 'Owner' : member.role === 'MANAGER' ? 'Manager' : member.role === 'TRAINER' ? 'Trainer' : 'Staff'})
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Assign this event to a specific team member. If unassigned, everyone can see it.
-                </p>
-              </div>
 
               {/* Description */}
               <div>
@@ -1266,6 +1354,145 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+
+      {/* Edit Event Modal */}
+      {editingEvent && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
+          <div className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto sm:m-4">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Edit Event</h3>
+              <button
+                onClick={() => setEditingEvent(null)}
+                className="p-1 rounded hover:bg-accent"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Event Type */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Event Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {eventTypes.map((type) => {
+                    const TypeIcon = type.icon;
+                    const isSelected = editForm.type === type.id;
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => setEditForm(prev => ({ ...prev, type: type.id }))}
+                        className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 ${
+                          isSelected
+                            ? 'border-amber-500 bg-amber-50'
+                            : 'border-border hover:border-border'
+                        }`}
+                      >
+                        <TypeIcon className={`w-5 h-5 ${isSelected ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                        <span className={`text-xs font-medium ${isSelected ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                          {type.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Title *</label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="input w-full"
+                  placeholder="Event title"
+                />
+              </div>
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date *</label>
+                  <input
+                    type="date"
+                    value={editForm.scheduledDate}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                    className="input w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Time</label>
+                  <input
+                    type="time"
+                    value={editForm.scheduledTime}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                    className="input w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="input w-full"
+                  rows={3}
+                  placeholder="Additional notes..."
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-border flex gap-3">
+              <button
+                onClick={() => {
+                  setDeleteEventId(editingEvent.id);
+                  setEditingEvent(null);
+                }}
+                className="btn-secondary flex items-center gap-2 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+              <div className="flex-1" />
+              <button
+                onClick={() => setEditingEvent(null)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                disabled={isEditSubmitting}
+                className="btn-primary flex items-center gap-2"
+              >
+                {isEditSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Event Confirmation */}
+      <ConfirmDialog
+        open={!!deleteEventId}
+        onConfirm={handleDeleteEvent}
+        onCancel={() => setDeleteEventId(null)}
+        title="Remove Event"
+        description={`Are you sure you want to remove "${deleteEventName || 'this event'}"? This action cannot be undone.`}
+        confirmLabel="Remove"
+        variant="danger"
+      />
 
       {/* Printable Calendar (hidden on screen, visible only when printing) */}
       {showPrintView && currentMonth && (

@@ -12,24 +12,15 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
-  Check,
-  Sparkles,
+  Shield,
 } from 'lucide-react';
-import {
-  type SubscriptionTier,
-  TIER_PRICING,
-  TIER_LIMITS,
-  TIER_FEATURES,
-  formatPrice,
-  formatBytes,
-} from '@/lib/tiers';
 
 export default function CreateBarnPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
-  const [stripeUnavailable, setStripeUnavailable] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -38,13 +29,32 @@ export default function CreateBarnPage() {
     zipCode: '',
     phone: '',
     email: '',
-    tier: '' as SubscriptionTier | '',
   });
+
+  const validateStep = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (step === 1) {
+      if (!formData.name.trim()) {
+        errors.name = 'Barn name is required';
+      }
+    } else if (step === 2) {
+      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+      }
+      if (formData.phone && !/^[\d\s\-().+]+$/.test(formData.phone)) {
+        errors.phone = 'Please enter a valid phone number';
+      }
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (step < 3) {
+    if (!validateStep()) return;
+
+    if (step < 2) {
       setStep(step + 1);
       return;
     }
@@ -53,64 +63,20 @@ export default function CreateBarnPage() {
     setError('');
 
     try {
-      // If FREE tier, create barn directly
-      if (formData.tier === 'FREE') {
-        const response = await fetch('/api/barns', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
+      const response = await fetch('/api/barns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, tier: 'CORE' }),
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (!response.ok) {
-          throw new Error(result.error || 'Failed to create barn');
-        }
-
-        // Success - redirect to dashboard
-        router.push('/dashboard');
-      } else {
-        // For paid tiers, redirect to Stripe checkout
-        const response = await fetch('/api/stripe/create-checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tier: formData.tier,
-            barnData: {
-              name: formData.name,
-              address: formData.address,
-              city: formData.city,
-              state: formData.state,
-              zipCode: formData.zipCode,
-              phone: formData.phone,
-              email: formData.email,
-            },
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          // If Stripe is not configured, show helpful error
-          if (result.demoMode || response.status === 503) {
-            setStripeUnavailable(true);
-            setError(
-              'Stripe is not configured. Please select the FREE tier to continue, or configure Stripe payment processing.'
-            );
-            setIsCreating(false);
-            return;
-          }
-          const errorMsg = result.details || result.error || 'Failed to create checkout session';
-          throw new Error(errorMsg);
-        }
-
-        // Redirect to Stripe checkout
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error('No checkout URL received');
-        }
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create barn');
       }
+
+      // Success - redirect to dashboard
+      router.push('/dashboard');
     } catch (err) {
       console.error('Error creating barn:', err);
       setError(err instanceof Error ? err.message : 'Failed to create barn. Please try again.');
@@ -122,8 +88,8 @@ export default function CreateBarnPage() {
     <div className="min-h-screen bg-muted py-12 px-4">
       <div className="max-w-xl mx-auto">
         {/* Back Link */}
-        <Link 
-          href="/onboarding" 
+        <Link
+          href="/onboarding"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -143,7 +109,7 @@ export default function CreateBarnPage() {
 
         {/* Progress */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className="flex items-center">
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center font-medium
@@ -154,7 +120,7 @@ export default function CreateBarnPage() {
               `}>
                 {step > s ? <CheckCircle className="w-5 h-5" /> : s}
               </div>
-              {s < 3 && (
+              {s < 2 && (
                 <div className={`w-16 h-1 mx-2 rounded ${step > s ? 'bg-amber-500' : 'bg-muted'}`} />
               )}
             </div>
@@ -186,13 +152,20 @@ export default function CreateBarnPage() {
                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
-                      required
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${fieldErrors.name ? 'border-destructive' : 'border-border'}`}
                       placeholder="e.g., Sunny Meadow Farm"
+                      aria-invalid={!!fieldErrors.name}
+                      aria-describedby={fieldErrors.name ? 'name-error' : undefined}
                     />
                   </div>
+                  {fieldErrors.name && (
+                    <p id="name-error" className="text-sm text-destructive mt-1" role="alert">{fieldErrors.name}</p>
+                  )}
                 </div>
 
                 <div>
@@ -249,9 +222,9 @@ export default function CreateBarnPage() {
                 </div>
               </div>
             </>
-          ) : step === 2 ? (
+          ) : (
             <>
-              <h2 className="font-semibold text-foreground mb-4">Contact Information</h2>
+              <h2 className="font-semibold text-foreground mb-4">Contact & Confirm</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-1">
@@ -262,11 +235,19 @@ export default function CreateBarnPage() {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: e.target.value });
+                        if (fieldErrors.phone) setFieldErrors(prev => ({ ...prev, phone: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${fieldErrors.phone ? 'border-destructive' : 'border-border'}`}
                       placeholder="(555) 123-4567"
+                      aria-invalid={!!fieldErrors.phone}
+                      aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
                     />
                   </div>
+                  {fieldErrors.phone && (
+                    <p id="phone-error" className="text-sm text-destructive mt-1" role="alert">{fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 <div>
@@ -278,10 +259,32 @@ export default function CreateBarnPage() {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${fieldErrors.email ? 'border-destructive' : 'border-border'}`}
                       placeholder="barn@example.com"
+                      aria-invalid={!!fieldErrors.email}
+                      aria-describedby={fieldErrors.email ? 'email-error' : undefined}
                     />
+                  </div>
+                  {fieldErrors.email && (
+                    <p id="email-error" className="text-sm text-destructive mt-1" role="alert">{fieldErrors.email}</p>
+                  )}
+                </div>
+
+                {/* Trial callout */}
+                <div className="p-4 rounded-xl bg-green-50 border border-green-200">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-green-900">Your 14-day free trial starts now</h3>
+                      <p className="text-sm text-green-700 mt-1">
+                        No credit card needed. Full access to all features, unlimited horses.
+                        After your trial, it&apos;s just $25/month.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -298,98 +301,12 @@ export default function CreateBarnPage() {
                         <dd className="text-foreground">{formData.city}, {formData.state}</dd>
                       </div>
                     )}
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Plan:</dt>
+                      <dd className="text-foreground">Core Plan &mdash; 14-day free trial</dd>
+                    </div>
                   </dl>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <h2 className="font-semibold text-foreground mb-4">Choose Your Plan</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Select the subscription tier that best fits your barn's needs
-              </p>
-              {error && error.includes('Stripe is not configured') && (
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-                  <p className="font-medium">Payment Processing Unavailable</p>
-                  <p className="mt-1">Stripe is not configured. Please select the FREE tier to continue without payment.</p>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                {(['FREE', 'BASIC', 'ADVANCED'] as SubscriptionTier[]).map((tier) => {
-                  const pricing = TIER_PRICING[tier];
-                  const limits = TIER_LIMITS[tier];
-                  const features = TIER_FEATURES[tier];
-                  const isSelected = formData.tier === tier;
-
-                  const keyFeatures = [
-                    `${limits.maxHorses === -1 ? 'Unlimited' : limits.maxHorses} horses`,
-                    `${limits.maxPhotosPerHorse === -1 ? 'Unlimited' : limits.maxPhotosPerHorse} photos per horse`,
-                    `${formatBytes(limits.maxStorageBytes)} storage`,
-                    features.canUploadDocuments && 'Document uploads',
-                    features.lessonManagement && 'Lesson management',
-                    features.invoicing && 'Invoicing',
-                    features.advancedAnalytics && 'Advanced analytics',
-                  ].filter(Boolean);
-
-                  return (
-                    <button
-                      key={tier}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, tier })}
-                      className={`
-                        w-full text-left p-4 rounded-xl border-2 transition-all relative
-                        ${isSelected
-                          ? 'border-amber-500 bg-amber-50'
-                          : 'border-border hover:border-border bg-card'
-                        }
-                      `}
-                    >
-                      {pricing.popular && (
-                        <div className="absolute -top-3 left-4 px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
-                          <Sparkles className="w-3 h-3" />
-                          Most Popular
-                        </div>
-                      )}
-
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-foreground">
-                              {pricing.displayName}
-                            </h3>
-                            {isSelected && (
-                              <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
-                                <Check className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {pricing.description}
-                          </p>
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {keyFeatures.slice(0, 3).map((feature, idx) => (
-                              <span
-                                key={idx}
-                                className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
-                              >
-                                {feature}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-foreground">
-                            {formatPrice(pricing.monthlyPriceCents)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {tier === 'FREE' ? 'Forever' : 'per month'}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             </>
           )}
@@ -406,11 +323,7 @@ export default function CreateBarnPage() {
             )}
             <button
               type="submit"
-              disabled={
-                isCreating ||
-                (step === 1 && !formData.name) ||
-                (step === 3 && !formData.tier)
-              }
+              disabled={isCreating}
               className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isCreating ? (
@@ -418,10 +331,10 @@ export default function CreateBarnPage() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Creating...
                 </>
-              ) : step < 3 ? (
+              ) : step < 2 ? (
                 'Continue'
               ) : (
-                'Create Barn'
+                'Start Free Trial'
               )}
             </button>
           </div>

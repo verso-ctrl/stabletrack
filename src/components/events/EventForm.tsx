@@ -64,6 +64,7 @@ export function EventForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<CreateEventInput>({
     horseId: event?.horseId || defaultHorseId || '',
@@ -128,16 +129,27 @@ export function EventForm({
     }
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!formData.title.trim()) {
+      errors.title = 'Event title is required';
+    }
+    if (!formData.scheduledDate || isNaN(formData.scheduledDate.getTime())) {
+      errors.scheduledDate = 'Please select a date';
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!currentBarn) {
       setError('No barn selected');
       return;
     }
 
-    if (!formData.title.trim() || !formData.type) {
-      setError('Title and type are required');
+    if (!validateForm()) {
       return;
     }
 
@@ -242,10 +254,14 @@ export function EventForm({
             type="text"
             name="title"
             value={formData.title}
-            onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              if (fieldErrors.title) setFieldErrors(prev => ({ ...prev, title: '' }));
+            }}
             placeholder="e.g., Farrier visit - Thunder"
-            className="input-base flex-1"
-            required
+            className={`input-base flex-1 ${fieldErrors.title ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
+            aria-invalid={!!fieldErrors.title}
+            aria-describedby={fieldErrors.title ? 'title-error' : undefined}
           />
           <button
             type="button"
@@ -255,6 +271,9 @@ export function EventForm({
             Auto
           </button>
         </div>
+        {fieldErrors.title && (
+          <p id="title-error" className="text-sm text-destructive mt-1" role="alert">{fieldErrors.title}</p>
+        )}
       </div>
 
       {/* Date & Time */}
@@ -268,12 +287,19 @@ export function EventForm({
               type="datetime-local"
               name="scheduledDate"
               value={formData.scheduledDate.toISOString().slice(0, 16)}
-              onChange={handleDateChange}
-              className="input-base"
-              required
+              onChange={(e) => {
+                handleDateChange(e);
+                if (fieldErrors.scheduledDate) setFieldErrors(prev => ({ ...prev, scheduledDate: '' }));
+              }}
+              className={`input-base ${fieldErrors.scheduledDate ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
+              aria-invalid={!!fieldErrors.scheduledDate}
+              aria-describedby={fieldErrors.scheduledDate ? 'date-error' : undefined}
             />
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
           </div>
+          {fieldErrors.scheduledDate && (
+            <p id="date-error" className="text-sm text-destructive mt-1" role="alert">{fieldErrors.scheduledDate}</p>
+          )}
         </div>
 
         {/* Cost */}

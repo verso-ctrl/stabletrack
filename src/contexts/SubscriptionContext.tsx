@@ -17,6 +17,7 @@ import {
   hasReachedHorseLimit,
   hasReachedTeamMemberLimit,
   getNextTier,
+  normalizeTier,
 } from '@/lib/tiers'
 import { toast } from '@/lib/toast'
 
@@ -96,7 +97,7 @@ export function SubscriptionProvider({
   children,
   barnId,
   barnTier,
-  defaultTier = 'FREE'  // Start with FREE tier until payment is made
+  defaultTier = 'CORE'  // Single plan: Core
 }: SubscriptionProviderProps) {
   // Use barn tier if provided, otherwise use default
   const [tier, setTier] = useState<SubscriptionTier>(barnTier || defaultTier)
@@ -104,10 +105,10 @@ export function SubscriptionProvider({
   const [error] = useState<string | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Update tier when barn tier changes
+  // Update tier when barn tier changes (normalize legacy tiers to CORE)
   useEffect(() => {
-    if (barnTier && ['FREE', 'BASIC', 'ADVANCED'].includes(barnTier)) {
-      setTier(barnTier)
+    if (barnTier) {
+      setTier(normalizeTier(barnTier))
     }
   }, [barnTier])
 
@@ -192,13 +193,7 @@ export function SubscriptionProvider({
       // Update local state immediately for responsiveness
       setTier(newTier)
 
-      const tierNames: Record<SubscriptionTier, string> = {
-        FREE: 'Free',
-        BASIC: 'Basic',
-        ADVANCED: 'Advanced',
-      }
-
-      toast.success('Plan Changed', `You are now on the ${tierNames[newTier]} plan.`)
+      toast.success('Plan Changed', `You are now on the ${getTierPricing(newTier).displayName} plan.`)
     } catch (err) {
       toast.error('Failed to change plan', 'Please try again.')
     } finally {
@@ -249,8 +244,8 @@ export function SubscriptionProvider({
     refetch,
     
     // Legacy compatibility
-    isFreeTier: tier === 'FREE',
-    isPaidTier: tier !== 'FREE',
+    isFreeTier: false,
+    isPaidTier: true,
     subscription: {
       tier,
       status: 'ACTIVE',

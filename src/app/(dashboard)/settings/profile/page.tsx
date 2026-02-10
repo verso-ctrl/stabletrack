@@ -13,6 +13,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const timezones = [
   { value: 'America/New_York', label: 'Eastern Time (ET)' },
@@ -150,6 +151,15 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Profile' },
+        ]}
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Profile Settings</h1>

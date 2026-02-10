@@ -11,6 +11,7 @@ import {
   Save,
   Loader2,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const themeColors = [
   { id: 'amber', name: 'Amber', color: 'bg-amber-500' },
@@ -46,6 +47,15 @@ export default function AppearanceSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Appearance' },
+        ]}
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Appearance</h1>

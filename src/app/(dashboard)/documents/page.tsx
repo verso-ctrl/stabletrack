@@ -19,6 +19,7 @@ import {
   ExternalLink,
   AlertCircle,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface Document {
   id: string;
@@ -70,6 +71,7 @@ export default function DocumentsPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
@@ -168,9 +170,15 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleDelete = async (docId: string) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
-    
+  const handleDeleteClick = (docId: string) => {
+    setDeleteDocId(docId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDocId) return;
+    const docId = deleteDocId;
+    setDeleteDocId(null);
+
     try {
       const response = await fetch(`/api/barns/${currentBarn?.id}/documents/${docId}`, {
         method: 'DELETE',
@@ -315,7 +323,7 @@ export default function DocumentsPage() {
                       <Download className="w-4 h-4" />
                     </a>
                     <button
-                      onClick={() => handleDelete(doc.id)}
+                      onClick={() => handleDeleteClick(doc.id)}
                       className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-all"
                       title="Delete"
                     >
@@ -328,6 +336,16 @@ export default function DocumentsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteDocId}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDocId(null)}
+        title="Delete document?"
+        description="This document will be permanently removed. This action cannot be undone."
+        variant="danger"
+        confirmLabel="Delete"
+      />
 
       {/* Upload Modal */}
       {showUploadModal && (

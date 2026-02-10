@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentBarn } from '@/contexts/BarnContext';
 import { queryKeys } from '@/lib/queryKeys';
+import { toast, showError } from '@/lib/toast';
 import type { Horse, Event, Task } from '@/types';
 
 // ============================================================================
@@ -69,12 +70,14 @@ export function useCreateHorse() {
       );
     },
     onSuccess: () => {
+      toast.success('Horse added', 'Successfully added to your barn');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.horses.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to add horse'),
   });
 }
 
@@ -92,6 +95,7 @@ export function useUpdateHorse() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Horse updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.horses.all(barn.id) });
         queryClient.invalidateQueries({
@@ -100,6 +104,7 @@ export function useUpdateHorse() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update horse'),
   });
 }
 
@@ -115,12 +120,14 @@ export function useDeleteHorse() {
       );
     },
     onSuccess: () => {
+      toast.success('Horse removed');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.horses.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to remove horse'),
   });
 }
 
@@ -154,12 +161,14 @@ export function useCreateEvent() {
       );
     },
     onSuccess: () => {
+      toast.success('Event created');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.alerts.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to create event'),
   });
 }
 
@@ -177,6 +186,7 @@ export function useUpdateEvent() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Event updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barn.id) });
         queryClient.invalidateQueries({
@@ -186,6 +196,7 @@ export function useUpdateEvent() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update event'),
   });
 }
 
@@ -201,12 +212,14 @@ export function useDeleteEvent() {
       );
     },
     onSuccess: () => {
+      toast.success('Event deleted');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.alerts.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to delete event'),
   });
 }
 
@@ -229,6 +242,7 @@ export function useCompleteEvent() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to complete event'),
   });
 }
 
@@ -262,12 +276,14 @@ export function useCreateTask() {
       );
     },
     onSuccess: () => {
+      toast.success('Task created');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to create task'),
   });
 }
 
@@ -285,6 +301,7 @@ export function useUpdateTask() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Task updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
         queryClient.invalidateQueries({
@@ -293,6 +310,7 @@ export function useUpdateTask() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update task'),
   });
 }
 
@@ -308,12 +326,14 @@ export function useDeleteTask() {
       );
     },
     onSuccess: () => {
+      toast.success('Task deleted');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to delete task'),
   });
 }
 
@@ -330,12 +350,14 @@ export function useCompleteTask() {
       );
     },
     onSuccess: () => {
+      toast.success('Task completed');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to complete task'),
   });
 }
 
@@ -368,11 +390,13 @@ export function useCreateClient() {
       );
     },
     onSuccess: () => {
+      toast.success('Client added');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.clients.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to add client'),
   });
 }
 
@@ -390,6 +414,7 @@ export function useUpdateClient() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Client updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.clients.all(barn.id) });
         queryClient.invalidateQueries({
@@ -398,6 +423,7 @@ export function useUpdateClient() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update client'),
   });
 }
 
@@ -413,11 +439,13 @@ export function useDeleteClient() {
       );
     },
     onSuccess: () => {
+      toast.success('Client removed');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.clients.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to remove client'),
   });
 }
 
@@ -455,6 +483,7 @@ export function useCreateInvoice() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Invoice created');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all(barn.id) });
         queryClient.invalidateQueries({
@@ -463,6 +492,7 @@ export function useCreateInvoice() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to create invoice'),
   });
 }
 
@@ -480,6 +510,7 @@ export function useUpdateInvoice() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Invoice updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all(barn.id) });
         queryClient.invalidateQueries({
@@ -488,6 +519,7 @@ export function useUpdateInvoice() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update invoice'),
   });
 }
 
@@ -503,11 +535,13 @@ export function useDeleteInvoice() {
       );
     },
     onSuccess: () => {
+      toast.success('Invoice deleted');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to delete invoice'),
   });
 }
 
@@ -544,12 +578,14 @@ export function useCreateLesson() {
       );
     },
     onSuccess: () => {
+      toast.success('Lesson scheduled');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.lessons.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to schedule lesson'),
   });
 }
 
@@ -567,6 +603,7 @@ export function useUpdateLesson() {
       );
     },
     onSuccess: (_, variables) => {
+      toast.success('Lesson updated');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.lessons.all(barn.id) });
         queryClient.invalidateQueries({
@@ -575,6 +612,7 @@ export function useUpdateLesson() {
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to update lesson'),
   });
 }
 
@@ -590,10 +628,12 @@ export function useDeleteLesson() {
       );
     },
     onSuccess: () => {
+      toast.success('Lesson removed');
       if (barn) {
         queryClient.invalidateQueries({ queryKey: queryKeys.lessons.all(barn.id) });
         queryClient.invalidateQueries({ queryKey: queryKeys.activity.all(barn.id) });
       }
     },
+    onError: (error) => showError(error, 'Failed to remove lesson'),
   });
 }

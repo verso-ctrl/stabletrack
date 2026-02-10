@@ -25,6 +25,7 @@ import {
   XCircle,
   Bell,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface TeamMember {
   id: string;
@@ -60,6 +61,14 @@ export default function TeamPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState('');
   const [approveRole, setApproveRole] = useState('CARETAKER');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    variant: 'danger' | 'warning' | 'default';
+    confirmLabel: string;
+    onConfirm: () => void;
+  }>({ open: false, title: '', description: '', variant: 'default', confirmLabel: 'Confirm', onConfirm: () => {} });
 
   useEffect(() => {
     if (currentBarn?.id) {
@@ -106,31 +115,37 @@ export default function TeamPage() {
     }
   };
 
-  const rejectMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to reject this join request?')) {
-      return;
-    }
+  const rejectMember = (memberId: string) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Reject join request?',
+      description: 'This person will not be added to your barn. They can request to join again later.',
+      variant: 'danger',
+      confirmLabel: 'Reject',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        setIsUpdating(true);
+        try {
+          const response = await fetch(`/api/barns/${currentBarn?.id}/members`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ memberId, action: 'reject' }),
+          });
 
-    setIsUpdating(true);
-    try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/members`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberId, action: 'reject' }),
-      });
+          const result = await response.json();
 
-      const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to reject member');
+          }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to reject member');
-      }
-
-      fetchMembers();
-    } catch (err) {
-      toast.error('Rejection failed', err instanceof Error ? err.message : 'Failed to reject member');
-    } finally {
-      setIsUpdating(false);
-    }
+          fetchMembers();
+        } catch (err) {
+          toast.error('Rejection failed', err instanceof Error ? err.message : 'Failed to reject member');
+        } finally {
+          setIsUpdating(false);
+        }
+      },
+    });
   };
 
   const updateMemberRole = async (memberId: string, newRole: string) => {
@@ -162,29 +177,37 @@ export default function TeamPage() {
     }
   };
 
-  const removeMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this member from the barn?')) {
-      return;
-    }
+  const removeMember = (memberId: string) => {
+    const member = members.find(m => m.id === memberId);
+    const memberName = member ? getMemberName(member) : 'this member';
+    setConfirmDialog({
+      open: true,
+      title: `Remove ${memberName}?`,
+      description: `${memberName} will lose access to this barn and all its data. This action cannot be undone.`,
+      variant: 'danger',
+      confirmLabel: 'Remove',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        try {
+          const response = await fetch(`/api/barns/${currentBarn?.id}/members?memberId=${memberId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/members?memberId=${memberId}`, {
-        method: 'DELETE',
-      });
+          const result = await response.json();
 
-      const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to remove member');
+          }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to remove member');
-      }
-
-      setMembers(members.filter(m => m.id !== memberId));
-      setShowRoleModal(false);
-      setSelectedMember(null);
-      toast.success('Member removed');
-    } catch (err) {
-      toast.error('Removal failed', err instanceof Error ? err.message : 'Failed to remove member');
-    }
+          setMembers(members.filter(m => m.id !== memberId));
+          setShowRoleModal(false);
+          setSelectedMember(null);
+          toast.success('Member removed');
+        } catch (err) {
+          toast.error('Removal failed', err instanceof Error ? err.message : 'Failed to remove member');
+        }
+      },
+    });
   };
 
   const pendingMembers = members.filter(m => m.status === 'PENDING');
@@ -528,6 +551,16 @@ export default function TeamPage() {
           onInvited={fetchMembers}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        variant={confirmDialog.variant}
+        confirmLabel={confirmDialog.confirmLabel}
+      />
     </div>
   );
 }

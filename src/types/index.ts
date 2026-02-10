@@ -2,9 +2,8 @@
 // SUBSCRIPTION & BILLING TYPES
 // ============================================================================
 
-// Simple 3-tier system: Free, Basic, Advanced
-// The only difference is the number of horses allowed
-export type SubscriptionTier = 'FREE' | 'BASIC' | 'ADVANCED';
+// Two plans: Core ($25/month) and Pro ($50/month)
+export type SubscriptionTier = 'CORE' | 'PRO';
 export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'TRIALING' | 'PAUSED';
 
 export interface TierLimits {
@@ -15,12 +14,12 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
-  FREE: {
-    maxHorses: 3,
+  CORE: {
+    maxHorses: 10,
     maxBarns: 1,
-    storageGb: 5,
+    storageGb: 10,
     features: [
-      'Up to 3 horses',
+      'Up to 10 horses',
       'Horse profiles & photos',
       'Health records',
       'Calendar & scheduling',
@@ -28,32 +27,22 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       'Client management',
     ],
   },
-  BASIC: {
-    maxHorses: 15,
-    maxBarns: 1,
-    storageGb: 25,
-    features: [
-      'Up to 15 horses',
-      'Everything in Free',
-      'Priority email support',
-    ],
-  },
-  ADVANCED: {
+  PRO: {
     maxHorses: -1, // unlimited
     maxBarns: 1,
-    storageGb: 100,
+    storageGb: 50,
     features: [
       'Unlimited horses',
-      'Everything in Basic',
+      'Everything in Core',
+      'Unlimited photos & storage',
       'Priority support',
     ],
   },
 };
 
 export const TIER_PRICING: Record<SubscriptionTier, number> = {
-  FREE: 0,
-  BASIC: 1900, // $19.00
-  ADVANCED: 3900, // $39.00
+  CORE: 2500, // $25.00
+  PRO: 5000, // $50.00
 };
 
 export interface Subscription {
@@ -229,6 +218,8 @@ export interface Horse {
   statusNote: string | null;
   profilePhotoUrl: string | null;
   ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
   bio: string | null;
   createdAt: Date;
   updatedAt: Date;

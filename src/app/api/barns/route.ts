@@ -163,12 +163,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!tier) {
-      return NextResponse.json(
-        { error: 'Subscription tier is required' },
-        { status: 400 }
-      );
-    }
+    // Default to CORE tier (single plan)
+    const barnTier = tier || 'CORE';
 
     // Generate unique invite code
     const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`;
@@ -186,7 +182,7 @@ export async function POST(request: NextRequest) {
         country: country || 'US',
         timezone: timezone || 'America/New_York',
         inviteCode,
-        tier, // Store tier on the barn itself
+        tier: barnTier, // Store tier on the barn itself
         subscriptionStatus: 'ACTIVE',
         members: {
           create: {

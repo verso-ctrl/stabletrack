@@ -52,8 +52,8 @@ export async function getBarnSubscription(barnId: string): Promise<BarnSubscript
     throw new Error('Barn not found')
   }
 
-  // Demo mode: Always return BASIC tier
-  const tier: SubscriptionTier = 'BASIC'
+  // Demo mode: Always return CORE tier
+  const tier: SubscriptionTier = 'CORE'
 
   return {
     tier,

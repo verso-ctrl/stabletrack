@@ -57,7 +57,7 @@ export default function TasksPage() {
     description: '',
     dueDate: '',
     dueTime: '',
-    priority: 'MEDIUM',
+    priority: '',
     horseId: '',
     isRecurring: false,
     recurringRule: null as RecurringRule | null,
@@ -349,6 +349,7 @@ export default function TasksPage() {
                     value={newTask.priority}
                     onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                   >
+                    <option value="">No Priority</option>
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
@@ -655,7 +656,7 @@ export default function TasksPage() {
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', horseId: '', isRecurring: false, recurringRule: null });
+                  setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: '', horseId: '', isRecurring: false, recurringRule: null });
                 }}
                 className="btn-secondary flex-1"
                 disabled={isCreating}
@@ -689,7 +690,7 @@ export default function TasksPage() {
                         description: newTask.description || null,
                         dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null,
                         dueTime: newTask.dueTime || null,
-                        priority: newTask.priority,
+                        priority: newTask.priority || null,
                         horseId: newTask.horseId || null,
                         isRecurring: newTask.isRecurring,
                         recurringRule: newTask.isRecurring && newTask.recurringRule
@@ -699,7 +700,7 @@ export default function TasksPage() {
                     });
                     if (!response.ok) throw new Error('Failed to create task');
                     setShowAddModal(false);
-                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: 'MEDIUM', horseId: '', isRecurring: false, recurringRule: null });
+                    setNewTask({ title: '', description: '', dueDate: '', dueTime: '', priority: '', horseId: '', isRecurring: false, recurringRule: null });
                     refetch();
                     toast.success(
                       newTask.isRecurring ? 'Recurring task created' : 'Task created',

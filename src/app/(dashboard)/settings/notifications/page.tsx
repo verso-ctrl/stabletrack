@@ -12,6 +12,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function NotificationSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -93,6 +94,15 @@ export default function NotificationSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Notifications' },
+        ]}
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Notification Settings</h1>

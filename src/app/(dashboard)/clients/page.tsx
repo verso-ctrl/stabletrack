@@ -22,6 +22,7 @@ import {
   Shield,
   Building,
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface Horse {
   horse: {
@@ -626,6 +627,7 @@ function ClientDetailsModal({
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentSaving, setPaymentSaving] = useState(false);
   const [paymentRemoving, setPaymentRemoving] = useState(false);
+  const [showRemovePaymentConfirm, setShowRemovePaymentConfirm] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [paymentForm, setPaymentForm] = useState({
     type: 'card' as 'card' | 'us_bank_account',
@@ -719,8 +721,12 @@ function ClientDetailsModal({
     }
   };
 
+  const handleRemovePaymentClick = () => {
+    setShowRemovePaymentConfirm(true);
+  };
+
   const handleRemovePayment = async () => {
-    if (!confirm('Remove this payment method? This cannot be undone.')) return;
+    setShowRemovePaymentConfirm(false);
     setPaymentRemoving(true);
 
     try {
@@ -848,7 +854,7 @@ function ClientDetailsModal({
                   </button>
                   <span className="text-muted-foreground">|</span>
                   <button
-                    onClick={handleRemovePayment}
+                    onClick={handleRemovePaymentClick}
                     disabled={paymentRemoving}
                     className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
                   >
@@ -1078,6 +1084,16 @@ function ClientDetailsModal({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showRemovePaymentConfirm}
+        onConfirm={handleRemovePayment}
+        onCancel={() => setShowRemovePaymentConfirm(false)}
+        title="Remove payment method?"
+        description="This payment method will be removed from the client's account. This cannot be undone."
+        variant="danger"
+        confirmLabel="Remove"
+      />
     </div>
   );
 }

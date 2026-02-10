@@ -54,8 +54,8 @@ export async function GET(req: NextRequest) {
     
     const used = (photoStats._sum.fileSize || 0) + (documentStats._sum.fileSize || 0)
     
-    // Demo mode: Always BASIC tier
-    const tier = normalizeTier('BASIC')
+    // Demo mode: Always CORE tier
+    const tier = normalizeTier('CORE')
     const limits = getTierLimits(tier)
     const limit = limits.maxStorageBytes
 

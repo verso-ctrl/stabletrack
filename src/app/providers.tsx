@@ -10,7 +10,7 @@ import type { SubscriptionTier } from '@/lib/tiers';
 // Wrapper component to connect BarnContext to SubscriptionProvider
 function SubscriptionProviderWithBarn({ children }: { children: React.ReactNode }) {
   const { currentBarn } = useBarn();
-  const barnTier = (currentBarn?.tier as SubscriptionTier) || 'FREE';
+  const barnTier = (currentBarn?.tier as SubscriptionTier) || 'CORE';
 
   return (
     <SubscriptionProvider barnId={currentBarn?.id} barnTier={barnTier}>

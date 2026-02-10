@@ -14,6 +14,7 @@ import {
   Laptop,
   Globe,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 // Demo session data
 const demoSessions = [
@@ -69,6 +70,15 @@ export default function SecuritySettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Security' },
+        ]}
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Security Settings</h1>

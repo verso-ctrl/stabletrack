@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useBarn } from '@/contexts/BarnContext';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useHorses } from '@/hooks/useData';
 import {
   usePaddocks,
@@ -222,6 +223,12 @@ function PasturesView({
 }) {
   const deletePaddock = useDeletePaddock();
   const removeHorse = useAssignHorseToPaddock();
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  }>({ open: false, title: '', description: '', onConfirm: () => {} });
 
   if (paddocks.length === 0) {
     return (
@@ -234,6 +241,7 @@ function PasturesView({
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {paddocks.map((paddock) => (
         <div
@@ -263,9 +271,15 @@ function PasturesView({
               <DropdownMenu
                 onEdit={() => onEdit(paddock)}
                 onDelete={() => {
-                  if (confirm(`Delete "${paddock.name}"? Horses will be unassigned.`)) {
-                    deletePaddock.mutate(paddock.id);
-                  }
+                  setConfirmDialog({
+                    open: true,
+                    title: `Delete "${paddock.name}"?`,
+                    description: 'All horses in this pasture will be unassigned. This action cannot be undone.',
+                    onConfirm: () => {
+                      setConfirmDialog(prev => ({ ...prev, open: false }));
+                      deletePaddock.mutate(paddock.id);
+                    },
+                  });
                 }}
               />
             </div>
@@ -325,6 +339,16 @@ function PasturesView({
         </div>
       ))}
     </div>
+    <ConfirmDialog
+      open={confirmDialog.open}
+      onConfirm={confirmDialog.onConfirm}
+      onCancel={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+      title={confirmDialog.title}
+      description={confirmDialog.description}
+      variant="danger"
+      confirmLabel="Delete"
+    />
+    </>
   );
 }
 
@@ -343,6 +367,12 @@ function StallsView({
 }) {
   const deleteStall = useDeleteStall();
   const removeHorse = useAssignHorseToStall();
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  }>({ open: false, title: '', description: '', onConfirm: () => {} });
 
   if (stalls.length === 0) {
     return (
@@ -366,6 +396,7 @@ function StallsView({
   );
 
   return (
+    <>
     <div className="space-y-8">
       {Object.entries(sections).map(([section, sectionStalls]) => (
         <div key={section}>
@@ -395,9 +426,15 @@ function StallsView({
                   <DropdownMenu
                     onEdit={() => onEdit(stall)}
                     onDelete={() => {
-                      if (confirm(`Delete stall "${stall.name}"?`)) {
-                        deleteStall.mutate(stall.id);
-                      }
+                      setConfirmDialog({
+                        open: true,
+                        title: `Delete stall "${stall.name}"?`,
+                        description: 'The assigned horse will be unassigned. This action cannot be undone.',
+                        onConfirm: () => {
+                          setConfirmDialog(prev => ({ ...prev, open: false }));
+                          deleteStall.mutate(stall.id);
+                        },
+                      });
                     }}
                   />
                 </div>
@@ -445,6 +482,16 @@ function StallsView({
         </div>
       ))}
     </div>
+    <ConfirmDialog
+      open={confirmDialog.open}
+      onConfirm={confirmDialog.onConfirm}
+      onCancel={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+      title={confirmDialog.title}
+      description={confirmDialog.description}
+      variant="danger"
+      confirmLabel="Delete"
+    />
+    </>
   );
 }
 

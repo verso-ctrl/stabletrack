@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract barn data from session metadata
-    const tier = session.metadata?.tier || 'FREE'
+    const tier = session.metadata?.tier || 'CORE'
     const barnName = session.metadata?.barnName
     const barnAddress = session.metadata?.barnAddress || ''
     const barnCity = session.metadata?.barnCity || ''

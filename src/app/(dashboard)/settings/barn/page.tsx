@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const timezones = [
   { value: 'America/New_York', label: 'Eastern Time (ET)' },
@@ -35,6 +37,7 @@ export default function BarnSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -138,8 +141,6 @@ export default function BarnSettingsPage() {
 
   const handleRegenerateCode = async () => {
     if (!currentBarn) return;
-    
-    if (!confirm('Are you sure? This will invalidate the current invite code.')) return;
 
     setIsSaving(true);
     try {
@@ -233,6 +234,15 @@ export default function BarnSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Barn' },
+        ]}
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Barn Settings</h1>
@@ -407,7 +417,7 @@ export default function BarnSettingsPage() {
             </button>
             <button
               type="button"
-              onClick={handleRegenerateCode}
+              onClick={() => setShowRegenerateConfirm(true)}
               className="btn-secondary btn-sm flex items-center gap-2"
               disabled={isSaving}
             >
@@ -469,6 +479,19 @@ export default function BarnSettingsPage() {
           </div>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={showRegenerateConfirm}
+        onConfirm={() => {
+          setShowRegenerateConfirm(false);
+          handleRegenerateCode();
+        }}
+        onCancel={() => setShowRegenerateConfirm(false)}
+        title="Regenerate invite code?"
+        description="The current invite code will stop working. Anyone who has the old code will need the new one to join."
+        variant="warning"
+        confirmLabel="Regenerate"
+      />
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

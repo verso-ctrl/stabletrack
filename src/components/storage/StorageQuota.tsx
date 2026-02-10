@@ -6,10 +6,10 @@
 import React, { useEffect } from 'react'
 import { HardDrive, AlertTriangle } from 'lucide-react'
 import { useStorageQuota } from '@/hooks/useStorage'
-import { 
-  getTierLimits, 
-  getTierPricing, 
-  getNextTier, 
+import {
+  getTierLimits,
+  getTierPricing,
+  getNextTier,
   formatBytes,
   normalizeTier,
 } from '@/lib/tiers'

@@ -1,17 +1,16 @@
 // src/components/storage/UpgradePrompt.tsx
-// Modal prompting users to upgrade their subscription tier
+// Modal prompting users to upgrade from Core to Pro
 
 'use client'
 
 import React from 'react'
 import { X, Crown, Check, Zap } from 'lucide-react'
-import { 
-  getTierDisplayName, 
-  getNextTier, 
-  getTierFeatures,
+import {
+  getTierDisplayName,
+  getNextTier,
   getTierLimits,
   formatBytes,
-  type SubscriptionTier 
+  type SubscriptionTier
 } from '@/lib/tiers'
 import { cn } from '@/lib/utils'
 
@@ -29,21 +28,29 @@ export function UpgradePrompt({
   onUpgrade,
 }: UpgradePromptProps) {
   const nextTier = getNextTier(currentTier)
-  
+
   if (!nextTier) {
     return null // Already on highest tier
   }
 
-  const improvements = getImprovements(currentTier, nextTier)
+  const nextLimits = getTierLimits(nextTier)
+
+  const improvements = [
+    'Unlimited horses',
+    `${formatBytes(nextLimits.maxStorageBytes)} storage`,
+    'Unlimited photos per horse',
+    'Unlimited team members',
+    'Priority support',
+  ]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-card rounded-xl shadow-xl max-w-md w-full overflow-hidden">
         {/* Header */}
@@ -54,7 +61,7 @@ export function UpgradePrompt({
           >
             <X className="w-5 h-5" />
           </button>
-          
+
           <div className="flex items-center gap-3">
             <div className="p-2 bg-card/20 rounded-full">
               <Crown className="w-6 h-6" />
@@ -62,7 +69,7 @@ export function UpgradePrompt({
             <div>
               <h2 className="text-xl font-semibold">Upgrade to {getTierDisplayName(nextTier)}</h2>
               <p className="text-white/80 text-sm">
-                {feature ? `Unlock ${feature} and more` : 'Get more features'}
+                {feature ? `Unlock ${feature} and more` : 'Remove all limits'}
               </p>
             </div>
           </div>
@@ -71,7 +78,7 @@ export function UpgradePrompt({
         {/* Content */}
         <div className="p-6 space-y-4">
           <p className="text-sm text-muted-foreground">
-            You're currently on the <strong>{getTierDisplayName(currentTier)}</strong> plan. 
+            You&apos;re currently on the <strong>{getTierDisplayName(currentTier)}</strong> plan.
             Upgrade to unlock:
           </p>
 
@@ -88,8 +95,8 @@ export function UpgradePrompt({
           </ul>
 
           {/* Pricing hint */}
-          <div className="pt-2">
-            <PricingHint tier={nextTier} />
+          <div className="text-center text-sm text-muted-foreground">
+            {getTierDisplayName(nextTier)} is <strong>$50/month</strong>
           </div>
         </div>
 
@@ -132,7 +139,7 @@ export function UpgradeBanner({
   onUpgrade,
 }: UpgradeBannerProps) {
   const nextTier = getNextTier(currentTier)
-  
+
   if (!nextTier) return null
 
   if (compact) {
@@ -204,7 +211,7 @@ export function FeatureLocked({
           {children}
         </div>
       )}
-      
+
       {/* Overlay */}
       <div className={cn(
         "flex flex-col items-center justify-center text-center p-8",
@@ -224,78 +231,6 @@ export function FeatureLocked({
           Upgrade to Unlock
         </button>
       </div>
-    </div>
-  )
-}
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-function getImprovements(from: SubscriptionTier, to: SubscriptionTier): string[] {
-  const improvements: string[] = []
-  const fromFeatures = getTierFeatures(from)
-  const toFeatures = getTierFeatures(to)
-  const fromLimits = getTierLimits(from)
-  const toLimits = getTierLimits(to)
-
-  // Storage
-  if (toLimits.maxStorageBytes > fromLimits.maxStorageBytes) {
-    improvements.push(`${formatBytes(toLimits.maxStorageBytes)} storage (up from ${formatBytes(fromLimits.maxStorageBytes)})`)
-  }
-
-  // Photos
-  if (toLimits.maxPhotosPerHorse !== fromLimits.maxPhotosPerHorse) {
-    if (toLimits.maxPhotosPerHorse === -1) {
-      improvements.push('Unlimited photos per horse')
-    } else {
-      improvements.push(`${toLimits.maxPhotosPerHorse} photos per horse`)
-    }
-  }
-
-  // Documents
-  if (!fromFeatures.canUploadDocuments && toFeatures.canUploadDocuments) {
-    improvements.push('Document uploads (Coggins, vet records, etc.)')
-  }
-
-  // Bulk upload
-  if (!fromFeatures.canBulkUpload && toFeatures.canBulkUpload) {
-    improvements.push('Bulk photo uploads')
-  }
-
-  // Downloads
-  if (!fromFeatures.canDownloadOriginals && toFeatures.canDownloadOriginals) {
-    improvements.push('Download original photos')
-  }
-
-  // Document expiry
-  if (!fromFeatures.canTrackDocumentExpiry && toFeatures.canTrackDocumentExpiry) {
-    improvements.push('Document expiry tracking & reminders')
-  }
-
-  // Sharing
-  if (!fromFeatures.canShareDocuments && toFeatures.canShareDocuments) {
-    improvements.push('Share documents with vets & clients')
-  }
-
-  // API
-  if (!fromFeatures.apiAccess && toFeatures.apiAccess) {
-    improvements.push('API access for integrations')
-  }
-
-  return improvements
-}
-
-function PricingHint({ tier }: { tier: SubscriptionTier }) {
-  const prices: Record<SubscriptionTier, string> = {
-    FREE: 'Free',
-    BASIC: '$19/month',
-    ADVANCED: '$39/month',
-  }
-
-  return (
-    <div className="text-center text-sm text-muted-foreground">
-      {getTierDisplayName(tier)} starts at <strong>{prices[tier]}</strong>
     </div>
   )
 }

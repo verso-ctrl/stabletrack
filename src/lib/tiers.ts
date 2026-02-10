@@ -1,9 +1,8 @@
 // src/lib/tiers.ts
 // SINGLE SOURCE OF TRUTH for all tier configuration
-// Simple 3-tier system: Free, Basic, Advanced
-// The only difference is the number of horses allowed
+// Two plans: Core ($25/mo, up to 10 horses) and Pro ($50/mo, unlimited)
 
-export type SubscriptionTier = 'FREE' | 'BASIC' | 'ADVANCED'
+export type SubscriptionTier = 'CORE' | 'PRO'
 
 // =============================================================================
 // TIER LIMITS
@@ -20,29 +19,23 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
-  FREE: {
-    maxHorses: 3,
-    maxTeamMembers: 2,
-    maxStorageBytes: 5 * 1024 * 1024 * 1024,      // 5 GB
-    maxPhotosPerHorse: 10,
-  },
-  BASIC: {
-    maxHorses: 15,
+  CORE: {
+    maxHorses: 10,
     maxTeamMembers: 5,
-    maxStorageBytes: 25 * 1024 * 1024 * 1024,     // 25 GB
-    maxPhotosPerHorse: 50,
+    maxStorageBytes: 10 * 1024 * 1024 * 1024,    // 10 GB
+    maxPhotosPerHorse: 20,
   },
-  ADVANCED: {
+  PRO: {
     maxHorses: -1,               // Unlimited
     maxTeamMembers: -1,          // Unlimited
-    maxStorageBytes: 100 * 1024 * 1024 * 1024,    // 100 GB
+    maxStorageBytes: 50 * 1024 * 1024 * 1024,    // 50 GB
     maxPhotosPerHorse: -1,       // Unlimited
   },
 }
 
 // =============================================================================
 // TIER FEATURES
-// All tiers have the same features - only horse limits differ
+// All features included on both plans — only limits differ
 // =============================================================================
 
 export interface TierFeatures {
@@ -91,7 +84,7 @@ export interface TierFeatures {
   smsNotifications: boolean
 }
 
-// All tiers get full features - only horse count differs
+// Both plans get full features — only horse/storage limits differ
 const ALL_FEATURES: TierFeatures = {
   // Core
   horseProfiles: true,
@@ -125,7 +118,7 @@ const ALL_FEATURES: TierFeatures = {
   customFields: true,
   activityLogs: true,
 
-  // Enterprise-level (all tiers get basic access)
+  // Enterprise-level
   multiLocation: false,
   advancedAnalytics: false,
   apiAccess: false,
@@ -139,9 +132,8 @@ const ALL_FEATURES: TierFeatures = {
 }
 
 export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
-  FREE: { ...ALL_FEATURES },
-  BASIC: { ...ALL_FEATURES, prioritySupport: true },
-  ADVANCED: { ...ALL_FEATURES, prioritySupport: true },
+  CORE: { ...ALL_FEATURES },
+  PRO: { ...ALL_FEATURES, prioritySupport: true },
 }
 
 // =============================================================================
@@ -163,11 +155,10 @@ export const DOCUMENT_TYPES = {
 
 export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES]
 
-// All tiers can upload all document types
+// Both plans can upload all document types
 export const TIER_DOCUMENT_TYPES: Record<SubscriptionTier, DocumentType[]> = {
-  FREE: Object.values(DOCUMENT_TYPES),
-  BASIC: Object.values(DOCUMENT_TYPES),
-  ADVANCED: Object.values(DOCUMENT_TYPES),
+  CORE: Object.values(DOCUMENT_TYPES),
+  PRO: Object.values(DOCUMENT_TYPES),
 }
 
 // =============================================================================
@@ -183,24 +174,18 @@ export interface TierPricing {
 }
 
 export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
-  FREE: {
-    monthlyPriceCents: 0,
-    annualPriceCents: 0,
-    displayName: 'Free',
-    description: 'Perfect for getting started with up to 3 horses',
-  },
-  BASIC: {
-    monthlyPriceCents: 1900,
-    annualPriceCents: 19000,
-    displayName: 'Basic',
-    description: 'For growing operations with up to 15 horses',
+  CORE: {
+    monthlyPriceCents: 2500,
+    annualPriceCents: 25000,
+    displayName: 'Core',
+    description: 'Everything you need for a small barn — up to 10 horses',
     popular: true,
   },
-  ADVANCED: {
-    monthlyPriceCents: 3900,
-    annualPriceCents: 39000,
-    displayName: 'Advanced',
-    description: 'Unlimited horses for larger farms',
+  PRO: {
+    monthlyPriceCents: 5000,
+    annualPriceCents: 50000,
+    displayName: 'Pro',
+    description: 'Unlimited horses and storage for growing operations',
   },
 }
 
@@ -209,23 +194,30 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
 // =============================================================================
 
 /**
- * Normalize tier string to SubscriptionTier type
+ * Normalize tier string to SubscriptionTier type.
+ * Maps legacy tier names to the closest modern equivalent.
  */
 export function normalizeTier(tier: string): SubscriptionTier {
   const normalized = tier.toUpperCase()
 
-  // Handle legacy tier names
-  if (normalized === 'PROFESSIONAL' || normalized === 'FARM') {
-    return 'BASIC'
-  }
-  if (normalized === 'ENTERPRISE') {
-    return 'ADVANCED'
+  if (normalized === 'PRO') return 'PRO'
+
+  // Legacy tiers that were "unlimited" map to PRO
+  if (normalized === 'ADVANCED' || normalized === 'ENTERPRISE') {
+    return 'PRO'
   }
 
-  if (normalized in TIER_LIMITS) {
-    return normalized as SubscriptionTier
-  }
-  return 'FREE'
+  // Everything else (FREE, BASIC, FARM, PROFESSIONAL, etc.) maps to CORE
+  return 'CORE'
+}
+
+/**
+ * Get next tier for upgrade path
+ */
+export function getNextTier(currentTier: string): SubscriptionTier | null {
+  const tier = normalizeTier(currentTier)
+  if (tier === 'CORE') return 'PRO'
+  return null // Already on highest tier
 }
 
 /**
@@ -267,21 +259,6 @@ export function hasFeature(
 ): boolean {
   const features = getTierFeatures(tier, activeAddOns)
   return features[feature]
-}
-
-/**
- * Get next tier for upgrade path
- */
-export function getNextTier(currentTier: string): SubscriptionTier | null {
-  const order: SubscriptionTier[] = ['FREE', 'BASIC', 'ADVANCED']
-  const current = normalizeTier(currentTier)
-  const currentIndex = order.indexOf(current)
-
-  if (currentIndex === -1 || currentIndex >= order.length - 1) {
-    return null
-  }
-
-  return order[currentIndex + 1]
 }
 
 /**

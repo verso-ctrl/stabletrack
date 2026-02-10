@@ -44,7 +44,7 @@ model Subscription {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  tier      String   @default("FARM")
+  tier      String   @default("CORE")
   status    String   @default("ACTIVE")
   
   maxHorses Int      @default(999)
@@ -172,6 +172,8 @@ model Horse {
   status          String    @default("ACTIVE")
   isPrivate       Boolean   @default(false)
   ownerName       String?
+  ownerEmail      String?
+  ownerPhone      String?
   profilePhotoUrl String?
   bio             String?
   stallId         String?   @unique

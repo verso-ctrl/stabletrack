@@ -1,25 +1,25 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { PricingPlans, CurrentPlanCard } from '@/components/billing/PricingPlans';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function BillingPage() {
   return (
     <div className="space-y-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Settings', href: '/settings' },
+          { label: 'Billing' },
+        ]}
+      />
+
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/settings"
-          className="p-2 rounded-xl hover:bg-accent transition-all"
-        >
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Billing & Subscription</h1>
-          <p className="text-muted-foreground">Manage your subscription and billing details</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Billing & Subscription</h1>
+        <p className="text-muted-foreground">Manage your subscription and billing details</p>
       </div>
 
       {/* Current Plan */}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, FileText, Loader2, Plus, X } from 'lucide-react';
+import { ChevronRight, FileText, Loader2, Pill, Plus, Printer, X } from 'lucide-react';
 
 interface HealthRecord {
   id: string;
@@ -48,9 +48,34 @@ interface CogginsData {
   data?: CogginsRecord[];
 }
 
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  route?: string | null;
+  instructions?: string | null;
+  status?: string;
+  logs?: Array<{
+    id: string;
+    givenAt: string;
+    givenBy?: string | null;
+    skipped: boolean;
+    skipReason?: string | null;
+    notes?: string | null;
+  }>;
+}
+
 interface HealthTabProps {
   horse: {
     id: string;
+    barnName?: string;
+    registeredName?: string | null;
+    breed?: string | null;
+    color?: string | null;
+    sex?: string | null;
+    age?: number | null;
+    ownerName?: string | null;
     vaccinations?: Vaccination[];
     weights?: Weight[];
   };
@@ -66,6 +91,8 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
   const [cogginsLoading, setCogginsLoading] = useState(true);
   const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([]);
   const [healthRecordsLoading, setHealthRecordsLoading] = useState(true);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [medicationsLoading, setMedicationsLoading] = useState(true);
   const [selectedHealthRecord, setSelectedHealthRecord] = useState<HealthRecord | null>(null);
   const [showHealthRecordModal, setShowHealthRecordModal] = useState(false);
 
@@ -74,9 +101,10 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
       if (!barnId || !horse?.id) return;
 
       try {
-        const [cogginsResponse, healthResponse] = await Promise.all([
+        const [cogginsResponse, healthResponse, medsResponse] = await Promise.all([
           fetch(`/api/barns/${barnId}/horses/${horse.id}/coggins`),
           fetch(`/api/barns/${barnId}/horses/${horse.id}/health`),
+          fetch(`/api/barns/${barnId}/horses/${horse.id}/medications?status=ACTIVE`),
         ]);
 
         const cogginsData = await cogginsResponse.json();
@@ -84,11 +112,15 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
         const healthData = await healthResponse.json();
         setHealthRecords(healthData.data || []);
+
+        const medsData = await medsResponse.json();
+        setMedications(medsData.data || []);
       } catch {
         // Errors handled silently
       } finally {
         setCogginsLoading(false);
         setHealthRecordsLoading(false);
+        setMedicationsLoading(false);
       }
     };
 
@@ -97,6 +129,54 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
   return (
     <div className="space-y-6">
+      {/* Print Button */}
+      <div className="flex justify-end">
+        <button onClick={() => window.print()} className="btn-secondary btn-sm">
+          <Printer className="w-4 h-4" />
+          Print Medical Report
+        </button>
+      </div>
+
+      {/* Current Medications */}
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <Pill className="w-4 h-4 text-purple-500" />
+            Current Medications
+          </h3>
+          {canEdit && (
+            <Link href={`/horses/${horse.id}/medications/new`} className="btn-secondary btn-sm">
+              <Plus className="w-4 h-4" />
+              Add Medication
+            </Link>
+          )}
+        </div>
+        {medicationsLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : medications.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {medications.map((med) => (
+              <div key={med.id} className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
+                <p className="font-medium text-foreground">{med.name}</p>
+                <p className="text-sm text-muted-foreground">{med.dosage} &bull; {med.frequency}</p>
+                {med.route && <p className="text-xs text-muted-foreground mt-1">Route: {med.route}</p>}
+                {med.instructions && <p className="text-xs text-muted-foreground mt-1">{med.instructions}</p>}
+                {med.logs && med.logs.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-purple-100 dark:border-purple-900/50">
+                    Last given: {new Date(med.logs[0].givenAt).toLocaleDateString()}
+                    {med.logs[0].givenBy && ` by ${med.logs[0].givenBy}`}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">No active medications</p>
+        )}
+      </div>
+
       {/* Coggins Status */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
@@ -415,6 +495,180 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           </div>
         </div>
       )}
+
+      {/* ============================================================ */}
+      {/* Printable Medical Report — hidden on screen, visible on print */}
+      {/* ============================================================ */}
+      <div className="printable-medical-report-wrapper">
+        <div className="printable-horse-sheet">
+          {/* Header */}
+          <div className="horse-sheet-header">
+            <h1 className="horse-sheet-name">{horse.barnName || 'Horse'}</h1>
+            {horse.registeredName && (
+              <p className="horse-sheet-reg">{horse.registeredName}</p>
+            )}
+            <p className="horse-sheet-meta">
+              {[horse.breed, horse.color, horse.sex, horse.age ? `${horse.age}y` : null]
+                .filter(Boolean)
+                .join('  \u2022  ')}
+            </p>
+            <p className="horse-sheet-date">
+              Medical Report &mdash; {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
+          </div>
+
+          <div className="horse-sheet-grid">
+            {/* Medications */}
+            <div className="horse-sheet-section">
+              <h2 className="horse-sheet-section-title">Current Medications</h2>
+              {medications.length > 0 ? (
+                <table className="horse-sheet-table">
+                  <thead>
+                    <tr>
+                      <th className="horse-sheet-th">Medication</th>
+                      <th className="horse-sheet-th">Dosage</th>
+                      <th className="horse-sheet-th">Frequency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {medications.map((med) => (
+                      <tr key={med.id}>
+                        <td className="horse-sheet-td horse-sheet-td-name">{med.name}</td>
+                        <td className="horse-sheet-td">{med.dosage}</td>
+                        <td className="horse-sheet-td">{med.frequency}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="horse-sheet-empty">No active medications</p>
+              )}
+            </div>
+
+            {/* Coggins */}
+            <div className="horse-sheet-section">
+              <h2 className="horse-sheet-section-title">Coggins Status</h2>
+              {coggins?.current ? (
+                <table className="horse-sheet-table">
+                  <tbody>
+                    <tr>
+                      <td className="horse-sheet-td horse-sheet-td-name">Status</td>
+                      <td className="horse-sheet-td">{coggins.isExpired ? 'EXPIRED' : 'Valid'}</td>
+                    </tr>
+                    <tr>
+                      <td className="horse-sheet-td horse-sheet-td-name">Test Date</td>
+                      <td className="horse-sheet-td">{new Date(coggins.current.testDate).toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                      <td className="horse-sheet-td horse-sheet-td-name">Expiry</td>
+                      <td className="horse-sheet-td">{new Date(coggins.current.expiryDate).toLocaleDateString()}</td>
+                    </tr>
+                    {coggins.current.veterinarian && (
+                      <tr>
+                        <td className="horse-sheet-td horse-sheet-td-name">Veterinarian</td>
+                        <td className="horse-sheet-td">{coggins.current.veterinarian}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="horse-sheet-empty">No Coggins on file</p>
+              )}
+            </div>
+          </div>
+
+          <div className="horse-sheet-grid">
+            {/* Vaccinations */}
+            <div className="horse-sheet-section">
+              <h2 className="horse-sheet-section-title">Vaccinations</h2>
+              {horse.vaccinations && horse.vaccinations.length > 0 ? (
+                <table className="horse-sheet-table">
+                  <thead>
+                    <tr>
+                      <th className="horse-sheet-th">Vaccine</th>
+                      <th className="horse-sheet-th">Date Given</th>
+                      <th className="horse-sheet-th">Next Due</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {horse.vaccinations.map((vax) => (
+                      <tr key={vax.id}>
+                        <td className="horse-sheet-td horse-sheet-td-name">{vax.type.replace(/_/g, ' ')}</td>
+                        <td className="horse-sheet-td">{new Date(vax.dateGiven).toLocaleDateString()}</td>
+                        <td className="horse-sheet-td">{vax.nextDueDate ? new Date(vax.nextDueDate).toLocaleDateString() : '\u2014'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="horse-sheet-empty">No vaccination records</p>
+              )}
+            </div>
+
+            {/* Weight History */}
+            <div className="horse-sheet-section">
+              <h2 className="horse-sheet-section-title">Weight History</h2>
+              {horse.weights && horse.weights.length > 0 ? (
+                <table className="horse-sheet-table">
+                  <thead>
+                    <tr>
+                      <th className="horse-sheet-th">Date</th>
+                      <th className="horse-sheet-th">Weight</th>
+                      <th className="horse-sheet-th">BCS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {horse.weights.slice(0, 10).map((w) => (
+                      <tr key={w.id}>
+                        <td className="horse-sheet-td">{new Date(w.date).toLocaleDateString()}</td>
+                        <td className="horse-sheet-td horse-sheet-td-name">{w.weight} lbs</td>
+                        <td className="horse-sheet-td">{w.bodyScore?.toFixed(1) || '\u2014'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="horse-sheet-empty">No weight records</p>
+              )}
+            </div>
+          </div>
+
+          {/* Health Records */}
+          {healthRecords.length > 0 && (
+            <div className="horse-sheet-section" style={{ marginTop: '12px' }}>
+              <h2 className="horse-sheet-section-title">Health Records</h2>
+              <table className="horse-sheet-table">
+                <thead>
+                  <tr>
+                    <th className="horse-sheet-th">Type</th>
+                    <th className="horse-sheet-th">Date</th>
+                    <th className="horse-sheet-th">Provider</th>
+                    <th className="horse-sheet-th">Diagnosis / Treatment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {healthRecords.map((record) => (
+                    <tr key={record.id}>
+                      <td className="horse-sheet-td horse-sheet-td-name">{record.type.replace(/_/g, ' ')}</td>
+                      <td className="horse-sheet-td">{new Date(record.date).toLocaleDateString()}</td>
+                      <td className="horse-sheet-td">{record.provider || '\u2014'}</td>
+                      <td className="horse-sheet-td">{record.diagnosis || record.treatment || '\u2014'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {horse.ownerName && (
+            <p className="horse-sheet-owner">Owner: {horse.ownerName}</p>
+          )}
+
+          <div className="horse-sheet-footer">
+            Printed from StableTrack &mdash; {new Date().toLocaleDateString()}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

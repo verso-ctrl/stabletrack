@@ -22,6 +22,7 @@ import {
   Weight,
   Camera,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 // Import extracted components
 import {
@@ -344,14 +345,17 @@ export default function HorseDetailPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Horses', href: '/horses' },
+          { label: horse.barnName },
+        ]}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        <Link
-          href="/horses"
-          className="p-2 rounded-xl hover:bg-accent transition-all self-start"
-        >
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
@@ -371,7 +375,7 @@ export default function HorseDetailPage() {
               <Edit className="w-4 h-4" />
               <span className="sm:inline">Edit</span>
             </Link>
-            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-accent transition-all flex-shrink-0">
+            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-accent transition-all flex-shrink-0" aria-label="More options">
               <MoreVertical className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
@@ -445,7 +449,7 @@ export default function HorseDetailPage() {
             />
             <InfoItem
               label="Stall"
-              value={horse.stallName}
+              value={horse.stallName ? `${horse.stallName}${currentBarn?.name ? ` (${currentBarn.name})` : ''}` : null}
               icon={MapPin}
             />
             <InfoItem
@@ -456,6 +460,7 @@ export default function HorseDetailPage() {
             <InfoItem
               label="Owner"
               value={horse.ownerName}
+              subValue={[horse.ownerPhone, horse.ownerEmail].filter(Boolean).join(' • ') || undefined}
               icon={User}
             />
             <InfoItem
@@ -478,11 +483,30 @@ export default function HorseDetailPage() {
       {/* Tabs - Grid on mobile, horizontal scroll on larger screens */}
       <div className="border-b border-border -mx-3 sm:-mx-4 sm:mx-0">
         {/* Mobile: Grid layout */}
-        <nav className="grid grid-cols-4 gap-1 px-2 pb-2 sm:hidden">
+        <div role="tablist" aria-label="Horse details" className="grid grid-cols-4 gap-1 px-2 pb-2 sm:hidden">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              role="tab"
+              aria-selected={activeTab === id}
+              aria-controls={`tabpanel-${id}`}
+              id={`tab-${id}`}
               onClick={() => setActiveTab(id)}
+              onKeyDown={(e) => {
+                const currentIndex = tabs.findIndex(t => t.id === id);
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  const nextIndex = (currentIndex + 1) % tabs.length;
+                  setActiveTab(tabs[nextIndex].id);
+                  document.getElementById(`tab-${tabs[nextIndex].id}`)?.focus();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                  setActiveTab(tabs[prevIndex].id);
+                  document.getElementById(`tab-${tabs[prevIndex].id}`)?.focus();
+                }
+              }}
+              tabIndex={activeTab === id ? 0 : -1}
               className={`
                 flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all no-tap-highlight
                 ${activeTab === id
@@ -495,14 +519,33 @@ export default function HorseDetailPage() {
               <span className="text-[10px] font-medium leading-tight text-center">{label.split(' ')[0]}</span>
             </button>
           ))}
-        </nav>
+        </div>
 
         {/* Desktop: Horizontal tabs */}
-        <nav className="hidden sm:flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
+        <div role="tablist" aria-label="Horse details" className="hidden sm:flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              role="tab"
+              aria-selected={activeTab === id}
+              aria-controls={`tabpanel-${id}`}
+              id={`tab-${id}-desktop`}
               onClick={() => setActiveTab(id)}
+              onKeyDown={(e) => {
+                const currentIndex = tabs.findIndex(t => t.id === id);
+                if (e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  const nextIndex = (currentIndex + 1) % tabs.length;
+                  setActiveTab(tabs[nextIndex].id);
+                  document.getElementById(`tab-${tabs[nextIndex].id}-desktop`)?.focus();
+                } else if (e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+                  setActiveTab(tabs[prevIndex].id);
+                  document.getElementById(`tab-${tabs[prevIndex].id}-desktop`)?.focus();
+                }
+              }}
+              tabIndex={activeTab === id ? 0 : -1}
               className={`
                 flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all flex-shrink-0
                 ${activeTab === id
@@ -515,12 +558,12 @@ export default function HorseDetailPage() {
               <span>{label}</span>
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* Tab Content */}
-      <div className="min-h-[400px]">
-        {activeTab === 'overview' && <OverviewTab horse={horse} onNavigateToHealth={() => setActiveTab('health')} />}
+      <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="min-h-[400px]">
+        {activeTab === 'overview' && <OverviewTab horse={horse} barnId={currentBarn?.id} onNavigateToHealth={() => setActiveTab('health')} onRefresh={refetch} />}
         {activeTab === 'photos' && currentBarn && (
           <div className="card p-6">
             <HorsePhotoGallery
@@ -568,7 +611,7 @@ export default function HorseDetailPage() {
                   <Weight className="w-5 h-5 text-amber-500" />
                   Log Weight
                 </h3>
-                <button onClick={() => setShowWeightModal(false)} className="p-1 rounded hover:bg-accent">
+                <button onClick={() => setShowWeightModal(false)} className="p-1 rounded hover:bg-accent" aria-label="Close">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -640,7 +683,7 @@ export default function HorseDetailPage() {
                   <Syringe className="w-5 h-5 text-green-500" />
                   Log Vaccination
                 </h3>
-                <button onClick={() => setShowVaccinationModal(false)} className="p-1 rounded hover:bg-accent">
+                <button onClick={() => setShowVaccinationModal(false)} className="p-1 rounded hover:bg-accent" aria-label="Close">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -743,7 +786,7 @@ export default function HorseDetailPage() {
                   <Utensils className="w-5 h-5 text-amber-500" />
                   Edit Feed Program
                 </h3>
-                <button onClick={() => setShowFeedModal(false)} className="p-1 rounded hover:bg-accent">
+                <button onClick={() => setShowFeedModal(false)} className="p-1 rounded hover:bg-accent" aria-label="Close">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -787,6 +830,7 @@ export default function HorseDetailPage() {
                             type="button"
                             onClick={() => removeFeedItem(index)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            aria-label="Remove feed item"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -858,7 +902,7 @@ export default function HorseDetailPage() {
             <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Add Coggins Record</h3>
-                <button onClick={() => setShowCogginsModal(false)} className="p-1 rounded hover:bg-accent">
+                <button onClick={() => setShowCogginsModal(false)} className="p-1 rounded hover:bg-accent" aria-label="Close">
                   <X className="w-5 h-5" />
                 </button>
               </div>

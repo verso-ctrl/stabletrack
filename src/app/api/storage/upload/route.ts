@@ -101,17 +101,12 @@ export async function POST(req: NextRequest) {
       })
 
       if (hasReachedPhotoLimit(tier, photoCount)) {
-        const nextTier = getNextTier(tier)
         return NextResponse.json({
           error: `Photo limit reached (${limits.maxPhotosPerHorse} photos per horse on ${getTierDisplayName(tier)} plan)`,
           code: 'PHOTO_LIMIT_REACHED',
           limit: limits.maxPhotosPerHorse,
           current: photoCount,
-          upgrade: nextTier ? {
-            tier: nextTier,
-            tierName: getTierDisplayName(nextTier),
-            newLimit: getTierLimits(nextTier).maxPhotosPerHorse,
-          } : null,
+          upgrade: getNextTier(tier),
         }, { status: 403 })
       }
     }

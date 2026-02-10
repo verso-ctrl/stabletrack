@@ -1,0 +1,22 @@
+import Link from 'next/link';
+
+export default function DashboardNotFound() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="text-center max-w-md">
+        <div className="text-6xl mb-6">🐴</div>
+        <h1 className="text-4xl font-bold text-foreground mb-2">404</h1>
+        <h2 className="text-xl font-semibold text-foreground mb-3">Page not found</h2>
+        <p className="text-muted-foreground mb-8">
+          This page doesn&apos;t exist or has been moved.
+        </p>
+        <Link
+          href="/dashboard"
+          className="inline-block px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 font-medium transition-opacity"
+        >
+          Go to Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
