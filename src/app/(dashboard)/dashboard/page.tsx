@@ -641,9 +641,10 @@ export default function DashboardPage() {
                   const date = new Date(event.scheduledDate);
                   const isToday = today ? date.toDateString() === today.toDateString() : false;
                   const isTomorrow = today ? date.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
-                  
+                  const calendarDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
                   return (
-                    <div key={event.id} className="p-4 hover:bg-accent transition-colors">
+                    <Link key={event.id} href={`/calendar?date=${calendarDate}`} className="block p-4 hover:bg-accent transition-colors">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground">{event.title}</p>
@@ -660,7 +661,7 @@ export default function DashboardPage() {
                         </div>
                         <ArrowUpRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>

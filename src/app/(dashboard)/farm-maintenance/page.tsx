@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
@@ -82,6 +82,67 @@ export default function FarmMaintenancePage() {
   const isLoading = pendingLoading || completedLoading;
   const refetch = () => { refetchPending(); refetchCompleted(); };
 
+  // Task completion: 'checking' = strikethrough shown, 'fading' = fading out, 'done' = hidden
+  const [taskStates, setTaskStates] = useState<Record<string, 'checking' | 'fading' | 'done'>>({});
+  const fadeTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const completeTask = useCallback(async (taskId: string, taskTitle: string) => {
+    setTaskStates(prev => ({ ...prev, [taskId]: 'checking' }));
+
+    fadeTimers.current[taskId] = setTimeout(() => {
+      setTaskStates(prev => ({ ...prev, [taskId]: 'fading' }));
+      fadeTimers.current[`${taskId}-done`] = setTimeout(() => {
+        setTaskStates(prev => ({ ...prev, [taskId]: 'done' }));
+      }, 300);
+    }, 1500);
+
+    try {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'COMPLETED' }),
+      });
+      if (!response.ok) throw new Error('Failed to update task');
+
+      toast.success('Task completed', taskTitle, {
+        label: 'Undo',
+        onClick: () => undoComplete(taskId),
+      });
+      refetch();
+    } catch {
+      toast.error('Failed to update task', 'Please try again');
+      clearTimeout(fadeTimers.current[taskId]);
+      clearTimeout(fadeTimers.current[`${taskId}-done`]);
+      setTaskStates(prev => {
+        const next = { ...prev };
+        delete next[taskId];
+        return next;
+      });
+    }
+  }, [currentBarn?.id]);
+
+  const undoComplete = useCallback(async (taskId: string) => {
+    clearTimeout(fadeTimers.current[taskId]);
+    clearTimeout(fadeTimers.current[`${taskId}-done`]);
+    setTaskStates(prev => {
+      const next = { ...prev };
+      delete next[taskId];
+      return next;
+    });
+
+    try {
+      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PENDING' }),
+      });
+      if (!response.ok) throw new Error('Failed to undo');
+      refetch();
+    } catch {
+      toast.error('Undo failed', 'Could not restore task');
+    }
+  }, [currentBarn?.id]);
+
   // Apply task type filter
   const filterByType = (tasks: typeof pendingTasks) => {
     if (taskType === 'FARM') return tasks.filter(t => !t.horseId);
@@ -93,13 +154,12 @@ export default function FarmMaintenancePage() {
   const filteredCompleted = filterByType(completedTasks);
   const displayTasks = statusFilter === 'COMPLETED' ? filteredCompleted : filteredPending;
 
-  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+  const uncompleteTask = async (taskId: string) => {
     try {
       const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: 'PENDING' }),
       });
       if (!response.ok) throw new Error('Failed to update task');
       refetch();
@@ -250,16 +310,30 @@ export default function FarmMaintenancePage() {
         </div>
       ) : displayTasks.length > 0 ? (
         <div className="card divide-y divide-border">
-          {displayTasks.map((task) => (
+          {displayTasks.map((task) => {
+            const state = taskStates[task.id];
+            const isChecking = !!state;
+            const isCompleted = task.status === 'COMPLETED';
+            if (state === 'done') return null;
+            return (
             <div
               key={task.id}
-              className="p-4 hover:bg-accent transition-all flex items-center gap-4"
+              className={`p-4 hover:bg-accent transition-all duration-300 flex items-center gap-4 ${
+                state === 'fading' ? 'opacity-0 max-h-0 py-0 overflow-hidden' : 'opacity-100 max-h-32'
+              }`}
             >
               <button
-                onClick={() => toggleTaskStatus(task.id, task.status)}
+                onClick={() => {
+                  if (isCompleted) {
+                    uncompleteTask(task.id);
+                  } else if (!state) {
+                    completeTask(task.id, task.title);
+                  }
+                }}
                 className="flex-shrink-0"
+                disabled={isChecking}
               >
-                {task.status === 'COMPLETED' ? (
+                {isCompleted || isChecking ? (
                   <CheckCircle2 className="w-6 h-6 text-green-500" />
                 ) : (
                   <Circle className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors" />
@@ -268,8 +342,8 @@ export default function FarmMaintenancePage() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className={`font-medium ${
-                    task.status === 'COMPLETED' ? 'text-muted-foreground line-through' : 'text-foreground'
+                  <p className={`font-medium transition-all duration-300 ${
+                    isCompleted || isChecking ? 'text-muted-foreground line-through' : 'text-foreground'
                   }`}>
                     {task.title}
                   </p>
@@ -315,7 +389,8 @@ export default function FarmMaintenancePage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="card p-12 text-center">
