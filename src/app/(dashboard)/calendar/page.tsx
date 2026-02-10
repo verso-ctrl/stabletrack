@@ -809,7 +809,11 @@ export default function CalendarPage() {
                         : event.horse?.barnName || null;
 
                       return (
-                        <div key={event.id} className="flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors">
+                        <div
+                          key={event.id}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors cursor-pointer"
+                          onClick={() => openEditEvent(event)}
+                        >
                           <div className={`p-2 rounded-lg ${colorClass}`}>
                             <Icon className="w-4 h-4" />
                           </div>
@@ -829,6 +833,7 @@ export default function CalendarPage() {
                               {event.providerName}
                             </span>
                           )}
+                          <Pencil className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
                         </div>
                       );
                     })}
