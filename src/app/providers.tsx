@@ -10,10 +10,16 @@ import type { SubscriptionTier } from '@/lib/tiers';
 // Wrapper component to connect BarnContext to SubscriptionProvider
 function SubscriptionProviderWithBarn({ children }: { children: React.ReactNode }) {
   const { currentBarn } = useBarn();
-  const barnTier = (currentBarn?.tier as SubscriptionTier) || 'CORE';
+  const barnTier = (currentBarn?.tier as SubscriptionTier) || 'STARTER';
 
   return (
-    <SubscriptionProvider barnId={currentBarn?.id} barnTier={barnTier}>
+    <SubscriptionProvider
+      barnId={currentBarn?.id}
+      barnTier={barnTier}
+      trialEndsAt={currentBarn?.trialEndsAt ?? null}
+      barnAddOns={currentBarn?.activeAddOns}
+      barnSubscriptionStatus={currentBarn?.subscriptionStatus ?? 'TRIALING'}
+    >
       {children}
     </SubscriptionProvider>
   );

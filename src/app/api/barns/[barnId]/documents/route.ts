@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, checkBarnPermission, getClientAccess } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { saveBase64File } from '@/lib/storage-server';
+import { enforceActiveSubscription, enforceStorageLimit } from '@/lib/tier-validation';
 
 // GET /api/barns/[barnId]/documents - Get all documents for barn
 export async function GET(
@@ -82,6 +83,16 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Enforce subscription status
+    try {
+      await enforceActiveSubscription(barnId);
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Subscription inactive' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const {
       horseId,
@@ -107,6 +118,17 @@ export async function POST(
 
     if (!horse) {
       return NextResponse.json({ error: 'Horse not found' }, { status: 404 });
+    }
+
+    // Enforce storage limit (estimate file size from base64)
+    const estimatedSize = Math.ceil(fileBase64.length * 3 / 4);
+    try {
+      await enforceStorageLimit(barnId, estimatedSize);
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Storage quota exceeded' },
+        { status: 403 }
+      );
     }
 
     // Save the file

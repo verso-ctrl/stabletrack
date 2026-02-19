@@ -3,6 +3,7 @@
 import { Sidebar, MobileBottomNav } from '@/components/dashboard/Sidebar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ToastContainer } from '@/components/ui/ToastContainer';
+import { TrialExpiredOverlay } from '@/components/billing/TrialExpiredOverlay';
 
 export default function DashboardLayout({
   children,
@@ -31,6 +32,7 @@ export default function DashboardLayout({
 
         <MobileBottomNav />
         <ToastContainer />
+        <TrialExpiredOverlay />
       </div>
     </ErrorBoundary>
   );

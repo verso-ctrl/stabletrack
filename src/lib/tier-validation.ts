@@ -43,22 +43,21 @@ export interface BarnUsage {
  * Get subscription info for a barn (Demo mode: always BASIC)
  */
 export async function getBarnSubscription(barnId: string): Promise<BarnSubscription> {
-  // Verify barn exists
   const barn = await prisma.barn.findUnique({
     where: { id: barnId },
+    select: { tier: true, activeAddOns: true },
   })
 
   if (!barn) {
     throw new Error('Barn not found')
   }
 
-  // Demo mode: Always return CORE tier
-  const tier: SubscriptionTier = 'CORE'
+  const tier = normalizeTier(barn.tier) as SubscriptionTier
 
   return {
     tier,
-    activeAddOns: [],
-    features: getTierFeatures(tier),
+    activeAddOns: barn.activeAddOns || [],
+    features: getTierFeatures(tier, barn.activeAddOns || []),
   }
 }
 
@@ -267,6 +266,33 @@ export async function enforceDocumentTypeAccess(
   const result = await canUploadDocument(barnId, documentType)
   if (!result.allowed) {
     throw new Error(result.reason || 'Document type not allowed')
+  }
+}
+
+/**
+ * Enforce that the barn has an active subscription (not canceled or expired trial).
+ * PAST_DUE is allowed — Stripe handles dunning/retry.
+ */
+export async function enforceActiveSubscription(barnId: string): Promise<void> {
+  const barn = await prisma.barn.findUnique({
+    where: { id: barnId },
+    select: { subscriptionStatus: true, trialEndsAt: true },
+  })
+
+  if (!barn) {
+    throw new Error('Barn not found')
+  }
+
+  if (barn.subscriptionStatus === 'CANCELED') {
+    throw new Error('Subscription canceled. Please resubscribe to continue.')
+  }
+
+  if (
+    barn.subscriptionStatus === 'TRIALING' &&
+    barn.trialEndsAt &&
+    new Date(barn.trialEndsAt) < new Date()
+  ) {
+    throw new Error('Free trial has expired. Please choose a plan to continue.')
   }
 }
 

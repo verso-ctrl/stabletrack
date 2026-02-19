@@ -1,52 +1,34 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Loader2, ArrowUp, CreditCard, Sparkles, Crown } from 'lucide-react';
+import { Check, Loader2, ArrowUp, ArrowDown, Star } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useBarn } from '@/contexts/BarnContext';
+import { AddOnCard } from './AddOnCard';
+import {
+  TIER_PRICING,
+  STARTER_FEATURES,
+  FARM_FEATURES,
+  ADD_ONS,
+  formatBytes,
+  type SubscriptionTier,
+} from '@/lib/tiers';
 import {
   TIER_LIMITS,
-  TIER_PRICING,
-  type SubscriptionTier,
 } from '@/types';
-
-const HorseIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
-    <circle cx="18" cy="9" r="1"/>
-  </svg>
-);
-
-const TIER_INFO: Record<
-  SubscriptionTier,
-  { name: string; description: string; highlighted?: boolean; icon?: React.ReactNode }
-> = {
-  CORE: {
-    name: 'Core',
-    description: 'Everything you need for a small barn',
-    highlighted: true,
-  },
-  PRO: {
-    name: 'Pro',
-    description: 'Unlimited horses for growing operations',
-    icon: <Crown className="w-4 h-4 text-amber-500" />,
-  },
-};
-
-function formatPrice(cents: number): string {
-  if (cents === 0) return 'Free';
-  return `$${(cents / 100).toFixed(0)}`;
-}
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { toast } from '@/lib/toast';
 
 function formatLimit(value: number): string {
   return value === -1 ? 'Unlimited' : value.toString();
 }
 
 export function PricingPlans() {
-  const { tier: currentTier, isLoading } = useSubscription();
+  const { tier: currentTier, isLoading, changeTier, activeAddOns } = useSubscription();
   const { currentBarn, refreshBarn } = useBarn();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState<SubscriptionTier | null>(null);
+  const [confirmUpgrade, setConfirmUpgrade] = useState<SubscriptionTier | null>(null);
+  const [confirmDowngrade, setConfirmDowngrade] = useState<SubscriptionTier | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleUpgrade = async (tier: SubscriptionTier) => {
@@ -73,7 +55,6 @@ export function PricingPlans() {
       }
 
       if (data.demoMode) {
-        // Demo mode: Simulate the upgrade
         const upgradeResponse = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -81,8 +62,9 @@ export function PricingPlans() {
         });
 
         if (upgradeResponse.ok) {
+          await changeTier(tier);
           await refreshBarn?.();
-          setShowUpgradeModal(null);
+          toast.success('Plan upgraded!', `You are now on the ${TIER_PRICING[tier].displayName} plan.`);
         }
       } else if (data.url) {
         window.location.href = data.url;
@@ -94,148 +76,271 @@ export function PricingPlans() {
       setError(err instanceof Error ? err.message : 'Failed to upgrade');
     } finally {
       setLoadingTier(null);
+      setConfirmUpgrade(null);
     }
   };
 
-  const tiers: SubscriptionTier[] = ['CORE', 'PRO'];
+  const handleDowngrade = async (tier: SubscriptionTier) => {
+    if (!currentBarn?.id) return;
+
+    try {
+      setLoadingTier(tier);
+      setError(null);
+
+      const response = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to downgrade');
+      }
+
+      await changeTier(tier);
+      await refreshBarn?.();
+      toast.success('Plan changed', `You've been switched to the ${TIER_PRICING[tier].displayName} plan.`);
+    } catch (err) {
+      console.error('Downgrade failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to downgrade');
+    } finally {
+      setLoadingTier(null);
+      setConfirmDowngrade(null);
+    }
+  };
+
+  const handleAddOn = async (addOnId: string) => {
+    if (!currentBarn?.id) return;
+    try {
+      setError(null);
+      const response = await fetch('/api/billing/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_addon',
+          addOnId,
+          barnId: currentBarn.id,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add add-on');
+      }
+      if (data.demoMode) {
+        await refreshBarn?.();
+        toast.success('Add-on activated!', `${ADD_ONS[addOnId]?.name} has been added to your plan.`);
+      } else if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Add-on activation failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to add add-on');
+    }
+  };
+
+  const handleRemoveAddOn = async (addOnId: string) => {
+    if (!currentBarn?.id) return;
+    try {
+      setError(null);
+      const response = await fetch('/api/billing/remove-addon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          barnId: currentBarn.id,
+          addOnId,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to remove add-on');
+      }
+      await refreshBarn?.();
+      toast.info('Add-on removed', `${ADD_ONS[addOnId]?.name} has been removed from your plan.`);
+    } catch (err) {
+      console.error('Add-on removal failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove add-on');
+    }
+  };
+
+  const plans: {
+    tier: SubscriptionTier
+    features: string[]
+    bestValue?: boolean
+  }[] = [
+    { tier: 'STARTER', features: STARTER_FEATURES },
+    { tier: 'FARM', features: FARM_FEATURES, bestValue: true },
+  ];
 
   return (
-    <div className="py-8">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-foreground">
-          Simple, transparent pricing
-        </h2>
-        <p className="mt-4 text-lg text-muted-foreground">
-          All features included. Pick the plan that fits your barn.
+    <div className="space-y-8">
+      {/* Change Plan */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Change Plan</h2>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {plans.map(({ tier, features, bestValue }) => {
+            const pricing = TIER_PRICING[tier];
+            const isCurrent = tier === currentTier;
+            const isUpgrade = tier === 'FARM' && currentTier === 'STARTER';
+            const isDowngrade = tier === 'STARTER' && currentTier === 'FARM';
+
+            return (
+              <div
+                key={tier}
+                className={`
+                  relative rounded-xl border-2 p-5 flex flex-col
+                  ${bestValue ? 'border-primary/50' : 'border-border'}
+                  ${isCurrent ? 'ring-2 ring-green-500 ring-offset-2' : ''}
+                `}
+              >
+                {bestValue && !isCurrent && (
+                  <span className="absolute -top-3 right-4 inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <Star className="w-3 h-3" />
+                    Best Value
+                  </span>
+                )}
+
+                {isCurrent && (
+                  <span className="absolute -top-3 right-4 bg-green-500 text-white text-xs font-medium px-3 py-0.5 rounded-full">
+                    Current Plan
+                  </span>
+                )}
+
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-foreground">{pricing.displayName}</h3>
+                  <p className="text-sm text-muted-foreground">{pricing.description}</p>
+                </div>
+
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-foreground">
+                    ${pricing.monthlyPriceCents / 100}
+                  </span>
+                  <span className="text-muted-foreground ml-1">/month</span>
+                </div>
+
+                <ul className="space-y-2 mb-6 flex-1">
+                  {features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => {
+                    if (isUpgrade) setConfirmUpgrade(tier);
+                    else if (isDowngrade) setConfirmDowngrade(tier);
+                  }}
+                  disabled={isCurrent || loadingTier !== null || isLoading}
+                  className={`
+                    w-full py-2.5 px-4 rounded-lg font-medium transition-all
+                    flex items-center justify-center gap-2 text-sm
+                    ${
+                      isCurrent
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default'
+                        : isUpgrade
+                        ? 'bg-primary text-primary-foreground hover:opacity-90'
+                        : 'border border-border text-muted-foreground hover:bg-muted'
+                    }
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  `}
+                >
+                  {loadingTier === tier ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : isCurrent ? (
+                    'Current Plan'
+                  ) : isUpgrade ? (
+                    <>
+                      <ArrowUp className="w-4 h-4" />
+                      Upgrade to {pricing.displayName}
+                    </>
+                  ) : (
+                    <>
+                      <ArrowDown className="w-4 h-4" />
+                      Switch to {pricing.displayName}
+                    </>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-3">
+          Upgrade is prorated. Downgrade takes effect next billing cycle.
         </p>
       </div>
 
-      {error && (
-        <div className="max-w-4xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
+      {/* Add-Ons */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Add-Ons</h2>
+
+        <div className="space-y-3">
+          {/* Available add-ons */}
+          {Object.values(ADD_ONS).filter(a => a.available).map((addOn) => (
+            <AddOnCard
+              key={addOn.id}
+              addOn={addOn}
+              isActive={activeAddOns.includes(addOn.id)}
+              onAdd={() => handleAddOn(addOn.id)}
+              onRemove={() => handleRemoveAddOn(addOn.id)}
+            />
+          ))}
+
+          {/* Coming soon */}
+          {Object.values(ADD_ONS).filter(a => !a.available).map((addOn) => (
+            <AddOnCard
+              key={addOn.id}
+              addOn={addOn}
+              compact
+            />
+          ))}
         </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-        {tiers.map((tier) => {
-          const info = TIER_INFO[tier];
-          const limits = TIER_LIMITS[tier];
-          const price = TIER_PRICING[tier];
-          const isCurrent = tier === currentTier;
-          const isUpgrade = tiers.indexOf(tier) > tiers.indexOf(currentTier);
-
-          return (
-            <div
-              key={tier}
-              className={`
-                relative rounded-2xl border-2 p-6 flex flex-col
-                ${info.highlighted ? 'border-amber-500 shadow-xl' : 'border-border'}
-                ${isCurrent ? 'ring-2 ring-green-500 ring-offset-2' : ''}
-              `}
-            >
-              {info.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-amber-500 text-white text-sm font-medium px-4 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              {isCurrent && (
-                <div className="absolute -top-4 right-4">
-                  <span className="bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-                    Current Plan
-                  </span>
-                </div>
-              )}
-
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-                  {info.icon}
-                  {info.name}
-                </h3>
-                <p className="text-muted-foreground text-sm mt-1">{info.description}</p>
-              </div>
-
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-foreground">
-                  {formatPrice(price)}
-                </span>
-                <span className="text-muted-foreground ml-1">/month</span>
-              </div>
-
-              {/* Horse limit highlight */}
-              <div className="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <HorseIcon className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-amber-700">
-                      {formatLimit(limits.maxHorses)}
-                    </p>
-                    <p className="text-sm text-amber-600">
-                      {limits.maxHorses === -1 ? 'horses' : 'horses max'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {limits.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => isUpgrade && handleUpgrade(tier)}
-                disabled={isCurrent || loadingTier !== null || isLoading || !isUpgrade}
-                className={`
-                  w-full py-3 px-4 rounded-xl font-medium transition-all
-                  flex items-center justify-center gap-2
-                  ${
-                    isCurrent
-                      ? 'bg-green-100 text-green-700 cursor-default'
-                      : isUpgrade
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-muted text-muted-foreground cursor-default'
-                  }
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
-              >
-                {loadingTier === tier ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : isCurrent ? (
-                  'Current Plan'
-                ) : isUpgrade ? (
-                  <>
-                    <ArrowUp className="w-4 h-4" />
-                    Upgrade to {info.name}
-                  </>
-                ) : (
-                  info.name
-                )}
-              </button>
-            </div>
-          );
-        })}
       </div>
 
-      <p className="text-center text-sm text-muted-foreground mt-8">
-        All plans include every feature. 14-day free trial, no credit card required.
-      </p>
+      {/* Upgrade Confirmation */}
+      {confirmUpgrade && (
+        <ConfirmDialog
+          open={true}
+          onCancel={() => setConfirmUpgrade(null)}
+          onConfirm={() => handleUpgrade(confirmUpgrade)}
+          title={`Upgrade to ${TIER_PRICING[confirmUpgrade].displayName}?`}
+          description={`Your plan will be upgraded immediately. You'll be charged the prorated difference today. Your next bill will be $${TIER_PRICING[confirmUpgrade].monthlyPriceCents / 100}/month.`}
+          confirmLabel="Upgrade"
+          variant="default"
+        />
+      )}
+
+      {/* Downgrade Confirmation */}
+      {confirmDowngrade && (
+        <ConfirmDialog
+          open={true}
+          onCancel={() => setConfirmDowngrade(null)}
+          onConfirm={() => handleDowngrade(confirmDowngrade)}
+          title={`Switch to ${TIER_PRICING[confirmDowngrade].displayName}?`}
+          description={`This takes effect at the end of your current billing period. The Starter plan supports up to 10 horses.`}
+          confirmLabel="Switch plan"
+          variant="default"
+        />
+      )}
     </div>
   );
 }
 
 export function CurrentPlanCard() {
-  const { subscription, tier, isLoading } = useSubscription();
+  const { subscription, tier, isLoading, usage, limits, trial, storagePercentUsed } = useSubscription();
   const { currentBarn } = useBarn();
   const [isOpening, setIsOpening] = useState(false);
 
@@ -256,7 +361,7 @@ export function CurrentPlanCard() {
       if (data.url) {
         window.location.href = data.url;
       } else if (data.demoMode) {
-        alert('Demo Mode: In production, this would open the Stripe billing portal.');
+        toast.info('Demo Mode', 'In production, this would open the Stripe billing portal.');
       }
     } catch (err) {
       console.error('Failed to open billing portal:', err);
@@ -274,9 +379,9 @@ export function CurrentPlanCard() {
     );
   }
 
-  const info = TIER_INFO[tier];
-  const limits = TIER_LIMITS[tier];
-  const price = TIER_PRICING[tier];
+  const pricing = TIER_PRICING[tier];
+  const horsePercent = limits.maxHorses === -1 ? 0 : Math.round((usage.horses / limits.maxHorses) * 100);
+  const teamPercent = limits.maxTeamMembers === -1 ? 0 : Math.round((usage.teamMembers / limits.maxTeamMembers) * 100);
 
   return (
     <div className="bg-card rounded-2xl border border-border p-6">
@@ -284,65 +389,103 @@ export function CurrentPlanCard() {
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
-              {info.name} Plan
+              {pricing.displayName} Plan
             </h3>
             <span
               className={`
               px-2 py-0.5 rounded-full text-xs font-medium
-              ${
-                subscription?.status === 'ACTIVE'
-                  ? 'bg-green-100 text-green-700'
-                  : subscription?.status === 'PAST_DUE'
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-muted text-muted-foreground'
+              ${trial.isTrialing
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                : subscription?.status === 'ACTIVE'
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : subscription?.status === 'PAST_DUE'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-muted text-muted-foreground'
               }
             `}
             >
-              {subscription?.status || 'Active'}
+              {trial.isTrialing
+                ? `Trial: ${trial.daysRemaining} days remaining`
+                : subscription?.status || 'Active'
+              }
             </span>
           </div>
-          <p className="text-muted-foreground text-sm mt-1">{info.description}</p>
+          <p className="text-muted-foreground text-sm mt-1">{pricing.description}</p>
         </div>
 
         <div className="text-right">
           <span className="text-2xl font-bold text-foreground">
-            {formatPrice(price)}
+            ${pricing.monthlyPriceCents / 100}
           </span>
           <span className="text-muted-foreground">/month</span>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-4">
-        <div className="p-3 bg-amber-50 rounded-lg">
-          <p className="text-xs text-amber-600 uppercase tracking-wide">
-            Horses
-          </p>
-          <p className="text-lg font-semibold text-amber-700">
-            {formatLimit(limits.maxHorses)}
-          </p>
+      {/* Usage Bars */}
+      <div className="mt-6 space-y-4">
+        {/* Horses */}
+        <div>
+          <div className="flex items-center justify-between text-sm mb-1">
+            <span className="text-muted-foreground">Horses</span>
+            <span className="font-medium text-foreground">
+              {usage.horses} / {formatLimit(limits.maxHorses)}
+            </span>
+          </div>
+          {limits.maxHorses !== -1 && (
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  horsePercent >= 90 ? 'bg-red-500' : horsePercent >= 70 ? 'bg-amber-500' : 'bg-primary'
+                }`}
+                style={{ width: `${Math.min(100, horsePercent)}%` }}
+              />
+            </div>
+          )}
         </div>
-        <div className="p-3 bg-background rounded-lg">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">
-            Storage
-          </p>
-          <p className="text-lg font-semibold text-foreground">
-            {limits.storageGb} GB
-          </p>
+
+        {/* Team Members */}
+        <div>
+          <div className="flex items-center justify-between text-sm mb-1">
+            <span className="text-muted-foreground">Team members</span>
+            <span className="font-medium text-foreground">
+              {usage.teamMembers} / {formatLimit(limits.maxTeamMembers)}
+            </span>
+          </div>
+          {limits.maxTeamMembers !== -1 && (
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  teamPercent >= 90 ? 'bg-red-500' : teamPercent >= 70 ? 'bg-amber-500' : 'bg-primary'
+                }`}
+                style={{ width: `${Math.min(100, teamPercent)}%` }}
+              />
+            </div>
+          )}
         </div>
-        <div className="p-3 bg-background rounded-lg">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">
-            Features
-          </p>
-          <p className="text-lg font-semibold text-foreground">
-            All
-          </p>
+
+        {/* Storage */}
+        <div>
+          <div className="flex items-center justify-between text-sm mb-1">
+            <span className="text-muted-foreground">Storage</span>
+            <span className="font-medium text-foreground">
+              {formatBytes(usage.storageBytes)} / {limits.maxStorageBytes === -1 ? '∞' : formatBytes(limits.maxStorageBytes)}
+            </span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${
+                storagePercentUsed >= 90 ? 'bg-red-500' : storagePercentUsed >= 70 ? 'bg-amber-500' : 'bg-primary'
+              }`}
+              style={{ width: `${Math.min(100, storagePercentUsed)}%` }}
+            />
+          </div>
         </div>
       </div>
 
       <button
         onClick={handleManageBilling}
         disabled={isOpening}
-        className="mt-4 w-full py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        className="mt-5 w-full py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-accent transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
       >
         {isOpening ? (
           <>
@@ -350,7 +493,7 @@ export function CurrentPlanCard() {
             Opening...
           </>
         ) : (
-          'Manage Billing'
+          'Manage billing'
         )}
       </button>
     </div>

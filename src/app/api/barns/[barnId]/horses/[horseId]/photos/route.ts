@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, checkBarnPermission } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { enforceActiveSubscription, enforcePhotoLimit, enforceStorageLimit } from '@/lib/tier-validation';
 
 // GET /api/barns/[barnId]/horses/[horseId]/photos
 export async function GET(
@@ -83,8 +84,31 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Enforce subscription status, photo limit, and storage limit
+    try {
+      await enforceActiveSubscription(barnId);
+      await enforcePhotoLimit(barnId, horseId);
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Plan limit reached' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { url, fileName, fileSize, mimeType, caption, isPrimary } = body;
+
+    // Enforce storage limit if file size is known
+    if (fileSize) {
+      try {
+        await enforceStorageLimit(barnId, fileSize);
+      } catch (err) {
+        return NextResponse.json(
+          { error: err instanceof Error ? err.message : 'Storage quota exceeded' },
+          { status: 403 }
+        );
+      }
+    }
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });

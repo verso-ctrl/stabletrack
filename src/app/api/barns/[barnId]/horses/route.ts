@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, checkBarnPermission, getClientAccess } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { enforceActiveSubscription } from '@/lib/tier-validation';
 
 // GET /api/barns/[barnId]/horses - Get all horses in a barn
 export async function GET(
@@ -137,6 +138,16 @@ export async function POST(
 
     if (!hasPermission) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Check subscription is active (not canceled or expired trial)
+    try {
+      await enforceActiveSubscription(barnId);
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Subscription inactive' },
+        { status: 403 }
+      );
     }
 
     // Check horse limit based on barn's subscription tier

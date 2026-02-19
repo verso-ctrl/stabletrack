@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser, checkBarnPermission } from '@/lib/auth'
-import { TIER_LIMITS, type SubscriptionTier } from '@/types'
+import { getTierLimits, type SubscriptionTier } from '@/lib/tiers'
 
 interface RouteParams {
   params: Promise<{ barnId: string }>
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const tier = barn.tier as SubscriptionTier
-    const limits = TIER_LIMITS[tier] || TIER_LIMITS.CORE
+    const limits = getTierLimits(tier)
 
     return NextResponse.json({
       tier,
@@ -91,10 +91,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json()
     const { tier } = body
 
-    const validTiers: SubscriptionTier[] = ['CORE', 'PRO']
+    const validTiers: SubscriptionTier[] = ['STARTER', 'FARM']
     if (!tier || !validTiers.includes(tier)) {
       return NextResponse.json(
-        { error: 'Invalid tier. Must be CORE or PRO.' },
+        { error: 'Invalid tier. Must be STARTER or FARM.' },
         { status: 400 }
       )
     }
@@ -112,7 +112,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Barn not found' }, { status: 404 })
     }
 
-    const newLimits = TIER_LIMITS[tier as SubscriptionTier]
+    const newLimits = getTierLimits(tier as SubscriptionTier)
     const horseCount = barn._count.horses
 
     // Check if downgrade is allowed based on horse count

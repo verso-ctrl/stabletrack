@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, checkBarnPermission } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { enforceActiveSubscription, enforceTeamMemberLimit } from '@/lib/tier-validation';
 
 // GET /api/barns/[barnId]/members - Get all barn members
 export async function GET(
@@ -76,6 +77,17 @@ export async function POST(
     const hasPermission = await checkBarnPermission(user.id, barnId, 'team:invite');
     if (!hasPermission) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Enforce subscription status and team member limit
+    try {
+      await enforceActiveSubscription(barnId);
+      await enforceTeamMemberLimit(barnId);
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Plan limit reached' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
