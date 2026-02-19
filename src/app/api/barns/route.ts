@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, address, city, state, zipCode, country, timezone, phone, email, tier } = body;
+    const { name, address, city, state, zipCode, country, timezone, phone, email, tier, addOns } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -163,8 +163,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Default to CORE tier (single plan)
-    const barnTier = tier || 'CORE';
+    // Default to STARTER tier
+    const barnTier = tier || 'STARTER';
+
+    // Trial ends 14 days from now
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
+    // Validate add-ons
+    const activeAddOns: string[] = Array.isArray(addOns) ? addOns.filter((a: string) => typeof a === 'string') : [];
 
     // Generate unique invite code
     const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`;
@@ -182,8 +189,10 @@ export async function POST(request: NextRequest) {
         country: country || 'US',
         timezone: timezone || 'America/New_York',
         inviteCode,
-        tier: barnTier, // Store tier on the barn itself
-        subscriptionStatus: 'ACTIVE',
+        tier: barnTier,
+        subscriptionStatus: 'TRIALING',
+        trialEndsAt,
+        activeAddOns,
         members: {
           create: {
             userId: user.id,

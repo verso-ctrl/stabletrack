@@ -6,7 +6,13 @@ import {
   Check,
   HelpCircle,
   ClipboardList,
+  Star,
 } from 'lucide-react';
+import {
+  STARTER_FEATURES,
+  FARM_FEATURES,
+  ADD_ONS,
+} from '@/lib/tiers';
 
 const HorseIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -15,59 +21,33 @@ const HorseIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const coreFeatures = [
-  'Unlimited horses',
-  'Horse profiles & management',
-  'Feed tracking & feed charts',
-  'Stall assignments',
-  'Pasture & paddock assignments',
-  'Vaccinations & health records',
-  'Medication tracking & schedules',
-  'Daily health checks',
-  'Daily care logs',
-  'Calendar & scheduling',
-  'Task management',
-  'Document storage',
-  'Activity log',
-  'Mobile access',
-];
-
-const addOns = [
-  {
-    name: 'Breeding Tracker',
-    description: 'Heat cycles, breeding records, and foaling management.',
-  },
-  {
-    name: 'Training & Lessons',
-    description: 'Training logs, lesson scheduling, and competition tracking.',
-  },
-  {
-    name: 'Client & Billing',
-    description: 'Client management, invoicing, payments, and recurring billing.',
-  },
-  {
-    name: 'Team Management',
-    description: 'Multi-user access, role-based permissions, and team coordination.',
-  },
-];
-
 const faqs = [
   {
     question: 'Is there a horse limit?',
-    answer: 'Nope! The core plan includes unlimited horses. Whether you have 2 or 20, you pay the same $25/month.',
+    answer: 'The Starter plan supports up to 10 horses. Need more? The Farm plan has no limit.',
   },
   {
     question: 'Can I cancel anytime?',
     answer: 'Absolutely. No contracts, no commitments. Cancel anytime and your data stays yours — you can export everything before you go.',
   },
   {
+    question: 'Can I switch plans?',
+    answer: 'Yes! Upgrade or downgrade anytime from Settings → Billing. Changes take effect immediately and billing is prorated.',
+  },
+  {
     question: 'What are add-ons?',
-    answer: 'Add-ons are optional features you can purchase on top of the core plan. They\'re designed for farms that need extras like breeding tracking, training logs, client billing, or team access. Only pay for what you actually use.',
+    answer: 'Optional features you can add to any plan. Breeding Tracker is available now — more coming soon.',
   },
   {
     question: 'Do I need a credit card for the trial?',
     answer: 'No! Start your 14-day free trial without entering any payment info. We\'ll only ask for payment if you want to continue after the trial.',
   },
+];
+
+const comingSoonAddOns = [
+  { name: 'Training & Lessons', description: 'Training logs, lesson scheduling, and competition tracking.' },
+  { name: 'Client & Billing', description: 'Client management, invoicing, payments, and recurring billing.' },
+  { name: 'Team Management', description: 'Multi-user access, role-based permissions, and team coordination.' },
 ];
 
 export default function PricingPage() {
@@ -104,54 +84,91 @@ export default function PricingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight">
-            One plan. One price. No surprises.
+            Simple plans for every farm.
           </h1>
           <p className="mt-4 text-muted-foreground text-lg">
-            Everything your barn needs for $25 a month. Start with a free 14-day trial.
+            All plans include a 14-day free trial. Pick the size that fits your barn.
           </p>
         </div>
       </section>
 
-      {/* Core Plan */}
+      {/* Plan Cards */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="rounded-xl border-2 border-primary/50 bg-primary/5 p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h2 className="font-display text-xl font-semibold text-foreground">StableTrack Core</h2>
-                <p className="text-sm text-muted-foreground mt-1">Everything you need to manage your barn</p>
-              </div>
-              <div className="text-left sm:text-right">
-                <span className="text-4xl font-display font-semibold text-foreground">$25</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+          {/* Starter Plan */}
+          <div className="rounded-xl border-2 border-border p-8 flex flex-col">
+            <div className="mb-6">
+              <h2 className="font-display text-xl font-semibold text-foreground">Starter</h2>
+              <p className="text-sm text-muted-foreground mt-1">Perfect for small farms with a few horses.</p>
             </div>
 
-            <Link
-              href="/sign-up"
-              className="block w-full py-3 rounded-lg text-sm font-medium text-center bg-primary text-primary-foreground hover:opacity-90 transition-opacity mb-6"
-            >
-              Start free 14-day trial
-            </Link>
+            <div className="mb-6">
+              <span className="text-4xl font-display font-semibold text-foreground">$25</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
 
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
-              {coreFeatures.map((feature) => (
-                <div
-                  key={feature}
-                  className="flex items-center gap-2.5 text-sm text-foreground"
-                >
+            <div className="space-y-2.5 mb-8 flex-1">
+              {STARTER_FEATURES.map((feature) => (
+                <div key={feature} className="flex items-center gap-2.5 text-sm text-foreground">
                   <Check className="w-4 h-4 text-primary flex-shrink-0" />
                   {feature}
                 </div>
               ))}
             </div>
+
+            <Link
+              href="/sign-up"
+              className="block w-full py-3 rounded-lg text-sm font-medium text-center border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              Start free trial
+            </Link>
+          </div>
+
+          {/* Farm Plan */}
+          <div className="relative rounded-xl border-2 border-primary/50 bg-primary/5 p-8 flex flex-col">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-full">
+                <Star className="w-3.5 h-3.5" />
+                Best Value
+              </span>
+            </div>
+
+            <div className="mb-6">
+              <h2 className="font-display text-xl font-semibold text-foreground">Farm</h2>
+              <p className="text-sm text-muted-foreground mt-1">For growing farms that need no limits.</p>
+            </div>
+
+            <div className="mb-6">
+              <span className="text-4xl font-display font-semibold text-foreground">$60</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+
+            <div className="space-y-2.5 mb-8 flex-1">
+              {FARM_FEATURES.map((feature) => (
+                <div key={feature} className="flex items-center gap-2.5 text-sm text-foreground">
+                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                  {feature}
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/sign-up"
+              className="block w-full py-3 rounded-lg text-sm font-medium text-center bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Start free trial
+            </Link>
           </div>
         </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Both plans include a 14-day free trial. Switch plans anytime.
+        </p>
       </section>
 
       {/* Add-Ons */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="font-display text-2xl font-semibold text-foreground tracking-tight">
               Optional add-ons
@@ -161,18 +178,39 @@ export default function PricingPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            {addOns.map((addon) => (
+          {/* Breeding Tracker - Available */}
+          <div className="rounded-xl border-2 border-primary/30 bg-card p-6 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <ClipboardList className="w-4 h-4 text-primary" />
+                  <h3 className="font-display font-semibold text-foreground">{ADD_ONS.breeding.name}</h3>
+                  <span className="text-sm font-medium text-primary">+${ADD_ONS.breeding.monthlyPriceCents / 100}/month</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{ADD_ONS.breeding.description}</p>
+                <p className="text-xs text-muted-foreground mt-1">Available on any plan.</p>
+              </div>
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors flex-shrink-0"
+              >
+                Add to my plan
+              </Link>
+            </div>
+          </div>
+
+          {/* Coming Soon Add-Ons */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            {comingSoonAddOns.map((addon) => (
               <div
                 key={addon.name}
-                className="rounded-lg border border-border/60 bg-card p-5"
+                className="rounded-lg border border-border/60 bg-card p-4 opacity-60"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <ClipboardList className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 mb-1">
+                  <ClipboardList className="w-4 h-4 text-muted-foreground" />
                   <h3 className="font-display font-medium text-foreground text-sm">{addon.name}</h3>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{addon.description}</p>
-                <p className="mt-3 text-xs font-medium text-primary">Coming Soon</p>
+                <p className="text-xs text-muted-foreground">Coming Soon</p>
               </div>
             ))}
           </div>
@@ -219,7 +257,7 @@ export default function PricingPage() {
             Ready to simplify your barn?
           </h2>
           <p className="mt-2 text-muted-foreground">
-            14-day free trial. No credit card required. Just $25/month after that.
+            14-day free trial. No credit card required. Plans start at $25/month.
           </p>
           <Link
             href="/sign-up"

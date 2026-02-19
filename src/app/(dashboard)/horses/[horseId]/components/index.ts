@@ -9,3 +9,4 @@ export { EventsTab } from './EventsTab';
 export { TasksTab } from './TasksTab';
 export { DocumentsTab } from './DocumentsTab';
 export { ActivityTab } from './ActivityTab';
+export { BreedingTab } from './BreedingTab';

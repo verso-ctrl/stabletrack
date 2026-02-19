@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
     // Retrieve the session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId)
 
-    // Verify the session is paid and belongs to this user
-    if (session.payment_status !== 'paid') {
+    // Verify the session completed — with trials, payment_status may be 'no_payment_required'
+    if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
       return NextResponse.json(
         { error: 'Payment not completed' },
         { status: 400 }
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract barn data from session metadata
-    const tier = session.metadata?.tier || 'CORE'
+    const tier = session.metadata?.tier || 'STARTER'
     const barnName = session.metadata?.barnName
     const barnAddress = session.metadata?.barnAddress || ''
     const barnCity = session.metadata?.barnCity || ''
@@ -75,6 +75,8 @@ export async function POST(req: NextRequest) {
     const barnZipCode = session.metadata?.barnZipCode || ''
     const barnPhone = session.metadata?.barnPhone || ''
     const barnEmail = session.metadata?.barnEmail || ''
+    const addOnsStr = session.metadata?.addOns || ''
+    const activeAddOns = addOnsStr ? addOnsStr.split(',').filter(Boolean) : []
 
     if (!barnName) {
       return NextResponse.json(
@@ -83,10 +85,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Calculate trial end date (14 days from now)
+    const trialEndsAt = new Date()
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14)
+
     // Generate unique invite code
     const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`
 
-    // Create the barn
+    // Create the barn with Stripe subscription data
     const barn = await prisma.barn.create({
       data: {
         name: barnName,
@@ -100,7 +106,11 @@ export async function POST(req: NextRequest) {
         timezone: 'America/New_York',
         inviteCode,
         tier,
-        subscriptionStatus: 'ACTIVE',
+        subscriptionStatus: 'TRIALING',
+        trialEndsAt,
+        activeAddOns,
+        stripeCustomerId: (session.customer as string) || null,
+        stripeSubscriptionId: (session.subscription as string) || null,
         members: {
           create: {
             userId: user.id,

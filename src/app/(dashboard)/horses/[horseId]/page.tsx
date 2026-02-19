@@ -23,6 +23,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 // Import extracted components
 import {
@@ -40,6 +41,7 @@ import { EventsTab } from './components/EventsTab';
 import { TasksTab } from './components/TasksTab';
 import { DocumentsTab } from './components/DocumentsTab';
 import { ActivityTab } from './components/ActivityTab';
+import { BreedingTab } from './components/BreedingTab';
 
 export default function HorseDetailPage() {
   const params = useParams();
@@ -53,6 +55,14 @@ export default function HorseDetailPage() {
 
   // Permission check - clients can view but not edit
   const canEdit = isMember && currentBarn?.role !== 'CLIENT';
+  const { hasAddOn } = useSubscription();
+
+  // Filter tabs: breeding only shown for non-geldings with the breeding add-on
+  const isBreedable = horse?.sex && horse.sex !== 'GELDING';
+  const visibleTabs = tabs.filter(tab => {
+    if (tab.id === 'breeding') return hasAddOn('breeding') && isBreedable;
+    return true;
+  });
 
   // Modal states
   const [showWeightModal, setShowWeightModal] = useState(false);
@@ -484,7 +494,7 @@ export default function HorseDetailPage() {
       <div className="border-b border-border -mx-3 sm:-mx-4 sm:mx-0">
         {/* Mobile: Grid layout */}
         <div role="tablist" aria-label="Horse details" className="grid grid-cols-4 gap-1 px-2 pb-2 sm:hidden">
-          {tabs.map(({ id, label, icon: Icon }) => (
+          {visibleTabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               role="tab"
@@ -493,17 +503,17 @@ export default function HorseDetailPage() {
               id={`tab-${id}`}
               onClick={() => setActiveTab(id)}
               onKeyDown={(e) => {
-                const currentIndex = tabs.findIndex(t => t.id === id);
+                const currentIndex = visibleTabs.findIndex(t => t.id === id);
                 if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                   e.preventDefault();
-                  const nextIndex = (currentIndex + 1) % tabs.length;
-                  setActiveTab(tabs[nextIndex].id);
-                  document.getElementById(`tab-${tabs[nextIndex].id}`)?.focus();
+                  const nextIndex = (currentIndex + 1) % visibleTabs.length;
+                  setActiveTab(visibleTabs[nextIndex].id);
+                  document.getElementById(`tab-${visibleTabs[nextIndex].id}`)?.focus();
                 } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
                   e.preventDefault();
-                  const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-                  setActiveTab(tabs[prevIndex].id);
-                  document.getElementById(`tab-${tabs[prevIndex].id}`)?.focus();
+                  const prevIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
+                  setActiveTab(visibleTabs[prevIndex].id);
+                  document.getElementById(`tab-${visibleTabs[prevIndex].id}`)?.focus();
                 }
               }}
               tabIndex={activeTab === id ? 0 : -1}
@@ -523,7 +533,7 @@ export default function HorseDetailPage() {
 
         {/* Desktop: Horizontal tabs */}
         <div role="tablist" aria-label="Horse details" className="hidden sm:flex gap-0.5 overflow-x-auto scrollbar-hide px-4 sm:px-0">
-          {tabs.map(({ id, label, icon: Icon }) => (
+          {visibleTabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               role="tab"
@@ -532,17 +542,17 @@ export default function HorseDetailPage() {
               id={`tab-${id}-desktop`}
               onClick={() => setActiveTab(id)}
               onKeyDown={(e) => {
-                const currentIndex = tabs.findIndex(t => t.id === id);
+                const currentIndex = visibleTabs.findIndex(t => t.id === id);
                 if (e.key === 'ArrowRight') {
                   e.preventDefault();
-                  const nextIndex = (currentIndex + 1) % tabs.length;
-                  setActiveTab(tabs[nextIndex].id);
-                  document.getElementById(`tab-${tabs[nextIndex].id}-desktop`)?.focus();
+                  const nextIndex = (currentIndex + 1) % visibleTabs.length;
+                  setActiveTab(visibleTabs[nextIndex].id);
+                  document.getElementById(`tab-${visibleTabs[nextIndex].id}-desktop`)?.focus();
                 } else if (e.key === 'ArrowLeft') {
                   e.preventDefault();
-                  const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-                  setActiveTab(tabs[prevIndex].id);
-                  document.getElementById(`tab-${tabs[prevIndex].id}-desktop`)?.focus();
+                  const prevIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
+                  setActiveTab(visibleTabs[prevIndex].id);
+                  document.getElementById(`tab-${visibleTabs[prevIndex].id}-desktop`)?.focus();
                 }
               }}
               tabIndex={activeTab === id ? 0 : -1}
@@ -598,6 +608,7 @@ export default function HorseDetailPage() {
         )}
         {activeTab === 'tasks' && <TasksTab horse={horse} canEdit={canEdit} />}
         {activeTab === 'events' && <EventsTab horse={horse} canEdit={canEdit} />}
+        {activeTab === 'breeding' && <BreedingTab horse={horse} barnId={currentBarn?.id || ''} canEdit={canEdit} />}
         {activeTab === 'documents' && <DocumentsTab horse={horse} canEdit={canEdit} />}
       </div>
 

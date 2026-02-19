@@ -2,8 +2,8 @@
 // SUBSCRIPTION & BILLING TYPES
 // ============================================================================
 
-// Two plans: Core ($25/month) and Pro ($50/month)
-export type SubscriptionTier = 'CORE' | 'PRO';
+// Two plans: Starter ($25/month) and Farm ($60/month)
+export type SubscriptionTier = 'STARTER' | 'FARM';
 export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'TRIALING' | 'PAUSED';
 
 export interface TierLimits {
@@ -14,7 +14,7 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
-  CORE: {
+  STARTER: {
     maxHorses: 10,
     maxBarns: 1,
     storageGb: 10,
@@ -24,25 +24,27 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       'Health records',
       'Calendar & scheduling',
       'Daily care logging',
-      'Client management',
+      'Up to 5 team members',
     ],
   },
-  PRO: {
+  FARM: {
     maxHorses: -1, // unlimited
     maxBarns: 1,
     storageGb: 50,
     features: [
       'Unlimited horses',
-      'Everything in Core',
-      'Unlimited photos & storage',
+      'Everything in Starter',
+      'Unlimited team members',
+      '50 GB document storage',
+      'Unlimited photo uploads',
       'Priority support',
     ],
   },
 };
 
 export const TIER_PRICING: Record<SubscriptionTier, number> = {
-  CORE: 2500, // $25.00
-  PRO: 5000, // $50.00
+  STARTER: 2500, // $25.00
+  FARM: 6000, // $60.00
 };
 
 export interface Subscription {
@@ -179,6 +181,8 @@ export interface Barn {
   subscriptionStatus?: SubscriptionStatus;
   stripeCustomerId?: string | null;
   stripeSubscriptionId?: string | null;
+  trialEndsAt?: string | null;
+  activeAddOns?: string[];
 }
 
 export interface BarnMember {
@@ -537,6 +541,101 @@ export interface Alert {
   horseName?: string;
   actionUrl?: string;
   expiresAt?: Date;
+}
+
+// ============================================================================
+// BREEDING TYPES
+// ============================================================================
+
+export type BreedingType = 'NATURAL' | 'AI_FRESH' | 'AI_COOLED' | 'AI_FROZEN' | 'EMBRYO_TRANSFER';
+export type BreedingStatus = 'PENDING' | 'CONFIRMED_PREGNANT' | 'NOT_PREGNANT' | 'REBREED' | 'FOALED';
+export type HeatIntensity = 'MILD' | 'MODERATE' | 'STRONG';
+export type FoalingOutcome = 'LIVE' | 'STILLBORN' | 'ABORTION' | 'DYSTOCIA';
+
+export interface HeatCycle {
+  id: string;
+  barnId: string;
+  horseId: string;
+  startDate: Date;
+  endDate: Date | null;
+  intensity: HeatIntensity | null;
+  signs: string[];
+  notes: string | null;
+  predictedNextDate: Date | null;
+  cycleLength: number;
+  createdAt: Date;
+  horse?: { barnName: string; profilePhotoUrl: string | null };
+}
+
+export interface BreedingRecord {
+  id: string;
+  barnId: string;
+  mareId: string;
+  stallionId: string | null;
+  externalStallionId: string | null;
+  breedingDate: Date;
+  breedingType: BreedingType;
+  veterinarian: string | null;
+  facility: string | null;
+  status: BreedingStatus;
+  pregnancyCheckDate: Date | null;
+  pregnancyCheckResult: string | null;
+  estimatedDueDate: Date | null;
+  cost: number | null;
+  notes: string | null;
+  createdAt: Date;
+  mare?: { id: string; barnName: string; profilePhotoUrl: string | null };
+  stallion?: { id: string; barnName: string } | null;
+  externalStallion?: { id: string; name: string; studFarm: string | null } | null;
+  foalingRecord?: FoalingRecord | null;
+}
+
+export interface FoalingRecord {
+  id: string;
+  barnId: string;
+  breedingRecordId: string;
+  mareId: string;
+  foalId: string | null;
+  dueDate: Date | null;
+  actualDate: Date;
+  foalSex: string | null;
+  foalColor: string | null;
+  foalName: string | null;
+  birthWeight: number | null;
+  outcome: FoalingOutcome;
+  complications: string | null;
+  veterinarian: string | null;
+  notes: string | null;
+  createdAt: Date;
+  mare?: { id: string; barnName: string };
+  foal?: { id: string; barnName: string; profilePhotoUrl: string | null } | null;
+  breedingRecord?: {
+    stallion?: { id: string; barnName: string } | null;
+    externalStallion?: { id: string; name: string } | null;
+  };
+}
+
+export interface ExternalStallion {
+  id: string;
+  barnId: string;
+  name: string;
+  registrationNumber: string | null;
+  breed: string | null;
+  color: string | null;
+  studFarm: string | null;
+  studFarmLocation: string | null;
+  contactName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  fee: number | null;
+  notes: string | null;
+}
+
+export interface BreedingStats {
+  maresInHeat: number;
+  activePregnancies: number;
+  upcomingDueDates: number;
+  foalsThisYear: number;
 }
 
 // ============================================================================

@@ -43,7 +43,7 @@ export default function NewHorsePage() {
     microchipNumber: '',
     status: 'ACTIVE' as HorseStatus,
     ownerName: '',
-    stall: '',
+    ownerPhone: '',
   });
 
   // Fetch suggestions when barn is available
@@ -89,7 +89,6 @@ export default function NewHorsePage() {
           ...formData,
           heightHands: formData.heightHands ? parseFloat(formData.heightHands) : undefined,
           sex: formData.sex || undefined,
-          stall: formData.stall || undefined,
         }),
       });
 
@@ -225,7 +224,7 @@ export default function NewHorsePage() {
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="label">Barn Name *</label>
+            <label className="label">Nickname *</label>
             <input
               type="text"
               name="barnName"
@@ -339,17 +338,6 @@ export default function NewHorsePage() {
             </select>
           </div>
 
-          <div>
-            <label className="label">Stall</label>
-            <input
-              type="text"
-              name="stall"
-              value={formData.stall}
-              onChange={handleChange}
-              placeholder="e.g., A12 or Barn 1 - Stall 5"
-              className="input"
-            />
-          </div>
         </div>
 
         {/* Additional Info */}
@@ -376,6 +364,18 @@ export default function NewHorsePage() {
                 onChange={handleFieldChange('ownerName')}
                 suggestions={suggestions.owners}
                 placeholder="Enter owner name"
+                className="input"
+              />
+            </div>
+
+            <div>
+              <label className="label">Owner Phone</label>
+              <input
+                type="tel"
+                name="ownerPhone"
+                value={formData.ownerPhone}
+                onChange={handleChange}
+                placeholder="(555) 123-4567"
                 className="input"
               />
             </div>

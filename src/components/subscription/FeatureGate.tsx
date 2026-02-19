@@ -102,7 +102,7 @@ export function FeatureLockedCard({ feature, compact = false }: FeatureLockedCar
 }
 
 function findMinimumTierForFeature(feature: keyof TierFeatures): string {
-  const tierOrder: SubscriptionTier[] = ['CORE', 'PRO']
+  const tierOrder: SubscriptionTier[] = ['STARTER', 'FARM']
 
   for (const tierName of tierOrder) {
     const features = getTierFeatures(tierName)
@@ -111,7 +111,7 @@ function findMinimumTierForFeature(feature: keyof TierFeatures): string {
     }
   }
 
-  return 'Pro'
+  return 'Farm'
 }
 
 // =============================================================================
@@ -290,8 +290,8 @@ export function TierBadge({ tier: propTier, size = 'md' }: TierBadgeProps) {
   const tierPricing = getTierPricing(tier)
 
   const colors: Record<SubscriptionTier, string> = {
-    CORE: 'bg-amber-100 text-amber-700',
-    PRO: 'bg-green-100 text-green-700',
+    STARTER: 'bg-amber-100 text-amber-700',
+    FARM: 'bg-green-100 text-green-700',
   }
 
   const sizes = {

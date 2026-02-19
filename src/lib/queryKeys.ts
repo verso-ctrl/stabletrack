@@ -131,6 +131,20 @@ export const queryKeys = {
     list: (barnId: string) => ['turnouts', barnId, 'list'] as const,
     active: (barnId: string) => ['turnouts', barnId, 'active'] as const,
   },
+
+  // Breeding
+  breeding: {
+    all: (barnId: string) => ['breeding', barnId] as const,
+    heatCycles: (barnId: string, filters?: { mareId?: string }) =>
+      ['breeding', barnId, 'heat-cycles', filters] as const,
+    records: (barnId: string, filters?: { mareId?: string; status?: string }) =>
+      ['breeding', barnId, 'records', filters] as const,
+    foalings: (barnId: string, filters?: { mareId?: string }) =>
+      ['breeding', barnId, 'foalings', filters] as const,
+    externalStallions: (barnId: string) =>
+      ['breeding', barnId, 'external-stallions'] as const,
+    stats: (barnId: string) => ['breeding', barnId, 'stats'] as const,
+  },
 } as const;
 
 // Stale time constants (in milliseconds)
@@ -150,6 +164,7 @@ export const staleTimes = {
   paddocks: 5 * 60 * 1000,    // 5 minutes - facility data
   stalls: 5 * 60 * 1000,      // 5 minutes - facility data
   turnouts: 2 * 60 * 1000,    // 2 minutes - active tracking
+  breeding: 3 * 60 * 1000,    // 3 minutes - breeding records
 } as const;
 
 // Helper to invalidate all data for a barn
@@ -166,5 +181,6 @@ export function getBarnInvalidationKeys(barnId: string) {
     queryKeys.paddocks.all(barnId),
     queryKeys.stalls.all(barnId),
     queryKeys.turnouts.all(barnId),
+    queryKeys.breeding.all(barnId),
   ];
 }

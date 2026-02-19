@@ -8,6 +8,7 @@ import {
   CheckSquare,
   Clock,
   FileText,
+  Heart,
   Stethoscope,
   Utensils,
 } from 'lucide-react';
@@ -21,7 +22,7 @@ export const HorseIcon = ({ className }: { className?: string }) => (
 );
 
 // Tab types and configuration
-export type TabId = 'overview' | 'health' | 'tasks' | 'events' | 'care' | 'activity' | 'photos' | 'documents';
+export type TabId = 'overview' | 'health' | 'tasks' | 'events' | 'care' | 'breeding' | 'activity' | 'photos' | 'documents';
 
 export type TabIcon = LucideIcon | typeof HorseIcon;
 
@@ -31,6 +32,7 @@ export const tabs: { id: TabId; label: string; icon: TabIcon }[] = [
   { id: 'tasks', label: 'Horse Tasks', icon: CheckSquare },
   { id: 'events', label: 'Horse Events', icon: Calendar },
   { id: 'care', label: 'Feeding Plan', icon: Utensils },
+  { id: 'breeding', label: 'Breeding', icon: Heart },
   { id: 'activity', label: 'Activity Log', icon: Clock },
   { id: 'photos', label: 'Photos', icon: Camera },
   { id: 'documents', label: 'Documents', icon: FileText },

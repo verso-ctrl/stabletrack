@@ -6,23 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 StableTrack is a simple, affordable barn management app built for small horse farms. The target audience is small farm owners who can't justify the cost of enterprise barn management software designed for large operations. The tone and UX should be friendly, approachable, and straightforward — not corporate or overwhelming.
 
-**Product & Pricing:**
-- **Core Plan — $25/month:** Includes everything a small farm needs day-to-day:
-  - Horse profiles & management
-  - Feed tracking & feed charts
-  - Stall assignments
-  - Pasture/paddock assignments
-  - Medication & health records (vaccinations, vet visits, daily health checks)
-  - Daily care logs
-  - Calendar & scheduling
-  - Task management
-  - Document storage
-  - Activity log
-- **Purchaseable Add-Ons** (each sold separately on top of the core plan):
-  - Breeding Tracker — heat cycles, breeding records, foaling management
-  - Training & Lessons — training logs, lesson scheduling, competition tracking
-  - Client & Billing — client management, invoicing, payments, recurring billing
-  - Team Management — multi-user access, role-based permissions, team coordination
+**Product & Pricing (Two-Tier + Add-Ons):**
+- **Starter Plan — $25/month:** Everything a small farm needs:
+  - Up to 10 horses, 5 team members, 10 GB storage, 20 photos/horse
+  - Horse profiles, feed tracking & charts, stall/pasture assignments
+  - Medication & health records, daily care logs, calendar & scheduling
+  - Task management, document storage, activity log
+- **Farm Plan — $60/month:** For growing operations:
+  - Unlimited horses, team members, photos/horse
+  - 50 GB storage, priority support
+  - All Starter features included
+- **Purchaseable Add-Ons** ($10/month each, on top of either plan):
+  - Breeding Tracker — heat cycles, breeding records, foaling management *(available)*
+  - Training & Lessons — training logs, lesson scheduling, competition tracking *(coming soon)*
+  - Client & Billing — client management, invoicing, payments, recurring billing *(coming soon)*
+  - Team Management — multi-user access, role-based permissions, team coordination *(coming soon)*
 
 When building features, keep the small-farm user in mind: prioritize clarity and simplicity over power-user complexity. Features should feel helpful, not enterprise-y.
 
@@ -85,15 +83,17 @@ npm run mobile:run:android     # Run on Android device/emulator
 stabletrack/
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── (dashboard)/       # Protected dashboard routes (19 sections)
+│   │   ├── (dashboard)/       # Protected dashboard routes (21 sections)
 │   │   │   ├── alerts/        # System alerts
 │   │   │   ├── barns/         # Barn management
 │   │   │   ├── billing/       # Billing management
+│   │   │   ├── breeding/      # Breeding tracker
 │   │   │   ├── calendar/      # Calendar view
 │   │   │   ├── clients/       # Client management
 │   │   │   ├── daily-care/    # Daily care logs
 │   │   │   ├── dashboard/     # Main dashboard
 │   │   │   ├── documents/     # Document management
+│   │   │   ├── farm-maintenance/ # Farm maintenance tasks
 │   │   │   ├── feed-chart/    # Feed chart view
 │   │   │   ├── help/          # Help page
 │   │   │   ├── horses/        # Horse management
@@ -106,24 +106,26 @@ stabletrack/
 │   │   │   ├── team/          # Team management
 │   │   │   └── training/      # Training logs
 │   │   ├── (marketing)/       # Public pages (pricing, privacy, terms)
-│   │   ├── api/               # REST API endpoints (57+ routes)
+│   │   ├── api/               # REST API endpoints (52+ routes, includes Stripe webhooks)
 │   │   ├── onboarding/        # User onboarding (create-barn, join-barn)
 │   │   ├── portal/            # Client portal
 │   │   └── sign-in/sign-up/   # Auth pages (Clerk)
 │   ├── components/            # React components
-│   │   ├── ui/                # Design system (Button, Dialog, Input, Select, Toast, etc.)
-│   │   ├── dashboard/         # Dashboard layout (DashboardContent, Shell, Sidebar)
+│   │   ├── ui/                # Design system (13 components: Button, Dialog, Input, Select, Toast, ConfirmDialog, Breadcrumbs, Pagination, EmptyState, ThemeProvider, ThemeToggle, AutocompleteInput, Toaster)
+│   │   ├── dashboard/         # Dashboard layout (DashboardContent, Shell, Sidebar, WelcomeChecklist)
 │   │   ├── horses/            # Horse management (AddHorseForm, HorseCard, HorseList, etc.)
-│   │   ├── events/            # Event management
-│   │   ├── billing/           # Billing/subscription components
-│   │   ├── storage/           # File upload components
-│   │   ├── subscription/      # Plan & add-on display components
+│   │   ├── events/            # Event management (CalendarView, EventForm, PrintableCalendar)
+│   │   ├── billing/           # Billing components (AddOnCard, PlanPicker, PricingPlans, TrialBanner, TrialExpiredOverlay)
+│   │   ├── storage/           # File upload (DocumentManager, FileUpload, HorsePhotoGallery, StorageQuota)
+│   │   ├── subscription/      # Feature gating (FeatureGate, UpgradeModal)
+│   │   ├── breeding/          # Breeding tracker (BreedingStatusBadge, HeatCycleTimeline, LogHeatCycleModal, PedigreeCard, RecordBreedingModal, RecordFoalingModal)
 │   │   └── auth/              # Auth components
-│   ├── lib/                   # Core utilities (20 files)
+│   ├── lib/                   # Core utilities (21 files)
 │   │   ├── auth.ts            # Authentication layer (Clerk + demo mode)
 │   │   ├── prisma.ts          # Database client singleton
-│   │   ├── tiers.ts           # Core plan + add-on configuration
+│   │   ├── tiers.ts           # Two-tier (STARTER/FARM) + add-on configuration
 │   │   ├── tier-validation.ts # Plan & add-on enforcement logic
+│   │   ├── csv.ts             # CSV export utilities
 │   │   ├── validations.ts     # Zod schemas
 │   │   ├── api-helpers.ts     # API request/response utilities
 │   │   ├── queryKeys.ts       # React Query cache keys and stale times
@@ -149,7 +151,7 @@ stabletrack/
 │   ├── contexts/              # React contexts
 │   │   ├── BarnContext.tsx     # Current barn selection, barn list, roles
 │   │   └── SubscriptionContext.tsx  # Plan status, active add-ons, feature gating
-│   ├── types/                 # TypeScript type definitions (index.ts, 613 lines)
+│   ├── types/                 # TypeScript type definitions (index.ts, 710 lines)
 │   ├── middleware.ts          # Next.js middleware for auth and routing
 │   └── styles/                # Global styles
 ├── prisma/
@@ -187,10 +189,21 @@ export async function GET(req: Request, { params }: { params: { barnId: string }
 ```
 
 **Pricing Model (src/lib/tiers.ts):**
-- Single core plan at $25/month — includes horse management, feed, stalls, pastures, medicine, calendar, tasks, documents
-- Purchaseable add-ons: Breeding Tracker, Training & Lessons, Client & Billing, Team Management
-- Add-on access is gated per-barn; features hidden in UI when add-on is not purchased
-- NOTE: The codebase currently has a legacy FREE/BASIC/ADVANCED tier system that needs to be migrated to the new single-plan + add-ons model
+- Two tiers: `SubscriptionTier = 'STARTER' | 'FARM'`
+- STARTER ($25/mo): 10 horses, 5 team members, 10 GB storage, 20 photos/horse
+- FARM ($60/mo): unlimited horses/team/photos, 50 GB storage, priority support
+- `normalizeTier()` maps legacy strings: FREE/BASIC/CORE → STARTER, PRO/ADVANCED/ENTERPRISE → FARM
+- 4 add-ons at $10/mo each: breeding (available), training/client_billing/team_management (coming soon)
+- Add-on access gated per-barn via `Barn.activeAddOns` array; features hidden in UI when not purchased
+- Trial system: barns start with `subscriptionStatus: 'TRIALING'` and `trialEndsAt` date
+
+**Stripe Integration:**
+- Checkout: `/api/billing/create-checkout/` creates Stripe session for upgrades (monthly/annual)
+- Billing portal: `/api/billing/portal/` redirects to Stripe customer portal
+- Webhooks: `/api/webhooks/stripe/` handles checkout.session.completed, subscription.updated/deleted
+- Barn model stores `stripeCustomerId` and `stripeSubscriptionId`
+- Client payment methods stored as Stripe tokens (never raw card data): `stripePaymentMethodId`, `paymentMethodType`, `paymentMethodLast4`, `paymentMethodBrand`
+- Demo mode: Stripe calls are skipped when keys are not configured
 
 **Multi-tenant Isolation:** All database queries scoped to `barnId`. Client access controlled via `ClientHorse` table. Team access via `BarnMember` with roles.
 
@@ -206,6 +219,7 @@ PostgreSQL via Supabase (SQLite available for local dev). 42 models organized as
 - **Documents:** Document, Note, InventoryItem, ActivityLog
 - **Billing:** Client, ClientHorse, Service, Invoice, InvoiceItem, Payment, RecurringInvoice, RecurringInvoiceItem
 - **Training:** Lesson, TrainingLog, Competition
+- **Breeding:** ExternalStallion, HeatCycle, BreedingRecord, FoalingRecord
 
 ### TypeScript Paths
 
@@ -232,15 +246,19 @@ App runs in demo mode if Clerk keys are missing (unless `DISABLE_DEMO_MODE=true`
 
 ## Testing
 
-Tests use Jest 30.2.0 with React Testing Library. Test files are in `__tests__` directories:
-- `src/lib/__tests__/` - API helpers and validation tests
-- `src/components/__tests__/` - Component tests (ErrorBoundary)
+Tests use Jest 30.2.0 with React Testing Library. 9 test files across 3 directories:
+
+- `src/lib/__tests__/` — api-helpers, validations, tiers, toast, csv
+- `src/components/__tests__/` — ErrorBoundary, ConfirmDialog, Breadcrumbs
+- `src/hooks/__tests__/` — useTierPermissions
 
 ```bash
 npm run test                   # Run all tests
 npm run test -- path/to/test   # Run specific test file
 npm run test:ci                # CI mode with coverage
 ```
+
+**Note:** `ErrorBoundary.test.tsx` has pre-existing failures (missing `toBeInTheDocument`, readonly `NODE_ENV`) — do not attempt to fix.
 
 ## Design Principles
 

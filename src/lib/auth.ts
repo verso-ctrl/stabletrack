@@ -99,7 +99,7 @@ export async function getCurrentUser() {
             avatarUrl: clerkUser?.imageUrl || existingUserByEmail.avatarUrl || null,
             subscription: {
               create: {
-                tier: existingUserByEmail.subscription?.tier || 'CORE',
+                tier: existingUserByEmail.subscription?.tier || 'STARTER',
                 status: existingUserByEmail.subscription?.status || 'ACTIVE',
                 maxHorses: existingUserByEmail.subscription?.maxHorses || (isClerkConfigured ? 5 : 999),
                 maxBarns: existingUserByEmail.subscription?.maxBarns || (isClerkConfigured ? 1 : 10),
@@ -123,7 +123,7 @@ export async function getCurrentUser() {
           avatarUrl: clerkUser?.imageUrl || null,
           subscription: {
             create: {
-              tier: 'CORE',
+              tier: 'STARTER',
               status: 'ACTIVE',
               maxHorses: isClerkConfigured ? 5 : 999,
               maxBarns: isClerkConfigured ? 1 : 10,

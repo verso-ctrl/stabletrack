@@ -21,6 +21,7 @@ import {
   User,
   Trees,
   Wrench,
+  Heart,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -43,13 +44,14 @@ const HorseIcon = ({ className }: { className?: string }) => (
 // v1 SIMPLIFIED: Core features only
 // Hidden for v1: Team, Documents, Billing (code exists, just not in nav)
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null },
-  { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read' },
-  { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read' },
-  { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read' },
-  { href: '/farm-maintenance', label: 'Farm Tasks', icon: Wrench, permission: 'tasks:read' },
-  { href: '/pastures', label: 'Pastures', icon: Trees, permission: 'horses:read' },
-  { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read' },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null, addOn: null },
+  { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read', addOn: null },
+  { href: '/calendar', label: 'Schedule', icon: Calendar, permission: 'events:read', addOn: null },
+  { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read', addOn: null },
+  { href: '/farm-maintenance', label: 'Farm Tasks', icon: Wrench, permission: 'tasks:read', addOn: null },
+  { href: '/breeding', label: 'Breeding', icon: Heart, permission: 'horses:read', addOn: 'breeding' },
+  { href: '/pastures', label: 'Pastures', icon: Trees, permission: 'horses:read', addOn: null },
+  { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read', addOn: null },
 ];
 
 const bottomNavItems = [
@@ -104,17 +106,19 @@ function UserProfile() {
 export function Sidebar() {
   const pathname = usePathname();
   const { barns, currentBarn, setCurrentBarn, isLoading: barnsLoading, isClient } = useBarn();
-  const { tier } = useSubscription();
+  const { tier, hasAddOn } = useSubscription();
   const [barnSwitcherOpen, setBarnSwitcherOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Get current role
   const currentRole = (currentBarn?.role || 'CARETAKER') as BarnRole;
 
-  // Filter nav items based on role permissions
+  // Filter nav items based on role permissions and add-on access
   const visibleNavItems = navItems.filter(item => {
-    if (!item.permission) return true; // Always show items without permission requirement
-    return hasPermission(currentRole, item.permission);
+    if (!item.permission) return true;
+    if (!hasPermission(currentRole, item.permission)) return false;
+    if (item.addOn && !hasAddOn(item.addOn)) return false;
+    return true;
   });
 
   const NavLink = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {

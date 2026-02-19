@@ -50,8 +50,8 @@ export function HorsePhotoGallery({
   const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null)
   const [isSettingPrimary, setIsSettingPrimary] = useState(false)
 
-  // Demo mode: CORE tier (use actual tier limits)
-  const tier: SubscriptionTier = 'CORE'
+  // Demo mode: STARTER tier (use actual tier limits)
+  const tier: SubscriptionTier = 'STARTER'
   const tierLimits = getTierLimits(tier)
   const canUploadPhotos = true
   const canBulkUpload = true

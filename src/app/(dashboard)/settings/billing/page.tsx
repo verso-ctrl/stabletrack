@@ -19,7 +19,7 @@ export default function BillingPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Billing & Subscription</h1>
-        <p className="text-muted-foreground">Manage your subscription and billing details</p>
+        <p className="text-muted-foreground">Manage your plan, add-ons, and billing details</p>
       </div>
 
       {/* Current Plan */}
@@ -28,7 +28,7 @@ export default function BillingPage() {
         <CurrentPlanCard />
       </section>
 
-      {/* Pricing Plans */}
+      {/* Plans & Add-ons */}
       <section>
         <PricingPlans />
       </section>

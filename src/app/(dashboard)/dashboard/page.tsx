@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useCurrentBarn, useBarn } from '@/contexts/BarnContext';
 import { useDashboard } from '@/hooks/useData';
 import { WelcomeChecklist } from '@/components/dashboard/WelcomeChecklist';
+import { TrialBanner } from '@/components/billing/TrialBanner';
 import { hasPermission, BarnRole } from '@/types';
 import { toast } from '@/lib/toast';
 import {
@@ -463,6 +464,9 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Trial Banner */}
+      <TrialBanner />
 
       {/* Welcome Checklist (new barns) */}
       <WelcomeChecklist

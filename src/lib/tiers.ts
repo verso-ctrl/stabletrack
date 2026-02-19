@@ -1,8 +1,52 @@
 // src/lib/tiers.ts
 // SINGLE SOURCE OF TRUTH for all tier configuration
-// Two plans: Core ($25/mo, up to 10 horses) and Pro ($50/mo, unlimited)
+// Two plans: Starter ($25/mo, up to 10 horses) and Farm ($60/mo, unlimited)
+// Add-ons: Breeding Tracker ($10/mo)
 
-export type SubscriptionTier = 'CORE' | 'PRO'
+export type SubscriptionTier = 'STARTER' | 'FARM'
+
+// =============================================================================
+// ADD-ONS
+// =============================================================================
+
+export interface AddOnConfig {
+  id: string
+  name: string
+  description: string
+  monthlyPriceCents: number
+  available: boolean // false = "Coming Soon"
+}
+
+export const ADD_ONS: Record<string, AddOnConfig> = {
+  breeding: {
+    id: 'breeding',
+    name: 'Breeding Tracker',
+    description: 'Heat cycles, breeding records, foaling management, stallion reports, and mare history.',
+    monthlyPriceCents: 1000, // $10/mo
+    available: true,
+  },
+  training: {
+    id: 'training',
+    name: 'Training & Lessons',
+    description: 'Training logs, lesson scheduling, and competition tracking.',
+    monthlyPriceCents: 1000,
+    available: false,
+  },
+  client_billing: {
+    id: 'client_billing',
+    name: 'Client & Billing',
+    description: 'Client management, invoicing, payments, and recurring billing.',
+    monthlyPriceCents: 1000,
+    available: false,
+  },
+  team_management: {
+    id: 'team_management',
+    name: 'Team Management',
+    description: 'Multi-user access, role-based permissions, and team coordination.',
+    monthlyPriceCents: 1000,
+    available: false,
+  },
+}
 
 // =============================================================================
 // TIER LIMITS
@@ -19,13 +63,13 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
-  CORE: {
+  STARTER: {
     maxHorses: 10,
     maxTeamMembers: 5,
     maxStorageBytes: 10 * 1024 * 1024 * 1024,    // 10 GB
     maxPhotosPerHorse: 20,
   },
-  PRO: {
+  FARM: {
     maxHorses: -1,               // Unlimited
     maxTeamMembers: -1,          // Unlimited
     maxStorageBytes: 50 * 1024 * 1024 * 1024,    // 50 GB
@@ -132,8 +176,8 @@ const ALL_FEATURES: TierFeatures = {
 }
 
 export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
-  CORE: { ...ALL_FEATURES },
-  PRO: { ...ALL_FEATURES, prioritySupport: true },
+  STARTER: { ...ALL_FEATURES },
+  FARM: { ...ALL_FEATURES, prioritySupport: true },
 }
 
 // =============================================================================
@@ -157,8 +201,8 @@ export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES]
 
 // Both plans can upload all document types
 export const TIER_DOCUMENT_TYPES: Record<SubscriptionTier, DocumentType[]> = {
-  CORE: Object.values(DOCUMENT_TYPES),
-  PRO: Object.values(DOCUMENT_TYPES),
+  STARTER: Object.values(DOCUMENT_TYPES),
+  FARM: Object.values(DOCUMENT_TYPES),
 }
 
 // =============================================================================
@@ -174,20 +218,46 @@ export interface TierPricing {
 }
 
 export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
-  CORE: {
+  STARTER: {
     monthlyPriceCents: 2500,
     annualPriceCents: 25000,
-    displayName: 'Core',
-    description: 'Everything you need for a small barn — up to 10 horses',
+    displayName: 'Starter',
+    description: 'Perfect for small farms with a few horses',
+    popular: false,
+  },
+  FARM: {
+    monthlyPriceCents: 6000,
+    annualPriceCents: 60000,
+    displayName: 'Farm',
+    description: 'For growing farms that need no limits',
     popular: true,
   },
-  PRO: {
-    monthlyPriceCents: 5000,
-    annualPriceCents: 50000,
-    displayName: 'Pro',
-    description: 'Unlimited horses and storage for growing operations',
-  },
 }
+
+// =============================================================================
+// PLAN FEATURE LISTS (for display on pricing/onboarding)
+// =============================================================================
+
+export const STARTER_FEATURES = [
+  'Up to 10 horses',
+  'Horse profiles & management',
+  'Feed tracking & feed charts',
+  'Health & vet records',
+  'Stall & pasture management',
+  'Calendar & tasks',
+  'Document storage (10 GB)',
+  'Up to 5 team members',
+  'Mobile access',
+]
+
+export const FARM_FEATURES = [
+  'Unlimited horses',
+  'Everything in Starter',
+  'Unlimited team members',
+  '50 GB document storage',
+  'Unlimited photo uploads',
+  'Priority support',
+]
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -200,15 +270,15 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
 export function normalizeTier(tier: string): SubscriptionTier {
   const normalized = tier.toUpperCase()
 
-  if (normalized === 'PRO') return 'PRO'
+  if (normalized === 'FARM') return 'FARM'
 
-  // Legacy tiers that were "unlimited" map to PRO
-  if (normalized === 'ADVANCED' || normalized === 'ENTERPRISE') {
-    return 'PRO'
+  // Legacy tiers that were "unlimited" map to FARM
+  if (normalized === 'PRO' || normalized === 'ADVANCED' || normalized === 'ENTERPRISE') {
+    return 'FARM'
   }
 
-  // Everything else (FREE, BASIC, FARM, PROFESSIONAL, etc.) maps to CORE
-  return 'CORE'
+  // Everything else (FREE, BASIC, CORE, STARTER, etc.) maps to STARTER
+  return 'STARTER'
 }
 
 /**
@@ -216,7 +286,7 @@ export function normalizeTier(tier: string): SubscriptionTier {
  */
 export function getNextTier(currentTier: string): SubscriptionTier | null {
   const tier = normalizeTier(currentTier)
-  if (tier === 'CORE') return 'PRO'
+  if (tier === 'STARTER') return 'FARM'
   return null // Already on highest tier
 }
 
@@ -232,7 +302,14 @@ export function getTierLimits(tier: string): TierLimits {
  */
 export function getTierFeatures(tier: string, activeAddOns: string[] = []): TierFeatures {
   const normalizedTier = normalizeTier(tier)
-  return { ...TIER_FEATURES[normalizedTier] }
+  const features = { ...TIER_FEATURES[normalizedTier] }
+
+  // Enable add-on features
+  if (activeAddOns.includes('breeding')) {
+    features.breedingManagement = true
+  }
+
+  return features
 }
 
 /**

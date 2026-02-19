@@ -41,7 +41,7 @@ model Subscription {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  tier      String   @default("CORE")
+  tier      String   @default("STARTER")
   status    String   @default("ACTIVE")
   
   maxHorses Int      @default(999)

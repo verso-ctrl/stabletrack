@@ -10,25 +10,25 @@ describe('useTierPermissions', () => {
     jest.clearAllMocks();
   });
 
-  it('returns CORE tier defaults initially', () => {
+  it('returns STARTER tier defaults initially', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tier: 'CORE' }),
+      json: async () => ({ tier: 'STARTER' }),
     });
 
     const { result } = renderHook(() =>
       useTierPermissions({ barnId: 'test-barn' })
     );
 
-    // Initially defaults to CORE
-    expect(result.current.tier).toBe('CORE');
+    // Initially defaults to STARTER
+    expect(result.current.tier).toBe('STARTER');
     expect(result.current.loading).toBe(true);
   });
 
-  it('fetches and sets CORE tier', async () => {
+  it('fetches and sets STARTER tier', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tier: 'CORE' }),
+      json: async () => ({ tier: 'STARTER' }),
     });
 
     const { result } = renderHook(() =>
@@ -37,18 +37,18 @@ describe('useTierPermissions', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.tier).toBe('CORE');
+    expect(result.current.tier).toBe('STARTER');
     expect(result.current.limits.maxHorses).toBe(10);
     expect(result.current.limits.maxTeamMembers).toBe(5);
     expect(result.current.features.canUploadPhotos).toBe(true);
-    expect(result.current.nextTier).toBe('PRO');
-    expect(result.current.tierDisplayName).toBe('Core');
+    expect(result.current.nextTier).toBe('FARM');
+    expect(result.current.tierDisplayName).toBe('Starter');
   });
 
-  it('fetches and sets PRO tier', async () => {
+  it('fetches and sets FARM tier', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tier: 'PRO' }),
+      json: async () => ({ tier: 'FARM' }),
     });
 
     const { result } = renderHook(() =>
@@ -57,16 +57,16 @@ describe('useTierPermissions', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.tier).toBe('PRO');
+    expect(result.current.tier).toBe('FARM');
     expect(result.current.limits.maxHorses).toBe(-1); // unlimited
     expect(result.current.nextTier).toBeNull();
-    expect(result.current.tierDisplayName).toBe('Pro');
+    expect(result.current.tierDisplayName).toBe('Farm');
   });
 
-  it('checkPhotoLimit respects CORE tier limits', async () => {
+  it('checkPhotoLimit respects STARTER tier limits', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tier: 'CORE' }),
+      json: async () => ({ tier: 'STARTER' }),
     });
 
     const { result } = renderHook(() =>
@@ -82,7 +82,7 @@ describe('useTierPermissions', () => {
   it('getRemainingPhotos returns correct count', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tier: 'CORE' }),
+      json: async () => ({ tier: 'STARTER' }),
     });
 
     const { result } = renderHook(() =>
@@ -106,22 +106,22 @@ describe('useTierPermissions', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    // Falls back to CORE
-    expect(result.current.tier).toBe('CORE');
+    // Falls back to STARTER
+    expect(result.current.tier).toBe('STARTER');
 
     consoleSpy.mockRestore();
   });
 });
 
 describe('useTier (without provider)', () => {
-  it('returns default CORE tier values when no provider', () => {
+  it('returns default STARTER tier values when no provider', () => {
     const { result } = renderHook(() => useTier());
 
-    expect(result.current.tier).toBe('CORE');
+    expect(result.current.tier).toBe('STARTER');
     expect(result.current.loading).toBe(false);
     expect(result.current.features.canUploadPhotos).toBe(true);
     expect(result.current.limits.maxHorses).toBe(10);
-    expect(result.current.nextTier).toBe('PRO');
-    expect(result.current.tierDisplayName).toBe('Core');
+    expect(result.current.nextTier).toBe('FARM');
+    expect(result.current.tierDisplayName).toBe('Starter');
   });
 });

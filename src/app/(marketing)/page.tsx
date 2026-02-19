@@ -60,10 +60,10 @@ const features = [
 ];
 
 const addOns = [
-  { name: 'Breeding Tracker', description: 'Heat cycles, breeding records, and foaling management.' },
-  { name: 'Training & Lessons', description: 'Training logs, lesson scheduling, and competition tracking.' },
-  { name: 'Client & Billing', description: 'Invoicing, payments, and recurring billing for boarders.' },
-  { name: 'Team Management', description: 'Multi-user access with role-based permissions.' },
+  { name: 'Breeding Tracker', description: 'Heat cycles, breeding records, and foaling management.', available: true, price: '$10/mo' },
+  { name: 'Training & Lessons', description: 'Training logs, lesson scheduling, and competition tracking.', available: false },
+  { name: 'Client & Billing', description: 'Invoicing, payments, and recurring billing for boarders.', available: false },
+  { name: 'Team Management', description: 'Multi-user access with role-based permissions.', available: false },
 ];
 
 export default function LandingPage() {
@@ -110,25 +110,25 @@ export default function LandingPage() {
               Barn management that doesn't break the bank.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
-              Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — all for one simple price. No enterprise pricing, no feature walls.
+              Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — starting at just $25/month.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/sign-up"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity"
               >
-                Try it free for 14 days
+                Start your free trial
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/pricing"
                 className="inline-flex items-center px-6 py-3 text-foreground font-medium rounded-lg border border-border hover:bg-muted/50 transition-colors"
               >
-                See what's included
+                See plans &amp; pricing
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              Then just $25/month. No credit card required to start.
+              14-day free trial. No contracts. Cancel anytime.
             </p>
           </div>
 
@@ -169,12 +169,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             <div>
-              <p className="font-display text-3xl font-semibold text-foreground">$25<span className="text-lg text-muted-foreground">/mo</span></p>
-              <p className="text-sm text-muted-foreground mt-0.5">One plan, everything included</p>
+              <p className="font-display text-3xl font-semibold text-foreground">From $25<span className="text-lg text-muted-foreground">/mo</span></p>
+              <p className="text-sm text-muted-foreground mt-0.5">Plans for every farm size</p>
             </div>
             <div>
-              <p className="font-display text-3xl font-semibold text-foreground">14 days</p>
-              <p className="text-sm text-muted-foreground mt-0.5">Free trial, no card required</p>
+              <p className="font-display text-3xl font-semibold text-foreground">14 days free</p>
+              <p className="text-sm text-muted-foreground mt-0.5">Try everything, risk-free</p>
             </div>
             <div>
               <p className="font-display text-3xl font-semibold text-foreground">Cancel anytime</p>
@@ -257,14 +257,18 @@ export default function LandingPage() {
             {addOns.map((addon) => (
               <div
                 key={addon.name}
-                className="p-5 rounded-lg border border-border/60 bg-card"
+                className={`p-5 rounded-lg border bg-card ${addon.available ? 'border-primary/30' : 'border-border/60 opacity-70'}`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <ClipboardList className="w-4 h-4 text-primary" />
                   <h3 className="font-display font-medium text-foreground text-sm">{addon.name}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{addon.description}</p>
-                <p className="mt-3 text-xs font-medium text-primary">Coming Soon</p>
+                {addon.available ? (
+                  <p className="mt-3 text-xs font-medium text-primary">Starting at {addon.price}</p>
+                ) : (
+                  <p className="mt-3 text-xs font-medium text-muted-foreground">Coming Soon</p>
+                )}
               </div>
             ))}
           </div>
@@ -307,7 +311,7 @@ export default function LandingPage() {
             Your barn deserves better than a spreadsheet.
           </h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            Try StableTrack free for 14 days. Just $25/month after that.
+            Try StableTrack free for 14 days. Plans start at $25/month.
           </p>
           <Link
             href="/sign-up"

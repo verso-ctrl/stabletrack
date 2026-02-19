@@ -45,7 +45,7 @@ model Subscription {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  tier      String   @default("CORE")
+  tier      String   @default("STARTER")
   status    String   @default("ACTIVE")
 
   maxHorses Int      @default(15)
@@ -75,8 +75,10 @@ model Barn {
   logoUrl     String?
 
   // Subscription (per-barn, not per-user)
-  tier                 String   @default("CORE")
-  subscriptionStatus   String   @default("ACTIVE") // ACTIVE, CANCELLED, PAST_DUE
+  tier                 String   @default("STARTER")
+  subscriptionStatus   String   @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
+  trialEndsAt          DateTime? // null = no trial
+  activeAddOns         String[] @default([]) // e.g. ["breeding"]
   stripeCustomerId     String?  // Stripe customer ID
   stripeSubscriptionId String?  // Stripe subscription ID
 
@@ -100,6 +102,10 @@ model Barn {
   lessons           Lesson[]
   trainingLogs      TrainingLog[]
   competitions      Competition[]
+  externalStallions ExternalStallion[]
+  heatCycles        HeatCycle[]
+  breedingRecords   BreedingRecord[]
+  foalingRecords    FoalingRecord[]
 }
 
 model BarnMember {
@@ -220,6 +226,11 @@ model Horse {
   trainingLogs    TrainingLog[]
   competitions    Competition[]
   tasks           Task[]
+  heatCycles         HeatCycle[]
+  mareBreedings      BreedingRecord[]  @relation("MareBreedings")
+  stallionBreedings  BreedingRecord[]  @relation("StallionBreedings")
+  mareFoalings       FoalingRecord[]   @relation("MareFoalings")
+  foalRecord         FoalingRecord?    @relation("FoalRecord")
 
   @@index([barnId])
   @@index([status])
@@ -993,4 +1004,117 @@ model Competition {
   @@index([horseId])
   @@index([eventDate(sort: Desc)])
   @@index([barnId, horseId])
+}
+
+// ============================================================================
+// BREEDING
+// ============================================================================
+
+model ExternalStallion {
+  id                 String   @id @default(cuid())
+  barnId             String
+  name               String
+  registrationNumber String?
+  breed              String?
+  color              String?
+  studFarm           String?
+  studFarmLocation   String?
+  contactName        String?
+  contactPhone       String?
+  contactEmail       String?
+  fee                Float?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  barn             Barn              @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  breedingRecords  BreedingRecord[]
+
+  @@unique([barnId, name])
+  @@index([barnId])
+}
+
+model HeatCycle {
+  id                String    @id @default(cuid())
+  barnId            String
+  horseId           String
+  startDate         DateTime
+  endDate           DateTime?
+  intensity         String?   // MILD, MODERATE, STRONG
+  signs             String[]  @default([])
+  notes             String?
+  predictedNextDate DateTime?
+  cycleLength       Int       @default(21)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  barn  Barn  @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([barnId])
+  @@index([horseId])
+  @@index([barnId, startDate(sort: Desc)])
+  @@index([predictedNextDate])
+}
+
+model BreedingRecord {
+  id                  String    @id @default(cuid())
+  barnId              String
+  mareId              String
+  stallionId          String?
+  externalStallionId  String?
+  breedingDate        DateTime
+  breedingType        String    // NATURAL, AI_FRESH, AI_COOLED, AI_FROZEN, EMBRYO_TRANSFER
+  veterinarian        String?
+  facility            String?
+  status              String    @default("PENDING") // PENDING, CONFIRMED_PREGNANT, NOT_PREGNANT, REBREED, FOALED
+  pregnancyCheckDate  DateTime?
+  pregnancyCheckResult String?  // POSITIVE, NEGATIVE, INCONCLUSIVE
+  estimatedDueDate    DateTime?
+  cost                Float?
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  barn              Barn               @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  mare              Horse              @relation("MareBreedings", fields: [mareId], references: [id], onDelete: Cascade)
+  stallion          Horse?             @relation("StallionBreedings", fields: [stallionId], references: [id])
+  externalStallion  ExternalStallion?  @relation(fields: [externalStallionId], references: [id])
+  foalingRecord     FoalingRecord?
+
+  @@index([barnId])
+  @@index([mareId])
+  @@index([stallionId])
+  @@index([externalStallionId])
+  @@index([barnId, status])
+  @@index([barnId, estimatedDueDate])
+}
+
+model FoalingRecord {
+  id               String    @id @default(cuid())
+  barnId           String
+  breedingRecordId String    @unique
+  mareId           String
+  foalId           String?   @unique
+  dueDate          DateTime?
+  actualDate       DateTime
+  foalSex          String?   // COLT, FILLY
+  foalColor        String?
+  foalName         String?
+  birthWeight      Float?
+  outcome          String    @default("LIVE") // LIVE, STILLBORN, ABORTION, DYSTOCIA
+  complications    String?
+  veterinarian     String?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  barn            Barn            @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  breedingRecord  BreedingRecord  @relation(fields: [breedingRecordId], references: [id], onDelete: Cascade)
+  mare            Horse           @relation("MareFoalings", fields: [mareId], references: [id], onDelete: Cascade)
+  foal            Horse?          @relation("FoalRecord", fields: [foalId], references: [id])
+
+  @@index([barnId])
+  @@index([mareId])
+  @@index([barnId, actualDate(sort: Desc)])
 }

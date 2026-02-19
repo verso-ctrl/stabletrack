@@ -111,7 +111,7 @@ export function DocumentManager({
     return (
       <FeatureLocked
         feature="Document Management"
-        requiredTier="CORE"
+        requiredTier="STARTER"
         onUpgrade={() => window.location.href = '/settings/billing'}
       />
     )
@@ -150,7 +150,7 @@ export function DocumentManager({
 
   const handleShare = async (doc: DocumentItem) => {
     if (!features.canShareDocuments) {
-      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('CORE')} plan`)
+      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('STARTER')} plan`)
       return
     }
     // Implement sharing logic

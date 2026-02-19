@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { tier, barnData } = body
+    const { tier, barnData, addOns } = body
 
     if (!tier) {
       return NextResponse.json(
@@ -51,32 +51,59 @@ export async function POST(req: NextRequest) {
 
     const pricing = TIER_PRICING[tier as SubscriptionTier]
 
-    // Create Stripe checkout session
+    // Build line items — base plan + any add-ons
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `StableTrack ${pricing.displayName} Plan`,
+            description: pricing.description,
+          },
+          unit_amount: pricing.monthlyPriceCents,
+          recurring: {
+            interval: 'month',
+          },
+        },
+        quantity: 1,
+      },
+    ]
+
+    // Add breeding add-on if selected
+    const selectedAddOns: string[] = Array.isArray(addOns) ? addOns : []
+    if (selectedAddOns.includes('breeding')) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Breeding Tracker Add-On',
+            description: 'Heat cycles, breeding records, foaling management',
+          },
+          unit_amount: 1000, // $10/mo
+          recurring: {
+            interval: 'month',
+          },
+        },
+        quantity: 1,
+      })
+    }
+
+    // Create Stripe checkout session with 14-day trial
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'StableTrack Core Plan',
-              description: pricing.description,
-            },
-            unit_amount: pricing.monthlyPriceCents,
-            recurring: {
-              interval: 'month',
-            },
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
+      subscription_data: {
+        trial_period_days: 14,
+      },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding/create-barn/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding/create-barn`,
       client_reference_id: user.id,
+      customer_email: user.email || undefined,
       metadata: {
         userId: user.id,
         tier,
+        addOns: selectedAddOns.join(','),
         barnName: barnData.name,
         barnAddress: barnData.address || '',
         barnCity: barnData.city || '',

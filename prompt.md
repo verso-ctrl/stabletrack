@@ -1,4 +1,4 @@
-# StableTrack Feature Implementation
+# StableTrack UX Polish & Testing
 
 Work through each task below in order. Complete one fully before moving to the next. Read the relevant files before making changes. Reference CLAUDE.md for project context.
 
@@ -6,108 +6,276 @@ This is a test environment — no need to worry about Stripe, Sentry, Resend, or
 
 ---
 
-## Task 1: Horse-Specific Tasks & Two-Way Schedule Sync
+## Task 1: Confirmation Dialog Component
 
-**Goal:** Allow users to create tasks under individual horse profiles that automatically sync to the master calendar, and vice versa — global schedule entries should appear under each affected horse's profile.
+**Goal:** Replace every `window.confirm()` / `confirm()` call with a proper styled confirmation modal that matches the app's design system.
 
-**Key behaviors:**
-- Under each horse's profile page, add the ability to create tasks specific to that horse (e.g. brush mane and tail, pick feet, dentist appointment, farrier visit)
-- Horse-specific tasks should automatically appear on the master schedule/calendar
-- When a global entry is made on the schedule (e.g. vet coming to check coggins, prepare health certificate) and one or more horses are tagged, that entry should also appear under each affected horse's profile
-- This must be a **two-way sync**: horse-level → master schedule, and master schedule → horse profile
+**Why:** Native browser confirm dialogs are ugly, can't be styled, don't match the app's dark mode, and break the user experience. Destructive actions deserve a proper "Are you sure?" dialog with clear context.
 
-**Files to check/update:**
-- `src/app/(dashboard)/horses/[horseId]/page.tsx` — horse detail page, add a tasks section
-- `src/app/(dashboard)/horses/[horseId]/components/` — may need a new TasksTab or similar
-- `src/app/(dashboard)/calendar/page.tsx` — ensure horse-linked events show horse context
-- `src/app/(dashboard)/daily-care/page.tsx` — check overlap with task management
-- `src/components/events/EventForm.tsx` — ensure events can be linked to one or more horses
-- `src/hooks/useData.ts` — may need hooks for horse-specific tasks
-- `prisma/schema.prisma` — verify Task and Event models have horse relationships
-- Relevant API routes under `src/app/api/barns/[barnId]/`
+**Files to create:**
+- `src/components/ui/ConfirmDialog.tsx` — reusable confirmation dialog component
+
+**Files to update (replace `confirm()` calls):**
+- `src/app/(dashboard)/team/page.tsx` — lines 110, 166 (reject request, remove member)
+- `src/app/(dashboard)/pastures/page.tsx` — lines 266, 398 (delete paddock, delete stall)
+- `src/app/(dashboard)/documents/page.tsx` — line 172 (delete document)
+- `src/app/(dashboard)/settings/barn/page.tsx` — line 142 (regenerate invite code)
+- `src/app/(dashboard)/clients/page.tsx` — line 723 (remove payment method)
+- `src/components/storage/HorsePhotoGallery.tsx` — line 122 (delete photo)
+- `src/components/storage/DocumentManager.tsx` — line 133 (delete document)
 
 **What to do:**
-- Check the existing Task and Event models in the Prisma schema — do they already have a `horseId` field? If not, add one
-- On the horse detail page, add a "Tasks" or "Schedule" section that lists all tasks and events linked to that horse
-- Allow creating new tasks directly from the horse profile (quick-add form or modal)
-- On the calendar/schedule page, when creating or viewing an event, show which horse(s) it's linked to
-- When a global event is created with horses selected, it should appear in each horse's profile view
-- Ensure task completion status syncs everywhere (mark done on calendar → shows done on horse profile, and vice versa)
+- Build `ConfirmDialog` using Radix UI's `AlertDialog` primitive (already a dependency — check `@radix-ui/react-alert-dialog`)
+  - If Radix AlertDialog is not installed, use a simple modal with backdrop, focus trap, and Escape-to-close
+- Props: `open`, `onConfirm`, `onCancel`, `title`, `description`, `confirmLabel` (default "Confirm"), `cancelLabel` (default "Cancel"), `variant` ("danger" | "warning" | "default")
+- Danger variant: red confirm button (for deletes/removes)
+- Warning variant: amber confirm button (for regenerating codes, etc.)
+- Must support dark mode (use existing CSS variable colors: `bg-card`, `text-foreground`, etc.)
+- Must trap focus and close on Escape
+- Replace every `confirm()` call in the codebase with the new component — each page will need local `useState` for dialog open/closed state and a pending action callback
+- Make sure the dialog shows context-specific messaging (e.g. "Remove Sarah from the barn?" not just "Are you sure?")
 
 ---
 
-## Task 2: Printable Monthly Calendar
+## Task 2: Custom 404 & Error Pages
 
-**Goal:** Provide a downloadable/printable full-month calendar view where activities appear inside the day squares, designed to be posted in the tack room.
+**Goal:** Add branded 404 and error pages so users don't see raw Next.js defaults when they hit a bad URL or a page crashes.
 
-**Files to check/update:**
-- `src/app/(dashboard)/calendar/page.tsx` — main calendar page
-- `src/components/events/CalendarView.tsx` — calendar rendering component
-- May need a new `PrintableCalendar.tsx` component
+**Files to create:**
+- `src/app/not-found.tsx` — global 404 page
+- `src/app/(dashboard)/not-found.tsx` — dashboard-specific 404
+- `src/app/(dashboard)/error.tsx` — dashboard error boundary
+- `src/app/(dashboard)/horses/[horseId]/not-found.tsx` — horse not found
 
 **What to do:**
-- Add a "Print" or "Download" button on the calendar page
-- Create a print-optimized monthly calendar layout:
-  - Full month grid with day squares large enough to fit text
-  - Activities/events listed inside each day square (not in a side panel)
-  - Show both horse-specific and global entries
-  - Include the month/year as a header
-  - Use `@media print` CSS for clean print output, or generate a PDF
-- Events in day squares should show a brief summary (event title, horse name if applicable)
-- If a day has too many events to fit, show a count like "+3 more"
-- The calendar should be legible when printed on standard letter paper (landscape orientation recommended)
-- Consider using the existing pdf-lib or pdfkit dependencies for PDF generation, or use CSS print styles for browser print
+
+### 404 Pages
+- Design a simple, friendly 404 page matching the app's style:
+  - Horse-themed illustration or icon (use an SVG or lucide icon)
+  - "Page not found" heading
+  - Helpful message: "This page doesn't exist or has been moved."
+  - "Go to Dashboard" button linking to `/dashboard`
+  - "Go Home" link for the public 404
+- The dashboard 404 should render inside the dashboard layout (sidebar stays visible)
+- The horse-specific 404 should say "Horse not found" with a link back to `/horses`
+
+### Error Boundary (`error.tsx`)
+- Must be a client component (`'use client'`)
+- Show a friendly error message: "Something went wrong"
+- Include a "Try again" button that calls the `reset()` function from Next.js error boundary props
+- Include a "Go to Dashboard" fallback link
+- Log the error to console (Sentry integration exists but don't worry about it for now)
+- Style to match the app — use `bg-card`, `text-foreground`, `border-border` tokens
 
 ---
 
-## Task 3: Separate Farm Maintenance from Daily Care
+## Task 3: Toast Feedback on All CRUD Operations
 
-**Goal:** Split "Daily Care" into two distinct sections — horse-specific daily care (feeding, meds, turnout) and general farm maintenance (property upkeep not tied to a specific horse).
+**Goal:** Ensure every create, update, and delete operation gives the user visible feedback via toast notifications.
 
-**Files to check/update:**
-- `src/app/(dashboard)/daily-care/page.tsx` — current daily care page
-- May need a new `src/app/(dashboard)/farm-maintenance/page.tsx` page
-- `src/components/dashboard/Sidebar.tsx` — add Farm Maintenance nav item
-- `prisma/schema.prisma` — may need a FarmTask model or a type field on existing Task model
-- Relevant API routes
+**Current state:** The toast system works — `ToastContainer` is rendered in the dashboard layout, and `toast.success()` / `toast.error()` from `src/lib/toast.ts` fire correctly. But most mutations in `src/hooks/useMutations.ts` silently succeed without telling the user.
+
+**Files to update:**
+- `src/hooks/useMutations.ts` — add toast calls to all mutation `onSuccess` and `onError` callbacks
 
 **What to do:**
-
-### Farm Maintenance (new section)
-- Create a new "Farm Maintenance" tab/page in the dashboard navigation
-- Farm tasks are NOT tied to a specific horse — they're property-level chores
-- Examples: fix fence boards, clean water troughs, spread manure in pastures, mow fields, repair barn doors
-- Support creating, completing, and scheduling farm maintenance tasks
-- Allow recurring tasks (e.g. "clean water troughs" every week)
-
-### Daily Care (refocused on horse-specific care)
-- Refocus the existing Daily Care page to be strictly horse-specific care:
-  - **Medications**: frequency (# times/day), form (pill/liquid/paste), dosage amount
-  - **Special dietary needs**: notes per horse
-  - **Hay/feed**: type (timothy, alfalfa, T&A, coastal, etc.), amount, number of times daily
-  - **Turnout schedule**: time out, duration, which pasture/paddock
-- Each of these should be viewable per individual horse (on the horse profile)
-- Also provide a **master daily care printout**: all horses listed alphabetically by name, showing each horse's care instructions — designed to be printed and posted for easy reference
+- Import `toast` and `showError` from `@/lib/toast`
+- Add success toasts to every mutation's `onSuccess`:
+  - `useCreateHorse` → `toast.success('Horse added', 'Successfully added to your barn')`
+  - `useUpdateHorse` → `toast.success('Horse updated')`
+  - `useDeleteHorse` → `toast.success('Horse removed')`
+  - `useCreateEvent` → `toast.success('Event created')`
+  - `useUpdateEvent` → `toast.success('Event updated')`
+  - `useDeleteEvent` → `toast.success('Event deleted')`
+  - `useCreateTask` → `toast.success('Task created')`
+  - `useUpdateTask` → `toast.success('Task updated')`
+  - `useDeleteTask` → `toast.success('Task deleted')`
+  - `useCompleteTask` → `toast.success('Task completed')`
+  - `useCreateClient` → `toast.success('Client added')`
+  - `useUpdateClient` → `toast.success('Client updated')`
+  - `useDeleteClient` → `toast.success('Client removed')`
+  - `useCreateInvoice` → `toast.success('Invoice created')`
+  - `useUpdateInvoice` → `toast.success('Invoice updated')`
+  - `useDeleteInvoice` → `toast.success('Invoice deleted')`
+  - `useCreateLesson` → `toast.success('Lesson scheduled')`
+  - `useUpdateLesson` → `toast.success('Lesson updated')`
+  - `useDeleteLesson` → `toast.success('Lesson removed')`
+- Add error toasts to every mutation's `onError`:
+  - Use `showError(error, 'Failed to [action]')` for each
+- Keep existing `onSuccess` logic (cache invalidation) — just add the toast call alongside it
+- Do NOT add toasts to `useCompleteEvent` if it already shows feedback in the UI
 
 ---
 
-## Task 4: Client Payment Information
+## Task 4: Breadcrumbs Navigation
 
-**Goal:** Allow storing payment methods on file for clients, with proper consent and security.
+**Goal:** Add breadcrumb navigation to detail pages and settings sub-pages so users always know where they are and can navigate back easily.
 
-**Files to check/update:**
-- `src/app/(dashboard)/clients/page.tsx` — clients list and detail
-- `src/app/api/barns/[barnId]/clients/` — client API routes
-- `prisma/schema.prisma` — Client model
-- `src/lib/` — may need payment utility functions
+**Files to create:**
+- `src/components/ui/Breadcrumbs.tsx` — reusable breadcrumb component
+
+**Files to update:**
+- `src/app/(dashboard)/horses/[horseId]/page.tsx` — add breadcrumbs: Dashboard > Horses > [Horse Name]
+- `src/app/(dashboard)/settings/barn/page.tsx` — add breadcrumbs: Dashboard > Settings > Barn
+- `src/app/(dashboard)/settings/billing/page.tsx` — add breadcrumbs: Dashboard > Settings > Billing
+- `src/app/(dashboard)/settings/profile/page.tsx` — add breadcrumbs: Dashboard > Settings > Profile
+- `src/app/(dashboard)/settings/security/page.tsx` — add breadcrumbs: Dashboard > Settings > Security
+- `src/app/(dashboard)/settings/notifications/page.tsx` — add breadcrumbs: Dashboard > Settings > Notifications
+- `src/app/(dashboard)/settings/appearance/page.tsx` — add breadcrumbs: Dashboard > Settings > Appearance
+- `src/app/(dashboard)/documents/page.tsx` — if it has a detail view
 
 **What to do:**
-- Under each client's profile, add a "Payment Method" section
-- Support storing payment method references:
-  - Credit/debit card (via Stripe tokenization — never store raw card numbers)
-  - ACH / bank account (via Stripe tokenization)
-- Add a consent/permission checkbox: "Client has authorized storing payment information on file"
-- Display masked payment info (e.g. "Visa ending in 4242", "Bank account ending in 6789")
-- Allow updating or removing a stored payment method
-- For this test environment, build the UI and data flow but use Stripe test mode or mock the payment token storage
-- **Security**: Never store raw card numbers, CVVs, or full bank account numbers in the database. Only store Stripe payment method IDs/tokens. Follow PCI compliance patterns.
+- Build a `Breadcrumbs` component:
+  - Props: `items: Array<{ label: string; href?: string }>` — last item has no href (current page)
+  - Render as `<nav aria-label="Breadcrumb">` with an `<ol>` for accessibility
+  - Use `>` or `/` as separator between items
+  - Links use `text-muted-foreground hover:text-foreground`, current page uses `text-foreground font-medium`
+  - Responsive: on mobile, show only the parent link as a back arrow ("< Horses") instead of full breadcrumb trail
+- Add breadcrumbs at the top of each detail/settings page, above the page heading
+- The horse detail page should show the horse's name as the last breadcrumb item
+
+---
+
+## Task 5: Accessibility Improvements
+
+**Goal:** Fix the most impactful accessibility gaps so the app is usable with screen readers and keyboard navigation.
+
+**Files to update:**
+- `src/components/dashboard/Sidebar.tsx` — skip-to-content link, aria labels
+- `src/app/(dashboard)/layout.tsx` or `src/components/dashboard/DashboardShell.tsx` — landmark roles, skip link target
+- `src/app/(dashboard)/horses/[horseId]/page.tsx` — tab navigation accessibility
+- Any modal/dialog components — focus management
+
+**What to do:**
+
+### Skip-to-Content Link
+- Add a "Skip to main content" link as the first focusable element in the dashboard layout
+- Visually hidden until focused (use `sr-only focus:not-sr-only` pattern)
+- Links to `#main-content` — add `id="main-content"` to the main content area
+
+### Aria Labels on Icon Buttons
+- Audit all icon-only buttons (no visible text) and add `aria-label` attributes
+- Key places to check:
+  - Sidebar toggle/hamburger button
+  - Theme toggle button
+  - Horse card action buttons (edit, delete)
+  - Modal close buttons (X icon)
+  - Table action menus (three-dot MoreVertical buttons)
+  - Photo gallery action buttons (set primary, download, delete)
+  - Calendar navigation arrows (prev/next month)
+
+### Focus Indicators
+- Ensure all interactive elements have visible focus indicators
+- Add `focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2` to any custom button/link styles that lack them
+- Check: sidebar nav items, card action buttons, form inputs
+
+### Tab Panel Accessibility
+- On the horse detail page, if tabs are used (Overview, Health, Tasks, etc.):
+  - Add `role="tablist"` to the tab container
+  - Add `role="tab"`, `aria-selected`, `aria-controls` to each tab button
+  - Add `role="tabpanel"`, `id`, `aria-labelledby` to each panel
+  - Support arrow key navigation between tabs
+
+---
+
+## Task 6: Form Validation UX
+
+**Goal:** Show inline field-level errors on forms so users can see exactly what's wrong without hunting.
+
+**Files to update:**
+- `src/components/horses/AddHorseForm.tsx` — inline errors under each field
+- `src/components/events/EventForm.tsx` — inline errors
+- `src/app/onboarding/create-barn/page.tsx` — inline errors on onboarding form
+
+**What to do:**
+- For React Hook Form fields (AddHorseForm):
+  - Below each input, add an error message span: `{errors.fieldName && <p className="text-sm text-destructive mt-1">{errors.fieldName.message}</p>}`
+  - Add `aria-invalid={!!errors.fieldName}` and `aria-describedby` to the input
+  - Add a red border on errored inputs: `border-destructive` when error is present
+- For the EventForm (native form handling):
+  - Add local validation state and show errors inline under each field
+  - Validate required fields (title, date) before submission
+  - Show specific messages: "Event title is required", "Please select a date"
+- For create-barn onboarding:
+  - Barn name: "Barn name is required"
+  - Contact fields: validate email format, phone format
+  - Show errors inline under each field, not just in a banner at the top
+- All error messages should use `role="alert"` or `aria-live="polite"` for screen reader announcement
+
+---
+
+## Task 7: Unit & Integration Tests
+
+**Goal:** Add meaningful test coverage for the core utilities, hooks, and key components. Target the highest-value, most testable code first.
+
+**Current state:** Only 3 test files exist:
+- `src/lib/__tests__/api-helpers.test.ts` — rate limiting, ValidationError
+- `src/lib/__tests__/validations.test.ts` — Zod schemas
+- `src/components/__tests__/ErrorBoundary.test.tsx` — error boundaries
+
+**Test framework:** Jest 30.2.0 + React Testing Library 16.3.1. Run with `npm run test`.
+
+**Files to create:**
+
+### Tier System Tests
+- `src/lib/__tests__/tiers.test.ts`
+  - `normalizeTier()` maps all legacy strings correctly: FREE → CORE, BASIC → CORE, ADVANCED → PRO, ENTERPRISE → PRO, garbage → CORE
+  - `getNextTier()` returns PRO for CORE, null for PRO
+  - `getTierLimits()` returns correct limits for each tier (maxHorses, maxStorageBytes, etc.)
+  - `getTierPricing()` returns correct prices
+  - `getTierFeatures()` returns correct feature flags
+  - `hasReachedPhotoLimit()` correctly checks limits
+  - `formatBytes()` formats bytes correctly (0, KB, MB, GB)
+
+### Toast Utility Tests
+- `src/lib/__tests__/toast.test.ts`
+  - `subscribeToToasts()` receives emitted toasts
+  - `toast.success()`, `toast.error()`, etc. emit correct types
+  - `showError()` extracts Error messages and falls back to default
+  - `showDemoMessage()` emits info toast with correct content
+  - Unsubscribe function stops receiving toasts
+
+### CSV Utility Tests (if `src/lib/csv.ts` exists)
+- `src/lib/__tests__/csv.test.ts`
+  - Generates correct CSV output from array of objects
+  - Handles special characters (commas, quotes, newlines) in values
+  - Handles empty arrays
+  - Handles custom column definitions
+
+### Tier Validation Tests
+- `src/lib/__tests__/tier-validation.test.ts`
+  - `validateBarnAction()` or equivalent functions enforce limits correctly
+  - Horse count checks respect maxHorses per tier
+  - Storage checks respect maxStorageBytes per tier
+
+### Component Tests
+- `src/components/__tests__/ConfirmDialog.test.tsx` (after Task 1)
+  - Renders with title and description
+  - Calls onConfirm when confirm button clicked
+  - Calls onCancel when cancel button or backdrop clicked
+  - Closes on Escape key
+  - Shows danger styling for variant="danger"
+
+- `src/components/__tests__/Breadcrumbs.test.tsx` (after Task 4)
+  - Renders all breadcrumb items
+  - Last item is not a link
+  - Has correct aria-label on nav element
+  - Links have correct href attributes
+
+### Hook Tests
+- `src/hooks/__tests__/useTierPermissions.test.tsx`
+  - Returns correct permissions for CORE tier
+  - Returns correct permissions for PRO tier
+  - `canAddHorses()` respects tier limits
+  - `canAddTeamMembers()` respects tier limits
+  - `getUpgradeMessage()` returns appropriate messages
+
+**What to do:**
+- Create each test file with the tests described above
+- Use `describe` / `it` blocks with clear test names
+- For component tests, use `@testing-library/react` render + screen queries
+- For hook tests, use `renderHook` from `@testing-library/react`
+- Mock external dependencies (Prisma, fetch, contexts) as needed
+- Run `npm run test` after each file to verify tests pass
+- Do NOT fix pre-existing test failures in `ErrorBoundary.test.tsx` (known issues — see CLAUDE.md memory)
+- Target: all new tests should pass green

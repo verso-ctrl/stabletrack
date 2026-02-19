@@ -73,9 +73,9 @@ export function TierProvider({
 export function useTier(): TierContextValue {
   const context = useContext(TierContext)
   
-  // If no provider, return default CORE tier values (demo mode)
+  // If no provider, return default STARTER tier values (demo mode)
   if (!context) {
-    const tier: SubscriptionTier = 'CORE'
+    const tier: SubscriptionTier = 'STARTER'
     const features = getTierFeatures(tier)
     const limits = getTierLimits(tier)
     
@@ -105,7 +105,7 @@ export function useTier(): TierContextValue {
 
 export function useTierPermissions(options: UseTierPermissionsOptions): TierContextValue {
   const { barnId } = options
-  const [tier, setTier] = useState<SubscriptionTier>('CORE')
+  const [tier, setTier] = useState<SubscriptionTier>('STARTER')
   const [loading, setLoading] = useState(true)
 
   // Fetch tier from API
@@ -116,7 +116,7 @@ export function useTierPermissions(options: UseTierPermissionsOptions): TierCont
         
         if (response.ok) {
           const data = await response.json()
-          setTier(normalizeTier(data.tier || 'CORE'))
+          setTier(normalizeTier(data.tier || 'STARTER'))
         }
       } catch (error) {
         console.error('Failed to fetch subscription tier:', error)

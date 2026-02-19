@@ -74,6 +74,52 @@ export async function POST(req: NextRequest) {
 
           console.log(`Barn ${barnId} upgraded to ${tier}`)
         }
+
+        // Handle add-on purchase
+        if (session.metadata?.barnId && session.metadata?.action === 'add_addon') {
+          const { barnId, addOnId } = session.metadata
+
+          if (addOnId) {
+            const barn = await prisma.barn.findUnique({
+              where: { id: barnId },
+              select: { activeAddOns: true },
+            })
+
+            if (barn && !barn.activeAddOns.includes(addOnId)) {
+              await prisma.barn.update({
+                where: { id: barnId },
+                data: {
+                  activeAddOns: { push: addOnId },
+                  stripeCustomerId: session.customer as string || undefined,
+                  stripeSubscriptionId: session.subscription as string || undefined,
+                },
+              })
+              console.log(`Barn ${barnId} activated add-on: ${addOnId}`)
+            }
+          }
+        }
+
+        // Handle barn creation with add-ons (from onboarding)
+        if (session.metadata?.addOns && session.metadata?.barnName) {
+          const addOns = session.metadata.addOns.split(',').filter(Boolean)
+          if (addOns.length > 0) {
+            // The barn may not exist yet (created by verify-session),
+            // but if it does, update its add-ons
+            const barn = await prisma.barn.findFirst({
+              where: {
+                name: session.metadata.barnName,
+                stripeCustomerId: session.customer as string,
+              },
+            })
+            if (barn && barn.activeAddOns.length === 0) {
+              await prisma.barn.update({
+                where: { id: barn.id },
+                data: { activeAddOns: addOns },
+              })
+              console.log(`Barn ${barn.id} initialized with add-ons: ${addOns.join(', ')}`)
+            }
+          }
+        }
         break
       }
 
@@ -112,9 +158,10 @@ export async function POST(req: NextRequest) {
           await prisma.barn.update({
             where: { id: barn.id },
             data: {
-              tier: 'CORE',
+              tier: 'STARTER',
               subscriptionStatus: 'CANCELED',
               stripeSubscriptionId: null,
+              activeAddOns: [],
             },
           })
 
