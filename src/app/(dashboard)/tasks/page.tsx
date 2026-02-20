@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Plus,
   Search,
@@ -81,7 +82,7 @@ export default function TasksPage() {
   const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -682,7 +683,7 @@ export default function TasksPage() {
                   }
                   setIsCreating(true);
                   try {
-                    const response = await fetch(`/api/barns/${currentBarn?.id}/tasks`, {
+                    const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({

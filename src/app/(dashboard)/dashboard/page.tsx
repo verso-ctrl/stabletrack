@@ -9,6 +9,7 @@ import { WelcomeChecklist } from '@/components/dashboard/WelcomeChecklist';
 import { TrialBanner } from '@/components/billing/TrialBanner';
 import { hasPermission, BarnRole } from '@/types';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   AlertTriangle,
   Calendar,
@@ -59,7 +60,7 @@ export default function DashboardPage() {
 
     // Step 3: Fire API call
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'COMPLETED' }),
@@ -98,7 +99,7 @@ export default function DashboardPage() {
     });
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'PENDING' }),

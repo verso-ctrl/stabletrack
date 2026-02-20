@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Pill,
   ChevronLeft,
@@ -69,7 +70,7 @@ export default function LogMedicationPage() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(
+      const response = await csrfFetch(
         `/api/barns/${currentBarn?.id}/horses/${selectedHorse}/medications/${selectedMedication}`,
         {
           method: 'PATCH',

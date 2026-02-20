@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   DollarSign,
   Users,
@@ -185,7 +186,7 @@ export default function BillingPage() {
           serviceId: item.serviceId || null,
         }));
 
-      const response = await fetch(`/api/barns/${currentBarn?.id}/invoices`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/invoices`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -224,7 +225,7 @@ export default function BillingPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/services`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -259,7 +260,7 @@ export default function BillingPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/invoices/${selectedInvoice.id}/payments`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/invoices/${selectedInvoice.id}/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -288,7 +289,7 @@ export default function BillingPage() {
 
   const handleUpdateInvoiceStatus = async (invoiceId: string, status: string) => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/invoices/${invoiceId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/invoices/${invoiceId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -330,7 +331,7 @@ export default function BillingPage() {
   const handleCreatePaymentLink = async (invoice: any) => {
     setIsCreatingPaymentLink(invoice.id);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/invoices/${invoice.id}/payment-link`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/invoices/${invoice.id}/payment-link`, {
         method: 'POST',
       });
       
@@ -369,7 +370,7 @@ export default function BillingPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/recurring-invoices`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/recurring-invoices`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -407,7 +408,7 @@ export default function BillingPage() {
   const handleGenerateInvoices = async (recurringId?: string) => {
     setIsGenerating(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/recurring-invoices/generate`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/recurring-invoices/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -432,7 +433,7 @@ export default function BillingPage() {
   // Toggle recurring invoice active status
   const handleToggleRecurring = async (recurring: any) => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/recurring-invoices/${recurring.id}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/recurring-invoices/${recurring.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !recurring.isActive }),

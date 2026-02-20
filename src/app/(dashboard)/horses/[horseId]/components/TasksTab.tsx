@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useTasks } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Plus,
   CheckCircle2,
@@ -61,7 +62,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
     }, 1500);
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'COMPLETED' }),
@@ -95,7 +96,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
     });
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'PENDING' }),
@@ -109,7 +110,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
 
   const uncompleteTask = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'PENDING' }),
@@ -128,7 +129,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
     }
     setIsCreating(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/tasks`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

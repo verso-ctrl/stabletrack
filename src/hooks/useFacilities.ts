@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentBarn } from '@/contexts/BarnContext';
 import { queryKeys, staleTimes } from '@/lib/queryKeys';
+import { csrfFetch } from '@/lib/fetch';
 
 // ============================================================================
 // Types
@@ -53,7 +54,7 @@ async function mutateApi<T>(
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   body?: unknown
 ): Promise<T> {
-  const response = await fetch(url, {
+  const response = await csrfFetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,

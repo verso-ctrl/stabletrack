@@ -7,6 +7,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 
 export default function BillingPage() {
   const searchParams = useSearchParams();
@@ -26,14 +27,14 @@ export default function BillingPage() {
     if (addonSuccess === 'true') {
       handledRef.current = true;
       // Verify and sync add-on status from Stripe session
-      fetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
+      csrfFetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
         .then(() => refreshBarn?.())
         .then(() => toast.success('Add-on activated!', 'Your add-on is now active.'))
         .catch(() => toast.success('Checkout complete!', 'Your add-on will be activated shortly.'));
       router.replace('/settings/billing');
     } else if (planSuccess === 'true' && tier) {
       handledRef.current = true;
-      fetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
+      csrfFetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
         .then(() => {
           changeTier(tier as any);
           return refreshBarn?.();

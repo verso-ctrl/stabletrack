@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   User,
   Mail,
@@ -86,7 +87,7 @@ export default function ProfileSettingsPage() {
       
       setIsSaving(true);
       try {
-        const response = await fetch('/api/user', {
+        const response = await csrfFetch('/api/user', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -117,7 +118,7 @@ export default function ProfileSettingsPage() {
     setIsSaving(true);
     
     try {
-      const response = await fetch('/api/user', {
+      const response = await csrfFetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

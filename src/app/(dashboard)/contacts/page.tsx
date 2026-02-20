@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Plus,
   Search,
@@ -370,7 +371,7 @@ function AddContactModal({
     setError('');
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/clients`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/clients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -601,7 +602,7 @@ function ContactDetailsModal({
     setError('');
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/clients`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/clients`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -633,7 +634,7 @@ function ContactDetailsModal({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/clients?id=${contact.id}`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/clients?id=${contact.id}`, {
         method: 'DELETE',
       });
 

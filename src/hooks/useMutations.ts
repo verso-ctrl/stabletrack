@@ -7,8 +7,9 @@ import { toast, showError } from '@/lib/toast';
 import type { Horse, Event, Task } from '@/types';
 
 // ============================================================================
-// Shared mutation helper
+// Shared mutation helper with CSRF protection
 // ============================================================================
+import { csrfFetch } from '@/lib/fetch';
 
 interface MutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;
@@ -21,11 +22,9 @@ async function fetchMutation<T>(
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   body?: unknown
 ): Promise<T> {
-  const response = await fetch(url, {
+  const response = await csrfFetch(url, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
 

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import { useEvents, useHorses } from '@/hooks/useData';
 import { PrintableCalendar } from '@/components/events/PrintableCalendar';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -230,7 +231,7 @@ export default function CalendarPage() {
   const handleGoogleSync = async () => {
     setIsSyncing(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/calendar/google`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/calendar/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'sync' }),
@@ -249,7 +250,7 @@ export default function CalendarPage() {
 
   const handleGoogleConnect = async () => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/calendar/google`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/calendar/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'connect' }),
@@ -383,7 +384,7 @@ export default function CalendarPage() {
       if (eventForm.providerName) requestBody.providerName = eventForm.providerName;
       if (eventForm.providerPhone) requestBody.providerPhone = eventForm.providerPhone;
 
-      const response = await fetch(`/api/barns/${currentBarn?.id}/events`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -451,7 +452,7 @@ export default function CalendarPage() {
     setIsEditSubmitting(true);
     try {
       const scheduledDateTime = `${editForm.scheduledDate}T${editForm.scheduledTime}:00`;
-      const res = await fetch(`/api/barns/${currentBarn.id}/events/${editingEvent.id}`, {
+      const res = await csrfFetch(`/api/barns/${currentBarn.id}/events/${editingEvent.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -476,7 +477,7 @@ export default function CalendarPage() {
   const handleDeleteEvent = async () => {
     if (!deleteEventId || !currentBarn) return;
     try {
-      const res = await fetch(`/api/barns/${currentBarn.id}/events/${deleteEventId}`, {
+      const res = await csrfFetch(`/api/barns/${currentBarn.id}/events/${deleteEventId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete event');

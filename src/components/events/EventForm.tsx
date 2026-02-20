@@ -12,6 +12,7 @@ import {
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
 import type { Event, EventType, CreateEventInput } from '@/types';
+import { csrfFetch } from '@/lib/fetch';
 
 interface EventFormProps {
   event?: Event;
@@ -161,7 +162,7 @@ export function EventForm({
         ? `/api/barns/${currentBarn.id}/events/${event.id}`
         : `/api/barns/${currentBarn.id}/events`;
 
-      const response = await fetch(url, {
+      const response = await csrfFetch(url, {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -12,6 +12,7 @@ import { ExternalStallionModal, type ExternalStallionFormData } from '@/componen
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import { hasPermission, BarnRole } from '@/types';
 import { Heart, Baby, Calendar, Star, Plus, Loader2, Pencil, Trash2, User } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -162,7 +163,7 @@ export default function BreedingPage() {
   // ---- Create handlers ----
 
   const handleLogHeatCycle = async (data: { horseId: string; startDate: string; endDate: string; intensity: string; signs: string[]; notes: string }) => {
-    const res = await fetch(`/api/barns/${barnId}/breeding/heat-cycles`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/heat-cycles`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to log heat cycle', err.error || 'Please try again'); throw new Error(err.error); }
@@ -171,7 +172,7 @@ export default function BreedingPage() {
   };
 
   const handleRecordBreeding = async (data: { mareId: string; stallionId: string; externalStallionId: string; breedingDate: string; breedingType: string; veterinarian: string; facility: string; cost: string; notes: string }) => {
-    const res = await fetch(`/api/barns/${barnId}/breeding/records`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/records`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, stallionId: data.stallionId || null, externalStallionId: data.externalStallionId || null }),
     });
@@ -181,7 +182,7 @@ export default function BreedingPage() {
   };
 
   const handleRecordFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
-    const res = await fetch(`/api/barns/${barnId}/breeding/foalings`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to record foaling', err.error || 'Please try again'); throw new Error(err.error); }
@@ -193,7 +194,7 @@ export default function BreedingPage() {
 
   const handleEditHeatCycle = async (data: { horseId: string; startDate: string; endDate: string; intensity: string; signs: string[]; notes: string }) => {
     if (!editingCycle) return;
-    const res = await fetch(`/api/barns/${barnId}/breeding/heat-cycles/${editingCycle.id}`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/heat-cycles/${editingCycle.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ endDate: data.endDate || null, intensity: data.intensity, signs: data.signs, notes: data.notes }),
     });
@@ -205,7 +206,7 @@ export default function BreedingPage() {
 
   const handleEditFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
     if (!editingFoaling) return;
-    const res = await fetch(`/api/barns/${barnId}/breeding/foalings/${editingFoaling.id}`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings/${editingFoaling.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ foalName: data.foalName, foalSex: data.foalSex, foalColor: data.foalColor, birthWeight: data.birthWeight, complications: data.complications, veterinarian: data.veterinarian, notes: data.notes }),
     });
@@ -217,7 +218,7 @@ export default function BreedingPage() {
 
   const handleUpdateStatus = async (recordId: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/barns/${barnId}/breeding/records/${recordId}`, {
+      const res = await csrfFetch(`/api/barns/${barnId}/breeding/records/${recordId}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -231,7 +232,7 @@ export default function BreedingPage() {
 
   const handleEditBreedingRecord = async (data: BreedingFormData) => {
     if (!editingRecord) return;
-    const res = await fetch(`/api/barns/${barnId}/breeding/records/${editingRecord.id}`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/records/${editingRecord.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         estimatedDueDate: data.estimatedDueDate || null,
@@ -252,7 +253,7 @@ export default function BreedingPage() {
 
   const handleDeleteHeatCycle = async (cycleId: string) => {
     try {
-      const res = await fetch(`/api/barns/${barnId}/breeding/heat-cycles/${cycleId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/barns/${barnId}/breeding/heat-cycles/${cycleId}`, { method: 'DELETE' });
       if (!res.ok) { const err = await res.json(); toast.error('Failed to delete', err.error); return; }
       toast.success('Heat cycle deleted');
       fetchData();
@@ -263,7 +264,7 @@ export default function BreedingPage() {
 
   const handleDeleteBreedingRecord = async (recordId: string) => {
     try {
-      const res = await fetch(`/api/barns/${barnId}/breeding/records/${recordId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/barns/${barnId}/breeding/records/${recordId}`, { method: 'DELETE' });
       if (!res.ok) { const err = await res.json(); toast.error('Cannot delete', err.error); return; }
       toast.success('Breeding record deleted');
       fetchData();
@@ -274,7 +275,7 @@ export default function BreedingPage() {
 
   const handleDeleteFoaling = async (foalingId: string) => {
     try {
-      const res = await fetch(`/api/barns/${barnId}/breeding/foalings/${foalingId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings/${foalingId}`, { method: 'DELETE' });
       if (!res.ok) { const err = await res.json(); toast.error('Failed to delete', err.error); return; }
       toast.success('Foaling record deleted');
       fetchData();
@@ -286,7 +287,7 @@ export default function BreedingPage() {
   // ---- External stallion handlers ----
 
   const handleCreateStallion = async (data: ExternalStallionFormData) => {
-    const res = await fetch(`/api/barns/${barnId}/breeding/external-stallions`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/external-stallions`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to add stallion', err.error || 'Please try again'); throw new Error(err.error); }
@@ -296,7 +297,7 @@ export default function BreedingPage() {
 
   const handleEditStallion = async (data: ExternalStallionFormData) => {
     if (!editingStallion) return;
-    const res = await fetch(`/api/barns/${barnId}/breeding/external-stallions/${editingStallion.id}`, {
+    const res = await csrfFetch(`/api/barns/${barnId}/breeding/external-stallions/${editingStallion.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update stallion', err.error || 'Please try again'); throw new Error(err.error); }
@@ -307,7 +308,7 @@ export default function BreedingPage() {
 
   const handleDeleteStallion = async (stallionId: string) => {
     try {
-      const res = await fetch(`/api/barns/${barnId}/breeding/external-stallions/${stallionId}`, { method: 'DELETE' });
+      const res = await csrfFetch(`/api/barns/${barnId}/breeding/external-stallions/${stallionId}`, { method: 'DELETE' });
       if (!res.ok) { const err = await res.json(); toast.error('Cannot delete', err.error); return; }
       toast.success('External stallion deleted');
       fetchData();

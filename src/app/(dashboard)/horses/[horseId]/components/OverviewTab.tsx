@@ -14,6 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/Dialog';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 
 interface FeedItem {
   id: string;
@@ -132,7 +133,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
     }
     setSaving(true);
     try {
-      const res = await fetch(
+      const res = await csrfFetch(
         `/api/barns/${barnId}/horses/${horse.id}/medications/${editingMed.id}`,
         {
           method: 'PATCH',
@@ -162,7 +163,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
     if (!deleteMedId || !barnId) return;
     setSaving(true);
     try {
-      const res = await fetch(
+      const res = await csrfFetch(
         `/api/barns/${barnId}/horses/${horse.id}/medications/${deleteMedId}`,
         { method: 'DELETE' }
       );
@@ -181,7 +182,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
     if (!loggingMed || !barnId) return;
     setSaving(true);
     try {
-      const res = await fetch(
+      const res = await csrfFetch(
         `/api/barns/${barnId}/horses/${horse.id}/medications/${loggingMed.id}`,
         {
           method: 'PATCH',

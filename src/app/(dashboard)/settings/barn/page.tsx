@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
@@ -106,7 +107,7 @@ export default function BarnSettingsPage() {
       
       setIsSaving(true);
       try {
-        const response = await fetch(`/api/barns/${currentBarn.id}`, {
+        const response = await csrfFetch(`/api/barns/${currentBarn.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -144,7 +145,7 @@ export default function BarnSettingsPage() {
 
     setIsSaving(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn.id}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ regenerateInviteCode: true }),
@@ -169,7 +170,7 @@ export default function BarnSettingsPage() {
 
     setIsSaving(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn.id}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -203,7 +204,7 @@ export default function BarnSettingsPage() {
     if (!currentBarn) return;
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn.id}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn.id}`, {
         method: 'DELETE',
       });
 

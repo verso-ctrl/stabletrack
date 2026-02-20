@@ -8,6 +8,7 @@ import { useCurrentBarn } from '@/contexts/BarnContext';
 import { ArrowLeft, Loader2, Upload, X, Camera } from 'lucide-react';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import type { HorseSex, HorseStatus } from '@/types';
+import { csrfFetch } from '@/lib/fetch';
 
 interface Suggestions {
   breeds: string[];
@@ -82,7 +83,7 @@ export default function NewHorsePage() {
       setIsSubmitting(true);
       setError(null);
 
-      const response = await fetch(`/api/barns/${barn.id}/horses`, {
+      const response = await csrfFetch(`/api/barns/${barn.id}/horses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,7 +110,7 @@ export default function NewHorsePage() {
         photoFormData.append('type', 'photo');
         photoFormData.append('isPrimary', 'true');
 
-        const photoResponse = await fetch('/api/storage/upload', {
+        const photoResponse = await csrfFetch('/api/storage/upload', {
           method: 'POST',
           body: photoFormData,
         });

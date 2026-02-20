@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useBarn } from '@/contexts/BarnContext';
 import type { Horse, HorseSex, HorseStatus, CreateHorseInput } from '@/types';
+import { csrfFetch } from '@/lib/fetch';
 
 interface HorseFormProps {
   horse?: Horse;
@@ -134,7 +135,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
         ? `/api/barns/${currentBarn.id}/horses/${horse.id}`
         : `/api/barns/${currentBarn.id}/horses`;
 
-      const response = await fetch(url, {
+      const response = await csrfFetch(url, {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

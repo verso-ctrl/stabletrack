@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { GitBranch, Loader2, User, Plus, Pencil, X, Search } from 'lucide-react';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 
 interface SimpleHorse {
   id: string;
@@ -431,7 +432,7 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     try {
       const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
       const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
-      const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [idField]: parentId, [nameField]: null }),
@@ -454,7 +455,7 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     try {
       const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
       const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
-      const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [idField]: null, [nameField]: name }),
@@ -477,7 +478,7 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     try {
       const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
       const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
-      const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [idField]: null, [nameField]: null }),

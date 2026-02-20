@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Activity,
   Plus,
@@ -87,7 +88,7 @@ export default function TrainingPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/training-logs`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/training-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

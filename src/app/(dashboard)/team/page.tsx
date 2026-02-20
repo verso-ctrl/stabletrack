@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Users,
   UserPlus,
@@ -95,7 +96,7 @@ export default function TeamPage() {
     setError('');
     
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/members`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/members`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memberId, role, action: 'approve' }),
@@ -126,7 +127,7 @@ export default function TeamPage() {
         setConfirmDialog(prev => ({ ...prev, open: false }));
         setIsUpdating(true);
         try {
-          const response = await fetch(`/api/barns/${currentBarn?.id}/members`, {
+          const response = await csrfFetch(`/api/barns/${currentBarn?.id}/members`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ memberId, action: 'reject' }),
@@ -153,7 +154,7 @@ export default function TeamPage() {
     setError('');
     
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/members`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/members`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memberId, role: newRole }),
@@ -189,7 +190,7 @@ export default function TeamPage() {
       onConfirm: async () => {
         setConfirmDialog(prev => ({ ...prev, open: false }));
         try {
-          const response = await fetch(`/api/barns/${currentBarn?.id}/members?memberId=${memberId}`, {
+          const response = await csrfFetch(`/api/barns/${currentBarn?.id}/members?memberId=${memberId}`, {
             method: 'DELETE',
           });
 
@@ -596,7 +597,7 @@ function InviteModal({
     setError('');
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/members`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName, lastName, role }),

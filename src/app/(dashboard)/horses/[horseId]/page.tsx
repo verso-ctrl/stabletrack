@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useHorse } from '@/hooks/useData';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import { HorsePhotoGallery } from '@/components/storage/HorsePhotoGallery';
 import {
   ArrowLeft,
@@ -86,7 +87,7 @@ export default function HorseDetailPage() {
       formData.append('type', 'photo');
       formData.append('isPrimary', 'true');
 
-      const response = await fetch('/api/storage/upload', {
+      const response = await csrfFetch('/api/storage/upload', {
         method: 'POST',
         body: formData,
       });
@@ -163,7 +164,7 @@ export default function HorseDetailPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/weights`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/weights`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -197,7 +198,7 @@ export default function HorseDetailPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/vaccinations`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/vaccinations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -237,7 +238,7 @@ export default function HorseDetailPage() {
   const handleSaveFeedProgram = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/feed-program`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/feed-program`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -274,7 +275,7 @@ export default function HorseDetailPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/coggins`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}/coggins`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

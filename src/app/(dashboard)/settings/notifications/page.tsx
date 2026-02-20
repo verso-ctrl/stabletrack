@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Bell,
   Mail,
@@ -58,7 +59,7 @@ export default function NotificationSettingsPage() {
     setIsSaving(true);
 
     try {
-      const response = await fetch('/api/user', {
+      const response = await csrfFetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

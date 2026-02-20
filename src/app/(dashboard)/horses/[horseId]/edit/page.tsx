@@ -8,6 +8,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   ChevronLeft,
   Save,
@@ -114,7 +115,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
       formData.append('type', 'photo');
       formData.append('isPrimary', 'true');
 
-      const response = await fetch('/api/storage/upload', {
+      const response = await csrfFetch('/api/storage/upload', {
         method: 'POST',
         body: formData,
       });
@@ -148,7 +149,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
     setIsSaving(true);
     
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -174,7 +175,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/horses/${horseId}`, {
         method: 'DELETE',
       });
 

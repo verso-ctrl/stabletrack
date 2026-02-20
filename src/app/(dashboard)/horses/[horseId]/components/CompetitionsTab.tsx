@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Trophy, X } from 'lucide-react';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 
 interface Competition {
   id: string;
@@ -221,7 +222,7 @@ function AddCompetitionModal({ horse, barnId, onClose, onSuccess }: AddCompetiti
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/barns/${barnId}/competitions`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/competitions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Stethoscope,
   ChevronLeft,
@@ -61,7 +62,7 @@ export default function AddHealthRecordPage({ params }: { params: Promise<{ hors
     setIsSaving(true);
     
     try {
-      const response = await fetch(
+      const response = await csrfFetch(
         `/api/barns/${currentBarn?.id}/horses/${horseId}/health`,
         {
           method: 'POST',
