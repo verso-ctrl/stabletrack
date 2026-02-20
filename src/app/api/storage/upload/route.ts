@@ -3,9 +3,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-// Allow uploads up to 25MB
-export const maxDuration = 30 // seconds
 import { getCurrentUser } from '@/lib/auth'
 import {
   getTierFeatures,
@@ -13,12 +10,9 @@ import {
   hasReachedPhotoLimit,
   getTierDisplayName,
   getNextTier,
-  formatBytes,
   normalizeTier,
-  type SubscriptionTier
 } from '@/lib/tiers'
 import { checkRateLimit, getRateLimitIdentifier, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
-// No longer need filesystem imports - storing in database
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,7 +32,17 @@ export async function POST(req: NextRequest) {
       return rateLimitResponse(rateLimitResult)
     }
 
-    const formData = await req.formData()
+    let formData: FormData
+    try {
+      formData = await req.formData()
+    } catch (parseError) {
+      console.error('FormData parse error:', parseError)
+      return NextResponse.json(
+        { error: 'Failed to parse upload. File may be too large (max 10MB).' },
+        { status: 413 }
+      )
+    }
+
     const file = formData.get('file') as File
     const barnId = formData.get('barnId') as string
     const horseId = formData.get('horseId') as string
@@ -53,6 +57,17 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Guard against files too large for base64 DB storage
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: `File too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum is 10MB.` },
+        { status: 413 }
+      )
+    }
+
+    console.log(`Upload: ${file.name} (${file.size} bytes, ${file.type || 'unknown type'}) for horse ${horseId}`)
 
     // Verify user has access and get barn tier
     const membership = await prisma.barnMember.findFirst({
@@ -197,9 +212,10 @@ export async function POST(req: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('Upload error:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('Upload error:', message, error)
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: `Upload failed: ${message}` },
       { status: 500 }
     )
   }
