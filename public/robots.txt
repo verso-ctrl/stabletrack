@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://stabletrack.app/sitemap.xml
+Sitemap: https://www.barnkeep.com/sitemap.xml

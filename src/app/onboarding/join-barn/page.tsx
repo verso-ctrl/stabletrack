@@ -141,12 +141,12 @@ export default function JoinBarnPage() {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   className="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center font-mono text-lg tracking-wider"
-                  placeholder="STABLE-XXXXXX"
+                  placeholder="BARN-XXXXXX"
                   maxLength={14}
                 />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                The invite code looks like "STABLE-ABC123"
+                The invite code looks like "BARN-ABC123"
               </p>
             </div>
           </div>

@@ -43,7 +43,7 @@ const settingsGroups = [
       {
         href: '/settings/billing',
         icon: CreditCard,
-        label: 'Subscription & Billing',
+        label: 'Billing & Plans',
         description: 'Manage your plan and payment details',
       },
     ],

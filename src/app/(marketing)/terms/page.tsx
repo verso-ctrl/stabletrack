@@ -11,7 +11,7 @@ export default function TermsPage() {
         <h1 className="text-4xl font-bold text-foreground mb-8">Terms of Service</h1>
         
         <div className="prose prose-stone max-w-none">
-          <p className="text-muted-foreground mb-8">Last updated: January 2025</p>
+          <p className="text-muted-foreground mb-8">Last updated: February 2026</p>
           
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
@@ -25,7 +25,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-semibold text-foreground mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground">
               BarnKeep provides horse farm management software including horse tracking, health records, 
-              scheduling, billing, and team collaboration features. Features may vary based on your subscription plan.
+              scheduling, billing, and team collaboration features. Features may vary based on your plan.
             </p>
           </section>
 
@@ -61,7 +61,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">5. Payment Terms</h2>
             <p className="text-muted-foreground mb-4">
-              For paid subscriptions:
+              For paid plans:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
               <li>Fees are billed in advance on a monthly or annual basis</li>

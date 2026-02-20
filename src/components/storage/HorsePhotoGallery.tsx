@@ -21,7 +21,8 @@ import { useHorsePhotoUpload, useFileList } from '@/hooks/useStorage'
 import { FileUpload } from './FileUpload'
 import { UpgradePrompt } from './UpgradePrompt'
 import { deleteFile, STORAGE_BUCKETS } from '@/lib/storage'
-import { getTierLimits, getTierDisplayName, getNextTier, type SubscriptionTier } from '@/lib/tiers'
+import { getTierLimits, getTierDisplayName, getNextTier } from '@/lib/tiers'
+import { useSubscription } from '@/contexts/SubscriptionContext'
 import { cn } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { toast } from '@/lib/toast'
@@ -50,8 +51,7 @@ export function HorsePhotoGallery({
   const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null)
   const [isSettingPrimary, setIsSettingPrimary] = useState(false)
 
-  // Demo mode: STARTER tier (use actual tier limits)
-  const tier: SubscriptionTier = 'STARTER'
+  const { tier } = useSubscription()
   const tierLimits = getTierLimits(tier)
   const canUploadPhotos = true
   const canBulkUpload = true

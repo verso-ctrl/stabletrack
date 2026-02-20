@@ -34,8 +34,8 @@ const faqCategories = [
         answer: 'Go to the Team page and share your barn\'s invite code with team members. They can use this code to join your barn when they sign up or from their settings.',
       },
       {
-        question: 'What subscription plan is right for me?',
-        answer: 'Free plan works great for up to 5 horses. Professional is ideal for small barns up to 25 horses. Farm plan supports unlimited horses and includes advanced features like breeding management and SMS notifications.',
+        question: 'What plan is right for me?',
+        answer: 'The Starter plan ($25/mo) is great for small farms with up to 10 horses. The Farm plan ($60/mo) supports unlimited horses, team members, and photos — perfect for growing operations. You can also add optional features like breeding tracking for $10/mo each.',
       },
     ],
   },
@@ -73,7 +73,7 @@ const faqCategories = [
       },
       {
         question: 'How do event reminders work?',
-        answer: 'You\'ll receive reminders via email (and SMS with the SMS add-on) before scheduled events. Configure reminder timing in your notification settings.',
+        answer: 'You\'ll receive reminders via email before scheduled events. You can configure reminder timing when creating or editing an event.',
       },
     ],
   },
@@ -84,11 +84,11 @@ const faqCategories = [
     faqs: [
       {
         question: 'What are the different team roles?',
-        answer: 'Owner has full access. Manager can manage horses, events, and team. Staff can view and update horse information. Viewer has read-only access.',
+        answer: 'Owner has full access to everything. Manager can manage horses, events, and team members. Caretaker can view and update horse information and daily care logs.',
       },
       {
         question: 'Can I restrict access to specific horses?',
-        answer: 'Yes! With the Professional plan and above, you can set horse-level permissions. Go to the horse\'s Settings tab to manage who can view or edit that specific horse.',
+        answer: 'Access is controlled through team roles. Owners and managers can see all horses. Caretakers can view and update the horses they work with. Clients only see horses linked to their account.',
       },
       {
         question: 'How do I remove a team member?',
@@ -98,7 +98,7 @@ const faqCategories = [
   },
   {
     id: 'billing',
-    name: 'Billing & Subscription',
+    name: 'Billing & Plans',
     icon: CreditCard,
     faqs: [
       {
@@ -111,7 +111,7 @@ const faqCategories = [
       },
       {
         question: 'Can I cancel anytime?',
-        answer: 'Yes! You can cancel your subscription at any time from Settings > Billing. You\'ll continue to have access until the end of your billing period.',
+        answer: 'Yes! You can cancel your plan at any time from Settings > Billing. You\'ll continue to have access until the end of your billing period.',
       },
     ],
   },

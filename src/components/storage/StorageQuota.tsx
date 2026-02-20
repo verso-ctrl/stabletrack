@@ -103,13 +103,13 @@ export function StorageQuota({
 
         {isNearLimit && !isOverLimit && (
           <p className="text-xs text-yellow-600">
-            You're running low on storage. Consider upgrading your plan.
+            You&apos;re running low on storage. Consider freeing up space or upgrading your plan.
           </p>
         )}
 
         {isOverLimit && (
           <p className="text-xs text-destructive">
-            Storage limit reached. Delete files or upgrade to continue uploading.
+            Storage limit reached. Delete files to continue uploading.
           </p>
         )}
       </div>

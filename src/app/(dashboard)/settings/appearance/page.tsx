@@ -97,7 +97,7 @@ export default function AppearanceSettingsPage() {
             })}
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Dark mode coming soon! Currently using light theme.
+            You can also toggle dark mode from the sidebar.
           </p>
         </div>
 

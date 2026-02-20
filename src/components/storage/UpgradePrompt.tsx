@@ -1,5 +1,5 @@
 // src/components/storage/UpgradePrompt.tsx
-// Modal prompting users to upgrade from Core to Pro
+// Modal prompting users to upgrade to the next plan tier
 
 'use client'
 
@@ -96,7 +96,7 @@ export function UpgradePrompt({
 
           {/* Pricing hint */}
           <div className="text-center text-sm text-muted-foreground">
-            {getTierDisplayName(nextTier)} is <strong>$50/month</strong>
+            {getTierDisplayName(nextTier)} is <strong>$60/month</strong>
           </div>
         </div>
 
@@ -222,7 +222,7 @@ export function FeatureLocked({
         </div>
         <h3 className="font-semibold text-lg">{feature}</h3>
         <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Available on {getTierDisplayName(requiredTier)} and above
+          Requires the {getTierDisplayName(requiredTier)} plan
         </p>
         <button
           onClick={onUpgrade}

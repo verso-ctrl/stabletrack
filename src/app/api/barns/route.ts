@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     const activeAddOns: string[] = Array.isArray(addOns) ? addOns.filter((a: string) => typeof a === 'string') : [];
 
     // Generate unique invite code
-    const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`;
+    const inviteCode = `BARN-${nanoid(6).toUpperCase()}`;
 
     // Create barn with owner membership and subscription tier
     const barn = await prisma.barn.create({

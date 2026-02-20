@@ -1,4 +1,4 @@
-// StableTrack Database Schema - SQLite (Local Demo)
+// BarnKeep Database Schema - SQLite (Local Demo)
 // For local development without external services
 
 generator client {

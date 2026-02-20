@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     trialEndsAt.setDate(trialEndsAt.getDate() + 14)
 
     // Generate unique invite code
-    const inviteCode = `STABLE-${nanoid(6).toUpperCase()}`
+    const inviteCode = `BARN-${nanoid(6).toUpperCase()}`
 
     // Create the barn with Stripe subscription data
     const barn = await prisma.barn.create({

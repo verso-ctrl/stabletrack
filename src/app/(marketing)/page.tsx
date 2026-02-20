@@ -351,7 +351,7 @@ export default function LandingPage() {
                 Need more? Add it on.
               </h2>
               <p className="mt-4 text-muted-foreground text-lg">
-                The core plan covers daily barn life. When you&apos;re ready for more, add only what you need.
+                Your plan covers daily barn life. When you&apos;re ready for more, add only what you need.
               </p>
             </div>
           </AnimateOnScroll>

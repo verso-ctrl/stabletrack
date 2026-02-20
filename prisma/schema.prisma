@@ -1,4 +1,4 @@
-// StableTrack Database Schema - Supabase PostgreSQL
+// BarnKeep Database Schema - Supabase PostgreSQL
 // Production-ready schema with PostgreSQL
 
 generator client {

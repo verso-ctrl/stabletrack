@@ -1,5 +1,5 @@
 // src/components/subscription/UpgradeModal.tsx
-// Modal for upgrading from Core to Pro
+// Modal for upgrading to the next plan tier
 
 'use client'
 
