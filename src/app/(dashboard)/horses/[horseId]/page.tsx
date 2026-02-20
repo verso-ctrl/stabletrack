@@ -39,7 +39,7 @@ import { HealthTab } from './components/HealthTab';
 import { CareTab } from './components/CareTab';
 import { EventsTab } from './components/EventsTab';
 import { TasksTab } from './components/TasksTab';
-import { DocumentsTab } from './components/DocumentsTab';
+import { DocumentManager } from '@/components/storage/DocumentManager';
 import { ActivityTab } from './components/ActivityTab';
 import { BreedingTab } from './components/BreedingTab';
 
@@ -609,7 +609,7 @@ export default function HorseDetailPage() {
         {activeTab === 'tasks' && <TasksTab horse={horse} canEdit={canEdit} />}
         {activeTab === 'events' && <EventsTab horse={horse} canEdit={canEdit} />}
         {activeTab === 'breeding' && <BreedingTab horse={horse} barnId={currentBarn?.id || ''} canEdit={canEdit} />}
-        {activeTab === 'documents' && <DocumentsTab horse={horse} canEdit={canEdit} />}
+        {activeTab === 'documents' && <DocumentManager barnId={currentBarn?.id || ''} horseId={horse.id} editable={canEdit} />}
       </div>
 
       {/* Weight Modal */}

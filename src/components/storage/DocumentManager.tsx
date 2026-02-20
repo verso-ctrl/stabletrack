@@ -81,7 +81,7 @@ export function DocumentManager({
         const response = await fetch(`/api/barns/${barnId}/documents?horseId=${horseId}`)
         if (response.ok) {
           const data = await response.json()
-          setDocuments(data.documents || [])
+          setDocuments(data.data || [])
         }
       } catch (error) {
         console.error('Failed to fetch documents:', error)
