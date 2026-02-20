@@ -4,7 +4,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
-import { headers } from 'next/headers'
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -16,7 +15,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export async function POST(req: NextRequest) {
   if (!stripe || !webhookSecret) {
-    console.error('Stripe not configured')
+    console.error('Stripe not configured. Secret present:', !!webhookSecret, 'Stripe present:', !!stripe)
     return NextResponse.json(
       { error: 'Stripe not configured' },
       { status: 500 }
@@ -24,10 +23,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.text()
-  const headersList = await headers()
-  const signature = headersList.get('stripe-signature')
+  const signature = req.headers.get('stripe-signature')
 
   if (!signature) {
+    console.error('Missing stripe-signature header. Headers:', Object.fromEntries(req.headers.entries()))
     return NextResponse.json(
       { error: 'Missing stripe-signature header' },
       { status: 400 }
@@ -39,7 +38,11 @@ export async function POST(req: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('Webhook signature verification failed:', message)
+    console.error('Secret starts with:', webhookSecret.substring(0, 10) + '...')
+    console.error('Body length:', body.length)
+    console.error('Signature:', signature.substring(0, 30) + '...')
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
