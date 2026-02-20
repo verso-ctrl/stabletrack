@@ -407,6 +407,79 @@
   }
 }
 
+/* ==========================================================================
+   Landing Page: Parallax & Scroll Animations
+   ========================================================================== */
+
+/* Parallax background sections */
+.parallax-section {
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* iOS Safari ignores background-attachment: fixed — degrade gracefully */
+@supports (-webkit-touch-callout: none) {
+  .parallax-section {
+    background-attachment: scroll;
+  }
+}
+
+/* Scroll-triggered animations (driven by AnimateOnScroll component) */
+.scroll-animate {
+  will-change: opacity, transform;
+}
+
+.scroll-animate--fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-animate--fade-in {
+  opacity: 0;
+  transition: opacity 0.7s ease-out;
+}
+
+.scroll-animate--fade-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-animate--fade-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-animate--visible {
+  opacity: 1 !important;
+  transform: translate(0, 0) !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-animate,
+  .scroll-animate--fade-up,
+  .scroll-animate--fade-in,
+  .scroll-animate--fade-left,
+  .scroll-animate--fade-right {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Dark mode: deepen parallax/CTA image overlays */
+.dark .parallax-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
 /* ============================================================================
    Printable Calendar Styles
    ============================================================================ */
