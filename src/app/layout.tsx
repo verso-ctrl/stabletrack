@@ -20,11 +20,13 @@ export const metadata: Metadata = {
     title: 'BarnKeep - Simple Barn Management for Small Farms',
     description: 'Affordable barn management for small horse farms. Track horses, feedings, health records, stalls, and pastures — all for $25/month.',
     url: siteUrl,
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'BarnKeep' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'BarnKeep - Simple Barn Management for Small Farms',
     description: 'Affordable barn management for small horse farms. Track horses, feedings, health records, stalls, and pastures — all for $25/month.',
+    images: ['/og-image.png'],
   },
 };
 

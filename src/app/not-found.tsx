@@ -2,26 +2,21 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-md">
-        <div className="text-6xl mb-6">🐴</div>
-        <h1 className="text-4xl font-bold text-foreground mb-2">404</h1>
-        <h2 className="text-xl font-semibold text-foreground mb-3">Page not found</h2>
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <span className="text-3xl font-bold text-primary">404</span>
+        </div>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Page not found</h1>
         <p className="text-muted-foreground mb-8">
-          This page doesn&apos;t exist or has been moved. Let&apos;s get you back on track.
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/dashboard"
-            className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 font-medium transition-opacity"
-          >
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/dashboard" className="btn-primary">
             Go to Dashboard
           </Link>
-          <Link
-            href="/"
-            className="px-6 py-2.5 border border-border rounded-lg text-muted-foreground hover:bg-muted font-medium transition-colors"
-          >
-            Go Home
+          <Link href="/" className="btn-secondary">
+            Back to Home
           </Link>
         </div>
       </div>
