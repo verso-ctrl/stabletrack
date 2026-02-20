@@ -54,28 +54,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Get next billing date from Stripe or compute from creation date
     let currentPeriodEnd: string | null = null
-    if (stripe && barn.stripeSubscriptionId) {
-      try {
-        const subscription = await stripe.subscriptions.retrieve(barn.stripeSubscriptionId)
-        const periodEnd = (subscription as any).current_period_end as number | undefined
-        if (periodEnd) {
-          currentPeriodEnd = new Date(periodEnd * 1000).toISOString()
+    try {
+      if (stripe && barn.stripeSubscriptionId) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(barn.stripeSubscriptionId)
+          const periodEnd = (subscription as any).current_period_end as number | undefined
+          if (periodEnd) {
+            currentPeriodEnd = new Date(periodEnd * 1000).toISOString()
+          }
+        } catch {
+          // If Stripe fails, fall through to computed date
         }
-      } catch {
-        // If Stripe fails, fall through to computed date
       }
-    }
-    // Fallback: compute next billing date from barn creation (monthly cycle)
-    if (!currentPeriodEnd) {
-      const created = new Date(barn.createdAt)
-      const now = new Date()
-      const nextBilling = new Date(created)
-      nextBilling.setMonth(now.getMonth())
-      nextBilling.setFullYear(now.getFullYear())
-      if (nextBilling <= now) {
-        nextBilling.setMonth(nextBilling.getMonth() + 1)
+      // Fallback: compute next billing date from barn creation (monthly cycle)
+      if (!currentPeriodEnd && barn.createdAt) {
+        const created = new Date(barn.createdAt)
+        const now = new Date()
+        const nextBilling = new Date(now)
+        nextBilling.setDate(created.getDate())
+        if (nextBilling <= now) {
+          nextBilling.setMonth(nextBilling.getMonth() + 1)
+        }
+        currentPeriodEnd = nextBilling.toISOString()
       }
-      currentPeriodEnd = nextBilling.toISOString()
+    } catch {
+      // Non-critical — billing date is just for display
     }
 
     return NextResponse.json({
