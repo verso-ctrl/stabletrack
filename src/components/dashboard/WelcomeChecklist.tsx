@@ -29,7 +29,7 @@ export function WelcomeChecklist({
   const [dismissed, setDismissed] = useState(true); // start hidden to avoid flash
 
   useEffect(() => {
-    const hidden = localStorage.getItem('stabletrack-checklist-dismissed');
+    const hidden = localStorage.getItem('barnkeep-checklist-dismissed');
     setDismissed(hidden === 'true');
   }, []);
 
@@ -46,7 +46,7 @@ export function WelcomeChecklist({
   // Auto-dismiss permanently once all items are complete
   useEffect(() => {
     if (allDone) {
-      localStorage.setItem('stabletrack-checklist-dismissed', 'true');
+      localStorage.setItem('barnkeep-checklist-dismissed', 'true');
       setDismissed(true);
     }
   }, [allDone]);
@@ -54,7 +54,7 @@ export function WelcomeChecklist({
   if (dismissed) return null;
 
   const handleDismiss = () => {
-    localStorage.setItem('stabletrack-checklist-dismissed', 'true');
+    localStorage.setItem('barnkeep-checklist-dismissed', 'true');
     setDismissed(true);
   };
 

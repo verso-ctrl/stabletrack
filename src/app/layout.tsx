@@ -3,27 +3,27 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import '@/styles/globals.css';
 
-const rawUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stabletrack.app';
+const rawUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.barnkeep.com';
 const siteUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
 export const metadata: Metadata = {
   title: {
-    default: 'StableTrack - Simple Barn Management for Small Farms',
-    template: '%s | StableTrack',
+    default: 'BarnKeep - Simple Barn Management for Small Farms',
+    template: '%s | BarnKeep',
   },
   description: 'Affordable barn management for small horse farms. Track horses, feedings, health records, stalls, and pastures — all for $25/month.',
   metadataBase: new URL(siteUrl),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    siteName: 'StableTrack',
-    title: 'StableTrack - Simple Barn Management for Small Farms',
+    siteName: 'BarnKeep',
+    title: 'BarnKeep - Simple Barn Management for Small Farms',
     description: 'Affordable barn management for small horse farms. Track horses, feedings, health records, stalls, and pastures — all for $25/month.',
     url: siteUrl,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'StableTrack - Simple Barn Management for Small Farms',
+    title: 'BarnKeep - Simple Barn Management for Small Farms',
     description: 'Affordable barn management for small horse farms. Track horses, feedings, health records, stalls, and pastures — all for $25/month.',
   },
 };
@@ -50,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   // Script to prevent flash of wrong theme
-  const themeScript = `(function(){try{var t=localStorage.getItem('stabletrack-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`;
+  const themeScript = `(function(){try{var t=localStorage.getItem('barnkeep-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`;
 
   // If Clerk is not configured, render without ClerkProvider (demo mode)
   if (!isClerkConfigured) {

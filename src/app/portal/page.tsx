@@ -978,7 +978,7 @@ export default function ClientPortalPage() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <p>Last updated: {formatDateTime(data.lastUpdated)}</p>
-            <p>Powered by StableTrack</p>
+            <p>Powered by BarnKeep</p>
           </div>
         </div>
       </footer>

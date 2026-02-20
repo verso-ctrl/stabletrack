@@ -1,4 +1,4 @@
-# StableTrack UX Polish & Testing
+# BarnKeep UX Polish & Testing
 
 Work through each task below in order. Complete one fully before moving to the next. Read the relevant files before making changes. Reference CLAUDE.md for project context.
 

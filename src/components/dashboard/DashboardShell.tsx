@@ -89,10 +89,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <div className="flex items-center justify-between h-16 px-6 border-b border-border">
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">ST</span>
+                <span className="text-white font-bold text-sm">BK</span>
               </div>
               <span className="text-xl font-semibold text-foreground">
-                StableTrack
+                BarnKeep
               </span>
             </Link>
             <button

@@ -1,5 +1,5 @@
 // src/lib/storage.ts
-// Storage utilities for StableTrack Demo - uses local file storage
+// Storage utilities for BarnKeep - uses local file storage
 
 import { getTierLimits, formatBytes } from './tiers'
 

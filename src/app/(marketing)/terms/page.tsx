@@ -16,7 +16,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground">
-              By accessing or using StableTrack, you agree to be bound by these Terms of Service. 
+              By accessing or using BarnKeep, you agree to be bound by these Terms of Service. 
               If you do not agree to these terms, please do not use our service.
             </p>
           </section>
@@ -24,7 +24,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground">
-              StableTrack provides horse farm management software including horse tracking, health records, 
+              BarnKeep provides horse farm management software including horse tracking, health records, 
               scheduling, billing, and team collaboration features. Features may vary based on your subscription plan.
             </p>
           </section>
@@ -32,7 +32,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">3. User Accounts</h2>
             <p className="text-muted-foreground mb-4">
-              To use StableTrack, you must:
+              To use BarnKeep, you must:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
               <li>Be at least 18 years old</li>
@@ -74,7 +74,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">6. Data Ownership</h2>
             <p className="text-muted-foreground">
-              You retain all rights to the data you enter into StableTrack. We claim no ownership over your content. 
+              You retain all rights to the data you enter into BarnKeep. We claim no ownership over your content. 
               You grant us a license to use your data solely for the purpose of providing and improving our services.
             </p>
           </section>
@@ -90,7 +90,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">8. Limitation of Liability</h2>
             <p className="text-muted-foreground">
-              StableTrack is provided "as is" without warranties of any kind. We are not liable for any 
+              BarnKeep is provided "as is" without warranties of any kind. We are not liable for any 
               indirect, incidental, or consequential damages arising from your use of the service. 
               Our total liability shall not exceed the amount paid by you in the past 12 months.
             </p>
@@ -115,7 +115,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-4">11. Contact</h2>
             <p className="text-muted-foreground">
-              For questions about these Terms of Service, please contact us at legal@stabletrack.com.
+              For questions about these Terms of Service, please contact us at legal@barnkeep.com.
             </p>
           </section>
         </div>

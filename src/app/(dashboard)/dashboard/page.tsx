@@ -164,7 +164,7 @@ export default function DashboardPage() {
           <div className="w-16 h-16 rounded-full bg-amber-500/15 flex items-center justify-center mx-auto mb-4">
             <HorseIcon className="w-8 h-8 text-amber-600" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Welcome to StableTrack</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Welcome to BarnKeep</h2>
           <p className="text-muted-foreground mb-6">Get started by creating your first barn.</p>
           <div className="flex gap-3 justify-center">
             <Link href="/onboarding/create-barn" className="btn-primary">Create Barn</Link>

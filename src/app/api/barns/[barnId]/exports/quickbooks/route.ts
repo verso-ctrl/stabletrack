@@ -29,7 +29,7 @@ Mike Williams,mike@example.com,$1350.00`;
     return new NextResponse(csvContent, {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="stabletrack-${type}-export.csv"`,
+        'Content-Disposition': `attachment; filename="barnkeep-${type}-export.csv"`,
       },
     })
   }

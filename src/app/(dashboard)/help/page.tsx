@@ -132,7 +132,7 @@ const helpResources = [
   },
   {
     title: 'Community Forum',
-    description: 'Connect with other StableTrack users',
+    description: 'Connect with other BarnKeep users',
     icon: Users,
     link: '#',
   },

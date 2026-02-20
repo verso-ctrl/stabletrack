@@ -51,12 +51,12 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "stabletrack/.next/types/**/*.ts",
+    "barnkeep/.next/types/**/*.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "stabletrack/node_modules",
+    "barnkeep/node_modules",
     "node_modules",
     "**/__tests__/**",
     "__tests_disabled__"

@@ -145,7 +145,7 @@ function NoBarnState() {
         No barn selected
       </h2>
       <p className="text-muted-foreground mb-6 max-w-sm">
-        Create a new barn or join an existing one to get started with StableTrack.
+        Create a new barn or join an existing one to get started with BarnKeep.
       </p>
       <div className="flex gap-3">
         <Link

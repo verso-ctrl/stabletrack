@@ -59,7 +59,7 @@ export default function AppearanceSettingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Appearance</h1>
-        <p className="text-muted-foreground mt-1">Customize how StableTrack looks for you</p>
+        <p className="text-muted-foreground mt-1">Customize how BarnKeep looks for you</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

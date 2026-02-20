@@ -163,7 +163,7 @@ export function PrintableCalendar({ month, events, barnName }: PrintableCalendar
 
       {/* Footer */}
       <div className="print-footer">
-        <p>Printed from StableTrack on {format(new Date(), 'MMM d, yyyy')}</p>
+        <p>Printed from BarnKeep on {format(new Date(), 'MMM d, yyyy')}</p>
       </div>
     </div>
   );

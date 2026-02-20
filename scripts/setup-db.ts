@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Database setup script for StableTrack
+ * Database setup script for BarnKeep
  * 
  * Usage:
  *   npx tsx scripts/setup-db.ts          # Auto-detect based on .env

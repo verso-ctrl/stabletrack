@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const rawUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stabletrack.app';
+  const rawUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.barnkeep.com';
   const baseUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
   return [

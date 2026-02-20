@@ -97,7 +97,7 @@ function UserProfile() {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">Demo User</p>
-        <p className="text-xs text-muted-foreground">demo@stabletrack.com</p>
+        <p className="text-xs text-muted-foreground">demo@barnkeep.com</p>
       </div>
     </div>
   );
@@ -150,7 +150,7 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
             <HorseIcon className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-display text-lg font-semibold text-foreground tracking-tight">StableTrack</span>
+          <span className="font-display text-lg font-semibold text-foreground tracking-tight">BarnKeep</span>
         </Link>
         
         {/* Barn Switcher */}
@@ -297,7 +297,7 @@ export function Sidebar() {
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
                 <HorseIcon className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-semibold text-foreground">StableTrack</span>
+              <span className="font-display font-semibold text-foreground">BarnKeep</span>
             </Link>
 
             <button
@@ -324,7 +324,7 @@ export function Sidebar() {
                 <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
                   <HorseIcon className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span className="font-display font-semibold text-foreground">StableTrack</span>
+                <span className="font-display font-semibold text-foreground">BarnKeep</span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}

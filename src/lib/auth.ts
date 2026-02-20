@@ -56,7 +56,7 @@ export async function getCurrentUser() {
   });
   
   if (!user) {
-    const email = clerkUser?.emailAddresses?.[0]?.emailAddress || 'demo@stabletrack.com';
+    const email = clerkUser?.emailAddresses?.[0]?.emailAddress || 'demo@barnkeep.com';
     
     // Check if a user with this email already exists (from previous sign-up with different ID)
     const existingUserByEmail = await prisma.user.findUnique({

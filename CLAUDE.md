@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-StableTrack is a simple, affordable barn management app built for small horse farms. The target audience is small farm owners who can't justify the cost of enterprise barn management software designed for large operations. The tone and UX should be friendly, approachable, and straightforward — not corporate or overwhelming.
+BarnKeep is a simple, affordable barn management app built for small horse farms. The target audience is small farm owners who can't justify the cost of enterprise barn management software designed for large operations. The tone and UX should be friendly, approachable, and straightforward — not corporate or overwhelming.
 
 **Product & Pricing (Two-Tier + Add-Ons):**
 - **Starter Plan — $25/month:** Everything a small farm needs:
@@ -80,7 +80,7 @@ npm run mobile:run:android     # Run on Android device/emulator
 ### Directory Structure
 
 ```
-stabletrack/
+barnkeep/
 ├── src/
 │   ├── app/                   # Next.js App Router
 │   │   ├── (dashboard)/       # Protected dashboard routes (21 sections)

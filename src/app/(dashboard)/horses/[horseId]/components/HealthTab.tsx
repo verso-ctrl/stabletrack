@@ -665,7 +665,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           )}
 
           <div className="horse-sheet-footer">
-            Printed from StableTrack &mdash; {new Date().toLocaleDateString()}
+            Printed from BarnKeep &mdash; {new Date().toLocaleDateString()}
           </div>
         </div>
       </div>

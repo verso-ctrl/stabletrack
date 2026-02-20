@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.stabletrack.app',
-  appName: 'StableTrack',
+  appId: 'com.barnkeep.app',
+  appName: 'BarnKeep',
   webDir: 'out',
   server: {
     androidScheme: 'https',

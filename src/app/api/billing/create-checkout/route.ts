@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `StableTrack ${addOn.name}`,
+              name: `BarnKeep ${addOn.name}`,
               description: addOn.description,
             },
             unit_amount: addOn.monthlyPriceCents,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `StableTrack ${pricing.displayName} Plan`,
+              name: `BarnKeep ${pricing.displayName} Plan`,
               description: pricing.description,
             },
             unit_amount: priceAmount,

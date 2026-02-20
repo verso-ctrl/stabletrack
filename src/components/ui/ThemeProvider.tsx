@@ -30,7 +30,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    const stored = localStorage.getItem('stabletrack-theme') as Theme | null;
+    const stored = localStorage.getItem('barnkeep-theme') as Theme | null;
     if (stored && ['light', 'dark', 'system'].includes(stored)) {
       setThemeState(stored);
     }
@@ -63,7 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('stabletrack-theme', newTheme);
+    localStorage.setItem('barnkeep-theme', newTheme);
   };
 
   return (

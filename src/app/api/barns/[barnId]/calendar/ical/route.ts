@@ -15,23 +15,23 @@ export async function GET(req: NextRequest, context: RouteContext) {
   // Generate a basic iCal feed
   const icalContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//StableTrack//Calendar//EN
+PRODID:-//BarnKeep//Calendar//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:StableTrack - Willowbrook Farm
+X-WR-CALNAME:BarnKeep - Willowbrook Farm
 BEGIN:VEVENT
 DTSTART:${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 DTEND:${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:Farrier Visit - All Horses
 DESCRIPTION:Regular farrier appointment
-UID:${barnId}-event-001@stabletrack.app
+UID:${barnId}-event-001@barnkeep.com
 END:VEVENT
 END:VCALENDAR`
 
   return new NextResponse(icalContent, {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="stabletrack.ics"',
+      'Content-Disposition': 'attachment; filename="barnkeep.ics"',
     },
   })
 }

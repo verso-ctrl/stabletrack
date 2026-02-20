@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * StableTrack Setup Script
+ * BarnKeep Setup Script
  * 
  * This script guides you through setting up Supabase and Stripe
  * Run with: npx tsx scripts/setup.ts
@@ -23,7 +23,7 @@ const question = (prompt: string): Promise<string> => {
 };
 
 async function main() {
-  console.log('\n🐴 StableTrack Setup\n');
+  console.log('\n🐴 BarnKeep Setup\n');
   console.log('This script will help you configure Supabase and Stripe.\n');
   console.log('=' .repeat(60) + '\n');
 

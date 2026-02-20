@@ -213,7 +213,7 @@ export default function SettingsPage() {
       <div className="card p-5 bg-gradient-to-br from-background to-white border-border">
         <div className="flex items-center justify-between text-sm">
           <div>
-            <p className="text-muted-foreground">StableTrack Version</p>
+            <p className="text-muted-foreground">BarnKeep Version</p>
             <p className="font-semibold text-foreground mt-0.5">1.0.0</p>
           </div>
           <div className="text-right">

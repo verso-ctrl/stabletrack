@@ -3,7 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'StableTrack - Simple Barn Management for Small Farms',
+  title: 'BarnKeep - Simple Barn Management for Small Farms',
   description: 'Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — all for $25/month. No enterprise pricing, no feature walls.',
 };
 import {
@@ -77,7 +77,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
                 <HorseIcon className="w-4 h-4" />
               </div>
-              <span className="font-display font-semibold text-lg text-foreground tracking-tight">StableTrack</span>
+              <span className="font-display font-semibold text-lg text-foreground tracking-tight">BarnKeep</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -221,7 +221,7 @@ export default function LandingPage() {
               Up and running in minutes
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              No training required. If you can use your phone, you can use StableTrack.
+              No training required. If you can use your phone, you can use BarnKeep.
             </p>
           </div>
 
@@ -311,7 +311,7 @@ export default function LandingPage() {
             Your barn deserves better than a spreadsheet.
           </h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            Try StableTrack free for 14 days. Plans start at $25/month.
+            Try BarnKeep free for 14 days. Plans start at $25/month.
           </p>
           <Link
             href="/sign-up"
@@ -332,7 +332,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
                   <HorseIcon className="w-4 h-4" />
                 </div>
-                <span className="font-display font-semibold text-foreground">StableTrack</span>
+                <span className="font-display font-semibold text-foreground">BarnKeep</span>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
                 Simple barn management for small farms.
@@ -361,7 +361,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} StableTrack. All rights reserved.
+            © {new Date().getFullYear()} BarnKeep. All rights reserved.
           </div>
         </div>
       </footer>

@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
           (item) => item.price.product &&
             typeof item.price.product === 'object' &&
             'name' in item.price.product &&
-            (item.price.product as Stripe.Product).name === `StableTrack ${addOn.name}`
+            (item.price.product as Stripe.Product).name === `BarnKeep ${addOn.name}`
         );
         if (addOnItem) {
           await stripe.subscriptionItems.del(addOnItem.id);

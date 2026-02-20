@@ -15,7 +15,7 @@ export default function SignInPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 text-primary rounded-lg mb-4">
             <HorseIcon />
           </div>
-          <h1 className="font-display text-2xl font-semibold text-foreground tracking-tight">StableTrack</h1>
+          <h1 className="font-display text-2xl font-semibold text-foreground tracking-tight">BarnKeep</h1>
           <p className="text-muted-foreground mt-1">Sign in to manage your barn</p>
         </div>
         

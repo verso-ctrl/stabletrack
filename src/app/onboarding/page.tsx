@@ -55,7 +55,7 @@ export default function OnboardingPage() {
               <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Welcome to StableTrack!</h1>
+          <h1 className="text-3xl font-bold text-foreground">Welcome to BarnKeep!</h1>
           <p className="text-muted-foreground mt-2">Let's get your barn set up so you can start managing your horses.</p>
         </div>
 

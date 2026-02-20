@@ -1,5 +1,5 @@
 // src/lib/supabase.ts
-// Supabase client configuration for StableTrack
+// Supabase client configuration for BarnKeep
 // NOTE: In demo mode, Supabase is not used - local file storage is used instead
 
 import { createClient } from '@supabase/supabase-js'

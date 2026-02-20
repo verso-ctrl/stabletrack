@@ -63,7 +63,7 @@ export default function PricingPage() {
               <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
                 <HorseIcon className="w-4 h-4" />
               </div>
-              <span className="font-display font-semibold text-lg text-foreground tracking-tight">StableTrack</span>
+              <span className="font-display font-semibold text-lg text-foreground tracking-tight">BarnKeep</span>
             </Link>
             <div className="flex items-center gap-3">
               <Link href="/sign-in" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -275,7 +275,7 @@ export default function PricingPage() {
             <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
               <HorseIcon className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
-            <span className="font-display font-medium text-foreground">StableTrack</span>
+            <span className="font-display font-medium text-foreground">BarnKeep</span>
           </Link>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>

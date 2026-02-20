@@ -601,7 +601,7 @@ export default function DailyCarePage() {
             </table>
 
             <div className="print-footer">
-              <p>Printed from StableTrack &mdash; {new Date().toLocaleString()}</p>
+              <p>Printed from BarnKeep &mdash; {new Date().toLocaleString()}</p>
             </div>
           </div>
         </div>

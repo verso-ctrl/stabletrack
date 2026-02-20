@@ -677,7 +677,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
           )}
 
           <div className="horse-sheet-footer">
-            Printed from StableTrack — {new Date().toLocaleDateString()}
+            Printed from BarnKeep — {new Date().toLocaleDateString()}
           </div>
         </div>
       </div>
