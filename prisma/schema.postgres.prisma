@@ -179,6 +179,8 @@ model Horse {
   stallId         String?   @unique
   sireId          String?
   damId           String?
+  sireName        String?
+  damName         String?
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

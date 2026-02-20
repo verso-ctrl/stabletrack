@@ -21,6 +21,8 @@ interface FamilyTreeProps {
     barnName: string;
     sireId?: string | null;
     damId?: string | null;
+    sireName?: string | null;
+    damName?: string | null;
     profilePhotoUrl?: string | null;
     sex?: string | null;
   };
@@ -64,15 +66,42 @@ function sexColors(sex?: string | null) {
   };
 }
 
-function HorseNode({ horse, label, unknown, role, onEdit, canEdit }: {
+function HorseNode({ horse, label, unknown, role, onEdit, canEdit, externalName }: {
   horse?: SimpleHorse | null;
   label?: string;
   unknown?: boolean;
   role?: 'sire' | 'dam';
   onEdit?: () => void;
   canEdit?: boolean;
+  externalName?: string | null;
 }) {
   const colors = role === 'sire' ? sexColors('STALLION') : role === 'dam' ? sexColors('MARE') : sexColors(horse?.sex);
+
+  // External parent (name only, no linked horse)
+  if (!horse && externalName) {
+    return (
+      <div className="flex flex-col items-center gap-1">
+        {label && <p className={`text-[10px] uppercase tracking-wide font-medium ${colors.label}`}>{label}</p>}
+        <div className="relative group">
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${colors.bg} border ${colors.border}`}>
+            <div className={`w-8 h-8 rounded-full ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
+              <User className={`w-3.5 h-3.5 ${colors.text}`} />
+            </div>
+            <span className={`text-xs font-semibold truncate max-w-[90px] ${colors.text}`}>{externalName}</span>
+          </div>
+          {canEdit && onEdit && (
+            <button
+              onClick={onEdit}
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-card border border-border shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label={`Edit ${label || 'parent'}`}
+            >
+              <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (unknown || !horse) {
     // Editable: show dashed "Add" button
@@ -188,16 +217,20 @@ function BranchUp({ count }: { count: number }) {
 }
 
 // Horse picker modal
-function HorsePickerModal({ open, onClose, onSelect, onClear, horses, role, currentId }: {
+function HorsePickerModal({ open, onClose, onSelect, onClear, onSetName, horses, role, currentId, currentName }: {
   open: boolean;
   onClose: () => void;
   onSelect: (horseId: string) => void;
   onClear?: () => void;
+  onSetName: (name: string) => void;
   horses: SimpleHorse[];
   role: 'sire' | 'dam';
   currentId?: string | null;
+  currentName?: string | null;
 }) {
   const [search, setSearch] = useState('');
+  const [manualName, setManualName] = useState(currentName || '');
+  const [showManual, setShowManual] = useState(false);
 
   if (!open) return null;
 
@@ -218,78 +251,130 @@ function HorsePickerModal({ open, onClose, onSelect, onClear, horses, role, curr
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h3 className="font-semibold text-foreground">
-            Select {role === 'sire' ? 'Sire' : 'Dam'}
+            {showManual ? `Enter ${role === 'sire' ? 'Sire' : 'Dam'} Name` : `Select ${role === 'sire' ? 'Sire' : 'Dam'}`}
           </h3>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted" aria-label="Close">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Search */}
-        <div className="p-3 border-b border-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={`Search ${role === 'sire' ? 'stallions' : 'mares'}...`}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="input w-full pl-9"
-              autoFocus
-            />
-          </div>
-        </div>
-
-        {/* List */}
-        <div className="flex-1 overflow-y-auto p-2">
-          {filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No {role === 'sire' ? 'stallions or colts' : 'mares or fillies'} found
-            </p>
-          ) : (
-            <div className="space-y-1">
-              {filtered.map(h => (
-                <button
-                  key={h.id}
-                  onClick={() => onSelect(h.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
-                    h.id === currentId
-                      ? `${colors.bg} ${colors.border} border`
-                      : 'hover:bg-muted'
-                  }`}
-                >
-                  <div className={`relative w-9 h-9 rounded-full ${colors.avatar} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
-                    {h.profilePhotoUrl ? (
-                      <Image src={h.profilePhotoUrl} alt="" fill unoptimized className="object-cover" />
-                    ) : (
-                      <User className={`w-4 h-4 ${colors.text}`} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{h.barnName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {h.sex ? h.sex.charAt(0) + h.sex.slice(1).toLowerCase() : 'Unknown sex'}
-                    </p>
-                  </div>
-                  {h.id === currentId && (
-                    <span className={`text-xs font-medium ${colors.text}`}>Current</span>
-                  )}
-                </button>
-              ))}
+        {showManual ? (
+          /* Manual name entry */
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                {role === 'sire' ? 'Sire' : 'Dam'} name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Thunder Ridge"
+                value={manualName}
+                onChange={e => setManualName(e.target.value)}
+                className="input w-full"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">
+                For horses not in your barn
+              </p>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {onClear && (
-          <div className="p-3 border-t border-border">
-            <button
-              onClick={onClear}
-              className="w-full btn-secondary btn-sm text-destructive hover:text-destructive"
-            >
-              Remove {role === 'sire' ? 'Sire' : 'Dam'}
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setShowManual(false)} className="btn-secondary btn-sm flex-1">
+                Back
+              </button>
+              <button
+                onClick={() => { if (manualName.trim()) onSetName(manualName.trim()); }}
+                disabled={!manualName.trim()}
+                className="btn-primary btn-sm flex-1"
+              >
+                Save
+              </button>
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Search */}
+            <div className="p-3 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder={`Search ${role === 'sire' ? 'stallions' : 'mares'}...`}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="input w-full pl-9"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Type a name option */}
+            <div className="px-3 pt-2">
+              <button
+                onClick={() => setShowManual(true)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-muted transition-colors border border-dashed border-border"
+              >
+                <div className={`w-9 h-9 rounded-full ${colors.avatar} flex items-center justify-center flex-shrink-0`}>
+                  <Plus className={`w-4 h-4 ${colors.text}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">Enter name manually</p>
+                  <p className="text-xs text-muted-foreground">For horses not in your barn</p>
+                </div>
+              </button>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto p-2">
+              {filtered.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No {role === 'sire' ? 'stallions or colts' : 'mares or fillies'} in your barn
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {filtered.map(h => (
+                    <button
+                      key={h.id}
+                      onClick={() => onSelect(h.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
+                        h.id === currentId
+                          ? `${colors.bg} ${colors.border} border`
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <div className={`relative w-9 h-9 rounded-full ${colors.avatar} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+                        {h.profilePhotoUrl ? (
+                          <Image src={h.profilePhotoUrl} alt="" fill unoptimized className="object-cover" />
+                        ) : (
+                          <User className={`w-4 h-4 ${colors.text}`} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{h.barnName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {h.sex ? h.sex.charAt(0) + h.sex.slice(1).toLowerCase() : 'Unknown sex'}
+                        </p>
+                      </div>
+                      {h.id === currentId && (
+                        <span className={`text-xs font-medium ${colors.text}`}>Current</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {onClear && (
+              <div className="p-3 border-t border-border">
+                <button
+                  onClick={onClear}
+                  className="w-full btn-secondary btn-sm text-destructive hover:text-destructive"
+                >
+                  Remove {role === 'sire' ? 'Sire' : 'Dam'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -333,7 +418,7 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     (horseIsStallion && h.sireId === horse.id) || (horseIsMare && h.damId === horse.id)
   );
 
-  const hasParents = !!sire || !!dam || !!horse.sireId || !!horse.damId;
+  const hasParents = !!sire || !!dam || !!horse.sireId || !!horse.damId || !!horse.sireName || !!horse.damName;
   const hasGrandparents = !!paternalGrandsire || !!paternalGranddam || !!maternalGrandsire || !!maternalGranddam;
   const hasOffspring = offspring.length > 0;
 
@@ -344,14 +429,38 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     if (!pickerRole) return;
     setSaving(true);
     try {
-      const field = pickerRole === 'sire' ? 'sireId' : 'damId';
+      const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
+      const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
       const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: parentId }),
+        body: JSON.stringify({ [idField]: parentId, [nameField]: null }),
       });
       if (!res.ok) throw new Error('Failed to update');
       toast.success(`${pickerRole === 'sire' ? 'Sire' : 'Dam'} updated`);
+      setPickerRole(null);
+      fetchHorses();
+      onUpdate?.();
+    } catch {
+      toast.error('Failed to update lineage');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSetName = async (name: string) => {
+    if (!pickerRole) return;
+    setSaving(true);
+    try {
+      const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
+      const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
+      const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [idField]: null, [nameField]: name }),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      toast.success(`${pickerRole === 'sire' ? 'Sire' : 'Dam'} set to ${name}`);
       setPickerRole(null);
       fetchHorses();
       onUpdate?.();
@@ -366,11 +475,12 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
     if (!pickerRole) return;
     setSaving(true);
     try {
-      const field = pickerRole === 'sire' ? 'sireId' : 'damId';
+      const idField = pickerRole === 'sire' ? 'sireId' : 'damId';
+      const nameField = pickerRole === 'sire' ? 'sireName' : 'damName';
       const res = await fetch(`/api/barns/${barnId}/horses/${horse.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: null }),
+        body: JSON.stringify({ [idField]: null, [nameField]: null }),
       });
       if (!res.ok) throw new Error('Failed to update');
       toast.success(`${pickerRole === 'sire' ? 'Sire' : 'Dam'} removed`);
@@ -438,7 +548,8 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
             <HorseNode
               horse={sire}
               label="Sire"
-              unknown={!sire}
+              unknown={!sire && !horse.sireName}
+              externalName={!sire ? horse.sireName : null}
               role="sire"
               canEdit={canEdit}
               onEdit={() => setPickerRole('sire')}
@@ -446,7 +557,8 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
             <HorseNode
               horse={dam}
               label="Dam"
-              unknown={!dam}
+              unknown={!dam && !horse.damName}
+              externalName={!dam ? horse.damName : null}
               role="dam"
               canEdit={canEdit}
               onEdit={() => setPickerRole('dam')}
@@ -481,14 +593,16 @@ export function FamilyTree({ horse, barnId, canEdit = false, onUpdate }: FamilyT
           open={!!pickerRole}
           onClose={() => setPickerRole(null)}
           onSelect={handleSelectParent}
+          onSetName={handleSetName}
           onClear={
-            (pickerRole === 'sire' && horse.sireId) || (pickerRole === 'dam' && horse.damId)
+            (pickerRole === 'sire' && (horse.sireId || horse.sireName)) || (pickerRole === 'dam' && (horse.damId || horse.damName))
               ? handleClearParent
               : undefined
           }
           horses={pickerHorses}
           role={pickerRole}
           currentId={currentPickerId}
+          currentName={pickerRole === 'sire' ? horse.sireName : horse.damName}
         />
       )}
     </>

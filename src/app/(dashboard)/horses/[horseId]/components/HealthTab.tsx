@@ -79,6 +79,8 @@ interface HealthTabProps {
     ownerName?: string | null;
     sireId?: string | null;
     damId?: string | null;
+    sireName?: string | null;
+    damName?: string | null;
     profilePhotoUrl?: string | null;
     vaccinations?: Vaccination[];
     weights?: Weight[];
