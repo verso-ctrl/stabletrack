@@ -10,6 +10,9 @@ const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
+const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const appUrl = rawAppUrl.startsWith('http') ? rawAppUrl : `https://${rawAppUrl}`;
+
 // POST /api/billing/create-checkout - Create Stripe checkout session for plan change
 export async function POST(request: NextRequest) {
   try {
@@ -106,8 +109,8 @@ export async function POST(request: NextRequest) {
             },
             quantity: 1,
           }],
-          success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?addon_success=true`,
-          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?canceled=true`,
+          success_url: `${appUrl}/settings/billing?addon_success=true`,
+          cancel_url: `${appUrl}/settings/billing?canceled=true`,
           client_reference_id: user.id,
           metadata: {
             userId: user.id,
@@ -163,8 +166,8 @@ export async function POST(request: NextRequest) {
             quantity: 1,
           },
         ],
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?success=true&tier=${tier}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/billing?canceled=true`,
+        success_url: `${appUrl}/settings/billing?success=true&tier=${tier}`,
+        cancel_url: `${appUrl}/settings/billing?canceled=true`,
         client_reference_id: user.id,
         customer_email: user.email || undefined,
         metadata: {

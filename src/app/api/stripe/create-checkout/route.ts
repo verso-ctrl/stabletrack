@@ -12,6 +12,9 @@ const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null
 
+const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+const appUrl = rawAppUrl.startsWith('http') ? rawAppUrl : `https://${rawAppUrl}`
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser()
@@ -96,8 +99,8 @@ export async function POST(req: NextRequest) {
       subscription_data: {
         trial_period_days: 14,
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding/create-barn/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/onboarding/create-barn`,
+      success_url: `${appUrl}/onboarding/create-barn/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/onboarding/create-barn`,
       client_reference_id: user.id,
       customer_email: user.email || undefined,
       metadata: {
