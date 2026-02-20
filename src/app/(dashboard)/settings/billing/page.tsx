@@ -1,10 +1,49 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { PricingPlans, CurrentPlanCard } from '@/components/billing/PricingPlans';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { useBarn } from '@/contexts/BarnContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { toast } from '@/lib/toast';
 
 export default function BillingPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { currentBarn, refreshBarn } = useBarn();
+  const { changeTier } = useSubscription();
+  const handledRef = useRef(false);
+
+  // Handle return from Stripe checkout
+  useEffect(() => {
+    if (handledRef.current || !currentBarn?.id) return;
+
+    const addonSuccess = searchParams?.get('addon_success');
+    const planSuccess = searchParams?.get('success');
+    const tier = searchParams?.get('tier');
+
+    if (addonSuccess === 'true') {
+      handledRef.current = true;
+      // Verify and sync add-on status from Stripe session
+      fetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
+        .then(() => refreshBarn?.())
+        .then(() => toast.success('Add-on activated!', 'Your add-on is now active.'))
+        .catch(() => toast.success('Checkout complete!', 'Your add-on will be activated shortly.'));
+      router.replace('/settings/billing');
+    } else if (planSuccess === 'true' && tier) {
+      handledRef.current = true;
+      fetch(`/api/barns/${currentBarn.id}/sync-subscription`, { method: 'POST' })
+        .then(() => {
+          changeTier(tier as any);
+          return refreshBarn?.();
+        })
+        .then(() => toast.success('Plan upgraded!', `You are now on the ${tier} plan.`))
+        .catch(() => toast.success('Checkout complete!', 'Your plan will be updated shortly.'));
+      router.replace('/settings/billing');
+    }
+  }, [searchParams, currentBarn?.id, refreshBarn, changeTier, router]);
+
   return (
     <div className="space-y-8">
       {/* Breadcrumbs */}
