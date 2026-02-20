@@ -146,9 +146,9 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
             <div className="grid grid-cols-2 gap-2">
               {[
                 { value: 'LIVE', label: 'Live Birth', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { value: 'STILLBORN', label: 'Stillborn', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' },
-                { value: 'DYSTOCIA', label: 'Dystocia', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-                { value: 'ABORTION', label: 'Abortion', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+                { value: 'STILLBORN', label: 'Loss at Birth', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' },
+                { value: 'DYSTOCIA', label: 'Difficult Birth', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+                { value: 'ABORTION', label: 'Pregnancy Loss', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' },
               ].map(o => (
                 <button
                   key={o.value}
