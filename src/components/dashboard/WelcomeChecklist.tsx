@@ -35,7 +35,7 @@ export function WelcomeChecklist({
 
   const items: ChecklistItem[] = [
     { id: 'horse', label: 'Add your first horse', href: '/horses/new', completed: horsesCount > 0 },
-    { id: 'stall', label: 'Set up your stalls', href: '/barns', completed: stallsCount > 0 },
+    { id: 'stall', label: 'Set up your stalls', href: '/pastures?tab=stalls', completed: stallsCount > 0 },
     { id: 'pasture', label: 'Add a pasture', href: '/pastures', completed: paddocksCount > 0 },
     { id: 'event', label: 'Schedule your first event', href: '/calendar', completed: eventsCount > 0 },
   ];

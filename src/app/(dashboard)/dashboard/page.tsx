@@ -20,7 +20,6 @@ import {
   ArrowUpRight,
   Activity,
   Syringe,
-  DollarSign,
   Phone,
   Mail,
   MapPin,
@@ -193,7 +192,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="stat-card">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
@@ -218,36 +217,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="stat-card col-span-2 md:col-span-1">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground">Balance Due</p>
-                <p className="text-2xl sm:text-3xl font-semibold text-foreground mt-0.5 sm:mt-1">
-                  ${(clientData?.stats?.balanceDue || 0).toLocaleString()}
-                </p>
-              </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* Balance Alert */}
-        {clientData?.stats?.balanceDue > 0 && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-              <div>
-                <p className="font-medium text-amber-900 dark:text-amber-200">Outstanding Balance</p>
-                <p className="text-sm text-amber-700 dark:text-amber-400">{clientData?.stats?.pendingInvoices || 0} invoice(s) pending</p>
-              </div>
-            </div>
-            <Link href="/billing" className="btn-primary btn-sm">
-              View Invoices
-            </Link>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Your Horses */}
@@ -328,44 +298,6 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
-                </div>
-              )}
-            </div>
-
-            {/* Recent Invoices */}
-            <div className="card">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Recent Invoices</h2>
-                <Link href="/billing" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
-                  View all
-                </Link>
-              </div>
-              {!clientData?.recentInvoices || clientData.recentInvoices.length === 0 ? (
-                <div className="p-6 text-center">
-                  <p className="text-sm text-muted-foreground">No invoices yet</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {clientData.recentInvoices.slice(0, 3).map((invoice: any) => (
-                    <div key={invoice.id} className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">#{invoice.invoiceNumber}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(invoice.issueDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-foreground">${invoice.total.toFixed(2)}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          invoice.status === 'PAID' ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
-                          invoice.status === 'OVERDUE' ? 'bg-red-500/10 text-red-700 dark:text-red-400' :
-                          'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                        }`}>
-                          {invoice.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>

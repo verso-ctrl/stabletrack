@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import {
   Trees,
@@ -39,7 +40,9 @@ type ViewMode = 'pastures' | 'stalls';
 
 export default function PasturesPage() {
   const { currentBarn } = useBarn();
-  const [viewMode, setViewMode] = useState<ViewMode>('pastures');
+  const searchParams = useSearchParams();
+  const initialTab = searchParams?.get('tab') === 'stalls' ? 'stalls' : 'pastures';
+  const [viewMode, setViewMode] = useState<ViewMode>(initialTab);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState<{
     type: 'paddock' | 'stall';

@@ -184,7 +184,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               value={formData.barnName}
               onChange={handleChange}
               placeholder="e.g., Thunder"
-              className="input-base"
+              className="input w-full"
               required
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -203,7 +203,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               value={formData.registeredName}
               onChange={handleChange}
               placeholder="e.g., Thunder's Lightning Strike"
-              className="input-base"
+              className="input w-full"
             />
             <p className="text-xs text-muted-foreground mt-1">
               Official registered name (if any)
@@ -222,7 +222,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               onChange={handleChange}
               list="breed-suggestions"
               placeholder="Select or type breed"
-              className="input-base"
+              className="input w-full"
             />
             <datalist id="breed-suggestions">
               {BREED_SUGGESTIONS.map((breed) => (
@@ -243,7 +243,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               onChange={handleChange}
               list="color-suggestions"
               placeholder="Select or type color"
-              className="input-base"
+              className="input w-full"
             />
             <datalist id="color-suggestions">
               {COLOR_SUGGESTIONS.map((color) => (
@@ -261,7 +261,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               name="sex"
               value={formData.sex || ''}
               onChange={handleChange}
-              className="input-base"
+              className="input w-full"
             >
               <option value="">Select sex</option>
               {SEX_OPTIONS.map((option) => (
@@ -287,7 +287,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
                     : ''
                 }
                 onChange={handleDateChange}
-                className="input-base"
+                className="input w-full"
               />
               <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
             </div>
@@ -307,7 +307,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               step="0.1"
               min="8"
               max="20"
-              className="input-base"
+              className="input w-full"
             />
           </div>
 
@@ -320,7 +320,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="input-base"
+              className="input w-full"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -350,7 +350,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               value={formData.microchipNumber}
               onChange={handleChange}
               placeholder="Enter microchip number"
-              className="input-base"
+              className="input w-full"
             />
           </div>
 
@@ -365,7 +365,7 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               value={formData.ownerName}
               onChange={handleChange}
               placeholder="Horse owner's name"
-              className="input-base"
+              className="input w-full"
             />
           </div>
         </div>

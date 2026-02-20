@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useHorse } from '@/hooks/useData';
 import { useBarn } from '@/contexts/BarnContext';
@@ -10,7 +11,6 @@ import { HorsePhotoGallery } from '@/components/storage/HorsePhotoGallery';
 import {
   ArrowLeft,
   Edit,
-  MoreVertical,
   Ruler,
   MapPin,
   Trees,
@@ -42,6 +42,7 @@ import { TasksTab } from './components/TasksTab';
 import { DocumentManager } from '@/components/storage/DocumentManager';
 import { ActivityTab } from './components/ActivityTab';
 import { BreedingTab } from './components/BreedingTab';
+import { FamilyTree } from './components/FamilyTree';
 
 export default function HorseDetailPage() {
   const params = useParams();
@@ -385,9 +386,6 @@ export default function HorseDetailPage() {
               <Edit className="w-4 h-4" />
               <span className="sm:inline">Edit</span>
             </Link>
-            <button className="p-2 sm:p-2.5 rounded-xl hover:bg-accent transition-all flex-shrink-0" aria-label="More options">
-              <MoreVertical className="w-5 h-5 text-muted-foreground" />
-            </button>
           </div>
         )}
       </div>
@@ -419,10 +417,12 @@ export default function HorseDetailPage() {
               </div>
             ) : horse.profilePhotoUrl ? (
               <>
-                <img
+                <Image
                   src={horse.profilePhotoUrl}
                   alt={horse.barnName}
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <div className="text-white text-center">
@@ -489,6 +489,11 @@ export default function HorseDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Family Tree */}
+      {currentBarn?.id && (
+        <FamilyTree horse={horse} barnId={currentBarn.id} />
+      )}
 
       {/* Tabs - Grid on mobile, horizontal scroll on larger screens */}
       <div className="border-b border-border -mx-3 sm:-mx-4 sm:mx-0">

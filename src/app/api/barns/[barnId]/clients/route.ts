@@ -110,28 +110,25 @@ export async function POST(req: NextRequest, context: RouteContext) {
       notes,
     } = body
 
-    if (!firstName || !lastName || !email) {
+    if (!firstName || !lastName) {
       return NextResponse.json(
-        { error: 'First name, last name, and email are required' },
+        { error: 'First name and last name are required' },
         { status: 400 }
       )
     }
 
-    // Check if client with email already exists
-    const existing = await prisma.client.findUnique({
-      where: {
-        barnId_email: {
-          barnId,
-          email,
-        },
-      },
-    })
+    // Check if client with same email already exists (only if email provided)
+    if (email) {
+      const existing = await prisma.client.findFirst({
+        where: { barnId, email },
+      })
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'A client with this email already exists' },
-        { status: 400 }
-      )
+      if (existing) {
+        return NextResponse.json(
+          { error: 'A contact with this email already exists' },
+          { status: 400 }
+        )
+      }
     }
 
     // Generate portal token if portal is enabled

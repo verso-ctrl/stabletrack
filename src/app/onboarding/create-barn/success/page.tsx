@@ -37,9 +37,9 @@ function SuccessPageContent() {
         setStatus('success')
         setMessage('Barn created successfully!')
 
-        // Redirect to dashboard after 2 seconds
+        // Redirect to dashboard after 2 seconds (full reload so BarnProvider re-fetches)
         setTimeout(() => {
-          router.push('/dashboard')
+          window.location.href = '/dashboard'
         }, 2000)
       } catch (error) {
         console.error('Error verifying session:', error)

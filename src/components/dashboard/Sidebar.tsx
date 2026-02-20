@@ -22,6 +22,7 @@ import {
   Trees,
   Wrench,
   Heart,
+  BookUser,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -50,8 +51,8 @@ const navItems = [
   { href: '/daily-care', label: 'Daily Care', icon: Activity, permission: 'tasks:read', addOn: null },
   { href: '/farm-maintenance', label: 'Farm Tasks', icon: Wrench, permission: 'tasks:read', addOn: null },
   { href: '/breeding', label: 'Breeding', icon: Heart, permission: 'horses:read', addOn: 'breeding' },
-  { href: '/pastures', label: 'Pastures', icon: Trees, permission: 'horses:read', addOn: null },
-  { href: '/clients', label: 'Clients', icon: User, permission: 'clients:read', addOn: null },
+  { href: '/pastures', label: 'Pastures & Stalls', icon: Trees, permission: 'horses:read', addOn: null },
+  { href: '/contacts', label: 'Contacts', icon: BookUser, permission: 'clients:read', addOn: null },
 ];
 
 const bottomNavItems = [
@@ -335,7 +336,7 @@ export function Sidebar() {
               </button>
             </div>
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <NavLink key={item.href} {...item} />
               ))}
             </nav>
@@ -343,7 +344,10 @@ export function Sidebar() {
               {bottomNavItems.map((item) => (
                 <NavLink key={item.href} {...item} />
               ))}
-              <UserProfile />
+              <div className="flex items-center justify-between pt-1">
+                <UserProfile />
+                <ThemeToggle />
+              </div>
             </div>
           </aside>
         </div>

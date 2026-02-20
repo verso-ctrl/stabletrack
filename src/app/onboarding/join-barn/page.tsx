@@ -47,8 +47,8 @@ export default function JoinBarnPage() {
       if (result.data?.status === 'PENDING') {
         setPendingBarn(result.data.barnName);
       } else {
-        // Direct approval - redirect to dashboard
-        router.push('/dashboard');
+        // Direct approval - full reload so BarnProvider re-fetches
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join barn');

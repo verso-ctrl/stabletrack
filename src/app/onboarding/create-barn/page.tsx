@@ -115,7 +115,8 @@ export default function CreateBarnPage() {
           throw new Error(result.error || 'Failed to create barn');
         }
 
-        router.push('/dashboard');
+        // Full reload so BarnProvider re-fetches the barn list
+        window.location.href = '/dashboard';
         return;
       }
 

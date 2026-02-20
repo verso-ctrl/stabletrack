@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Pill, Calendar, Weight, Ruler } from 'lucide-react';
 import { cn, formatAge, formatWeight, formatHeight, getStatusColor } from '@/lib/utils';
 import type { Horse } from '@/types';
@@ -23,12 +24,14 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
   const CompactContent = () => (
     <>
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0 relative">
         {horse.profilePhotoUrl ? (
-          <img
+          <Image
             src={horse.profilePhotoUrl}
             alt={horse.barnName}
-            className="w-full h-full object-cover"
+            fill
+            unoptimized
+            className="object-cover"
           />
         ) : (
           <span className="text-sm font-semibold text-muted-foreground">
@@ -95,12 +98,14 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
   const DefaultContent = () => (
     <div className="flex items-start gap-4">
       {/* Avatar */}
-      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-muted to-border flex items-center justify-center overflow-hidden flex-shrink-0 relative">
         {horse.profilePhotoUrl ? (
-          <img
+          <Image
             src={horse.profilePhotoUrl}
             alt={horse.barnName}
-            className="w-full h-full object-cover"
+            fill
+            unoptimized
+            className="object-cover"
           />
         ) : (
           <span className="text-xl font-semibold text-muted-foreground">

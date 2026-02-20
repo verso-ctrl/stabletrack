@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Heart, Plus, Loader2, Calendar, Baby, GitBranch, Pencil, Trash2, FileText } from 'lucide-react';
 import { HeatCycleTimeline } from '@/components/breeding/HeatCycleTimeline';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
-import { PedigreeCard } from '@/components/breeding/PedigreeCard';
 import { LogHeatCycleModal } from '@/components/breeding/LogHeatCycleModal';
 import { RecordBreedingModal, type BreedingFormData } from '@/components/breeding/RecordBreedingModal';
 import { RecordFoalingModal } from '@/components/breeding/RecordFoalingModal';
@@ -134,9 +133,6 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
   const offspring = allHorses.filter(h =>
     (isStallion && h.sireId === horse.id) || (isMare && h.damId === horse.id)
   );
-  const externalSireForPedigree = !sire && breedingRecords.length > 0
-    ? breedingRecords.find(r => r.externalStallion && r.mareId === horse.id)?.externalStallion ?? null
-    : null;
 
   const fetchData = useCallback(async () => {
     if (!barnId || !horse?.id) return;
@@ -652,14 +648,37 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
         </>
       )}
 
-      {/* Lineage - shown for both mares and stallions */}
-      <PedigreeCard
-        horse={{ id: horse.id, barnName: horse.barnName, sireId: horse.sireId ?? null, damId: horse.damId ?? null }}
-        sire={sire}
-        dam={dam}
-        offspring={offspring}
-        externalSire={externalSireForPedigree ? { name: externalSireForPedigree.name, studFarm: externalSireForPedigree.studFarm ?? null } : null}
-      />
+      {/* Sire & Dam (quick reference — full family tree on main page) */}
+      {(sire || dam) && (
+        <div className="card p-4 sm:p-6">
+          <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+            <GitBranch className="w-4 h-4 text-indigo-500" />
+            Sire &amp; Dam
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Sire</p>
+              {sire ? (
+                <Link href={`/horses/${sire.id}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                  {sire.barnName}
+                </Link>
+              ) : (
+                <p className="text-sm text-muted-foreground">Unknown</p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Dam</p>
+              {dam ? (
+                <Link href={`/horses/${dam.id}`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                  {dam.barnName}
+                </Link>
+              ) : (
+                <p className="text-sm text-muted-foreground">Unknown</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <LogHeatCycleModal

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
 import { useUser } from '@clerk/nextjs';
 import {
@@ -11,7 +12,9 @@ import {
   Loader2,
   Crown,
   Users,
-  CreditCard,
+  Palette,
+  Shield,
+  Bell,
 } from 'lucide-react';
 
 const settingsGroups = [
@@ -24,6 +27,18 @@ const settingsGroups = [
         label: 'Profile',
         description: 'Manage your personal information',
       },
+      {
+        href: '/settings/appearance',
+        icon: Palette,
+        label: 'Appearance',
+        description: 'Theme, display, and layout preferences',
+      },
+      {
+        href: '/settings/notifications',
+        icon: Bell,
+        label: 'Notifications',
+        description: 'Email and push notification preferences',
+      },
     ],
   },
   {
@@ -35,19 +50,26 @@ const settingsGroups = [
         label: 'Barn Settings',
         description: 'Update barn info and location',
       },
-    ],
-  },
-  {
-    title: 'Billing',
-    items: [
       {
-        href: '/settings/billing',
-        icon: CreditCard,
-        label: 'Billing & Plans',
-        description: 'Manage your plan and payment details',
+        href: '/settings/security',
+        icon: Shield,
+        label: 'Security',
+        description: 'Password, two-factor, and session management',
       },
     ],
   },
+  // Billing section hidden until client billing is fully implemented
+  // {
+  //   title: 'Billing',
+  //   items: [
+  //     {
+  //       href: '/settings/billing',
+  //       icon: CreditCard,
+  //       label: 'Billing & Plans',
+  //       description: 'Manage your plan and payment details',
+  //     },
+  //   ],
+  // },
 ];
 
 const roleIcons: Record<string, any> = {
@@ -113,10 +135,13 @@ export default function SettingsPage() {
           {/* Avatar */}
           <div className="relative flex-shrink-0">
             {user?.imageUrl ? (
-              <img
+              <Image
                 src={user.imageUrl}
                 alt={user.fullName || 'User'}
-                className="w-20 h-20 rounded-full object-cover ring-4 ring-border"
+                width={80}
+                height={80}
+                unoptimized
+                className="rounded-full object-cover ring-4 ring-border"
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center ring-4 ring-border">

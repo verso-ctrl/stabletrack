@@ -233,7 +233,7 @@ export function EventForm({
           name="horseId"
           value={formData.horseId || ''}
           onChange={handleChange}
-          className="input-base"
+          className="input w-full"
         >
           <option value="">All horses / Barn-wide event</option>
           {horses?.map((horse) => (
@@ -259,7 +259,7 @@ export function EventForm({
               if (fieldErrors.title) setFieldErrors(prev => ({ ...prev, title: '' }));
             }}
             placeholder="e.g., Farrier visit - Thunder"
-            className={`input-base flex-1 ${fieldErrors.title ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
+            className={`input w-full flex-1 ${fieldErrors.title ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
             aria-invalid={!!fieldErrors.title}
             aria-describedby={fieldErrors.title ? 'title-error' : undefined}
           />
@@ -291,7 +291,7 @@ export function EventForm({
                 handleDateChange(e);
                 if (fieldErrors.scheduledDate) setFieldErrors(prev => ({ ...prev, scheduledDate: '' }));
               }}
-              className={`input-base ${fieldErrors.scheduledDate ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
+              className={`input w-full ${fieldErrors.scheduledDate ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''}`}
               aria-invalid={!!fieldErrors.scheduledDate}
               aria-describedby={fieldErrors.scheduledDate ? 'date-error' : undefined}
             />
@@ -315,7 +315,7 @@ export function EventForm({
             placeholder="0.00"
             step="0.01"
             min="0"
-            className="input-base"
+            className="input w-full"
           />
         </div>
       </div>
@@ -330,7 +330,7 @@ export function EventForm({
             name="farrierWork"
             value={formData.farrierWork || ''}
             onChange={handleChange}
-            className="input-base"
+            className="input w-full"
           >
             <option value="">Select work type</option>
             {FARRIER_WORK_OPTIONS.map((option) => (
@@ -351,7 +351,7 @@ export function EventForm({
             name="dewormProduct"
             value={formData.dewormProduct || ''}
             onChange={handleChange}
-            className="input-base"
+            className="input w-full"
           >
             <option value="">Select product</option>
             {DEWORMER_OPTIONS.map((option) => (
@@ -376,7 +376,7 @@ export function EventForm({
             value={formData.providerName || ''}
             onChange={handleChange}
             placeholder="e.g., Dr. Martinez"
-            className="input-base"
+            className="input w-full"
           />
         </div>
 
@@ -391,7 +391,7 @@ export function EventForm({
             value={formData.providerPhone || ''}
             onChange={handleChange}
             placeholder="555-123-4567"
-            className="input-base"
+            className="input w-full"
           />
         </div>
       </div>
@@ -407,7 +407,7 @@ export function EventForm({
           onChange={handleChange}
           placeholder="Additional details about this event..."
           rows={3}
-          className="input-base resize-none"
+          className="input w-full resize-none"
         />
       </div>
 
@@ -422,7 +422,7 @@ export function EventForm({
           onChange={handleChange}
           placeholder="Internal notes..."
           rows={2}
-          className="input-base resize-none"
+          className="input w-full resize-none"
         />
       </div>
 

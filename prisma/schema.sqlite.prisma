@@ -599,7 +599,7 @@ model Client {
   firstName     String
   lastName      String
   name          String?
-  email         String
+  email         String?
   phone         String?
   address       String?
   city          String?
@@ -612,11 +612,11 @@ model Client {
   balance       Float    @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+
   barn          Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
   horses        ClientHorse[]
-  
-  @@unique([barnId, email])
+
+  @@index([barnId])
 }
 
 model ClientHorse {

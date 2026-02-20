@@ -446,7 +446,9 @@ export default function FeedChartPage() {
               </button>
               <button
                 onClick={() => {
-                  const [horseId, feedingTime] = showNotes.split('-');
+                  const lastDash = showNotes.lastIndexOf('-');
+                  const horseId = showNotes.substring(0, lastDash);
+                  const feedingTime = showNotes.substring(lastDash + 1);
                   handleSaveNotes(horseId, feedingTime);
                 }}
                 className="btn-primary flex-1"

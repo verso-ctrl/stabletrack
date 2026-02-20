@@ -713,7 +713,7 @@ model Client {
   firstName     String
   lastName      String
   name          String?
-  email         String
+  email         String?
   phone         String?
   address       String?
   city          String?
@@ -735,14 +735,13 @@ model Client {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+
   barn              Barn              @relation(fields: [barnId], references: [id], onDelete: Cascade)
   horses            ClientHorse[]
   invoices          Invoice[]
   recurringInvoices RecurringInvoice[]
   lessons           Lesson[]
 
-  @@unique([barnId, email])
   @@index([barnId])
   @@index([status])
   @@index([barnId, status])
