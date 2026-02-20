@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Loader2, ArrowUp, ArrowDown, Star } from 'lucide-react';
+import { Check, Loader2, ArrowUp, ArrowDown, Star, Calendar } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useBarn } from '@/contexts/BarnContext';
 import { AddOnCard } from './AddOnCard';
@@ -24,7 +24,7 @@ function formatLimit(value: number): string {
 }
 
 export function PricingPlans() {
-  const { tier: currentTier, isLoading, changeTier, activeAddOns } = useSubscription();
+  const { tier: currentTier, isLoading, changeTier, activeAddOns, currentPeriodEnd } = useSubscription();
   const { currentBarn, refreshBarn } = useBarn();
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
   const [confirmUpgrade, setConfirmUpgrade] = useState<SubscriptionTier | null>(null);
@@ -101,7 +101,10 @@ export function PricingPlans() {
 
       await changeTier(tier);
       await refreshBarn?.();
-      toast.success('Plan changed', `You've been switched to the ${TIER_PRICING[tier].displayName} plan.`);
+      const effectDate = currentPeriodEnd
+        ? ` effective ${currentPeriodEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+        : '';
+      toast.success('Downgrade scheduled', `You'll switch to the ${TIER_PRICING[tier].displayName} plan${effectDate}. You won't be charged for the higher plan after that.`);
     } catch (err) {
       console.error('Downgrade failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to downgrade');
@@ -329,10 +332,33 @@ export function PricingPlans() {
           open={true}
           onCancel={() => setConfirmDowngrade(null)}
           onConfirm={() => handleDowngrade(confirmDowngrade)}
-          title={`Switch to ${TIER_PRICING[confirmDowngrade].displayName}?`}
-          description={`This takes effect at the end of your current billing period. The Starter plan supports up to 10 horses.`}
-          confirmLabel="Switch plan"
-          variant="default"
+          title={`Downgrade to ${TIER_PRICING[confirmDowngrade].displayName}?`}
+          description={
+            <div className="space-y-3">
+              <p>
+                Your current {TIER_PRICING[currentTier].displayName} plan will remain active until the end of your billing period.
+                {currentPeriodEnd && (
+                  <> You will <strong>not be charged</strong> for the {TIER_PRICING[currentTier].displayName} plan after <strong>{currentPeriodEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>.</>
+                )}
+              </p>
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-300 text-xs space-y-1">
+                <p className="font-medium">What changes with Starter:</p>
+                <ul className="list-disc list-inside space-y-0.5">
+                  <li>Limited to 10 horses and 5 team members</li>
+                  <li>Storage reduced to 10 GB</li>
+                  <li>20 photos per horse</li>
+                </ul>
+              </div>
+              {currentPeriodEnd && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Next charge: ${TIER_PRICING[confirmDowngrade].monthlyPriceCents / 100}/mo starting {currentPeriodEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+              )}
+            </div>
+          }
+          confirmLabel="Confirm downgrade"
+          variant="warning"
         />
       )}
     </div>
@@ -340,7 +366,7 @@ export function PricingPlans() {
 }
 
 export function CurrentPlanCard() {
-  const { subscription, tier, isLoading, usage, limits, trial, storagePercentUsed } = useSubscription();
+  const { subscription, tier, isLoading, usage, limits, trial, storagePercentUsed, currentPeriodEnd } = useSubscription();
   const { currentBarn } = useBarn();
   const [isOpening, setIsOpening] = useState(false);
 
@@ -420,6 +446,19 @@ export function CurrentPlanCard() {
           <span className="text-muted-foreground">/month</span>
         </div>
       </div>
+
+      {/* Next Billing Date */}
+      {currentPeriodEnd && !trial.isTrialing && (
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="w-4 h-4" />
+          <span>
+            Next charge: <span className="font-medium text-foreground">${pricing.monthlyPriceCents / 100}</span> on{' '}
+            <span className="font-medium text-foreground">
+              {currentPeriodEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </span>
+          </span>
+        </div>
+      )}
 
       {/* Usage Bars */}
       <div className="mt-6 space-y-4">

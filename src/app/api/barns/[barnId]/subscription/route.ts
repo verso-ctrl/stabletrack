@@ -2,9 +2,16 @@
 // Get and update barn subscription/tier
 
 import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser, checkBarnPermission } from '@/lib/auth'
 import { getTierLimits, type SubscriptionTier } from '@/lib/tiers'
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-12-15.clover',
+    })
+  : null
 
 interface RouteParams {
   params: Promise<{ barnId: string }>
@@ -31,6 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         subscriptionStatus: true,
         stripeCustomerId: true,
         stripeSubscriptionId: true,
+        createdAt: true,
         _count: {
           select: { horses: true },
         },
@@ -44,11 +52,38 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const tier = barn.tier as SubscriptionTier
     const limits = getTierLimits(tier)
 
+    // Get next billing date from Stripe or compute from creation date
+    let currentPeriodEnd: string | null = null
+    if (stripe && barn.stripeSubscriptionId) {
+      try {
+        const subscription = await stripe.subscriptions.retrieve(barn.stripeSubscriptionId)
+        const periodEnd = (subscription as any).current_period_end as number | undefined
+        if (periodEnd) {
+          currentPeriodEnd = new Date(periodEnd * 1000).toISOString()
+        }
+      } catch {
+        // If Stripe fails, fall through to computed date
+      }
+    }
+    // Fallback: compute next billing date from barn creation (monthly cycle)
+    if (!currentPeriodEnd) {
+      const created = new Date(barn.createdAt)
+      const now = new Date()
+      const nextBilling = new Date(created)
+      nextBilling.setMonth(now.getMonth())
+      nextBilling.setFullYear(now.getFullYear())
+      if (nextBilling <= now) {
+        nextBilling.setMonth(nextBilling.getMonth() + 1)
+      }
+      currentPeriodEnd = nextBilling.toISOString()
+    }
+
     return NextResponse.json({
       tier,
       status: barn.subscriptionStatus,
       hasStripeSubscription: !!barn.stripeSubscriptionId,
       limits,
+      currentPeriodEnd,
       usage: {
         horses: barn._count.horses,
       },

@@ -51,6 +51,9 @@ export interface SubscriptionContextType {
   // Trial state
   trial: TrialState
 
+  // Billing
+  currentPeriodEnd: Date | null
+
   // Active add-ons
   activeAddOns: string[]
 
@@ -134,6 +137,9 @@ export function SubscriptionProvider({
     storageBytes: 0,
   })
 
+  // Next billing date
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<Date | null>(null)
+
   // Update tier when barn tier changes (normalize legacy tiers)
   useEffect(() => {
     if (barnTier) {
@@ -148,18 +154,27 @@ export function SubscriptionProvider({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addOnsKey])
 
-  // Fetch real usage data from API
+  // Fetch real usage data and billing info from API
   const fetchUsage = useCallback(async () => {
     if (!barnId) return
     try {
-      const res = await fetch(`/api/barns/${barnId}/usage`)
-      if (res.ok) {
-        const data = await res.json()
+      const [usageRes, subRes] = await Promise.all([
+        fetch(`/api/barns/${barnId}/usage`),
+        fetch(`/api/barns/${barnId}/subscription`),
+      ])
+      if (usageRes.ok) {
+        const data = await usageRes.json()
         setUsage({
           horses: data.horses ?? 0,
           teamMembers: data.teamMembers ?? 0,
           storageBytes: data.storageBytes ?? 0,
         })
+      }
+      if (subRes.ok) {
+        const subData = await subRes.json()
+        if (subData.currentPeriodEnd) {
+          setCurrentPeriodEnd(new Date(subData.currentPeriodEnd))
+        }
       }
     } catch {
       // Silent fail — usage display is non-critical
@@ -312,6 +327,7 @@ export function SubscriptionProvider({
     tierPricing,
     usage,
     trial,
+    currentPeriodEnd,
     activeAddOns,
     loading,
     isLoading: loading,
@@ -343,7 +359,7 @@ export function SubscriptionProvider({
       addOns: activeAddOns,
     },
   }), [
-    tier, tierDisplayName, features, limits, tierPricing, usage, trial,
+    tier, tierDisplayName, features, limits, tierPricing, usage, trial, currentPeriodEnd,
     activeAddOns, loading, error, checkHasFeature, canAddHorses,
     canAddTeamMembers, hasAddOn, nextTier, upgradeMessage, getUpgradeMessage,
     getUpgradeMessageForLimit, storagePercentUsed, changeTier, upgradeTier,

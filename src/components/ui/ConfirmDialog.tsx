@@ -9,7 +9,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'default';
@@ -50,8 +50,8 @@ export function ConfirmDialog({
           <AlertDialogPrimitive.Title className="text-lg font-semibold text-foreground">
             {title}
           </AlertDialogPrimitive.Title>
-          <AlertDialogPrimitive.Description className="text-sm text-muted-foreground mt-2">
-            {description}
+          <AlertDialogPrimitive.Description asChild={typeof description !== 'string'} className="text-sm text-muted-foreground mt-2">
+            {typeof description === 'string' ? description : <div>{description}</div>}
           </AlertDialogPrimitive.Description>
           <div className="flex gap-3 mt-6 sm:justify-end">
             <AlertDialogPrimitive.Cancel
