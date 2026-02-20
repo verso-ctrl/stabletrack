@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
     const isPrimary = formData.get('isPrimary') === 'true'
     const caption = formData.get('caption') as string | null
     const documentType = formData.get('documentType') as string | null
+    const documentTitle = formData.get('documentTitle') as string | null
+    const documentNotes = formData.get('documentNotes') as string | null
 
     if (!file || !barnId || !horseId || !type) {
       return NextResponse.json(
@@ -59,10 +61,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Guard against files too large for base64 DB storage
-    const maxSize = 10 * 1024 * 1024 // 10MB
+    const maxSize = 25 * 1024 * 1024 // 25MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: `File too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum is 10MB.` },
+        { error: `File too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum is 25MB.` },
         { status: 413 }
       )
     }
@@ -183,7 +185,7 @@ export async function POST(req: NextRequest) {
         data: {
           horseId,
           type: documentType || 'other',
-          title: file.name,
+          title: documentTitle || file.name,
           name: file.name,
           fileName: file.name,
           url: `/api/storage/file/document/${horseId}`, // Placeholder
@@ -191,6 +193,7 @@ export async function POST(req: NextRequest) {
           fileData: base64Data,
           fileSize: file.size,
           mimeType: file.type,
+          notes: documentNotes || null,
           uploadedBy: user.id,
         },
       })

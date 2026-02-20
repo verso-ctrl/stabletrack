@@ -32,15 +32,20 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { type } = body;
+    const { type, title, notes } = body;
 
-    if (!type || typeof type !== 'string') {
-      return NextResponse.json({ error: 'Tag is required' }, { status: 400 });
+    const updateData: Record<string, string | null> = {};
+    if (type && typeof type === 'string') updateData.type = type.trim();
+    if (title && typeof title === 'string') updateData.title = title.trim();
+    if (notes !== undefined) updateData.notes = notes ? String(notes).trim() : null;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
     const updated = await prisma.document.update({
       where: { id: documentId },
-      data: { type: type.trim() },
+      data: updateData,
     });
 
     return NextResponse.json({ data: updated });

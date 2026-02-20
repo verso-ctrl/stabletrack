@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Filter,
   Tag,
+  Pencil,
 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
@@ -28,6 +29,7 @@ interface Document {
   fileUrl: string;
   fileSize: number | null;
   type: string;
+  notes: string | null;
   uploadedAt: string;
   horse?: { id: string; barnName: string };
 }
@@ -61,10 +63,15 @@ export default function DocumentsPage() {
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
     title: '',
+    notes: '',
     tag: '',
     horseId: '',
     file: null as File | null,
   });
+
+  // Edit modal state
+  const [editDoc, setEditDoc] = useState<Document | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', notes: '', tag: '' });
 
   // Fetch documents
   useEffect(() => {
@@ -96,7 +103,7 @@ export default function DocumentsPage() {
     if (!file) return;
 
     if (file.size > 25 * 1024 * 1024) {
-      toast.warning('File too large', 'File must be less than 25MB');
+      toast.warning('File too large', 'Maximum file size is 25MB');
       return;
     }
 
@@ -105,11 +112,12 @@ export default function DocumentsPage() {
       file,
       title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
     }));
+    if (!showUploadModal) setShowUploadModal(true);
   };
 
   const handleUpload = async () => {
-    if (!uploadForm.file || !uploadForm.title || !uploadForm.horseId || !currentBarn) {
-      toast.warning('Missing fields', 'Please select a file, enter a title, and choose a horse');
+    if (!uploadForm.file || !uploadForm.title.trim() || !uploadForm.horseId || !currentBarn) {
+      toast.warning('Missing fields', 'Please select a file, enter a name, and choose a horse');
       return;
     }
 
@@ -121,7 +129,11 @@ export default function DocumentsPage() {
       formData.append('barnId', currentBarn.id);
       formData.append('horseId', uploadForm.horseId);
       formData.append('type', 'document');
-      formData.append('documentType', uploadForm.tag || 'Untagged');
+      formData.append('documentType', uploadForm.tag.trim() || 'Untagged');
+      formData.append('documentTitle', uploadForm.title.trim());
+      if (uploadForm.notes.trim()) {
+        formData.append('documentNotes', uploadForm.notes.trim());
+      }
 
       const response = await fetch('/api/storage/upload', {
         method: 'POST',
@@ -133,9 +145,7 @@ export default function DocumentsPage() {
         throw new Error(error.error || 'Failed to upload');
       }
 
-      const result = await response.json();
-
-      // Add to list (refetch to get full data with horse relation)
+      // Refetch to get full data with horse relation
       const refetchRes = await fetch(`/api/barns/${currentBarn.id}/documents`);
       if (refetchRes.ok) {
         const refetchData = await refetchRes.json();
@@ -143,7 +153,7 @@ export default function DocumentsPage() {
       }
 
       setShowUploadModal(false);
-      setUploadForm({ title: '', tag: '', horseId: '', file: null });
+      setUploadForm({ title: '', notes: '', tag: '', horseId: '', file: null });
       toast.success('Document uploaded', uploadForm.file.name);
     } catch (error) {
       console.error('Error uploading:', error);
@@ -176,6 +186,51 @@ export default function DocumentsPage() {
     } catch (error) {
       console.error('Error deleting:', error);
       toast.error('Delete failed', 'Failed to delete document');
+    }
+  };
+
+  const openEditModal = (doc: Document) => {
+    setEditDoc(doc);
+    setEditForm({
+      title: doc.title,
+      notes: doc.notes || '',
+      tag: doc.type === 'Untagged' ? '' : doc.type,
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editDoc || !currentBarn) return;
+
+    try {
+      const response = await fetch(`/api/barns/${currentBarn.id}/documents/${editDoc.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editForm.title.trim() || undefined,
+          type: editForm.tag.trim() || undefined,
+          notes: editForm.notes.trim() || null,
+        }),
+      });
+
+      if (response.ok) {
+        setDocuments(prev =>
+          prev.map(d =>
+            d.id === editDoc.id
+              ? {
+                  ...d,
+                  title: editForm.title.trim() || d.title,
+                  type: editForm.tag.trim() || d.type,
+                  notes: editForm.notes.trim() || null,
+                }
+              : d
+          )
+        );
+        toast.success('Document updated');
+      }
+    } catch {
+      toast.error('Failed to update document');
+    } finally {
+      setEditDoc(null);
     }
   };
 
@@ -289,6 +344,9 @@ export default function DocumentsPage() {
 
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-foreground truncate">{doc.title}</h3>
+                    {doc.notes && (
+                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{doc.notes}</p>
+                    )}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground mt-1">
                       {doc.type && doc.type !== 'Untagged' && (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
@@ -324,13 +382,22 @@ export default function DocumentsPage() {
                       <Download className="w-4 h-4" />
                     </a>
                     {canEdit && (
-                      <button
-                        onClick={() => handleDeleteClick(doc.id)}
-                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => openEditModal(doc)}
+                          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                          title="Edit"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(doc.id)}
+                          className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -357,7 +424,10 @@ export default function DocumentsPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Upload Document</h3>
               <button
-                onClick={() => setShowUploadModal(false)}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadForm({ title: '', notes: '', tag: '', horseId: '', file: null });
+                }}
                 className="p-1 rounded hover:bg-accent"
               >
                 <X className="w-5 h-5" />
@@ -367,22 +437,22 @@ export default function DocumentsPage() {
             {/* File Drop Zone */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+              className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                 uploadForm.file ? 'border-green-300 bg-green-50 dark:bg-green-950/20' : 'border-border hover:border-primary/50'
               }`}
             >
               {uploadForm.file ? (
                 <>
-                  <FileText className="w-10 h-10 text-green-600 mx-auto mb-2" />
-                  <p className="text-foreground font-medium">{uploadForm.file.name}</p>
-                  <p className="text-sm text-muted-foreground">{formatBytes(uploadForm.file.size)}</p>
+                  <FileText className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                  <p className="text-foreground font-medium text-sm">{uploadForm.file.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatBytes(uploadForm.file.size)}</p>
                   <p className="text-xs text-muted-foreground mt-1">Click to change file</p>
                 </>
               ) : (
                 <>
-                  <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground font-medium">Click to select a file</p>
-                  <p className="text-sm text-muted-foreground mt-1">PDF, DOC, XLS, images, and more — up to 25MB</p>
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground font-medium text-sm">Click to select a file</p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF, DOC, XLS, images, and more — up to 25MB</p>
                 </>
               )}
               <input
@@ -395,19 +465,35 @@ export default function DocumentsPage() {
             </div>
 
             <div className="space-y-4 mt-4">
+              {/* Document Name */}
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Document Title *
+                  Document Name *
                 </label>
                 <input
                   type="text"
                   value={uploadForm.title}
                   onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                   className="input w-full"
-                  placeholder="Enter document title"
+                  placeholder="e.g. 2024 Coggins Test"
                 />
               </div>
 
+              {/* Description (optional) */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Description <span className="text-xs font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={uploadForm.notes}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, notes: e.target.value }))}
+                  className="input w-full resize-none"
+                  rows={2}
+                  placeholder="Add any notes about this document..."
+                />
+              </div>
+
+              {/* Horse */}
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
                   Horse *
@@ -424,9 +510,10 @@ export default function DocumentsPage() {
                 </select>
               </div>
 
+              {/* Tag */}
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Tag
+                  Tag <span className="text-xs font-normal">(optional)</span>
                 </label>
                 <input
                   type="text"
@@ -440,7 +527,7 @@ export default function DocumentsPage() {
                     <button
                       key={tag}
                       type="button"
-                      onClick={() => setUploadForm(prev => ({ ...prev, tag }))}
+                      onClick={() => setUploadForm(prev => ({ ...prev, tag: prev.tag === tag ? '' : tag }))}
                       className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
                         uploadForm.tag === tag
                           ? 'bg-primary text-primary-foreground border-primary'
@@ -456,7 +543,10 @@ export default function DocumentsPage() {
 
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowUploadModal(false)}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadForm({ title: '', notes: '', tag: '', horseId: '', file: null });
+                }}
                 className="btn-secondary flex-1"
                 disabled={isUploading}
               >
@@ -465,7 +555,7 @@ export default function DocumentsPage() {
               <button
                 onClick={handleUpload}
                 className="btn-primary flex-1 flex items-center justify-center gap-2"
-                disabled={isUploading || !uploadForm.file || !uploadForm.title || !uploadForm.horseId}
+                disabled={isUploading || !uploadForm.file || !uploadForm.title.trim() || !uploadForm.horseId}
               >
                 {isUploading ? (
                   <>
@@ -478,6 +568,95 @@ export default function DocumentsPage() {
                     Upload
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Edit Document</h3>
+              <button
+                onClick={() => setEditDoc(null)}
+                className="p-1 rounded hover:bg-accent"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Document Name
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Description <span className="text-xs font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                  className="input w-full resize-none"
+                  rows={2}
+                  placeholder="Add any notes..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Tag
+                </label>
+                <input
+                  type="text"
+                  value={editForm.tag}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, tag: e.target.value }))}
+                  className="input w-full"
+                  placeholder="e.g. Coggins, Vet Record..."
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {TAG_SUGGESTIONS.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setEditForm(prev => ({ ...prev, tag: prev.tag === tag ? '' : tag }))}
+                      className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
+                        editForm.tag === tag
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setEditDoc(null)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="btn-primary flex-1"
+                disabled={!editForm.title.trim()}
+              >
+                Save Changes
               </button>
             </div>
           </div>

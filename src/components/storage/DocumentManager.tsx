@@ -10,13 +10,13 @@ import {
   Trash2,
   Download,
   ExternalLink,
-  Share2,
   Loader2,
   AlertCircle,
   Tag,
   X,
   Filter,
   Plus,
+  Pencil,
 } from 'lucide-react'
 import { toast } from '@/lib/toast'
 import { formatBytes } from '@/lib/tiers'
@@ -39,6 +39,7 @@ interface DocumentItem {
   fileUrl: string
   fileSize: number | null
   mimeType: string | null
+  notes: string | null
   uploadedAt: string
 }
 
@@ -65,14 +66,21 @@ export function DocumentManager({
   const [loading, setLoading] = useState(true)
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null)
   const [filterTag, setFilterTag] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Tagging state for newly uploaded doc
-  const [pendingTagDocId, setPendingTagDocId] = useState<string | null>(null)
-  const [tagInput, setTagInput] = useState('')
-  const [showTagSuggestions, setShowTagSuggestions] = useState(false)
+  // Upload modal state
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    notes: '',
+    tag: '',
+    file: null as File | null,
+  })
+
+  // Edit modal state
+  const [editDocId, setEditDocId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ title: '', notes: '', tag: '' })
 
   // Fetch documents
   const fetchDocuments = useCallback(async () => {
@@ -94,28 +102,44 @@ export function DocumentManager({
     fetchDocuments()
   }, [fetchDocuments])
 
-  // Upload handler
-  const handleUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
+  // File select handler
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    const file = files[0]
-
-    // 25MB limit
     if (file.size > 25 * 1024 * 1024) {
-      setUploadError('File too large. Maximum size is 25MB.')
+      toast.warning('File too large', 'Maximum file size is 25MB')
+      return
+    }
+
+    setUploadForm(prev => ({
+      ...prev,
+      file,
+      title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
+    }))
+    setShowUploadModal(true)
+  }
+
+  // Upload handler
+  const handleUpload = async () => {
+    if (!uploadForm.file || !uploadForm.title.trim()) {
+      toast.warning('Missing fields', 'Please select a file and enter a name')
       return
     }
 
     setUploading(true)
-    setUploadError(null)
 
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', uploadForm.file)
       formData.append('barnId', barnId)
       formData.append('horseId', horseId)
       formData.append('type', 'document')
-      formData.append('documentType', 'Untagged')
+      formData.append('documentType', uploadForm.tag.trim() || 'Untagged')
+      formData.append('documentTitle', uploadForm.title.trim())
+      if (uploadForm.notes.trim()) {
+        formData.append('documentNotes', uploadForm.notes.trim())
+      }
 
       const response = await fetch('/api/storage/upload', {
         method: 'POST',
@@ -128,50 +152,53 @@ export function DocumentManager({
         throw new Error(result.error || 'Upload failed')
       }
 
-      // Refresh and prompt for tag
       await fetchDocuments()
-      const newDocId = result.document?.id
-      if (newDocId) {
-        setPendingTagDocId(newDocId)
-        setTagInput('')
-        setShowTagSuggestions(true)
-      }
-      toast.success('Document uploaded', file.name)
+      setShowUploadModal(false)
+      setUploadForm({ title: '', notes: '', tag: '', file: null })
+      toast.success('Document uploaded', uploadForm.file.name)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Upload failed'
-      setUploadError(msg)
       toast.error('Upload failed', msg)
     } finally {
       setUploading(false)
-      // Reset file input
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
-  // Tag a document (update type field)
-  const handleTagDocument = async (docId: string, tag: string) => {
-    const trimmedTag = tag.trim()
-    if (!trimmedTag) return
+  // Edit handler
+  const handleEditSave = async () => {
+    if (!editDocId) return
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/documents/${docId}`, {
+      const response = await fetch(`/api/barns/${barnId}/documents/${editDocId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: trimmedTag }),
+        body: JSON.stringify({
+          title: editForm.title.trim() || undefined,
+          type: editForm.tag.trim() || undefined,
+          notes: editForm.notes.trim() || null,
+        }),
       })
 
       if (response.ok) {
         setDocuments(prev =>
-          prev.map(d => (d.id === docId ? { ...d, type: trimmedTag } : d))
+          prev.map(d =>
+            d.id === editDocId
+              ? {
+                  ...d,
+                  title: editForm.title.trim() || d.title,
+                  type: editForm.tag.trim() || d.type,
+                  notes: editForm.notes.trim() || null,
+                }
+              : d
+          )
         )
-        toast.success('Tag updated', trimmedTag)
+        toast.success('Document updated')
       }
     } catch {
-      toast.error('Failed to update tag')
+      toast.error('Failed to update document')
     } finally {
-      setPendingTagDocId(null)
-      setTagInput('')
-      setShowTagSuggestions(false)
+      setEditDocId(null)
     }
   }
 
@@ -188,6 +215,16 @@ export function DocumentManager({
     } catch {
       toast.error('Failed to delete document')
     }
+  }
+
+  // Open edit modal
+  const openEdit = (doc: DocumentItem) => {
+    setEditDocId(doc.id)
+    setEditForm({
+      title: doc.title,
+      notes: doc.notes || '',
+      tag: doc.type === 'Untagged' ? '' : doc.type,
+    })
   }
 
   // Get unique tags from documents
@@ -216,7 +253,7 @@ export function DocumentManager({
               ref={fileInputRef}
               type="file"
               className="hidden"
-              onChange={e => handleUpload(e.target.files)}
+              onChange={handleFileSelect}
               accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.jpg,.jpeg,.png,.gif,.heic,.heif,.webp,.tiff,.tif,.bmp"
             />
             <button
@@ -224,85 +261,12 @@ export function DocumentManager({
               disabled={uploading}
               className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all"
             >
-              {uploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  Upload
-                </>
-              )}
+              <Upload className="w-4 h-4" />
+              Upload
             </button>
           </div>
         )}
       </div>
-
-      {/* Upload error */}
-      {uploadError && (
-        <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          {uploadError}
-          <button onClick={() => setUploadError(null)} className="ml-auto">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Tag prompt for newly uploaded doc */}
-      {pendingTagDocId && (
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
-          <p className="text-sm font-medium flex items-center gap-2">
-            <Tag className="w-4 h-4" />
-            Tag this document
-          </p>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && tagInput.trim()) {
-                  handleTagDocument(pendingTagDocId, tagInput)
-                }
-              }}
-              placeholder="e.g. Coggins, Vet Record..."
-              className="flex-1 px-3 py-2 text-sm border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
-              autoFocus
-            />
-            <button
-              onClick={() => handleTagDocument(pendingTagDocId, tagInput || 'Untagged')}
-              className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => {
-                setPendingTagDocId(null)
-                setTagInput('')
-                setShowTagSuggestions(false)
-              }}
-              className="px-3 py-2 border rounded-lg text-sm hover:bg-muted"
-            >
-              Skip
-            </button>
-          </div>
-          {/* Quick-pick tag suggestions */}
-          <div className="flex flex-wrap gap-1.5">
-            {TAG_SUGGESTIONS.map(suggestion => (
-              <button
-                key={suggestion}
-                onClick={() => handleTagDocument(pendingTagDocId, suggestion)}
-                className="px-2.5 py-1 text-xs rounded-full border hover:bg-muted transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Tag filter bar */}
       {allTags.length > 1 && (
@@ -362,13 +326,8 @@ export function DocumentManager({
               key={doc.id}
               document={doc}
               editable={editable}
-              isTagging={pendingTagDocId === doc.id}
               onDelete={() => setDeleteDocId(doc.id)}
-              onTagClick={() => {
-                setPendingTagDocId(doc.id)
-                setTagInput(doc.type === 'Untagged' ? '' : doc.type)
-                setShowTagSuggestions(true)
-              }}
+              onEdit={() => openEdit(doc)}
             />
           ))}
         </div>
@@ -383,6 +342,226 @@ export function DocumentManager({
         variant="danger"
         confirmLabel="Delete"
       />
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Upload Document</h3>
+              <button
+                onClick={() => {
+                  setShowUploadModal(false)
+                  setUploadForm({ title: '', notes: '', tag: '', file: null })
+                }}
+                className="p-1 rounded hover:bg-accent"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Selected file */}
+            {uploadForm.file && (
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg mb-4">
+                <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{uploadForm.file.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatBytes(uploadForm.file.size)}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    fileInputRef.current?.click()
+                  }}
+                  className="text-xs text-primary hover:underline flex-shrink-0"
+                >
+                  Change
+                </button>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {/* Document Name */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Document Name *
+                </label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="input w-full"
+                  placeholder="e.g. 2024 Coggins Test"
+                />
+              </div>
+
+              {/* Description (optional) */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Description <span className="text-xs font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={uploadForm.notes}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, notes: e.target.value }))}
+                  className="input w-full resize-none"
+                  rows={2}
+                  placeholder="Add any notes about this document..."
+                />
+              </div>
+
+              {/* Tag */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Tag <span className="text-xs font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={uploadForm.tag}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, tag: e.target.value }))}
+                  className="input w-full"
+                  placeholder="e.g. Coggins, Vet Record..."
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {TAG_SUGGESTIONS.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setUploadForm(prev => ({ ...prev, tag: prev.tag === tag ? '' : tag }))}
+                      className={cn(
+                        'px-2 py-0.5 text-xs rounded-full border transition-colors',
+                        uploadForm.tag === tag
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'hover:bg-muted'
+                      )}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowUploadModal(false)
+                  setUploadForm({ title: '', notes: '', tag: '', file: null })
+                }}
+                className="btn-secondary flex-1"
+                disabled={uploading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpload}
+                className="btn-primary flex-1 flex items-center justify-center gap-2"
+                disabled={uploading || !uploadForm.file || !uploadForm.title.trim()}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Upload
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editDocId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Edit Document</h3>
+              <button
+                onClick={() => setEditDocId(null)}
+                className="p-1 rounded hover:bg-accent"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Document Name
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Description <span className="text-xs font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                  className="input w-full resize-none"
+                  rows={2}
+                  placeholder="Add any notes..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Tag
+                </label>
+                <input
+                  type="text"
+                  value={editForm.tag}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, tag: e.target.value }))}
+                  className="input w-full"
+                  placeholder="e.g. Coggins, Vet Record..."
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {TAG_SUGGESTIONS.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setEditForm(prev => ({ ...prev, tag: prev.tag === tag ? '' : tag }))}
+                      className={cn(
+                        'px-2 py-0.5 text-xs rounded-full border transition-colors',
+                        editForm.tag === tag
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'hover:bg-muted'
+                      )}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setEditDocId(null)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="btn-primary flex-1"
+                disabled={!editForm.title.trim()}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -394,17 +573,15 @@ export function DocumentManager({
 interface DocumentRowProps {
   document: DocumentItem
   editable: boolean
-  isTagging: boolean
   onDelete: () => void
-  onTagClick: () => void
+  onEdit: () => void
 }
 
 function DocumentRow({
   document,
   editable,
-  isTagging,
   onDelete,
-  onTagClick,
+  onEdit,
 }: DocumentRowProps) {
   const downloadUrl = document.fileUrl || document.url || ''
 
@@ -416,31 +593,16 @@ function DocumentRow({
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{document.title || document.fileName}</p>
+        {document.notes && (
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{document.notes}</p>
+        )}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
           {document.type && document.type !== 'Untagged' && (
             <>
-              <button
-                onClick={editable ? onTagClick : undefined}
-                className={cn(
-                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs',
-                  editable && 'hover:bg-primary/20 cursor-pointer'
-                )}
-              >
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
                 <Tag className="w-2.5 h-2.5" />
                 {document.type}
-              </button>
-              <span>·</span>
-            </>
-          )}
-          {document.type === 'Untagged' && editable && (
-            <>
-              <button
-                onClick={onTagClick}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-dashed text-muted-foreground hover:bg-muted cursor-pointer text-xs"
-              >
-                <Plus className="w-2.5 h-2.5" />
-                Add tag
-              </button>
+              </span>
               <span>·</span>
             </>
           )}
@@ -479,13 +641,22 @@ function DocumentRow({
           </>
         )}
         {editable && (
-          <button
-            onClick={onDelete}
-            className="p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
-            title="Delete"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <>
+            <button
+              onClick={onEdit}
+              className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+              title="Edit"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </>
         )}
       </div>
     </div>
