@@ -1,36 +1,25 @@
 // src/components/storage/DocumentManager.tsx
-// Document management component with tier-based restrictions
+// Document management component — upload, tag, and filter
 
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   FileText,
   Upload,
   Trash2,
   Download,
-  Calendar,
-  AlertTriangle,
-  Lock,
-  Plus,
   ExternalLink,
   Share2,
-  Clock,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Tag,
+  X,
+  Filter,
+  Plus,
 } from 'lucide-react'
-import { useDocumentUpload, useFileList } from '@/hooks/useStorage'
-import { useTier } from '@/hooks/useTierPermissions'
-import { FileUpload } from './FileUpload'
-import { UpgradeBanner, FeatureLocked } from './UpgradePrompt'
 import { toast } from '@/lib/toast'
-import {
-  DOCUMENT_TYPES,
-  getDocumentTypeDisplayName,
-  getTierDisplayName,
-  formatBytes,
-  type DocumentType 
-} from '@/lib/tiers'
+import { formatBytes } from '@/lib/tiers'
 import { cn } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
@@ -42,99 +31,151 @@ interface DocumentManagerProps {
 
 interface DocumentItem {
   id: string
-  name: string
-  type: DocumentType
-  url: string
-  path: string
-  size: number
-  mimeType: string
-  expiryDate?: Date | null
-  uploadedAt: Date
+  title: string
+  name: string | null
+  fileName: string
+  type: string
+  url: string | null
+  fileUrl: string
+  fileSize: number | null
+  mimeType: string | null
+  uploadedAt: string
 }
+
+// Common tag suggestions
+const TAG_SUGGESTIONS = [
+  'Coggins',
+  'Vet Record',
+  'Registration',
+  'Insurance',
+  'Health Certificate',
+  'Farrier',
+  'Dental',
+  'Contract',
+  'Invoice',
+  'Other',
+]
 
 export function DocumentManager({
   barnId,
   horseId,
   editable = true,
 }: DocumentManagerProps) {
-  const [showUpload, setShowUpload] = useState(false)
-  const [selectedType, setSelectedType] = useState<DocumentType | null>(null)
   const [documents, setDocuments] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null)
+  const [filterTag, setFilterTag] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Tier permissions
-  const {
-    tier,
-    features,
-    canUploadDocuments,
-    canTrackDocumentExpiry,
-    checkDocumentType,
-    nextTier,
-    tierDisplayName,
-  } = useTier()
+  // Tagging state for newly uploaded doc
+  const [pendingTagDocId, setPendingTagDocId] = useState<string | null>(null)
+  const [tagInput, setTagInput] = useState('')
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false)
 
   // Fetch documents
-  useEffect(() => {
-    async function fetchDocuments() {
-      try {
-        const response = await fetch(`/api/barns/${barnId}/documents?horseId=${horseId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setDocuments(data.data || [])
-        }
-      } catch (error) {
-        console.error('Failed to fetch documents:', error)
-      } finally {
-        setLoading(false)
+  const fetchDocuments = useCallback(async () => {
+    try {
+      const url = `/api/barns/${barnId}/documents?horseId=${horseId}`
+      const response = await fetch(url)
+      if (response.ok) {
+        const data = await response.json()
+        setDocuments(data.data || [])
       }
+    } catch (error) {
+      console.error('Failed to fetch documents:', error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchDocuments()
   }, [barnId, horseId])
 
-  // Upload hook
-  const { upload, uploading, progress, error } = useDocumentUpload({
-    barnId,
-    horseId,
-    documentType: selectedType || 'other',
-    onSuccess: () => {
-      setShowUpload(false)
-      setSelectedType(null)
-      // Refresh documents
-      window.location.reload() // Simple refresh, could be optimized
-    },
-  })
+  useEffect(() => {
+    fetchDocuments()
+  }, [fetchDocuments])
 
-  // If documents not available on this tier
-  if (!canUploadDocuments) {
-    return (
-      <FeatureLocked
-        feature="Document Management"
-        requiredTier="STARTER"
-        onUpgrade={() => window.location.href = '/settings/billing'}
-      />
-    )
-  }
+  // Upload handler
+  const handleUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
 
-  const handleUploadClick = (type: DocumentType) => {
-    if (!checkDocumentType(type)) {
-      return // Type not allowed on this tier
+    const file = files[0]
+
+    // 25MB limit
+    if (file.size > 25 * 1024 * 1024) {
+      setUploadError('File too large. Maximum size is 25MB.')
+      return
     }
-    setSelectedType(type)
-    setShowUpload(true)
-  }
 
-  const handleUpload = async (files: File[]) => {
-    if (files[0]) {
-      await upload(files[0])
+    setUploading(true)
+    setUploadError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('barnId', barnId)
+      formData.append('horseId', horseId)
+      formData.append('type', 'document')
+      formData.append('documentType', 'Untagged')
+
+      const response = await fetch('/api/storage/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed')
+      }
+
+      // Refresh and prompt for tag
+      await fetchDocuments()
+      const newDocId = result.document?.id
+      if (newDocId) {
+        setPendingTagDocId(newDocId)
+        setTagInput('')
+        setShowTagSuggestions(true)
+      }
+      toast.success('Document uploaded', file.name)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Upload failed'
+      setUploadError(msg)
+      toast.error('Upload failed', msg)
+    } finally {
+      setUploading(false)
+      // Reset file input
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
-  const handleDeleteClick = (docId: string) => {
-    setDeleteDocId(docId)
+  // Tag a document (update type field)
+  const handleTagDocument = async (docId: string, tag: string) => {
+    const trimmedTag = tag.trim()
+    if (!trimmedTag) return
+
+    try {
+      const response = await fetch(`/api/barns/${barnId}/documents/${docId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: trimmedTag }),
+      })
+
+      if (response.ok) {
+        setDocuments(prev =>
+          prev.map(d => (d.id === docId ? { ...d, type: trimmedTag } : d))
+        )
+        toast.success('Tag updated', trimmedTag)
+      }
+    } catch {
+      toast.error('Failed to update tag')
+    } finally {
+      setPendingTagDocId(null)
+      setTagInput('')
+      setShowTagSuggestions(false)
+    }
   }
 
+  // Delete handler
   const handleDeleteConfirm = async () => {
     if (!deleteDocId) return
     const docId = deleteDocId
@@ -143,47 +184,23 @@ export function DocumentManager({
     try {
       await fetch(`/api/barns/${barnId}/documents/${docId}`, { method: 'DELETE' })
       setDocuments(prev => prev.filter(d => d.id !== docId))
-    } catch (error) {
-      console.error('Failed to delete document:', error)
+      toast.success('Document deleted')
+    } catch {
+      toast.error('Failed to delete document')
     }
   }
 
-  const handleShare = async (doc: DocumentItem) => {
-    if (!features.canShareDocuments) {
-      toast.warning('Upgrade required', `Document sharing requires ${getTierDisplayName('STARTER')} plan`)
-      return
-    }
-    // Implement sharing logic
-    navigator.clipboard.writeText(doc.url)
-    toast.success('Link copied', 'Document link copied to clipboard')
-  }
+  // Get unique tags from documents
+  const allTags = Array.from(new Set(documents.map(d => d.type).filter(Boolean)))
 
-  // Group documents by type
-  const documentsByType = documents.reduce((acc, doc) => {
-    const type = doc.type || 'other'
-    if (!acc[type]) acc[type] = []
-    acc[type].push(doc)
-    return acc
-  }, {} as Record<string, DocumentItem[]>)
-
-  // Check for expiring documents
-  const expiringDocs = canTrackDocumentExpiry 
-    ? documents.filter(d => {
-        if (!d.expiryDate) return false
-        const daysUntilExpiry = Math.ceil(
-          (new Date(d.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-        )
-        return daysUntilExpiry <= 30 && daysUntilExpiry > 0
-      })
-    : []
-
-  const expiredDocs = canTrackDocumentExpiry
-    ? documents.filter(d => d.expiryDate && new Date(d.expiryDate) < new Date())
-    : []
+  // Filtered documents
+  const filteredDocs = filterTag
+    ? documents.filter(d => d.type === filterTag)
+    : documents
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-5">
+      {/* Header with upload button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
@@ -192,178 +209,166 @@ export function DocumentManager({
             ({documents.length})
           </span>
         </div>
+
+        {editable && (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={e => handleUpload(e.target.files)}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.jpg,.jpeg,.png,.gif,.heic,.heif,.webp,.tiff,.tif,.bmp"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" />
+                  Upload
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Expiry warnings */}
-      {canTrackDocumentExpiry && (expiredDocs.length > 0 || expiringDocs.length > 0) && (
-        <div className="space-y-2">
-          {expiredDocs.length > 0 && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-red-800">
-                  {expiredDocs.length} expired document{expiredDocs.length > 1 ? 's' : ''}
-                </p>
-                <p className="text-xs text-red-600">
-                  {expiredDocs.map(d => d.name).join(', ')}
-                </p>
-              </div>
-            </div>
-          )}
-          {expiringDocs.length > 0 && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-              <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-amber-800">
-                  {expiringDocs.length} document{expiringDocs.length > 1 ? 's' : ''} expiring soon
-                </p>
-                <p className="text-xs text-amber-600">
-                  {expiringDocs.map(d => d.name).join(', ')}
-                </p>
-              </div>
-            </div>
-          )}
+      {/* Upload error */}
+      {uploadError && (
+        <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          {uploadError}
+          <button onClick={() => setUploadError(null)} className="ml-auto">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      {/* Expiry tracking upgrade banner */}
-      {!canTrackDocumentExpiry && documents.length > 0 && (
-        <UpgradeBanner
-          currentTier={tier}
-          feature="document expiry tracking"
-          compact
-          onUpgrade={() => window.location.href = '/settings/billing'}
-        />
-      )}
-
-      {/* Document type sections */}
-      {editable && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {Object.values(DOCUMENT_TYPES).map(type => {
-            const isAllowed = checkDocumentType(type)
-            const count = documentsByType[type]?.length || 0
-
-            return (
-              <button
-                key={type}
-                onClick={() => isAllowed && handleUploadClick(type)}
-                disabled={!isAllowed}
-                className={cn(
-                  'p-3 border rounded-lg text-left transition-colors',
-                  isAllowed 
-                    ? 'hover:border-primary hover:bg-primary/5 cursor-pointer'
-                    : 'opacity-50 cursor-not-allowed bg-muted'
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {getDocumentTypeDisplayName(type)}
-                  </span>
-                  {!isAllowed && <Lock className="w-3 h-3 text-muted-foreground" />}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {count} file{count !== 1 ? 's' : ''}
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Upload modal */}
-      {showUpload && selectedType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-card rounded-lg p-6 max-w-md w-full">
-            <h4 className="font-medium mb-4">
-              Upload {getDocumentTypeDisplayName(selectedType)}
-            </h4>
-            
-            {!uploading && !error ? (
-              <FileUpload
-                onFilesSelected={handleUpload}
-                accept={['application/pdf', 'image/*', '.doc', '.docx']}
-                maxSizeMB={25}
-                uploading={false}
-                progress={0}
-                error={null}
-              />
-            ) : uploading ? (
-              <div className="py-8 text-center">
-                <Loader2 className="w-12 h-12 mx-auto mb-4 text-amber-500 animate-spin" />
-                <p className="text-sm text-muted-foreground">Uploading document...</p>
-                <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2 overflow-hidden mt-4">
-                  <div
-                    className="h-full bg-amber-500 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            ) : error ? (
-              <div className="py-8 text-center">
-                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
-                <p className="text-sm text-red-600 mb-4">{error}</p>
-                <button
-                  onClick={() => {
-                    setShowUpload(false)
-                    setSelectedType(null)
-                  }}
-                  className="px-4 py-2 bg-muted text-muted-foreground rounded hover:bg-accent"
-                >
-                  Close
-                </button>
-              </div>
-            ) : null}
-
-            {canTrackDocumentExpiry && !uploading && !error && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-1">
-                  Expiry Date (optional)
-                </label>
-                <input
-                  type="date"
-                  className="w-full border rounded px-3 py-2 text-sm"
-                  // Would need to wire this up to the upload
-                />
-              </div>
-            )}
-
-            {!uploading && !error && (
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => {
-                    setShowUpload(false)
-                    setSelectedType(null)
-                  }}
-                  className="flex-1 px-4 py-2 border rounded text-sm hover:bg-accent"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
+      {/* Tag prompt for newly uploaded doc */}
+      {pendingTagDocId && (
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+          <p className="text-sm font-medium flex items-center gap-2">
+            <Tag className="w-4 h-4" />
+            Tag this document
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && tagInput.trim()) {
+                  handleTagDocument(pendingTagDocId, tagInput)
+                }
+              }}
+              placeholder="e.g. Coggins, Vet Record..."
+              className="flex-1 px-3 py-2 text-sm border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-primary/50"
+              autoFocus
+            />
+            <button
+              onClick={() => handleTagDocument(pendingTagDocId, tagInput || 'Untagged')}
+              className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => {
+                setPendingTagDocId(null)
+                setTagInput('')
+                setShowTagSuggestions(false)
+              }}
+              className="px-3 py-2 border rounded-lg text-sm hover:bg-muted"
+            >
+              Skip
+            </button>
           </div>
+          {/* Quick-pick tag suggestions */}
+          <div className="flex flex-wrap gap-1.5">
+            {TAG_SUGGESTIONS.map(suggestion => (
+              <button
+                key={suggestion}
+                onClick={() => handleTagDocument(pendingTagDocId, suggestion)}
+                className="px-2.5 py-1 text-xs rounded-full border hover:bg-muted transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tag filter bar */}
+      {allTags.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <button
+            onClick={() => setFilterTag(null)}
+            className={cn(
+              'px-2.5 py-1 text-xs rounded-full border transition-colors',
+              !filterTag
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'hover:bg-muted'
+            )}
+          >
+            All
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+              className={cn(
+                'px-2.5 py-1 text-xs rounded-full border transition-colors',
+                filterTag === tag
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'hover:bg-muted'
+              )}
+            >
+              {tag}
+            </button>
+          ))}
         </div>
       )}
 
       {/* Document list */}
       {loading ? (
         <div className="text-center py-8 text-muted-foreground">
+          <Loader2 className="w-6 h-6 mx-auto mb-2 animate-spin" />
           Loading documents...
         </div>
-      ) : documents.length === 0 ? (
+      ) : filteredDocs.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-          <p>No documents uploaded yet</p>
+          <p>{filterTag ? `No documents tagged "${filterTag}"` : 'No documents uploaded yet'}</p>
+          {editable && !filterTag && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="mt-3 text-sm text-primary hover:underline"
+            >
+              Upload your first document
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
-          {documents.map(doc => (
+          {filteredDocs.map(doc => (
             <DocumentRow
               key={doc.id}
               document={doc}
-              canShare={features.canShareDocuments}
-              canTrackDocumentExpiry={canTrackDocumentExpiry}
-              onDelete={() => handleDeleteClick(doc.id)}
-              onShare={() => handleShare(doc)}
+              editable={editable}
+              isTagging={pendingTagDocId === doc.id}
+              onDelete={() => setDeleteDocId(doc.id)}
+              onTagClick={() => {
+                setPendingTagDocId(doc.id)
+                setTagInput(doc.type === 'Untagged' ? '' : doc.type)
+                setShowTagSuggestions(true)
+              }}
             />
           ))}
         </div>
@@ -388,101 +393,100 @@ export function DocumentManager({
 
 interface DocumentRowProps {
   document: DocumentItem
-  canShare: boolean
-  canTrackDocumentExpiry: boolean
+  editable: boolean
+  isTagging: boolean
   onDelete: () => void
-  onShare: () => void
+  onTagClick: () => void
 }
 
 function DocumentRow({
   document,
-  canShare,
-  canTrackDocumentExpiry,
+  editable,
+  isTagging,
   onDelete,
-  onShare,
+  onTagClick,
 }: DocumentRowProps) {
-  const isExpired = document.expiryDate && new Date(document.expiryDate) < new Date()
-  const isExpiringSoon = document.expiryDate && !isExpired && (() => {
-    const daysUntil = Math.ceil(
-      (new Date(document.expiryDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    )
-    return daysUntil <= 30
-  })()
+  const downloadUrl = document.fileUrl || document.url || ''
 
   return (
-    <div className={cn(
-      'flex items-center gap-3 p-3 border rounded-lg',
-      isExpired && 'border-red-200 bg-red-50',
-      isExpiringSoon && !isExpired && 'border-amber-200 bg-amber-50'
-    )}>
+    <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
       <div className="p-2 bg-muted rounded">
         <FileText className="w-5 h-5 text-muted-foreground" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium truncate">{document.name}</p>
-          {isExpired && (
-            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs rounded">
-              Expired
-            </span>
-          )}
-          {isExpiringSoon && (
-            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded">
-              Expiring soon
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{getDocumentTypeDisplayName(document.type)}</span>
-          <span>•</span>
-          <span>{formatBytes(document.size)}</span>
-          {canTrackDocumentExpiry && document.expiryDate && (
+        <p className="text-sm font-medium truncate">{document.title || document.fileName}</p>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+          {document.type && document.type !== 'Untagged' && (
             <>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {new Date(document.expiryDate).toLocaleDateString()}
-              </span>
+              <button
+                onClick={editable ? onTagClick : undefined}
+                className={cn(
+                  'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs',
+                  editable && 'hover:bg-primary/20 cursor-pointer'
+                )}
+              >
+                <Tag className="w-2.5 h-2.5" />
+                {document.type}
+              </button>
+              <span>·</span>
+            </>
+          )}
+          {document.type === 'Untagged' && editable && (
+            <>
+              <button
+                onClick={onTagClick}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-dashed text-muted-foreground hover:bg-muted cursor-pointer text-xs"
+              >
+                <Plus className="w-2.5 h-2.5" />
+                Add tag
+              </button>
+              <span>·</span>
+            </>
+          )}
+          {document.fileSize != null && (
+            <span>{formatBytes(document.fileSize)}</span>
+          )}
+          {document.uploadedAt && (
+            <>
+              <span>·</span>
+              <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
             </>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-1">
-        <a
-          href={document.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
-          title="View"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </a>
-        <a
-          href={document.url}
-          download={document.name}
-          className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
-          title="Download"
-        >
-          <Download className="w-4 h-4" />
-        </a>
-        {canShare && (
+        {downloadUrl && (
+          <>
+            <a
+              href={downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+              title="View"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+            <a
+              href={downloadUrl}
+              download={document.fileName}
+              className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+              title="Download"
+            >
+              <Download className="w-4 h-4" />
+            </a>
+          </>
+        )}
+        {editable && (
           <button
-            onClick={onShare}
-            className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
-            title="Share"
+            onClick={onDelete}
+            className="p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
+            title="Delete"
           >
-            <Share2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" />
           </button>
         )}
-        <button
-          onClick={onDelete}
-          className="p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
-          title="Delete"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
       </div>
     </div>
   )

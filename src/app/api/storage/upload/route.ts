@@ -1,8 +1,11 @@
 // src/app/api/storage/upload/route.ts
-// API route for file uploads (Demo mode - uses local storage)
+// API route for file uploads (stores as base64 in database)
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+
+// Allow uploads up to 25MB
+export const maxDuration = 30 // seconds
 import { getCurrentUser } from '@/lib/auth'
 import {
   getTierFeatures,
