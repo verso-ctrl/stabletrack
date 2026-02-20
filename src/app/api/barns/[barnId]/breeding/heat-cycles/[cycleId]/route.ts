@@ -25,6 +25,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!cycle) return NextResponse.json({ error: 'Heat cycle not found' }, { status: 404 });
     return NextResponse.json({ data: cycle });
   } catch (error) {
+    console.error('Error fetching heat cycle:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch heat cycle';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -70,6 +71,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json({ data: cycle });
   } catch (error) {
+    console.error('Error updating heat cycle:', error);
     const message = error instanceof Error ? error.message : 'Failed to update heat cycle';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -94,6 +96,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     await prisma.heatCycle.delete({ where: { id: cycleId } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting heat cycle:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete heat cycle';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });

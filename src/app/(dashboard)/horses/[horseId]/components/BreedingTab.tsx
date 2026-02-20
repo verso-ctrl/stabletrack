@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, Plus, Loader2, Calendar, Baby, GitBranch, Pencil, Trash2 } from 'lucide-react';
+import { Heart, Plus, Loader2, Calendar, Baby, GitBranch, Pencil, Trash2, FileText } from 'lucide-react';
 import { HeatCycleTimeline } from '@/components/breeding/HeatCycleTimeline';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
 import { PedigreeCard } from '@/components/breeding/PedigreeCard';
 import { LogHeatCycleModal } from '@/components/breeding/LogHeatCycleModal';
-import { RecordBreedingModal } from '@/components/breeding/RecordBreedingModal';
+import { RecordBreedingModal, type BreedingFormData } from '@/components/breeding/RecordBreedingModal';
 import { RecordFoalingModal } from '@/components/breeding/RecordFoalingModal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from '@/lib/toast';
@@ -37,6 +37,8 @@ interface BreedingRecord {
   veterinarian?: string | null;
   cost?: number | null;
   notes?: string | null;
+  pregnancyCheckDate?: string | null;
+  pregnancyCheckResult?: string | null;
   mare?: { id: string; barnName: string; profilePhotoUrl?: string | null };
   stallion?: { id: string; barnName: string } | null;
   externalStallion?: { id: string; name: string; studFarm?: string | null } | null;
@@ -117,6 +119,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
   // Edit states
   const [editingCycle, setEditingCycle] = useState<HeatCycle | null>(null);
   const [editingFoaling, setEditingFoaling] = useState<FoalingRecord | null>(null);
+  const [editingRecord, setEditingRecord] = useState<BreedingRecord | null>(null);
 
   // Confirm dialog
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -187,7 +190,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
     fetchData();
   };
 
-  const handleRecordBreeding = async (data: { mareId: string; stallionId: string; externalStallionId: string; breedingDate: string; breedingType: string; veterinarian: string; facility: string; cost: string; notes: string }) => {
+  const handleRecordBreeding = async (data: BreedingFormData) => {
     const res = await fetch(`/api/barns/${barnId}/breeding/records`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, stallionId: data.stallionId || undefined, externalStallionId: data.externalStallionId || undefined }),
@@ -237,6 +240,25 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update foaling record', err.error); throw new Error(err.error); }
     toast.success('Foaling record updated');
     setEditingFoaling(null);
+    fetchData();
+  };
+
+  const handleEditBreedingRecord = async (data: BreedingFormData) => {
+    if (!editingRecord) return;
+    const res = await fetch(`/api/barns/${barnId}/breeding/records/${editingRecord.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        estimatedDueDate: data.estimatedDueDate || null,
+        veterinarian: data.veterinarian || null,
+        cost: data.cost || null,
+        notes: data.notes || null,
+        pregnancyCheckDate: data.pregnancyCheckDate || null,
+        pregnancyCheckResult: data.pregnancyCheckResult || null,
+      }),
+    });
+    if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }
+    toast.success('Breeding record updated');
+    setEditingRecord(null);
     fetchData();
   };
 
@@ -327,24 +349,40 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
             </h3>
             {(() => {
               const status = getCurrentStatus();
+              const pregnantRecord = breedingRecords.find(r => r.status === 'CONFIRMED_PREGNANT');
               return (
-                <div className="flex items-center gap-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-                    {status.label}
-                  </span>
-                  {status.label === 'Pregnant' && (() => {
-                    const record = breedingRecords.find(r => r.status === 'CONFIRMED_PREGNANT');
-                    if (!record?.estimatedDueDate) return null;
-                    return (
-                      <span className="text-sm text-muted-foreground">
-                        Due {new Date(record.estimatedDueDate).toLocaleDateString()}
-                      </span>
-                    );
-                  })()}
-                  {status.label === 'Not in Heat' && heatCycles.length > 0 && heatCycles[0].predictedNextDate && (
-                    <span className="text-sm text-muted-foreground">
-                      Next predicted: {new Date(heatCycles[0].predictedNextDate).toLocaleDateString()}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
+                      {status.label}
                     </span>
+                    {status.label === 'Pregnant' && pregnantRecord?.estimatedDueDate && (
+                      <span className="text-sm text-muted-foreground">
+                        Due {new Date(pregnantRecord.estimatedDueDate).toLocaleDateString()}
+                      </span>
+                    )}
+                    {status.label === 'Not in Heat' && heatCycles.length > 0 && heatCycles[0].predictedNextDate && (
+                      <span className="text-sm text-muted-foreground">
+                        Next predicted: {new Date(heatCycles[0].predictedNextDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                  {/* Pregnancy document upload prompt */}
+                  {status.label === 'Pregnant' && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                      <FileText className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-blue-900 dark:text-blue-300">
+                          Track pregnancy progress — upload ultrasound photos, milk test results, and vet reports.
+                        </p>
+                        <Link
+                          href="/documents"
+                          className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        >
+                          Upload Pregnancy Documents
+                        </Link>
+                      </div>
+                    </div>
                   )}
                 </div>
               );
@@ -393,7 +431,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                 Breeding History
               </h3>
               {canEdit && (
-                <button onClick={() => setShowBreedingModal(true)} className="btn-secondary btn-sm" aria-label="Record breeding">
+                <button onClick={() => { setEditingRecord(null); setShowBreedingModal(true); }} className="btn-secondary btn-sm" aria-label="Record breeding">
                   <Plus className="w-4 h-4" />
                   Record Breeding
                 </button>
@@ -428,13 +466,22 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                           <BreedingStatusBadge status={record.status} />
                         )}
                         {canEdit && (
-                          <button
-                            onClick={() => confirmDelete('Delete breeding record?', 'Records with foaling data cannot be deleted.', () => handleDeleteBreedingRecord(record.id))}
-                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                            aria-label="Delete breeding record"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => { setEditingRecord(record); setShowBreedingModal(true); }}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground"
+                              aria-label="Edit breeding record"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => confirmDelete('Delete breeding record?', 'Records with foaling data cannot be deleted.', () => handleDeleteBreedingRecord(record.id))}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                              aria-label="Delete breeding record"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -515,7 +562,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                 Breeding History
               </h3>
               {canEdit && (
-                <button onClick={() => setShowBreedingModal(true)} className="btn-secondary btn-sm" aria-label="Record breeding">
+                <button onClick={() => { setEditingRecord(null); setShowBreedingModal(true); }} className="btn-secondary btn-sm" aria-label="Record breeding">
                   <Plus className="w-4 h-4" />
                   Record Breeding
                 </button>
@@ -550,13 +597,22 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                           <BreedingStatusBadge status={record.status} />
                         )}
                         {canEdit && (
-                          <button
-                            onClick={() => confirmDelete('Delete breeding record?', 'Records with foaling data cannot be deleted.', () => handleDeleteBreedingRecord(record.id))}
-                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                            aria-label="Delete breeding record"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => { setEditingRecord(record); setShowBreedingModal(true); }}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground"
+                              aria-label="Edit breeding record"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => confirmDelete('Delete breeding record?', 'Records with foaling data cannot be deleted.', () => handleDeleteBreedingRecord(record.id))}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                              aria-label="Delete breeding record"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -616,12 +672,13 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
       />
       <RecordBreedingModal
         open={showBreedingModal}
-        onClose={() => setShowBreedingModal(false)}
-        onSubmit={handleRecordBreeding}
+        onClose={() => { setShowBreedingModal(false); setEditingRecord(null); }}
+        onSubmit={editingRecord ? handleEditBreedingRecord : handleRecordBreeding}
         mares={mares.map(m => ({ id: m.id, barnName: m.barnName }))}
         stallions={stallions.map(s => ({ id: s.id, barnName: s.barnName }))}
         externalStallions={externalStallions}
         preselectedMareId={isMare ? horse.id : undefined}
+        editRecord={editingRecord}
       />
       <RecordFoalingModal
         open={showFoalingModal}

@@ -34,6 +34,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!foaling) return NextResponse.json({ error: 'Foaling record not found' }, { status: 404 });
     return NextResponse.json({ data: foaling });
   } catch (error) {
+    console.error('Error fetching foaling record:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch foaling record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -77,6 +78,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json({ data: foaling });
   } catch (error) {
+    console.error('Error updating foaling record:', error);
     const message = error instanceof Error ? error.message : 'Failed to update foaling record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -109,6 +111,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting foaling record:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete foaling record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });

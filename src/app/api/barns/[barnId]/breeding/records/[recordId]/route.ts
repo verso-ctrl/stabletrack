@@ -30,6 +30,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!record) return NextResponse.json({ error: 'Breeding record not found' }, { status: 404 });
     return NextResponse.json({ data: record });
   } catch (error) {
+    console.error('Error fetching breeding record:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch breeding record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -106,6 +107,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json({ data: record });
   } catch (error) {
+    console.error('Error updating breeding record:', error);
     const message = error instanceof Error ? error.message : 'Failed to update breeding record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -140,6 +142,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     await prisma.breedingRecord.delete({ where: { id: recordId } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting breeding record:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete breeding record';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });

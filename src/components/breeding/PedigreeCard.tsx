@@ -26,7 +26,7 @@ interface PedigreeCardProps {
 export function PedigreeCard({ horse, sire, dam, offspring = [], externalSire }: PedigreeCardProps) {
   return (
     <div className="card p-4 sm:p-6">
-      <h3 className="text-sm font-semibold text-foreground mb-4">Lineage</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-4">{horse.barnName}&apos;s Parents &amp; Offspring</h3>
 
       <div className="space-y-4">
         {/* Parents */}

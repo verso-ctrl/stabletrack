@@ -6,7 +6,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { FeatureGate } from '@/components/subscription/FeatureGate';
 import { LogHeatCycleModal } from '@/components/breeding/LogHeatCycleModal';
-import { RecordBreedingModal } from '@/components/breeding/RecordBreedingModal';
+import { RecordBreedingModal, type BreedingFormData } from '@/components/breeding/RecordBreedingModal';
 import { RecordFoalingModal } from '@/components/breeding/RecordFoalingModal';
 import { ExternalStallionModal, type ExternalStallionFormData } from '@/components/breeding/ExternalStallionModal';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
@@ -36,6 +36,8 @@ interface BreedingRecord {
   externalStallion: { id: string; name: string; studFarm: string | null } | null;
   breedingDate: string; breedingType: string; status: string;
   estimatedDueDate: string | null;
+  veterinarian?: string | null; cost?: number | null; notes?: string | null;
+  pregnancyCheckDate?: string | null; pregnancyCheckResult?: string | null;
   foalingRecord: { id: string; actualDate: string; foalName: string | null; outcome: string; foalId: string | null } | null;
 }
 interface FoalingRecord {
@@ -117,6 +119,7 @@ export default function BreedingPage() {
   const [editingCycle, setEditingCycle] = useState<HeatCycle | null>(null);
   const [editingFoaling, setEditingFoaling] = useState<FoalingRecord | null>(null);
   const [editingStallion, setEditingStallion] = useState<ExternalStallionFull | null>(null);
+  const [editingRecord, setEditingRecord] = useState<BreedingRecord | null>(null);
 
   // Confirm dialog
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -226,6 +229,25 @@ export default function BreedingPage() {
     }
   };
 
+  const handleEditBreedingRecord = async (data: BreedingFormData) => {
+    if (!editingRecord) return;
+    const res = await fetch(`/api/barns/${barnId}/breeding/records/${editingRecord.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        estimatedDueDate: data.estimatedDueDate || null,
+        veterinarian: data.veterinarian || null,
+        cost: data.cost || null,
+        notes: data.notes || null,
+        pregnancyCheckDate: data.pregnancyCheckDate || null,
+        pregnancyCheckResult: data.pregnancyCheckResult || null,
+      }),
+    });
+    if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }
+    toast.success('Breeding record updated');
+    setEditingRecord(null);
+    fetchData();
+  };
+
   // ---- Delete handlers ----
 
   const handleDeleteHeatCycle = async (cycleId: string) => {
@@ -304,7 +326,7 @@ export default function BreedingPage() {
 
   const actionButtons: Record<Tab, { label: string; onClick: () => void }> = {
     'heat-cycles': { label: 'Log Heat Cycle', onClick: () => { setEditingCycle(null); setShowHeatModal(true); } },
-    records: { label: 'Record Breeding', onClick: () => setShowBreedingModal(true) },
+    records: { label: 'Record Breeding', onClick: () => { setEditingRecord(null); setShowBreedingModal(true); } },
     pregnancies: { label: 'Record Foaling', onClick: () => { setEditingFoaling(null); setShowFoalingModal(true); } },
     foalings: { label: 'Record Foaling', onClick: () => { setEditingFoaling(null); setShowFoalingModal(true); } },
     stallions: { label: 'Add Stallion', onClick: () => { setEditingStallion(null); setShowStallionModal(true); } },
@@ -394,8 +416,9 @@ export default function BreedingPage() {
               <BreedingRecordsTab
                 records={breedingRecords}
                 canEdit={canEdit}
-                onAdd={() => setShowBreedingModal(true)}
+                onAdd={() => { setEditingRecord(null); setShowBreedingModal(true); }}
                 onUpdateStatus={handleUpdateStatus}
+                onEdit={(record) => { setEditingRecord(record); setShowBreedingModal(true); }}
                 onDelete={(id) => confirmDelete('Delete breeding record?', 'This action cannot be undone. Records with foaling data cannot be deleted.', () => handleDeleteBreedingRecord(id))}
               />
             )}
@@ -405,6 +428,7 @@ export default function BreedingPage() {
                 canEdit={canEdit}
                 onRecordFoaling={() => { setEditingFoaling(null); setShowFoalingModal(true); }}
                 onUpdateStatus={handleUpdateStatus}
+                onEdit={(record) => { setEditingRecord(record); setShowBreedingModal(true); }}
               />
             )}
             {activeTab === 'foalings' && (
@@ -438,12 +462,13 @@ export default function BreedingPage() {
         />
         <RecordBreedingModal
           open={showBreedingModal}
-          onClose={() => setShowBreedingModal(false)}
-          onSubmit={handleRecordBreeding}
+          onClose={() => { setShowBreedingModal(false); setEditingRecord(null); }}
+          onSubmit={editingRecord ? handleEditBreedingRecord : handleRecordBreeding}
           mares={mares}
           stallions={stallions}
           externalStallions={externalStallions.map(s => ({ id: s.id, name: s.name, studFarm: s.studFarm ?? null }))}
           onAddExternalStallion={() => { setShowBreedingModal(false); setEditingStallion(null); setShowStallionModal(true); }}
+          editRecord={editingRecord}
         />
         <RecordFoalingModal
           open={showFoalingModal}
@@ -551,9 +576,10 @@ function HeatCyclesTab({ cycles, canEdit, onAdd, onEdit, onDelete }: {
 // ============================================================================
 // Tab: Breeding Records
 // ============================================================================
-function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onDelete }: {
+function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onEdit, onDelete }: {
   records: BreedingRecord[]; canEdit: boolean; onAdd: () => void;
   onUpdateStatus: (recordId: string, status: string) => void;
+  onEdit: (record: BreedingRecord) => void;
   onDelete: (id: string) => void;
 }) {
   if (records.length === 0) {
@@ -604,13 +630,22 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onDelete 
               </div>
             </div>
             {canEdit && (
-              <button
-                onClick={() => onDelete(record.id)}
-                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
-                aria-label="Delete breeding record"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  onClick={() => onEdit(record)}
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
+                  aria-label="Edit breeding record"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(record.id)}
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label="Delete breeding record"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -622,9 +657,10 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onDelete 
 // ============================================================================
 // Tab: Pregnancies
 // ============================================================================
-function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus }: {
+function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus, onEdit }: {
   pregnancies: BreedingRecord[]; canEdit: boolean; onRecordFoaling: () => void;
   onUpdateStatus: (recordId: string, status: string) => void;
+  onEdit: (record: BreedingRecord) => void;
 }) {
   if (pregnancies.length === 0) {
     return (
@@ -696,8 +732,19 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus 
                   </div>
                 )}
               </div>
-              {canEdit && !record.foalingRecord && (
-                <button onClick={onRecordFoaling} className="btn-secondary btn-md text-xs flex-shrink-0">Record Foaling</button>
+              {canEdit && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => onEdit(record)}
+                    className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
+                    aria-label="Edit pregnancy details"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  {!record.foalingRecord && (
+                    <button onClick={onRecordFoaling} className="btn-secondary btn-md text-xs">Record Foaling</button>
+                  )}
+                </div>
               )}
             </div>
           </div>

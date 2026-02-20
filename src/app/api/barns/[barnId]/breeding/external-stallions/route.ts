@@ -25,6 +25,7 @@ export async function GET(
 
     return NextResponse.json({ data: stallions });
   } catch (error) {
+    console.error('Error fetching external stallions:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch external stallions';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -72,6 +73,7 @@ export async function POST(
 
     return NextResponse.json({ data: stallion }, { status: 201 });
   } catch (error) {
+    console.error('Error creating external stallion:', error);
     const message = error instanceof Error ? error.message : 'Failed to create external stallion';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     if (message.includes('Unique constraint')) return NextResponse.json({ error: 'A stallion with that name already exists' }, { status: 409 });

@@ -30,6 +30,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!stallion) return NextResponse.json({ error: 'External stallion not found' }, { status: 404 });
     return NextResponse.json({ data: stallion });
   } catch (error) {
+    console.error('Error fetching external stallion:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch external stallion';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -71,6 +72,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json({ data: stallion });
   } catch (error) {
+    console.error('Error updating external stallion:', error);
     const message = error instanceof Error ? error.message : 'Failed to update external stallion';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
@@ -104,6 +106,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     await prisma.externalStallion.delete({ where: { id: stallionId } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting external stallion:', error);
     const message = error instanceof Error ? error.message : 'Failed to delete external stallion';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });
     return NextResponse.json({ error: message }, { status: 500 });
