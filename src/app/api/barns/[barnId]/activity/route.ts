@@ -23,7 +23,7 @@ export async function GET(
     
     // Parse query params
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20') || 20));
     const cursor = searchParams.get('cursor'); // For pagination
     
     const activities = await prisma.activityLog.findMany({

@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     const clientId = searchParams.get('clientId')
 
     // Pagination with cursor-based approach
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50') || 50))
     const cursor = searchParams.get('cursor')
 
     // Check if user is a client (to filter invoices to their own)

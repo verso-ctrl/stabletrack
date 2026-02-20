@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /onboarding/
+Disallow: /horses/
+Disallow: /calendar/
+Disallow: /daily-care/
+Disallow: /farm-maintenance/
+Disallow: /contacts/
+Disallow: /portal/
 
 Sitemap: https://www.barnkeep.com/sitemap.xml

@@ -7,12 +7,18 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth'
 import { nanoid } from 'nanoid'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover',
-})
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-12-15.clover',
+    })
+  : null
 
 export async function POST(req: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 })
+    }
+
     const user = await getCurrentUser()
 
     if (!user) {

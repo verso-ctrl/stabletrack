@@ -32,8 +32,8 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const search = searchParams.get('search');
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+    const pageSize = Math.min(200, Math.max(1, parseInt(searchParams.get('pageSize') || '20') || 20));
     
     // Build where clause
     const where: any = { barnId: barnId };
@@ -50,9 +50,9 @@ export async function GET(
     
     if (search) {
       where.OR = [
-        { barnName: { contains: search } },
-        { registeredName: { contains: search } },
-        { breed: { contains: search } },
+        { barnName: { contains: search, mode: 'insensitive' } },
+        { registeredName: { contains: search, mode: 'insensitive' } },
+        { breed: { contains: search, mode: 'insensitive' } },
       ];
     }
     

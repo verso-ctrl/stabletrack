@@ -132,7 +132,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const horseId = searchParams.get('horseId');
     const date = searchParams.get('date');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50') || 50));
 
     const healthChecks = await prisma.dailyHealthCheck.findMany({
       where: {

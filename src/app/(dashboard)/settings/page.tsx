@@ -15,6 +15,7 @@ import {
   Palette,
   Shield,
   Bell,
+  CreditCard,
 } from 'lucide-react';
 
 const settingsGroups = [
@@ -58,18 +59,17 @@ const settingsGroups = [
       },
     ],
   },
-  // Billing section hidden until client billing is fully implemented
-  // {
-  //   title: 'Billing',
-  //   items: [
-  //     {
-  //       href: '/settings/billing',
-  //       icon: CreditCard,
-  //       label: 'Billing & Plans',
-  //       description: 'Manage your plan and payment details',
-  //     },
-  //   ],
-  // },
+  {
+    title: 'Billing',
+    items: [
+      {
+        href: '/settings/billing',
+        icon: CreditCard,
+        label: 'Billing & Plans',
+        description: 'Manage your plan and payment details',
+      },
+    ],
+  },
 ];
 
 const roleIcons: Record<string, any> = {

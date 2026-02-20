@@ -41,6 +41,12 @@ export async function PUT(req: NextRequest, context: RouteContext) {
     const hasPermission = await checkBarnPermission(user.id, barnId, 'events:write')
     if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
 
+    // Verify event belongs to this barn before updating
+    const existing = await prisma.event.findFirst({ where: { id: eventId, barnId } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
     const body = await req.json()
     const { title, description, type, scheduledDate, completedDate, allDay, horseId, status, location } = body
 
@@ -75,6 +81,12 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     const { barnId, eventId } = await context.params
     const hasPermission = await checkBarnPermission(user.id, barnId, 'events:write')
     if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
+
+    // Verify event belongs to this barn before deleting
+    const event = await prisma.event.findFirst({ where: { id: eventId, barnId } })
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
 
     await prisma.event.delete({ where: { id: eventId } })
 

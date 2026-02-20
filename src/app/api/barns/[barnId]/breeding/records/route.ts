@@ -22,7 +22,7 @@ export async function GET(
     const mareId = searchParams.get('mareId');
     const stallionId = searchParams.get('stallionId');
     const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50') || 50));
 
     const records = await prisma.breedingRecord.findMany({
       where: {

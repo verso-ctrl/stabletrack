@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getMimeType } from '@/lib/storage-server';
+import { getCurrentUser } from '@/lib/auth';
 
 // GET /api/uploads/[...path] - Serve uploaded files
 export async function GET(
@@ -9,6 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { path: pathSegments } = await params;
     const filePath = pathSegments.join('/');
     const absolutePath = path.join(process.cwd(), 'uploads', filePath);

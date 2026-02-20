@@ -44,8 +44,8 @@ export async function GET(
         ...(type && { type }),
         ...(search && {
           OR: [
-            { title: { contains: search } },
-            { fileName: { contains: search } },
+            { title: { contains: search, mode: 'insensitive' as const } },
+            { fileName: { contains: search, mode: 'insensitive' as const } },
           ],
         }),
         // If client, only show their horses' documents

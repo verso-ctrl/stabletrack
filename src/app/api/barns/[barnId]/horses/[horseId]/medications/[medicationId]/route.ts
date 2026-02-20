@@ -60,11 +60,18 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Verify medication belongs to this horse
+    const { horseId } = await params;
+    const existing = await prisma.medication.findFirst({ where: { id: medicationId, horseId } });
+    if (!existing) {
+      return NextResponse.json({ error: 'Medication not found' }, { status: 404 });
+    }
+
     const body = await request.json();
-    
+
     if (body.action === 'log') {
       const { givenAt, skipped, skipReason, notes } = body;
-      
+
       const log = await prisma.medicationLog.create({
         data: {
           medicationId,
@@ -111,7 +118,7 @@ export async function DELETE(
   { params }: { params: Promise<{ barnId: string; horseId: string; medicationId: string }> }
 ) {
   try {
-    const { barnId, medicationId } = await params;
+    const { barnId, horseId, medicationId } = await params;
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -120,6 +127,12 @@ export async function DELETE(
     const hasPermission = await checkBarnPermission(user.id, barnId, 'health:write');
     if (!hasPermission) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Verify medication belongs to this horse
+    const existing = await prisma.medication.findFirst({ where: { id: medicationId, horseId } });
+    if (!existing) {
+      return NextResponse.json({ error: 'Medication not found' }, { status: 404 });
     }
 
     await prisma.medication.delete({

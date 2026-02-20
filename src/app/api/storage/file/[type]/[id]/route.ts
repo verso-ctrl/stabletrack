@@ -1,12 +1,18 @@
 // API route to serve files stored in database
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ type: string; id: string }> }
 ) {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { type, id } = await params
 
     let fileData: string | null = null

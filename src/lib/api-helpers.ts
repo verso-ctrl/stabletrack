@@ -60,7 +60,7 @@ export function handleApiError(error: unknown): NextResponse {
 
     return NextResponse.json(
       {
-        error: error.message || 'Internal server error',
+        error: 'Internal server error',
       },
       { status: 500 }
     );
@@ -141,6 +141,31 @@ export function withErrorHandling<T extends any[], R>(
       return handleApiError(error);
     }
   };
+}
+
+// ============================================================================
+// Pagination Helpers
+// ============================================================================
+
+/**
+ * Parse and bound pagination parameters from URL search params
+ * Prevents unbounded queries from client input
+ */
+export function parsePagination(
+  searchParams: URLSearchParams,
+  defaults: { page?: number; limit?: number; maxLimit?: number } = {}
+): { page: number; limit: number; skip: number } {
+  const { page: defaultPage = 1, limit: defaultLimit = 50, maxLimit = 200 } = defaults;
+
+  let page = parseInt(searchParams.get('page') || String(defaultPage));
+  if (isNaN(page) || page < 1) page = 1;
+
+  const limitParam = searchParams.get('limit') || searchParams.get('pageSize');
+  let limit = parseInt(limitParam || String(defaultLimit));
+  if (isNaN(limit) || limit < 1) limit = defaultLimit;
+  if (limit > maxLimit) limit = maxLimit;
+
+  return { page, limit, skip: (page - 1) * limit };
 }
 
 // ============================================================================

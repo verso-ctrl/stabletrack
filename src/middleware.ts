@@ -14,19 +14,35 @@ const isClerkConfigured =
 function addSecurityHeaders(response: NextResponse): NextResponse {
   // Prevent clickjacking
   response.headers.set('X-Frame-Options', 'DENY');
-  
+
   // Prevent MIME sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  
+
   // XSS protection
   response.headers.set('X-XSS-Protection', '1; mode=block');
-  
+
   // Referrer policy
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+
   // Permissions policy
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
+
+  // HSTS - enforce HTTPS
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+  // Content Security Policy
+  response.headers.set('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://*.stripe.com",
+    "font-src 'self'",
+    "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://*.sentry.io",
+    "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev",
+    "object-src 'none'",
+    "base-uri 'self'",
+  ].join('; '));
+
   return response;
 }
 

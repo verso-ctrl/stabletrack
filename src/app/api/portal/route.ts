@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimit, getClientIdentifier } from '@/lib/api-helpers';
 
 // GET /api/portal?token={token} - Get client portal data using token authentication
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit portal access - 20 requests per minute per IP
+    const clientId = getClientIdentifier(request);
+    const rateLimitResult = rateLimit(`portal:${clientId}`, 20, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 

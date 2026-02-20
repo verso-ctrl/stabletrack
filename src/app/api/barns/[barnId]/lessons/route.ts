@@ -21,8 +21,8 @@ export async function GET(req: NextRequest, context: RouteContext) {
     const status = searchParams.get('status')
 
     // Pagination parameters
-    const limit = parseInt(searchParams.get('limit') || '100')
-    const page = parseInt(searchParams.get('page') || '1')
+    const limit = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '100') || 100))
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1)
     const skip = (page - 1) * limit
 
     // Check if user is a client (to filter lessons to their own)
