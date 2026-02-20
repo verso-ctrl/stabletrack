@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, FileText, Loader2, Pill, Plus, Printer, X } from 'lucide-react';
+import { FamilyTree } from './FamilyTree';
 
 interface HealthRecord {
   id: string;
@@ -76,6 +77,9 @@ interface HealthTabProps {
     sex?: string | null;
     age?: number | null;
     ownerName?: string | null;
+    sireId?: string | null;
+    damId?: string | null;
+    profilePhotoUrl?: string | null;
     vaccinations?: Vaccination[];
     weights?: Weight[];
   };
@@ -84,9 +88,10 @@ interface HealthTabProps {
   onLogCoggins: () => void;
   barnId: string;
   canEdit?: boolean;
+  onUpdate?: () => void;
 }
 
-export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true }: HealthTabProps) {
+export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true, onUpdate }: HealthTabProps) {
   const [coggins, setCoggins] = useState<CogginsData | null>(null);
   const [cogginsLoading, setCogginsLoading] = useState(true);
   const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([]);
@@ -129,6 +134,11 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
   return (
     <div className="space-y-6">
+      {/* Family Tree */}
+      {barnId && horse.barnName && (
+        <FamilyTree horse={{ ...horse, barnName: horse.barnName }} barnId={barnId} canEdit={canEdit} onUpdate={onUpdate} />
+      )}
+
       {/* Print Button */}
       <div className="flex justify-end">
         <button onClick={() => window.print()} className="btn-secondary btn-sm">

@@ -42,7 +42,7 @@ import { TasksTab } from './components/TasksTab';
 import { DocumentManager } from '@/components/storage/DocumentManager';
 import { ActivityTab } from './components/ActivityTab';
 import { BreedingTab } from './components/BreedingTab';
-import { FamilyTree } from './components/FamilyTree';
+
 
 export default function HorseDetailPage() {
   const params = useParams();
@@ -490,11 +490,6 @@ export default function HorseDetailPage() {
         )}
       </div>
 
-      {/* Family Tree */}
-      {currentBarn?.id && (
-        <FamilyTree horse={horse} barnId={currentBarn.id} />
-      )}
-
       {/* Tabs - Grid on mobile, horizontal scroll on larger screens */}
       <div className="border-b border-border -mx-3 sm:-mx-4 sm:mx-0">
         {/* Mobile: Grid layout */}
@@ -602,6 +597,7 @@ export default function HorseDetailPage() {
             onLogVaccination={() => setShowVaccinationModal(true)}
             onLogCoggins={() => setShowCogginsModal(true)}
             canEdit={canEdit}
+            onUpdate={refetch}
           />
         )}
         {activeTab === 'care' && (

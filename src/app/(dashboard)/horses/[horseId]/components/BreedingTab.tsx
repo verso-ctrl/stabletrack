@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Heart, Plus, Loader2, Calendar, Baby, GitBranch, Pencil, Trash2, FileText } from 'lucide-react';
 import { HeatCycleTimeline } from '@/components/breeding/HeatCycleTimeline';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
@@ -100,6 +101,7 @@ const BREEDING_STATUSES = [
 ];
 
 export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps) {
+  const router = useRouter();
   const isMare = horse.sex === 'MARE' || horse.sex === 'FILLY';
   const isStallion = horse.sex === 'STALLION' || horse.sex === 'COLT';
 
@@ -209,8 +211,15 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
       toast.error('Failed to record foaling', err.error || 'Please try again');
       throw new Error(err.error);
     }
-    toast.success('Foaling recorded');
-    fetchData();
+    const result = await res.json();
+    if (data.outcome === 'LIVE' && result.data?.foalId) {
+      toast.success('Foal added to barn!', 'Redirecting to their profile...');
+      fetchData();
+      router.push(`/horses/${result.data.foalId}`);
+    } else {
+      toast.success('Foaling recorded');
+      fetchData();
+    }
   };
 
   // ---- Edit handlers ----

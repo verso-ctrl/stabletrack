@@ -22,13 +22,6 @@ import {
   ClipboardList,
 } from 'lucide-react';
 
-const HorseIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
-    <circle cx="18" cy="9" r="1"/>
-  </svg>
-);
-
 // Top features get full-width image + text rows
 const heroFeatures = [
   {
@@ -100,9 +93,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
-                <HorseIcon className="w-4 h-4" />
-              </div>
+              <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
               <span className="font-display font-semibold text-lg text-foreground tracking-tight">BarnKeep</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
@@ -461,9 +452,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 md:gap-12">
             <div className="md:col-span-1">
               <Link href="/" className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
-                  <HorseIcon className="w-4 h-4" />
-                </div>
+                <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
                 <span className="font-display font-semibold text-foreground">BarnKeep</span>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">

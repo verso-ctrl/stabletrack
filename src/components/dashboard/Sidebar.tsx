@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useBarn } from '@/contexts/BarnContext';
@@ -148,9 +149,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-4 border-b border-border/40">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <HorseIcon className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
           <span className="font-display text-lg font-semibold text-foreground tracking-tight">BarnKeep</span>
         </Link>
         
@@ -295,9 +294,7 @@ export function Sidebar() {
         <div className="safe-top">
           <div className="flex items-center justify-between px-4 h-14">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <HorseIcon className="w-4 h-4 text-primary-foreground" />
-              </div>
+              <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
               <span className="font-display font-semibold text-foreground">BarnKeep</span>
             </Link>
 
