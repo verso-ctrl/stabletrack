@@ -139,6 +139,8 @@ export default async function middleware(request: NextRequest) {
         '/terms(.*)',
         '/sign-in(.*)',
         '/sign-up(.*)',
+        '/sitemap.xml',
+        '/robots.txt',
         '/api/webhooks(.*)',
         '/api/portal(.*)',
         '/api/csrf(.*)',
