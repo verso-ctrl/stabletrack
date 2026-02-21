@@ -61,6 +61,7 @@ export function validateEnv() {
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    'NEXT_PUBLIC_SENTRY_DSN',
   ]);
 
   for (const [key, value] of Object.entries(process.env)) {
