@@ -91,9 +91,10 @@ interface HealthTabProps {
   barnId: string;
   canEdit?: boolean;
   onUpdate?: () => void;
+  refreshKey?: number;
 }
 
-export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true, onUpdate }: HealthTabProps) {
+export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true, onUpdate, refreshKey }: HealthTabProps) {
   const [coggins, setCoggins] = useState<CogginsData | null>(null);
   const [cogginsLoading, setCogginsLoading] = useState(true);
   const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([]);
@@ -132,7 +133,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
     };
 
     fetchHealthData();
-  }, [barnId, horse?.id]);
+  }, [barnId, horse?.id, refreshKey]);
 
   return (
     <div className="space-y-6">

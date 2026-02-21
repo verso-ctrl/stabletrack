@@ -58,6 +58,13 @@ export default function HorseDetailPage() {
   // Permission check - clients can view but not edit
   const canEdit = isMember && currentBarn?.role !== 'CLIENT';
   const { hasAddOn } = useSubscription();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Refetch horse data AND signal sub-tabs to refresh their independent data
+  const refreshAll = () => {
+    refetch();
+    setRefreshKey(k => k + 1);
+  };
 
   // Filter tabs: breeding only shown for non-geldings with the breeding add-on
   const isBreedable = horse?.sex && horse.sex !== 'GELDING';
@@ -93,7 +100,7 @@ export default function HorseDetailPage() {
       });
 
       if (response.ok) {
-        refetch();
+        refreshAll();
       }
     } catch (err) {
       console.error('Failed to upload photo:', err);
@@ -182,7 +189,7 @@ export default function HorseDetailPage() {
 
       setShowWeightModal(false);
       setWeightForm({ weight: '', bodyScore: '', date: new Date().toISOString().split('T')[0], notes: '' });
-      refetch();
+      refreshAll();
     } catch (err) {
       toast.error('Failed to log weight', err instanceof Error ? err.message : 'Please try again');
     } finally {
@@ -227,7 +234,7 @@ export default function HorseDetailPage() {
         administeredBy: '',
         notes: '',
       });
-      refetch();
+      refreshAll();
     } catch (err) {
       toast.error('Failed to log vaccination', err instanceof Error ? err.message : 'Please try again');
     } finally {
@@ -259,7 +266,7 @@ export default function HorseDetailPage() {
       }
 
       setShowFeedModal(false);
-      refetch();
+      refreshAll();
     } catch (err) {
       toast.error('Failed to save feed program', err instanceof Error ? err.message : 'Please try again');
     } finally {
@@ -304,7 +311,7 @@ export default function HorseDetailPage() {
         accessionNumber: '',
         notes: '',
       });
-      refetch();
+      refreshAll();
     } catch (err) {
       toast.error('Failed to log Coggins', err instanceof Error ? err.message : 'Please try again');
     } finally {
@@ -574,7 +581,7 @@ export default function HorseDetailPage() {
 
       {/* Tab Content */}
       <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="min-h-[400px]">
-        {activeTab === 'overview' && <OverviewTab horse={horse} barnId={currentBarn?.id} onNavigateToHealth={() => setActiveTab('health')} onRefresh={refetch} />}
+        {activeTab === 'overview' && <OverviewTab horse={horse} barnId={currentBarn?.id} onNavigateToHealth={() => setActiveTab('health')} onRefresh={refreshAll} />}
         {activeTab === 'photos' && currentBarn && (
           <div className="card p-6">
             <HorsePhotoGallery
@@ -583,7 +590,7 @@ export default function HorseDetailPage() {
               primaryPhotoUrl={horse.profilePhotoUrl}
               onPrimaryPhotoChange={() => {
                 // Refresh horse data when primary photo changes
-                refetch();
+                refreshAll();
               }}
               editable={canEdit}
             />
@@ -598,7 +605,8 @@ export default function HorseDetailPage() {
             onLogVaccination={() => setShowVaccinationModal(true)}
             onLogCoggins={() => setShowCogginsModal(true)}
             canEdit={canEdit}
-            onUpdate={refetch}
+            onUpdate={refreshAll}
+            refreshKey={refreshKey}
           />
         )}
         {activeTab === 'care' && (
