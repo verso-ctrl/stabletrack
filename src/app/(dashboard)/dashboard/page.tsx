@@ -490,10 +490,20 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {tasks.slice(0, 5).map((task: any) => {
+              {[...tasks]
+                .sort((a: any, b: any) => {
+                  const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+                  const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+                  return dateA - dateB;
+                })
+                .slice(0, 5)
+                .map((task: any) => {
                 const state = taskStates[task.id];
                 const isChecked = !!state || task.status === 'COMPLETED';
                 if (state === 'done') return null;
+                const taskDate = task.dueDate ? new Date(task.dueDate) : null;
+                const isTaskToday = taskDate && today ? taskDate.toDateString() === today.toDateString() : false;
+                const isTaskTomorrow = taskDate && today ? taskDate.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
                 return (
                 <div
                   key={task.id}
@@ -516,9 +526,20 @@ export default function DashboardPage() {
                     <p className={`text-sm transition-all duration-300 ${isChecked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </p>
-                    {task.horse?.barnName && (
-                      <p className="text-xs text-muted-foreground">{task.horse.barnName}</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {task.horse?.barnName && <>{task.horse.barnName} · </>}
+                      {taskDate ? (
+                        isTaskToday ? (
+                          <span className="text-amber-600 font-medium">Today</span>
+                        ) : isTaskTomorrow ? (
+                          <span className="text-blue-600">Tomorrow</span>
+                        ) : (
+                          taskDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        )
+                      ) : (
+                        'No due date'
+                      )}
+                    </p>
                   </div>
                   {task.dueTime && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
