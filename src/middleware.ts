@@ -83,6 +83,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('Content-Security-Policy', [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev",
+    "worker-src 'self' blob:",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://*.stripe.com",
     "font-src 'self'",
