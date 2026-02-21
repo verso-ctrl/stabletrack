@@ -101,7 +101,6 @@ export default function CalendarPage() {
   const [modalStep, setModalStep] = useState(1); // 1 = Event Details, 2 = Select Horses
   const [showCalendarSettings, setShowCalendarSettings] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [iCalCopied, setICalCopied] = useState(false);
   const [googleStatus, setGoogleStatus] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -210,23 +209,6 @@ export default function CalendarPage() {
     }
   };
 
-  const getICalUrl = () => {
-    if (!currentBarn) return '';
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/api/barns/${currentBarn.id}/calendar/ical?token=${currentBarn.inviteCode}`;
-  };
-
-  const copyICalUrl = async () => {
-    const url = getICalUrl();
-    await navigator.clipboard.writeText(url);
-    setICalCopied(true);
-    setTimeout(() => setICalCopied(false), 2000);
-  };
-
-  const downloadICal = () => {
-    const url = getICalUrl();
-    window.open(url, '_blank');
-  };
 
   const handleGoogleSync = async () => {
     setIsSyncing(true);
@@ -1206,48 +1188,6 @@ export default function CalendarPage() {
             </div>
             
             <div className="p-6 space-y-6">
-              {/* iCal Export */}
-              <div className="space-y-3">
-                <h4 className="font-medium text-foreground flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-amber-500" />
-                  Subscribe to Calendar (iCal)
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Add this URL to Apple Calendar, Google Calendar, Outlook, or any calendar app that supports iCal feeds.
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={getICalUrl()}
-                    className="input flex-1 text-sm bg-background"
-                  />
-                  <button
-                    onClick={copyICalUrl}
-                    className="btn-secondary btn-sm flex items-center gap-1"
-                  >
-                    {iCalCopied ? (
-                      <>
-                        <Check className="w-4 h-4 text-green-600" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copy
-                      </>
-                    )}
-                  </button>
-                </div>
-                <button
-                  onClick={downloadICal}
-                  className="btn-secondary btn-sm flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Download .ics File
-                </button>
-              </div>
-
               {/* Google Calendar Sync */}
               <div className="space-y-3 pt-4 border-t border-border">
                 <h4 className="font-medium text-foreground flex items-center gap-2">
