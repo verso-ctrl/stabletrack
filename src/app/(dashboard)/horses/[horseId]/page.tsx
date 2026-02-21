@@ -596,7 +596,7 @@ export default function HorseDetailPage() {
             />
           </div>
         )}
-        {activeTab === 'activity' && <ActivityTab horse={horse} barnId={currentBarn?.id || ''} />}
+        {activeTab === 'activity' && <ActivityTab horse={horse} barnId={currentBarn?.id || ''} refreshKey={refreshKey} />}
         {activeTab === 'health' && (
           <HealthTab
             horse={horse}

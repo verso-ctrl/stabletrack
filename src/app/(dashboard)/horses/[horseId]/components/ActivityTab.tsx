@@ -30,6 +30,7 @@ interface ActivityTabProps {
     id: string;
   };
   barnId: string;
+  refreshKey?: number;
 }
 
 const filterOptions = [
@@ -65,7 +66,7 @@ function getCategoryColor(category: string) {
   }
 }
 
-export function ActivityTab({ horse, barnId }: ActivityTabProps) {
+export function ActivityTab({ horse, barnId, refreshKey }: ActivityTabProps) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -86,7 +87,7 @@ export function ActivityTab({ horse, barnId }: ActivityTabProps) {
     };
 
     fetchActivity();
-  }, [barnId, horse?.id]);
+  }, [barnId, horse?.id, refreshKey]);
 
   const filteredActivities = filter === 'all'
     ? activities
