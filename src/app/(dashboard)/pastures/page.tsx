@@ -605,7 +605,7 @@ function AddFacilityModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={type === 'paddock' ? 'e.g., North Pasture' : 'e.g., Stall 1'}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="input"
               required
             />
           </div>
@@ -622,7 +622,7 @@ function AddFacilityModal({
                   value={acreage}
                   onChange={(e) => setAcreage(e.target.value)}
                   placeholder="e.g., 2.5"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="input"
                 />
               </div>
               <div>
@@ -634,7 +634,7 @@ function AddFacilityModal({
                   value={maxHorses}
                   onChange={(e) => setMaxHorses(e.target.value)}
                   placeholder="e.g., 4"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="input"
                 />
               </div>
             </>
@@ -648,7 +648,7 @@ function AddFacilityModal({
                 value={section}
                 onChange={(e) => setSection(e.target.value)}
                 placeholder="e.g., Main Barn, Barn 2, South Wing"
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="input"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 You can use the same stall name in different sections
@@ -741,7 +741,7 @@ function EditFacilityModal({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="input"
               required
             />
           </div>
@@ -755,7 +755,7 @@ function EditFacilityModal({
                   step="0.1"
                   value={acreage}
                   onChange={(e) => setAcreage(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="input"
                 />
               </div>
               <div>
@@ -764,7 +764,7 @@ function EditFacilityModal({
                   type="number"
                   value={maxHorses}
                   onChange={(e) => setMaxHorses(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="input"
                 />
               </div>
             </>
@@ -776,7 +776,7 @@ function EditFacilityModal({
                 value={section}
                 onChange={(e) => setSection(e.target.value)}
                 placeholder="e.g., Main Barn, Barn 2"
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="input"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 You can use the same stall name in different sections
@@ -865,7 +865,7 @@ function AssignHorseModal({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search horses..."
-            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="input"
           />
         </div>
 
