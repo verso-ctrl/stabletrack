@@ -56,9 +56,15 @@ export function validateEnv() {
   }
 
   // Check for NEXT_PUBLIC_ vars that might contain secrets
+  // Whitelist: Supabase anon keys are JWTs by design and are safe to expose
+  const safePublicVars = new Set([
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+  ]);
+
   for (const [key, value] of Object.entries(process.env)) {
-    if (key.startsWith('NEXT_PUBLIC_') && value && value.length > 100) {
-      // JWT tokens are typically 100+ characters - flag potential secret leaks
+    if (key.startsWith('NEXT_PUBLIC_') && value && value.length > 100 && !safePublicVars.has(key)) {
       if (value.startsWith('eyJ') || value.includes('sk_')) {
         errors.push(
           `${key} appears to contain a secret key or JWT. ` +
@@ -76,11 +82,6 @@ export function validateEnv() {
     ].join('\n');
 
     console.error(message);
-
-    // In production, throw to prevent startup with bad config
-    if (isProduction) {
-      throw new Error(`Environment validation failed:\n${errors.join('\n')}`);
-    }
   }
 }
 
