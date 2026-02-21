@@ -4,6 +4,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { csrfFetch } from '@/lib/fetch'
 import { 
   Camera, 
   Trash2, 
@@ -122,7 +123,7 @@ export function HorsePhotoGallery({
   const handleSetPrimary = async (url: string) => {
     setIsSettingPrimary(true)
     try {
-      const res = await fetch(`/api/barns/${barnId}/horses/${horseId}`, {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profilePhotoUrl: url }),
@@ -149,7 +150,7 @@ export function HorsePhotoGallery({
     // If deleting the primary photo, clear it from the horse profile
     if (id === '__primary__') {
       try {
-        const res = await fetch(`/api/barns/${barnId}/horses/${horseId}`, {
+        const res = await csrfFetch(`/api/barns/${barnId}/horses/${horseId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ profilePhotoUrl: null }),

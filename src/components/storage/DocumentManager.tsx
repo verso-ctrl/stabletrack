@@ -4,6 +4,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { csrfFetch } from '@/lib/fetch'
 import {
   FileText,
   Upload,
@@ -141,7 +142,7 @@ export function DocumentManager({
         formData.append('documentNotes', uploadForm.notes.trim())
       }
 
-      const response = await fetch('/api/storage/upload', {
+      const response = await csrfFetch('/api/storage/upload', {
         method: 'POST',
         body: formData,
       })
@@ -170,7 +171,7 @@ export function DocumentManager({
     if (!editDocId) return
 
     try {
-      const response = await fetch(`/api/barns/${barnId}/documents/${editDocId}`, {
+      const response = await csrfFetch(`/api/barns/${barnId}/documents/${editDocId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -209,7 +210,7 @@ export function DocumentManager({
     setDeleteDocId(null)
 
     try {
-      await fetch(`/api/barns/${barnId}/documents/${docId}`, { method: 'DELETE' })
+      await csrfFetch(`/api/barns/${barnId}/documents/${docId}`, { method: 'DELETE' })
       setDocuments(prev => prev.filter(d => d.id !== docId))
       toast.success('Document deleted')
     } catch {

@@ -2,6 +2,7 @@
 // React hooks for file uploads and storage management (Demo mode)
 
 import { useState, useCallback } from 'react'
+import { csrfFetch } from '@/lib/fetch'
 import {
   uploadHorsePhoto,
   uploadDocument,
@@ -248,7 +249,7 @@ export function useFileList(options: UseFileListOptions): UseFileListReturn {
 
   const remove = useCallback(async (fileId: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/storage/delete', {
+      const response = await csrfFetch('/api/storage/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
