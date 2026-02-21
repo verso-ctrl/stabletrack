@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Utensils,
   ChevronLeft,
@@ -67,7 +68,7 @@ export default function LogFeedPage() {
         'Night': 'NIGHT',
       };
 
-      const response = await fetch(`/api/barns/${currentBarn?.id}/feed-logs`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/feed-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Building2,
   MapPin,
@@ -71,7 +72,7 @@ export default function CreateBarnPage() {
 
     try {
       // Try Stripe checkout first
-      const checkoutResponse = await fetch('/api/stripe/create-checkout', {
+      const checkoutResponse = await csrfFetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -99,7 +100,7 @@ export default function CreateBarnPage() {
 
       // If Stripe not configured (demo mode), create barn directly
       if (checkoutResult.demoMode) {
-        const response = await fetch('/api/barns', {
+        const response = await csrfFetch('/api/barns', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

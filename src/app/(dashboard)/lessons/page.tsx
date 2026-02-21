@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Calendar,
   Plus,
@@ -108,7 +109,7 @@ export default function LessonsPage() {
     try {
       const scheduledDate = new Date(`${form.scheduledDate}T${form.scheduledTime}`);
       
-      const response = await fetch(`/api/barns/${currentBarn?.id}/lessons`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/lessons`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ export default function LessonsPage() {
 
   const handleUpdateStatus = async (lessonId: string, status: string) => {
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/lessons`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/lessons`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lessonId, status }),

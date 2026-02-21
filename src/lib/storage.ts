@@ -2,6 +2,7 @@
 // Storage utilities for BarnKeep - uses local file storage
 
 import { getTierLimits, formatBytes } from './tiers'
+import { csrfFetch } from './fetch'
 
 // Re-export formatBytes for backward compatibility
 export { formatBytes }
@@ -67,7 +68,7 @@ export async function uploadHorsePhoto(
     formData.append('isPrimary', String(isPrimary))
     if (caption) formData.append('caption', caption)
 
-    const response = await fetch('/api/storage/upload', {
+    const response = await csrfFetch('/api/storage/upload', {
       method: 'POST',
       body: formData,
     })
@@ -112,7 +113,7 @@ export async function uploadDocument(
     formData.append('type', 'document')
     formData.append('documentType', documentType)
 
-    const response = await fetch('/api/storage/upload', {
+    const response = await csrfFetch('/api/storage/upload', {
       method: 'POST',
       body: formData,
     })
@@ -149,7 +150,7 @@ export async function deleteFile(
   fileType: 'photo' | 'document' = 'document'
 ): Promise<boolean> {
   try {
-    const response = await fetch('/api/storage/delete', {
+    const response = await csrfFetch('/api/storage/delete', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Check, Loader2, ArrowUp, ArrowDown, Star, Calendar } from 'lucide-react';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { csrfFetch } from '@/lib/fetch';
 import { useBarn } from '@/contexts/BarnContext';
 import { AddOnCard } from './AddOnCard';
 import {
@@ -38,7 +39,7 @@ export function PricingPlans() {
       setLoadingTier(tier);
       setError(null);
 
-      const response = await fetch('/api/billing/create-checkout', {
+      const response = await csrfFetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -55,7 +56,7 @@ export function PricingPlans() {
       }
 
       if (data.demoMode) {
-        const upgradeResponse = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
+        const upgradeResponse = await csrfFetch(`/api/barns/${currentBarn.id}/subscription`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tier }),
@@ -87,7 +88,7 @@ export function PricingPlans() {
       setLoadingTier(tier);
       setError(null);
 
-      const response = await fetch(`/api/barns/${currentBarn.id}/subscription`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn.id}/subscription`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tier }),
@@ -118,7 +119,7 @@ export function PricingPlans() {
     if (!currentBarn?.id) return;
     try {
       setError(null);
-      const response = await fetch('/api/billing/create-checkout', {
+      const response = await csrfFetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,7 +148,7 @@ export function PricingPlans() {
     if (!currentBarn?.id) return;
     try {
       setError(null);
-      const response = await fetch('/api/billing/remove-addon', {
+      const response = await csrfFetch('/api/billing/remove-addon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -376,7 +377,7 @@ export function CurrentPlanCard() {
     try {
       setIsOpening(true);
 
-      const response = await fetch('/api/billing/portal', {
+      const response = await csrfFetch('/api/billing/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ barnId: currentBarn.id }),

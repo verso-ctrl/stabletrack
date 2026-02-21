@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { csrfFetch } from '@/lib/fetch'
 
 function SuccessPageContent() {
   const router = useRouter()
@@ -22,7 +23,7 @@ function SuccessPageContent() {
     // Verify the session and create the barn
     const verifyAndCreateBarn = async () => {
       try {
-        const response = await fetch('/api/stripe/verify-session', {
+        const response = await csrfFetch('/api/stripe/verify-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),

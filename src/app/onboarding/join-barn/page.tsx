@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
+import { csrfFetch } from '@/lib/fetch';
+import {
   Users, 
   ChevronLeft,
   Loader2,
@@ -31,7 +32,7 @@ export default function JoinBarnPage() {
     setError('');
     
     try {
-      const response = await fetch('/api/barns/join', {
+      const response = await csrfFetch('/api/barns/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ inviteCode: inviteCode.trim() }),

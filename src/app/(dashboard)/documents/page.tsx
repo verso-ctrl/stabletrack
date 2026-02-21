@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import { formatBytes } from '@/lib/tiers';
 import {
   FileText,
@@ -135,7 +136,7 @@ export default function DocumentsPage() {
         formData.append('documentNotes', uploadForm.notes.trim());
       }
 
-      const response = await fetch('/api/storage/upload', {
+      const response = await csrfFetch('/api/storage/upload', {
         method: 'POST',
         body: formData,
       });
@@ -173,7 +174,7 @@ export default function DocumentsPage() {
     setDeleteDocId(null);
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/documents/${docId}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/documents/${docId}`, {
         method: 'DELETE',
       });
 
@@ -202,7 +203,7 @@ export default function DocumentsPage() {
     if (!editDoc || !currentBarn) return;
 
     try {
-      const response = await fetch(`/api/barns/${currentBarn.id}/documents/${editDoc.id}`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn.id}/documents/${editDoc.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

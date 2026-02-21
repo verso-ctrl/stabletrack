@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Utensils,
   Check,
@@ -67,7 +68,7 @@ export default function FeedChartPage() {
   const handleToggleFeeding = async (horseId: string, feedingTime: string, action: 'complete' | 'skip' | 'undo') => {
     setIsUpdating(`${horseId}-${feedingTime}`);
     try {
-      const response = await fetch(`/api/barns/${currentBarn?.id}/feed-chart`, {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/feed-chart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -114,7 +115,7 @@ export default function FeedChartPage() {
   const handleSaveNotes = async (horseId: string, feedingTime: string) => {
     setIsUpdating(`${horseId}-${feedingTime}`);
     try {
-      await fetch(`/api/barns/${currentBarn?.id}/feed-chart`, {
+      await csrfFetch(`/api/barns/${currentBarn?.id}/feed-chart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

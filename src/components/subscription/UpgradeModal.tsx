@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react'
 import { X, Check, Sparkles, Crown } from 'lucide-react'
+import { csrfFetch } from '@/lib/fetch'
 import { useSubscription } from '@/contexts/SubscriptionContext'
 import {
   type TierFeatures,
@@ -46,7 +47,7 @@ export function UpgradeModal({
   const handleUpgrade = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/billing/create-checkout', {
+      const response = await csrfFetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

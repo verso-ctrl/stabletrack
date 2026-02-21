@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
+import { csrfFetch } from '@/lib/fetch';
 import {
   Heart,
   Droplets,
@@ -124,7 +125,7 @@ export default function DailyCheckPage() {
         notes: obs.notes || null,
       }));
 
-      const healthResponse = await fetch(`/api/barns/${currentBarn?.id}/health-checks`, {
+      const healthResponse = await csrfFetch(`/api/barns/${currentBarn?.id}/health-checks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ checks: healthChecks }),
@@ -142,7 +143,7 @@ export default function DailyCheckPage() {
         refilled: obs.refilled,
       }));
 
-      const waterResponse = await fetch(`/api/barns/${currentBarn?.id}/water-checks`, {
+      const waterResponse = await csrfFetch(`/api/barns/${currentBarn?.id}/water-checks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ checks: waterChecks }),
