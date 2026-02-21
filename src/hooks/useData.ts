@@ -414,6 +414,7 @@ export function useDashboard() {
     queryFn: () => fetchApi<{ data: any }>(`/api/barns/${barn!.id}/dashboard`),
     enabled: !!barn?.id,
     staleTime: staleTimes.dashboard,
+    refetchOnMount: 'always',
   });
 
   const d = data?.data;
