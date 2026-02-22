@@ -113,17 +113,20 @@ export function RecordBreedingModal({
       });
       setStallionSource(editRecord.externalStallionId ? 'external' : 'internal');
     } else {
+      const today = new Date();
+      const dueDate = new Date(today);
+      dueDate.setDate(dueDate.getDate() + 340);
       setForm({
         mareId: preselectedMareId || '',
         stallionId: '',
         externalStallionId: '',
-        breedingDate: new Date().toISOString().split('T')[0],
+        breedingDate: today.toISOString().split('T')[0],
         breedingType: 'NATURAL',
         veterinarian: '',
         facility: '',
         cost: '',
         notes: '',
-        estimatedDueDate: '',
+        estimatedDueDate: dueDate.toISOString().split('T')[0],
         pregnancyCheckDate: '',
         pregnancyCheckResult: '',
       });
@@ -273,7 +276,19 @@ export function RecordBreedingModal({
               <input
                 type="date"
                 value={form.breedingDate}
-                onChange={e => setForm(f => ({ ...f, breedingDate: e.target.value }))}
+                onChange={e => {
+                  const newDate = e.target.value;
+                  setForm(f => {
+                    const updates: Partial<BreedingFormData> = { breedingDate: newDate };
+                    // Auto-calculate due date (340 days) if not manually set or if creating new
+                    if (!isEditing && newDate) {
+                      const due = new Date(newDate);
+                      due.setDate(due.getDate() + 340);
+                      updates.estimatedDueDate = due.toISOString().split('T')[0];
+                    }
+                    return { ...f, ...updates };
+                  });
+                }}
                 className={`input w-full ${isEditing ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}`}
                 required={!isEditing}
                 disabled={isEditing}
@@ -295,19 +310,25 @@ export function RecordBreedingModal({
             </div>
           </div>
 
-          {/* Estimated Due Date - always editable */}
-          {isEditing && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Estimated Due Date</label>
-              <input
-                type="date"
-                value={form.estimatedDueDate}
-                onChange={e => setForm(f => ({ ...f, estimatedDueDate: e.target.value }))}
-                className="input w-full"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">Auto-calculated at 340 days. Override if vet provides a different estimate.</p>
-            </div>
-          )}
+          {/* Estimated Due Date */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Estimated Due Date</label>
+            <input
+              type="date"
+              value={form.estimatedDueDate}
+              onChange={e => setForm(f => ({ ...f, estimatedDueDate: e.target.value }))}
+              className="input w-full"
+            />
+            {form.breedingDate && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {form.estimatedDueDate
+                  ? `${Math.round((new Date(form.estimatedDueDate).getTime() - new Date(form.breedingDate).getTime()) / (1000 * 60 * 60 * 24))} days from breeding date`
+                  : 'Auto-calculated at ~340 days (11 months)'
+                }
+                {!isEditing && !form.estimatedDueDate && form.breedingDate && ' — will be set automatically'}
+              </p>
+            )}
+          </div>
 
           {/* Pregnancy Check - only in edit mode */}
           {isEditing && (

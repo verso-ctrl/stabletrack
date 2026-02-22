@@ -14,7 +14,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
 import { hasPermission, BarnRole } from '@/types';
-import { Heart, Baby, Calendar, Star, Plus, Loader2, Pencil, Trash2, User } from 'lucide-react';
+import { Heart, Baby, Calendar, Star, Plus, Loader2, Pencil, Trash2, User, ArrowRight, CheckCircle2, Search } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface BreedingStats {
@@ -369,12 +369,16 @@ export default function BreedingPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {([
-                { value: stats.maresInHeat, label: 'Mares in Heat', icon: Heart, accent: 'bg-pink-500/10', iconColor: 'text-pink-600' },
-                { value: stats.activePregnancies, label: 'Active Pregnancies', icon: Baby, accent: 'bg-blue-500/10', iconColor: 'text-blue-600' },
-                { value: stats.upcomingDueDates, label: 'Upcoming Due Dates', icon: Calendar, accent: 'bg-amber-500/10', iconColor: 'text-amber-600' },
-                { value: stats.foalsThisYear, label: 'Foals This Year', icon: Star, accent: 'bg-green-500/10', iconColor: 'text-green-600' },
+                { value: stats.maresInHeat, label: 'Mares in Heat', icon: Heart, accent: 'bg-pink-500/10', iconColor: 'text-pink-600', tab: 'heat-cycles' as Tab },
+                { value: stats.activePregnancies, label: 'Active Pregnancies', icon: Baby, accent: 'bg-blue-500/10', iconColor: 'text-blue-600', tab: 'pregnancies' as Tab },
+                { value: stats.upcomingDueDates, label: 'Upcoming Due Dates', icon: Calendar, accent: 'bg-amber-500/10', iconColor: 'text-amber-600', tab: 'pregnancies' as Tab },
+                { value: stats.foalsThisYear, label: 'Foals This Year', icon: Star, accent: 'bg-green-500/10', iconColor: 'text-green-600', tab: 'foalings' as Tab },
               ] as const).map((card) => (
-                <div key={card.label} className="card p-4">
+                <button
+                  key={card.label}
+                  onClick={() => setActiveTab(card.tab)}
+                  className={`card p-4 text-left transition-all hover:ring-2 hover:ring-primary/20 ${activeTab === card.tab ? 'ring-2 ring-primary/40' : ''}`}
+                >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${card.accent}`}>
                       <card.icon className={`w-5 h-5 ${card.iconColor}`} />
@@ -384,9 +388,52 @@ export default function BreedingPage() {
                       <p className="text-sm text-muted-foreground">{card.label}</p>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
+
+            {/* Getting Started Guide - show when no data exists */}
+            {heatCycles.length === 0 && breedingRecords.length === 0 && foalings.length === 0 && canEdit && (
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-1">Getting Started with Breeding</h2>
+                <p className="text-sm text-muted-foreground mb-4">Follow these steps to track your breeding program</p>
+                <div className="grid sm:grid-cols-4 gap-3">
+                  {([
+                    { step: 1, label: 'Log Heat Cycle', desc: 'Track your mare\'s estrus cycles', icon: Heart, done: heatCycles.length > 0, action: () => { setEditingCycle(null); setShowHeatModal(true); } },
+                    { step: 2, label: 'Record Breeding', desc: 'Log a breeding event with mare & stallion', icon: Baby, done: breedingRecords.length > 0, action: () => { setEditingRecord(null); setShowBreedingModal(true); } },
+                    { step: 3, label: 'Track Pregnancy', desc: 'Monitor gestation & schedule vet checks', icon: Calendar, done: breedingRecords.some(r => r.status === 'CONFIRMED_PREGNANT'), action: null },
+                    { step: 4, label: 'Record Foaling', desc: 'Document the birth & add foal to herd', icon: Star, done: foalings.length > 0, action: null },
+                  ] as const).map((item) => (
+                    <button
+                      key={item.step}
+                      onClick={item.action ?? undefined}
+                      disabled={!item.action}
+                      className={`relative p-4 rounded-xl border text-left transition-all ${
+                        item.done
+                          ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'
+                          : item.action
+                            ? 'bg-card border-border hover:border-primary hover:shadow-sm cursor-pointer'
+                            : 'bg-muted/50 border-border opacity-60 cursor-default'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        {item.done ? (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                        ) : (
+                          <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">{item.step}</span>
+                        )}
+                        <item.icon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <p className="font-medium text-foreground text-sm">{item.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                      {item.action && !item.done && (
+                        <ArrowRight className="w-4 h-4 text-primary absolute top-4 right-4" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Tab Filters */}
             <div className="flex rounded-xl bg-muted p-1 overflow-x-auto">
@@ -531,7 +578,7 @@ function HeatCyclesTab({ cycles, canEdit, onAdd, onEdit, onDelete }: {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-foreground">{cycle.horse.barnName}</p>
+                  <Link href={`/horses/${cycle.horse.id}`} className="font-medium text-foreground hover:text-primary transition-colors">{cycle.horse.barnName}</Link>
                   {cycle.intensity && <BreedingStatusBadge status={cycle.intensity} />}
                   {isActive && (
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400">In Heat</span>
@@ -583,6 +630,9 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onEdit, o
   onEdit: (record: BreedingRecord) => void;
   onDelete: (id: string) => void;
 }) {
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
   if (records.length === 0) {
     return (
       <div className="card p-12 text-center">
@@ -595,62 +645,115 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onEdit, o
       </div>
     );
   }
+
+  const filtered = records.filter(r => {
+    if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const mareName = r.mare.barnName.toLowerCase();
+      const stallionName = (r.stallion?.barnName || r.externalStallion?.name || '').toLowerCase();
+      if (!mareName.includes(q) && !stallionName.includes(q)) return false;
+    }
+    return true;
+  });
+
   return (
-    <div className="card divide-y divide-border">
-      {records.map(record => (
-        <div key={record.id} className="p-4 hover:bg-accent transition-colors">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-              <Baby className="w-5 h-5 text-blue-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-medium text-foreground">{record.mare.barnName} x {getStallionName(record)}</p>
-                <BreedingStatusBadge status={record.breedingType} />
-                {canEdit ? (
-                  <select
-                    value={record.status}
-                    onChange={(e) => onUpdateStatus(record.id, e.target.value)}
-                    className="text-xs rounded-lg border border-border bg-card px-2 py-1 text-foreground"
-                    aria-label={`Update status for ${record.mare.barnName}`}
-                  >
-                    {BREEDING_STATUSES.map(s => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <BreedingStatusBadge status={record.status} />
+    <div className="space-y-3">
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by mare or stallion name..."
+            className="input w-full pl-9"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          className="input w-full sm:w-44"
+          aria-label="Filter by status"
+        >
+          <option value="ALL">All Statuses</option>
+          {BREEDING_STATUSES.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="card p-8 text-center">
+          <p className="text-muted-foreground text-sm">No records match your search.</p>
+        </div>
+      ) : (
+        <div className="card divide-y divide-border">
+          {filtered.map(record => (
+            <div key={record.id} className="p-4 hover:bg-accent transition-colors">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <Baby className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-foreground">
+                      <Link href={`/horses/${record.mare.id}`} className="hover:text-primary transition-colors">{record.mare.barnName}</Link>
+                      {' x '}
+                      {record.stallion ? (
+                        <Link href={`/horses/${record.stallion.id}`} className="hover:text-primary transition-colors">{record.stallion.barnName}</Link>
+                      ) : (
+                        <span>{record.externalStallion?.name || 'Unknown Stallion'}</span>
+                      )}
+                    </p>
+                    <BreedingStatusBadge status={record.breedingType} />
+                    {canEdit ? (
+                      <select
+                        value={record.status}
+                        onChange={(e) => onUpdateStatus(record.id, e.target.value)}
+                        className="text-xs rounded-lg border border-border bg-card px-2 py-1 text-foreground"
+                        aria-label={`Update status for ${record.mare.barnName}`}
+                      >
+                        {BREEDING_STATUSES.map(s => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <BreedingStatusBadge status={record.status} />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(record.breedingDate).toLocaleDateString()}
+                    </span>
+                    {record.estimatedDueDate && <span>Due: {new Date(record.estimatedDueDate).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+                {canEdit && (
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => onEdit(record)}
+                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
+                      aria-label="Edit breeding record"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(record.id)}
+                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Delete breeding record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {new Date(record.breedingDate).toLocaleDateString()}
-                </span>
-                {record.estimatedDueDate && <span>Due: {new Date(record.estimatedDueDate).toLocaleDateString()}</span>}
-              </div>
             </div>
-            {canEdit && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <button
-                  onClick={() => onEdit(record)}
-                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
-                  aria-label="Edit breeding record"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onDelete(record.id)}
-                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                  aria-label="Delete breeding record"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -685,7 +788,7 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus,
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-foreground">{record.mare.barnName}</p>
+                  <Link href={`/horses/${record.mare.id}`} className="font-medium text-foreground hover:text-primary transition-colors">{record.mare.barnName}</Link>
                   {canEdit ? (
                     <select
                       value={record.status}
@@ -705,31 +808,54 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus,
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
-                  <span>Sire: {getStallionName(record)}</span>
+                  <span>Sire: {record.stallion ? (
+                    <Link href={`/horses/${record.stallion.id}`} className="hover:text-primary transition-colors">{record.stallion.barnName}</Link>
+                  ) : (
+                    record.externalStallion?.name || 'Unknown Stallion'
+                  )}</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     Bred: {new Date(record.breedingDate).toLocaleDateString()}
                   </span>
                 </div>
                 {record.estimatedDueDate && (
-                  <div className="mt-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Due:</span>
-                      <span className="font-medium text-foreground">{new Date(record.estimatedDueDate).toLocaleDateString()}</span>
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Due:</span>
+                        <span className="font-medium text-foreground">{new Date(record.estimatedDueDate).toLocaleDateString()}</span>
+                      </div>
                       {days !== null && (
-                        <span className="text-xs text-muted-foreground">
-                          ({days >= 0 ? `${days} days remaining` : `${Math.abs(days)} days overdue`})
+                        <span className={`text-xs font-medium ${days < 0 ? 'text-red-600' : days <= 30 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                          {days >= 0 ? `${days} days remaining` : `${Math.abs(days)} days overdue`}
                         </span>
                       )}
                     </div>
-                    <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
-                      {(() => {
-                        const elapsed = Math.max(0, Date.now() - new Date(record.breedingDate).getTime());
-                        const pct = Math.min(100, Math.round((elapsed / (340 * 86400000)) * 100));
-                        const barColor = pct >= 90 ? 'bg-red-500' : pct >= 75 ? 'bg-amber-500' : 'bg-blue-500';
-                        return <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />;
-                      })()}
-                    </div>
+                    {(() => {
+                      const elapsed = Math.max(0, Date.now() - new Date(record.breedingDate).getTime());
+                      const elapsedDays = Math.round(elapsed / 86400000);
+                      const pct = Math.min(100, Math.round((elapsed / (340 * 86400000)) * 100));
+                      const barColor = pct >= 90 ? 'bg-red-500' : pct >= 67 ? 'bg-amber-500' : pct >= 33 ? 'bg-blue-500' : 'bg-emerald-500';
+                      const trimester = elapsedDays <= 113 ? '1st' : elapsedDays <= 226 ? '2nd' : '3rd';
+                      return (
+                        <div>
+                          <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                            <div className={`h-full ${barColor} transition-all duration-500 rounded-full`} style={{ width: `${pct}%` }} />
+                            {/* Trimester markers */}
+                            <div className="absolute top-0 bottom-0 w-px bg-border" style={{ left: '33.2%' }} />
+                            <div className="absolute top-0 bottom-0 w-px bg-border" style={{ left: '66.5%' }} />
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-[10px] text-muted-foreground">T1</span>
+                            <span className="text-[10px] text-muted-foreground">T2</span>
+                            <span className="text-[10px] text-muted-foreground">T3</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {trimester} trimester &middot; Day {elapsedDays} of ~340
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -786,7 +912,7 @@ function FoalingsTab({ foalings, canEdit, onAdd, onEdit, onDelete }: {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-foreground">{foaling.mare.barnName}</p>
+                  <Link href={`/horses/${foaling.mare.id}`} className="font-medium text-foreground hover:text-primary transition-colors">{foaling.mare.barnName}</Link>
                   <BreedingStatusBadge status={foaling.outcome} />
                   {foaling.foalSex && (
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
