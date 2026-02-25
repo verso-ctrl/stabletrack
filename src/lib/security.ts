@@ -43,8 +43,8 @@ export function withSecurity<T = Record<string, unknown>>(
                request.headers.get('x-real-ip') || 
                'unknown';
     
-    // Get user ID from headers (set by auth middleware)
-    const userId = request.headers.get('x-user-id') || undefined;
+    // User ID should come from auth, not headers (x-user-id is client-controllable)
+    const userId = undefined;
     
     // Rate limiting
     if (options.rateLimit) {

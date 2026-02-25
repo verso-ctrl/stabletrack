@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
         barnId,
         name: body.name,
         category: body.category || 'OTHER',
-        price: parseFloat(body.price) || 0,
+        price: Math.max(0, parseFloat(body.price) || 0),
         unit: body.unit || 'month',
         description: body.description,
         taxable: body.taxable ?? true,

@@ -48,10 +48,15 @@ export async function POST(
       return NextResponse.json({ synced: false, reason: 'Stripe not configured' });
     }
 
-    // Find recent completed checkout sessions for this user/barn
+    if (!barn.stripeCustomerId) {
+      return NextResponse.json({ synced: false, reason: 'No Stripe customer' });
+    }
+
+    // Find recent completed checkout sessions scoped to this barn's customer
     const sessions = await stripe.checkout.sessions.list({
       limit: 5,
       status: 'complete',
+      customer: barn.stripeCustomerId,
     });
 
     let updated = false;

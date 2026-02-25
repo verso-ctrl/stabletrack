@@ -19,6 +19,15 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    // Verify horse belongs to this barn
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    });
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found' }, { status: 404 });
+    }
+
     const feedProgram = await prisma.feedProgram.findUnique({
       where: { horseId: horseId },
       include: {

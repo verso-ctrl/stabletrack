@@ -142,6 +142,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: { id: barnId },
       select: {
         tier: true,
+        stripeSubscriptionId: true,
         _count: { select: { horses: true } },
       },
     })
@@ -163,11 +164,28 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // If downgrading and there's an active Stripe subscription, cancel it
+    if (tier === 'STARTER' && barn.tier === 'FARM' && barn.stripeSubscriptionId && stripe) {
+      try {
+        await stripe.subscriptions.cancel(barn.stripeSubscriptionId)
+      } catch (stripeError) {
+        console.error('Failed to cancel Stripe subscription during downgrade:', stripeError)
+        return NextResponse.json(
+          { error: 'Failed to cancel existing subscription. Please try again or contact support.' },
+          { status: 502 }
+        )
+      }
+    }
+
     // Update the barn tier
     const updatedBarn = await prisma.barn.update({
       where: { id: barnId },
       data: {
         tier,
+        // Clear Stripe subscription on downgrade to STARTER
+        ...(tier === 'STARTER' && barn.stripeSubscriptionId ? {
+          stripeSubscriptionId: null,
+        } : {}),
       },
       select: {
         tier: true,

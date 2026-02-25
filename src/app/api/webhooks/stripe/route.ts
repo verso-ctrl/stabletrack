@@ -62,17 +62,26 @@ export async function POST(req: NextRequest) {
         if (session.metadata?.barnId && session.metadata?.action === 'upgrade') {
           const { barnId, tier } = session.metadata
 
-          await prisma.barn.update({
+          // Verify barn exists and either has no Stripe customer or matches this one
+          const barn = await prisma.barn.findUnique({
             where: { id: barnId },
-            data: {
-              tier,
-              subscriptionStatus: 'ACTIVE',
-              stripeCustomerId: session.customer as string,
-              stripeSubscriptionId: session.subscription as string,
-            },
+            select: { stripeCustomerId: true },
           })
 
-          console.log(`Barn ${barnId} upgraded to ${tier}`)
+          if (barn && (!barn.stripeCustomerId || barn.stripeCustomerId === session.customer)) {
+            await prisma.barn.update({
+              where: { id: barnId },
+              data: {
+                tier,
+                subscriptionStatus: 'ACTIVE',
+                stripeCustomerId: session.customer as string,
+                stripeSubscriptionId: session.subscription as string,
+              },
+            })
+            console.log(`Barn ${barnId} upgraded to ${tier}`)
+          } else {
+            console.error(`Webhook: Barn ${barnId} customer mismatch. Expected ${barn?.stripeCustomerId}, got ${session.customer}`)
+          }
         }
 
         // Handle add-on purchase
@@ -132,9 +141,17 @@ export async function POST(req: NextRequest) {
         })
 
         if (barn) {
-          const status = subscription.status === 'active' ? 'ACTIVE' :
-                        subscription.status === 'past_due' ? 'PAST_DUE' :
-                        subscription.status === 'canceled' ? 'CANCELED' : 'ACTIVE'
+          const statusMap: Record<string, string> = {
+            active: 'ACTIVE',
+            past_due: 'PAST_DUE',
+            canceled: 'CANCELED',
+            unpaid: 'PAST_DUE',
+            incomplete: 'PAST_DUE',
+            incomplete_expired: 'CANCELED',
+            trialing: 'ACTIVE',
+            paused: 'PAST_DUE',
+          }
+          const status = statusMap[subscription.status] || 'PAST_DUE'
 
           await prisma.barn.update({
             where: { id: barn.id },

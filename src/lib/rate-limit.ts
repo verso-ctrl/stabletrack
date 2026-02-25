@@ -92,18 +92,15 @@ export function getRateLimitIdentifier(
   request: Request,
   userId?: string
 ): string {
-  // Prefer user ID if available
+  // Prefer user ID if available (reliable, not spoofable)
   if (userId) {
     return `user:${userId}`;
   }
-  
-  // Fall back to IP address
-  const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() || 
-             request.headers.get('x-real-ip') || 
-             'unknown';
-  
-  return `ip:${ip}`;
+
+  // For unauthenticated requests, use a generic key so all anonymous
+  // requests share a single rate-limit bucket. x-forwarded-for is
+  // client-controllable and can be spoofed to bypass per-IP limits.
+  return `ip:anonymous`;
 }
 
 // Rate limit response helper

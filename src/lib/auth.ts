@@ -57,85 +57,42 @@ export async function getCurrentUser() {
   
   if (!user) {
     const email = clerkUser?.emailAddresses?.[0]?.emailAddress || 'demo@barnkeep.com';
-    
-    // Check if a user with this email already exists (from previous sign-up with different ID)
+
+    // Check if a user with this email already exists
     const existingUserByEmail = await prisma.user.findUnique({
       where: { email },
-      include: { 
+      select: { id: true },
+    });
+
+    if (existingUserByEmail) {
+      // Another Clerk account with this email exists — do NOT auto-migrate
+      // The user should contact support to resolve duplicate accounts
+      console.warn(`Auth: New Clerk user ${userId} has same email as existing user ${existingUserByEmail.id}. Skipping auto-migration for security.`);
+    }
+
+    // Create new user in our database (with unique email if collision)
+    const userEmail = existingUserByEmail ? `${userId}@pending.barnkeep.com` : email;
+    user = await prisma.user.create({
+      data: {
+        id: userId,
+        email: userEmail,
+        firstName: clerkUser?.firstName || 'Demo',
+        lastName: clerkUser?.lastName || 'User',
+        avatarUrl: clerkUser?.imageUrl || null,
+        subscription: {
+          create: {
+            tier: 'STARTER',
+            status: 'ACTIVE',
+            maxHorses: isClerkConfigured ? 5 : 999,
+            maxBarns: isClerkConfigured ? 1 : 10,
+            storageGb: isClerkConfigured ? 1 : 50,
+          },
+        },
+      },
+      include: {
         subscription: true,
-        barnMemberships: true,
       },
     });
-    
-    if (existingUserByEmail) {
-      // User exists with different ID - need to migrate their data to new Clerk ID
-      // Use a transaction to safely migrate the user
-      user = await prisma.$transaction(async (tx) => {
-        // Update all barn memberships to the new user ID
-        await tx.barnMember.updateMany({
-          where: { userId: existingUserByEmail.id },
-          data: { userId: userId },
-        });
-        
-        // Delete old subscription if exists
-        if (existingUserByEmail.subscription) {
-          await tx.subscription.delete({
-            where: { userId: existingUserByEmail.id },
-          });
-        }
-        
-        // Delete the old user record
-        await tx.user.delete({
-          where: { id: existingUserByEmail.id },
-        });
-        
-        // Create new user with the correct Clerk ID
-        return await tx.user.create({
-          data: {
-            id: userId,
-            email,
-            firstName: clerkUser?.firstName || existingUserByEmail.firstName || 'User',
-            lastName: clerkUser?.lastName || existingUserByEmail.lastName || '',
-            avatarUrl: clerkUser?.imageUrl || existingUserByEmail.avatarUrl || null,
-            subscription: {
-              create: {
-                tier: existingUserByEmail.subscription?.tier || 'STARTER',
-                status: existingUserByEmail.subscription?.status || 'ACTIVE',
-                maxHorses: existingUserByEmail.subscription?.maxHorses || (isClerkConfigured ? 5 : 999),
-                maxBarns: existingUserByEmail.subscription?.maxBarns || (isClerkConfigured ? 1 : 10),
-                storageGb: existingUserByEmail.subscription?.storageGb || (isClerkConfigured ? 1 : 50),
-              },
-            },
-          },
-          include: {
-            subscription: true,
-          },
-        });
-      });
-    } else {
-      // Create new user in our database
-      user = await prisma.user.create({
-        data: {
-          id: userId,
-          email,
-          firstName: clerkUser?.firstName || 'Demo',
-          lastName: clerkUser?.lastName || 'User',
-          avatarUrl: clerkUser?.imageUrl || null,
-          subscription: {
-            create: {
-              tier: 'STARTER',
-              status: 'ACTIVE',
-              maxHorses: isClerkConfigured ? 5 : 999,
-              maxBarns: isClerkConfigured ? 1 : 10,
-              storageGb: isClerkConfigured ? 1 : 50,
-            },
-          },
-        },
-        include: {
-          subscription: true,
-        },
-      });
-    }
   }
   
   return user;
@@ -269,6 +226,7 @@ export function getRolePermissions(role: BarnRole): string[] {
     MANAGER: [
       'horses:read', 'horses:write', 'horses:delete',
       'health:read', 'health:write',
+      'dailycare:read', 'dailycare:write',
       'events:read', 'events:write', 'events:delete',
       'tasks:read', 'tasks:write', 'tasks:assign',
       'team:read', 'team:write', 'team:invite',
@@ -285,6 +243,7 @@ export function getRolePermissions(role: BarnRole): string[] {
     TRAINER: [
       'horses:read',
       'health:read',
+      'dailycare:read', 'dailycare:write',
       'events:read', 'events:write',
       'tasks:read', 'tasks:write',
       'clients:read',
@@ -296,6 +255,7 @@ export function getRolePermissions(role: BarnRole): string[] {
     CARETAKER: [
       'horses:read', 'horses:write',
       'health:read', 'health:write',
+      'dailycare:read', 'dailycare:write',
       'events:read', 'events:write',
       'tasks:read', 'tasks:write',
       'feed:read', 'feed:write',
@@ -463,8 +423,9 @@ export async function requireAuth() {
  */
 export async function verifyBarnAccess(userId: string, barnId: string): Promise<boolean> {
   const membership = await getUserBarnMembership(userId, barnId);
-  if (membership) return true;
-  
+  // Only allow ACTIVE members, not PENDING
+  if (membership && (membership as any).status === 'ACTIVE') return true;
+
   // Also check for client access
   const clientAccess = await getClientAccess(userId, barnId);
   return !!clientAccess;

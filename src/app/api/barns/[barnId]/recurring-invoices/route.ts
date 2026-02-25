@@ -69,9 +69,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
         break
     }
     
-    // Calculate amount from items
+    // Calculate amount from items (enforce non-negative)
     const items = body.items || []
-    const amount = items.reduce((sum: number, i: any) => sum + (i.quantity * i.unitPrice), 0)
+    const amount = items.reduce((sum: number, i: any) => {
+      const qty = Math.max(0, parseInt(i.quantity) || 1)
+      const price = Math.max(0, parseFloat(i.unitPrice) || 0)
+      return sum + (qty * price)
+    }, 0)
     
     const recurring = await prisma.recurringInvoice.create({
       data: {

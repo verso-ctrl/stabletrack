@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser, checkBarnPermission } from '@/lib/auth';
+import { getCurrentUser, checkBarnPermission, getClientAccess } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { addDays } from 'date-fns';
 
@@ -22,6 +22,15 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Check if user is a client (not a barn member) — scope data to their horses only
+    const isMember = await prisma.barnMember.findUnique({
+      where: { userId_barnId: { userId: user.id, barnId } },
+    });
+    const clientAccess = !isMember ? await getClientAccess(user.id, barnId) : null;
+    const clientHorseIds = clientAccess
+      ? clientAccess.horses.map((h: { horseId: string }) => h.horseId)
+      : null;
+
     const now = new Date();
     const in30Days = addDays(now, 30);
 
@@ -40,9 +49,9 @@ export async function GET(
       layupHorses,
       expiringDocuments,
     ] = await Promise.all([
-      // Horses (just count + basic list)
+      // Horses (just count + basic list) — scoped to client's horses if applicable
       prisma.horse.findMany({
-        where: { barnId, status: { in: ['ACTIVE', 'LAYUP'] } },
+        where: { barnId, status: { in: ['ACTIVE', 'LAYUP'] }, ...(clientHorseIds && { id: { in: clientHorseIds } }) },
         select: {
           id: true,
           barnName: true,
@@ -55,9 +64,9 @@ export async function GET(
         orderBy: { barnName: 'asc' },
         take: 50,
       }),
-      // Upcoming events (limited)
+      // Upcoming events (limited) — scoped for clients
       prisma.event.findMany({
-        where: { barnId, status: 'SCHEDULED', scheduledDate: { gte: now } },
+        where: { barnId, status: 'SCHEDULED', scheduledDate: { gte: now }, ...(clientHorseIds && { horseId: { in: clientHorseIds } }) },
         include: {
           horse: { select: { id: true, barnName: true } },
           horses: { include: { horse: { select: { id: true, barnName: true } } }, take: 5 },
@@ -65,9 +74,9 @@ export async function GET(
         orderBy: { scheduledDate: 'asc' },
         take: 10,
       }),
-      // Pending tasks (limited)
+      // Pending tasks (limited) — scoped for clients
       prisma.task.findMany({
-        where: { barnId, status: 'PENDING' },
+        where: { barnId, status: 'PENDING', ...(clientHorseIds && { horseId: { in: clientHorseIds } }) },
         include: {
           assignee: { select: { firstName: true, lastName: true, avatarUrl: true } },
           horse: { select: { id: true, barnName: true } },
@@ -75,53 +84,53 @@ export async function GET(
         orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }],
         take: 10,
       }),
-      // Stalls
-      prisma.stall.findMany({
+      // Stalls — hide from clients
+      clientHorseIds ? Promise.resolve([]) : prisma.stall.findMany({
         where: { barnId },
         include: { horse: { select: { id: true, barnName: true } } },
         orderBy: { name: 'asc' },
       }),
-      // Paddocks
-      prisma.paddock.findMany({
+      // Paddocks — hide from clients
+      clientHorseIds ? Promise.resolve([]) : prisma.paddock.findMany({
         where: { barnId },
         include: { turnouts: { where: { endTime: null }, include: { horse: { select: { id: true, barnName: true } } } } },
         orderBy: { name: 'asc' },
       }),
-      // Alerts: expiring coggins
+      // Alerts: expiring coggins — scoped for clients
       prisma.healthRecord.findMany({
-        where: { horse: { barnId }, type: 'COGGINS', cogginsExpiry: { gte: now, lte: in30Days } },
+        where: { horse: { barnId, ...(clientHorseIds && { id: { in: clientHorseIds } }) }, type: 'COGGINS', cogginsExpiry: { gte: now, lte: in30Days } },
         include: { horse: { select: { id: true, barnName: true } } },
         orderBy: { cogginsExpiry: 'asc' },
         take: 20,
       }),
-      // Alerts: due vaccinations
+      // Alerts: due vaccinations — scoped for clients
       prisma.vaccination.findMany({
-        where: { horse: { barnId }, nextDueDate: { gte: now, lte: in30Days } },
+        where: { horse: { barnId, ...(clientHorseIds && { id: { in: clientHorseIds } }) }, nextDueDate: { gte: now, lte: in30Days } },
         include: { horse: { select: { id: true, barnName: true } } },
         orderBy: { nextDueDate: 'asc' },
         take: 20,
       }),
-      // Alerts: medications needing refill
+      // Alerts: medications needing refill — scoped for clients
       prisma.medication.findMany({
-        where: { horse: { barnId }, status: 'ACTIVE', refillsRemaining: { lte: 1 } },
+        where: { horse: { barnId, ...(clientHorseIds && { id: { in: clientHorseIds } }) }, status: 'ACTIVE', refillsRemaining: { lte: 1 } },
         include: { horse: { select: { id: true, barnName: true } } },
         take: 20,
       }),
-      // Alerts: overdue events
+      // Alerts: overdue events — scoped for clients
       prisma.event.findMany({
-        where: { barnId, status: 'SCHEDULED', scheduledDate: { lt: now } },
+        where: { barnId, status: 'SCHEDULED', scheduledDate: { lt: now }, ...(clientHorseIds && { horseId: { in: clientHorseIds } }) },
         include: { horse: { select: { id: true, barnName: true } } },
         take: 20,
       }),
-      // Alerts: layup horses
+      // Alerts: layup horses — scoped for clients
       prisma.horse.findMany({
-        where: { barnId, status: 'LAYUP' },
+        where: { barnId, status: 'LAYUP', ...(clientHorseIds && { id: { in: clientHorseIds } }) },
         select: { id: true, barnName: true },
         take: 20,
       }),
-      // Alerts: expiring documents
+      // Alerts: expiring documents — scoped for clients
       prisma.document.findMany({
-        where: { horse: { barnId }, expiryDate: { gte: now, lte: in30Days } },
+        where: { horse: { barnId, ...(clientHorseIds && { id: { in: clientHorseIds } }) }, expiryDate: { gte: now, lte: in30Days } },
         include: { horse: { select: { id: true, barnName: true } } },
         orderBy: { expiryDate: 'asc' },
         take: 20,

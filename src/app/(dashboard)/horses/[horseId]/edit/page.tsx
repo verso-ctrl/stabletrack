@@ -25,7 +25,7 @@ interface Suggestions {
   markings: string[];
 }
 
-const sexOptions = ['Gelding', 'Mare', 'Stallion', 'Colt', 'Filly'];
+const sexOptions = ['GELDING', 'MARE', 'STALLION', 'COLT', 'FILLY'];
 const statusOptions = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'LAYUP', label: 'Layup / Injured' },
@@ -376,7 +376,7 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
                 >
                   <option value="">Select</option>
                   {sexOptions.map((sex) => (
-                    <option key={sex} value={sex}>{sex}</option>
+                    <option key={sex} value={sex}>{sex.charAt(0) + sex.slice(1).toLowerCase()}</option>
                   ))}
                 </select>
               </div>

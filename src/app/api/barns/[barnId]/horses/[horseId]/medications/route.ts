@@ -19,6 +19,15 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Verify horse belongs to this barn to prevent cross-barn access
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    });
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found' }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 

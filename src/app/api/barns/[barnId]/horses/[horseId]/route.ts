@@ -161,15 +161,26 @@ export async function PATCH(
     }
     
     const body = await request.json();
-    
-    // Remove fields that shouldn't be updated directly
-    const { id, barnId: _, createdAt, updatedAt, stall, ...updateData } = body;
-    
+
+    // Whitelist allowed fields to prevent arbitrary field injection
+    const ALLOWED_FIELDS = [
+      'barnName', 'showName', 'breed', 'color', 'markings', 'sex',
+      'dateOfBirth', 'height', 'status', 'notes', 'microchipNumber',
+      'registrationNumber', 'insuranceInfo', 'profilePhotoUrl',
+      'sireId', 'damId', 'owner', 'cogginsExpiry',
+    ];
+    const updateData: Record<string, any> = {};
+    for (const field of ALLOWED_FIELDS) {
+      if (field in body) {
+        updateData[field] = body[field];
+      }
+    }
+
     // Handle date conversion
     if (updateData.dateOfBirth) {
       updateData.dateOfBirth = new Date(updateData.dateOfBirth);
     }
-    
+
     const horse = await prisma.horse.update({
       where: {
         id: horseId,

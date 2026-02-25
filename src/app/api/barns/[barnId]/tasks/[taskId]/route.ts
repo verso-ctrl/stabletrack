@@ -163,17 +163,29 @@ export async function PATCH(
     }
     
     const body = await request.json();
-    const { id, barnId: _, creatorId, createdAt, ...updateData } = body;
-    
+
+    // Whitelist allowed fields to prevent arbitrary field injection
+    const ALLOWED_FIELDS = [
+      'title', 'description', 'status', 'priority', 'dueDate', 'dueTime',
+      'assigneeId', 'horseId', 'category', 'isRecurring', 'recurringRule',
+      'isFarmOnly', 'notes',
+    ];
+    const updateData: Record<string, any> = {};
+    for (const field of ALLOWED_FIELDS) {
+      if (field in body) {
+        updateData[field] = body[field];
+      }
+    }
+
     if (updateData.dueDate) {
       updateData.dueDate = new Date(updateData.dueDate);
     }
-    
+
     if (updateData.status === 'COMPLETED') {
       updateData.completedAt = new Date();
       updateData.completedBy = user.id;
     }
-    
+
     const task = await prisma.task.update({
       where: {
         id: taskId,

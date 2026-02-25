@@ -60,6 +60,25 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validate file type to prevent stored XSS
+    const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif']
+    const ALLOWED_DOCUMENT_TYPES = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain', 'text/csv',
+      ...ALLOWED_PHOTO_TYPES,
+    ]
+    const allowedTypes = type === 'photo' ? ALLOWED_PHOTO_TYPES : ALLOWED_DOCUMENT_TYPES
+    if (!file.type || !allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: `File type "${file.type || 'unknown'}" is not allowed. Accepted: ${type === 'photo' ? 'JPEG, PNG, GIF, WebP' : 'PDF, Word, Excel, CSV, images'}` },
+        { status: 400 }
+      )
+    }
+
     // Guard against files too large for base64 DB storage
     const maxSize = 25 * 1024 * 1024 // 25MB
     if (file.size > maxSize) {

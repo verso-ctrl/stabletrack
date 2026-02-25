@@ -165,35 +165,18 @@ export function sanitizeFilename(filename: string | null | undefined): string {
 }
 
 /**
- * Sanitize rich text (allows some HTML but escapes dangerous tags)
+ * Sanitize rich text by stripping ALL HTML tags.
+ * For safe rich text rendering, use a proper library like DOMPurify on the client.
  */
 export function sanitizeRichText(html: string | null | undefined): string {
   if (!html) return '';
-  
-  // List of allowed tags
-  const allowedTags = ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-  
-  // Remove script tags and event handlers
-  let sanitized = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/data:/gi, '');
-  
-  // Remove disallowed tags but keep content
-  const tagRegex = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
-  sanitized = sanitized.replace(tagRegex, (match, tagName) => {
-    if (allowedTags.includes(tagName.toLowerCase())) {
-      // For allowed tags, remove all attributes except basic ones
-      if (match.startsWith('</')) {
-        return match; // Closing tags are fine
-      }
-      return `<${tagName.toLowerCase()}>`;
-    }
-    return ''; // Remove disallowed tags
-  });
-  
-  return sanitized.substring(0, 50000);
+
+  // Strip all HTML tags — regex-based allow-lists are bypassable
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/\0/g, '')
+    .trim()
+    .substring(0, 50000);
 }
 
 /**

@@ -112,7 +112,7 @@ export async function POST(
         veterinarian: veterinarian || null,
         facility: facility || null,
         estimatedDueDate,
-        cost: cost ? parseFloat(cost) : null,
+        cost: cost ? Math.max(0, parseFloat(cost) || 0) : null,
         notes: notes || null,
         status: 'PENDING',
       },

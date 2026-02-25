@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useBarn } from '@/contexts/BarnContext';
-import { useUser } from '@clerk/nextjs';
 import {
   User,
   Building2,
@@ -87,10 +86,28 @@ const roleColors: Record<string, string> = {
 };
 
 export default function SettingsPage() {
-  const { user, isLoaded: isUserLoaded } = useUser();
   const { currentBarn } = useBarn();
+  const [userData, setUserData] = useState<any>(null);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/user');
+        if (response.ok) {
+          const result = await response.json();
+          setUserData(result.data);
+        }
+      } catch {
+        // User fetch failed silently
+      } finally {
+        setIsUserLoaded(true);
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -134,10 +151,10 @@ export default function SettingsPage() {
         <div className="flex items-start gap-4">
           {/* Avatar */}
           <div className="relative flex-shrink-0">
-            {user?.imageUrl ? (
+            {userData?.avatarUrl ? (
               <Image
-                src={user.imageUrl}
-                alt={user.fullName || 'User'}
+                src={userData.avatarUrl}
+                alt={`${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User'}
                 width={80}
                 height={80}
                 unoptimized
@@ -146,7 +163,7 @@ export default function SettingsPage() {
             ) : (
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center ring-4 ring-border">
                 <span className="text-white text-2xl font-semibold">
-                  {user?.firstName?.[0] || user?.username?.[0] || 'U'}
+                  {userData?.firstName?.[0] || 'U'}
                 </span>
               </div>
             )}
@@ -157,10 +174,10 @@ export default function SettingsPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-bold text-foreground truncate">
-                  {user?.fullName || user?.username || 'User'}
+                  {userData ? `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User' : 'User'}
                 </h2>
                 <p className="text-muted-foreground text-sm mt-1 truncate">
-                  {user?.primaryEmailAddress?.emailAddress}
+                  {userData?.email}
                 </p>
 
                 {/* Badges */}

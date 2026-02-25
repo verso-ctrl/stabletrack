@@ -106,6 +106,15 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const body = await req.json()
     const { horseId, feedingTime, completed, skipped } = body
 
+    // Verify horse belongs to this barn
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    })
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found in this barn' }, { status: 404 })
+    }
+
     // Log the feeding action
     await prisma.feedLog.create({
       data: {
@@ -124,14 +133,4 @@ export async function POST(req: NextRequest, context: RouteContext) {
   }
 }
 
-export async function PUT(req: NextRequest, context: RouteContext) {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  
-  const { barnId } = await context.params
-  const hasPermission = await checkBarnPermission(user.id, barnId, 'horses:write')
-  if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
-
-  const body = await req.json()
-  return NextResponse.json({ data: body, message: 'Feed chart updated' })
-}
+// PUT removed — was a no-op that returned the request body without persisting anything

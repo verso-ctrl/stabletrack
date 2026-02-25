@@ -122,27 +122,17 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ sessionId: session.id, url: session.url });
       } catch (stripeError) {
-        // If Stripe checkout fails (e.g. test keys, account not fully set up),
-        // fall back to direct activation so the feature can still be tested
-        console.warn('Stripe checkout failed for add-on, activating directly:', stripeError);
-        const currentAddOns = barn.activeAddOns as string[] || [];
-        if (!currentAddOns.includes(addOnId)) {
-          await prisma.barn.update({
-            where: { id: barnId },
-            data: { activeAddOns: { push: addOnId } },
-          });
-        }
-        return NextResponse.json({
-          demoMode: true,
-          message: `${addOn.name} add-on activated.`,
-          addOnId,
-        });
+        console.error('Stripe checkout failed for add-on:', stripeError);
+        return NextResponse.json(
+          { error: 'Payment processing is temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
       }
     }
 
     const pricing = TIER_PRICING[tier as SubscriptionTier];
     const priceAmount = billingCycle === 'annual'
-      ? pricing.annualPriceCents / 12
+      ? pricing.annualPriceCents
       : pricing.monthlyPriceCents;
 
     try {
@@ -181,13 +171,11 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ sessionId: session.id, url: session.url });
     } catch (stripeError) {
-      // If Stripe checkout fails, fall back to demo mode
-      console.warn('Stripe checkout failed for upgrade, using demo mode:', stripeError);
-      return NextResponse.json({
-        demoMode: true,
-        message: 'Stripe checkout unavailable. Plan change simulated.',
-        tier,
-      });
+      console.error('Stripe checkout failed for upgrade:', stripeError);
+      return NextResponse.json(
+        { error: 'Payment processing is temporarily unavailable. Please try again later.' },
+        { status: 503 }
+      );
     }
   } catch (error) {
     console.error('Error creating checkout session:', error);

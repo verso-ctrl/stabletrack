@@ -84,6 +84,15 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Verify horse belongs to this barn
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    });
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found' }, { status: 404 });
+    }
+
     // Enforce subscription status, photo limit, and storage limit
     try {
       await enforceActiveSubscription(barnId);

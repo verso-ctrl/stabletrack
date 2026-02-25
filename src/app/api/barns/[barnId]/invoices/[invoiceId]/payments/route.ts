@@ -46,7 +46,10 @@ export async function POST(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
     
-    const paymentAmount = parseFloat(body.amount) || 0
+    const paymentAmount = parseFloat(body.amount)
+    if (!paymentAmount || paymentAmount <= 0 || !isFinite(paymentAmount)) {
+      return NextResponse.json({ error: 'Amount must be a positive number' }, { status: 400 })
+    }
     
     // Create the payment
     const payment = await prisma.payment.create({

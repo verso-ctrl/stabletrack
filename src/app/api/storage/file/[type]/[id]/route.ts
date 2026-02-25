@@ -1,7 +1,7 @@
 // API route to serve files stored in database
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth'
+import { getCurrentUser, verifyBarnAccess } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
@@ -26,6 +26,7 @@ export async function GET(
           fileData: true,
           mimeType: true,
           fileName: true,
+          horse: { select: { barnId: true } },
         },
       })
 
@@ -34,6 +35,12 @@ export async function GET(
           { error: 'Photo not found' },
           { status: 404 }
         )
+      }
+
+      // Verify user has access to the barn this file belongs to
+      const hasAccess = await verifyBarnAccess(user.id, photo.horse.barnId)
+      if (!hasAccess) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
       }
 
       fileData = photo.fileData
@@ -46,6 +53,7 @@ export async function GET(
           fileData: true,
           mimeType: true,
           fileName: true,
+          horse: { select: { barnId: true } },
         },
       })
 
@@ -54,6 +62,12 @@ export async function GET(
           { error: 'Document not found' },
           { status: 404 }
         )
+      }
+
+      // Verify user has access to the barn this file belongs to
+      const hasAccess = await verifyBarnAccess(user.id, document.horse.barnId)
+      if (!hasAccess) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
       }
 
       fileData = document.fileData

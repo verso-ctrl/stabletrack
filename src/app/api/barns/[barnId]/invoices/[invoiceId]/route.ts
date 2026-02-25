@@ -50,7 +50,15 @@ export async function PUT(req: NextRequest, context: RouteContext) {
     if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
 
     const body = await req.json()
-    
+
+    // Verify invoice belongs to this barn
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, barnId },
+    })
+    if (!existingInvoice) {
+      return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+    }
+
     // Calculate totals if items are provided
     let updateData: any = {
       status: body.status,
@@ -58,13 +66,17 @@ export async function PUT(req: NextRequest, context: RouteContext) {
       terms: body.terms,
       dueDate: body.dueDate ? new Date(body.dueDate) : undefined,
     }
-    
+
     if (body.items) {
-      const subtotal = body.items.reduce((sum: number, i: any) => sum + (i.quantity * i.unitPrice), 0)
-      const taxRate = body.taxRate || 0
+      const subtotal = body.items.reduce((sum: number, i: any) => {
+        const qty = Math.max(0, parseInt(i.quantity) || 1)
+        const price = Math.max(0, parseFloat(i.unitPrice) || 0)
+        return sum + (qty * price)
+      }, 0)
+      const taxRate = Math.max(0, parseFloat(body.taxRate) || 0)
       const taxAmount = subtotal * (taxRate / 100)
       const total = subtotal + taxAmount
-      
+
       updateData = {
         ...updateData,
         subtotal,
@@ -73,29 +85,22 @@ export async function PUT(req: NextRequest, context: RouteContext) {
         total,
         amountDue: total - (body.amountPaid || 0),
       }
-      
+
       // Delete existing items and create new ones
       await prisma.invoiceItem.deleteMany({ where: { invoiceId } })
     }
-    
+
     // Handle status change to PAID
     if (body.status === 'PAID') {
       updateData.paidDate = new Date()
       updateData.amountDue = 0
     }
-    
-    const invoice = await prisma.invoice.update({
+
+    await prisma.invoice.update({
       where: { id: invoiceId },
       data: updateData,
-      include: {
-        client: {
-          select: { id: true, firstName: true, lastName: true, email: true },
-        },
-        items: true,
-        payments: true,
-      },
     })
-    
+
     // Create new items if provided
     if (body.items) {
       await prisma.invoiceItem.createMany({
@@ -111,7 +116,19 @@ export async function PUT(req: NextRequest, context: RouteContext) {
         })),
       })
     }
-    
+
+    // Re-fetch with all relations to return fresh data
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: {
+        client: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        items: true,
+        payments: true,
+      },
+    })
+
     return NextResponse.json({ data: invoice })
   } catch (error) {
     console.error('Error updating invoice:', error)

@@ -14,6 +14,15 @@ export async function GET(req: NextRequest, context: RouteContext) {
     const hasPermission = await checkBarnPermission(user.id, barnId, 'horses:read')
     if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
 
+    // Verify horse belongs to this barn
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    })
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found' }, { status: 404 })
+    }
+
     // Build activity feed from multiple sources
     const activities: any[] = []
 

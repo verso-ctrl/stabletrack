@@ -25,11 +25,20 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     
+    // Verify horse belongs to this barn to prevent cross-barn access
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId, barnId },
+      select: { id: true },
+    });
+    if (!horse) {
+      return NextResponse.json({ error: 'Horse not found' }, { status: 404 });
+    }
+
     const where: any = { horseId: horseId };
     if (type) {
       where.type = type;
     }
-    
+
     const healthRecords = await prisma.healthRecord.findMany({
       where,
       include: {
@@ -111,7 +120,7 @@ export async function POST(
         treatment: treatment || null,
         findings: findings || null,
         followUpDate: followUpDate ? new Date(followUpDate) : null,
-        cost: cost || null,
+        cost: cost != null ? Math.max(0, parseFloat(cost) || 0) : null,
         cogginsExpiry: cogginsExpiry ? new Date(cogginsExpiry) : null,
         followUpNotes: notes || null,
       },

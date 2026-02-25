@@ -98,7 +98,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
         date: new Date(body.scheduledDate || body.date),
         startTime: body.startTime || '09:00',
         duration: body.duration || 60,
-        price: parseFloat(body.price) || 0,
+        price: Math.max(0, parseFloat(body.price) || 0),
         status: 'SCHEDULED',
         billed: false,
         notes: body.notes,
@@ -183,38 +183,39 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       })
 
       if (!invoice) {
-        // Generate invoice number
-        const lastInvoice = await prisma.invoice.findFirst({
-          where: { barnId },
-          orderBy: { createdAt: 'desc' },
-          select: { invoiceNumber: true },
-        })
+        // Use a transaction to prevent invoice number race conditions
+        invoice = await prisma.$transaction(async (tx) => {
+          const lastInvoice = await tx.invoice.findFirst({
+            where: { barnId },
+            orderBy: { createdAt: 'desc' },
+            select: { invoiceNumber: true },
+          })
 
-        let nextNumber = 1001
-        if (lastInvoice?.invoiceNumber) {
-          const match = lastInvoice.invoiceNumber.match(/\d+/)
-          if (match) nextNumber = parseInt(match[0]) + 1
-        }
-        const invoiceNumber = `INV-${nextNumber}`
+          let nextNumber = 1001
+          if (lastInvoice?.invoiceNumber) {
+            const match = lastInvoice.invoiceNumber.match(/\d+/)
+            if (match) nextNumber = parseInt(match[0]) + 1
+          }
+          const invoiceNumber = `INV-${nextNumber}`
 
-        // Create new DRAFT invoice
-        invoice = await prisma.invoice.create({
-          data: {
-            barnId,
-            clientId: existingLesson.clientId,
-            invoiceNumber,
-            status: 'DRAFT',
-            subtotal: 0,
-            taxRate: 0,
-            taxAmount: 0,
-            total: 0,
-            amountPaid: 0,
-            amountDue: 0,
-            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          },
-          include: {
-            items: true,
-          },
+          return tx.invoice.create({
+            data: {
+              barnId,
+              clientId: existingLesson.clientId,
+              invoiceNumber,
+              status: 'DRAFT',
+              subtotal: 0,
+              taxRate: 0,
+              taxAmount: 0,
+              total: 0,
+              amountPaid: 0,
+              amountDue: 0,
+              dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            },
+            include: {
+              items: true,
+            },
+          })
         })
       }
 
