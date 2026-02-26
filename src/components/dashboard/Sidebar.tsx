@@ -24,6 +24,7 @@ import {
   Wrench,
   Heart,
   BookUser,
+  Users,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -43,8 +44,7 @@ const HorseIcon = ({ className }: { className?: string }) => (
 );
 
 // Nav items with required permissions
-// v1 SIMPLIFIED: Core features only
-// Hidden for v1: Team, Documents, Billing (code exists, just not in nav)
+// Hidden for v1: Documents, Billing (code exists, just not in nav)
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: null, addOn: null },
   { href: '/horses', label: 'Horses', icon: HorseIcon, permission: 'horses:read', addOn: null },
@@ -54,6 +54,7 @@ const navItems = [
   { href: '/breeding', label: 'Breeding', icon: Heart, permission: 'horses:read', addOn: 'breeding' },
   { href: '/pastures', label: 'Pastures & Stalls', icon: Trees, permission: 'horses:read', addOn: null },
   { href: '/contacts', label: 'Contacts', icon: BookUser, permission: 'clients:read', addOn: null },
+  { href: '/team', label: 'Team', icon: Users, permission: 'team:read', addOn: null },
 ];
 
 const bottomNavItems = [
