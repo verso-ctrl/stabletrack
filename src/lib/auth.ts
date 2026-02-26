@@ -65,9 +65,47 @@ export async function getCurrentUser() {
     });
 
     if (existingUserByEmail) {
-      // Another Clerk account with this email exists — do NOT auto-migrate
-      // The user should contact support to resolve duplicate accounts
-      console.warn(`Auth: New Clerk user ${userId} has same email as existing user ${existingUserByEmail.id}. Skipping auto-migration for security.`);
+      // A user with this email was created via direct invite (no Clerk ID).
+      // Migrate their record to use the Clerk ID so memberships carry over.
+      // This only runs for users without a Clerk ID (invited users have DB-generated IDs).
+      const hasClerkId = existingUserByEmail.id.startsWith('user_');
+      if (!hasClerkId && isClerkConfigured) {
+        // Update all references from old ID to new Clerk ID
+        await prisma.$transaction([
+          prisma.barnMember.updateMany({
+            where: { userId: existingUserByEmail.id },
+            data: { userId: userId! },
+          }),
+          prisma.barnMember.updateMany({
+            where: { approvedBy: existingUserByEmail.id },
+            data: { approvedBy: userId! },
+          }),
+          prisma.activityLog.updateMany({
+            where: { userId: existingUserByEmail.id },
+            data: { userId: userId! },
+          }),
+          prisma.user.update({
+            where: { id: existingUserByEmail.id },
+            data: {
+              id: userId!,
+              firstName: clerkUser?.firstName || undefined,
+              lastName: clerkUser?.lastName || undefined,
+              avatarUrl: clerkUser?.imageUrl || undefined,
+            },
+          }),
+        ]);
+
+        // Fetch the migrated user
+        user = await prisma.user.findUnique({
+          where: { id: userId! },
+          include: { subscription: true },
+        });
+
+        if (user) return user;
+      } else {
+        // Another Clerk account with this email exists — do not auto-migrate
+        console.warn(`Auth: New Clerk user ${userId} has same email as existing Clerk user ${existingUserByEmail.id}. Skipping migration.`);
+      }
     }
 
     // Create new user in our database (with unique email if collision)
