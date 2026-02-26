@@ -108,7 +108,11 @@ export async function POST(
           sex: foalSex || null,
           status: 'ACTIVE',
           sireId: breedingRecord.stallionId || null,
+          sireName: breedingRecord.stallionId
+            ? breedingRecord.stallion?.barnName || null
+            : breedingRecord.externalStallion?.name || null,
           damId: breedingRecord.mareId,
+          damName: breedingRecord.mare.barnName,
           ownerName: breedingRecord.mare.ownerName,
           ownerEmail: breedingRecord.mare.ownerEmail,
           ownerPhone: breedingRecord.mare.ownerPhone,
