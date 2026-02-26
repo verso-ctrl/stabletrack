@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { notifyOwnerOfJoinRequest } from '@/lib/email';
 
 // POST /api/barns/join - Join a barn with invite code
 export async function POST(request: NextRequest) {
@@ -83,7 +84,17 @@ export async function POST(request: NextRequest) {
         barnId: barn.id,
       },
     });
-    
+
+    // Notify barn owner(s) via email (fire-and-forget)
+    const owners = await prisma.barnMember.findMany({
+      where: { barnId: barn.id, role: 'OWNER', status: 'ACTIVE' },
+      include: { user: { select: { email: true } } },
+    });
+    const requesterName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+    for (const owner of owners) {
+      notifyOwnerOfJoinRequest(owner.user.email, requesterName, barn.name);
+    }
+
     return NextResponse.json({
       data: {
         barnName: membership.barn.name,

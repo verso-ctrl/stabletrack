@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, checkBarnPermission } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { enforceActiveSubscription, enforceTeamMemberLimit } from '@/lib/tier-validation';
+import { notifyDirectInvite, notifyJoinApproved } from '@/lib/email';
 
 // GET /api/barns/[barnId]/members - Get all barn members
 export async function GET(
@@ -167,6 +168,10 @@ export async function POST(
       },
     });
 
+    // Fire-and-forget email notification
+    const barn = await prisma.barn.findUnique({ where: { id: barnId }, select: { name: true } });
+    notifyDirectInvite(email, barn?.name || 'your barn', role);
+
     return NextResponse.json({ data: member }, { status: 201 });
   } catch (error) {
     console.error('Error creating member:', error);
@@ -222,6 +227,16 @@ export async function PATCH(
         return NextResponse.json({ error: 'Member is not pending approval' }, { status: 400 });
       }
 
+      // Enforce team member limit before approving
+      try {
+        await enforceTeamMemberLimit(barnId);
+      } catch {
+        return NextResponse.json(
+          { error: 'Team member limit reached for your plan. Upgrade to add more members.' },
+          { status: 403 }
+        );
+      }
+
       const updatedMember = await prisma.barnMember.update({
         where: { id: memberId },
         data: {
@@ -254,6 +269,10 @@ export async function PATCH(
           metadata: JSON.stringify({ memberId, approvedUserId: targetMember.userId }),
         },
       });
+
+      // Fire-and-forget email notification
+      const barn = await prisma.barn.findUnique({ where: { id: barnId }, select: { name: true } });
+      notifyJoinApproved(targetMember.user.email, barn?.name || 'your barn', role || targetMember.role);
 
       return NextResponse.json({ data: updatedMember });
     }

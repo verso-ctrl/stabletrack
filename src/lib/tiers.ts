@@ -65,13 +65,13 @@ export interface TierLimits {
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   STARTER: {
     maxHorses: 10,
-    maxTeamMembers: 5,
+    maxTeamMembers: 1,
     maxStorageBytes: 10 * 1024 * 1024 * 1024,    // 10 GB
     maxPhotosPerHorse: 20,
   },
   FARM: {
     maxHorses: -1,               // Unlimited
-    maxTeamMembers: -1,          // Unlimited
+    maxTeamMembers: 5,
     maxStorageBytes: 50 * 1024 * 1024 * 1024,    // 50 GB
     maxPhotosPerHorse: -1,       // Unlimited
   },
@@ -246,14 +246,14 @@ export const STARTER_FEATURES = [
   'Stall & pasture management',
   'Calendar & tasks',
   'Document storage (10 GB)',
-  'Up to 5 team members',
+  '1 team member',
   'Mobile access',
 ]
 
 export const FARM_FEATURES = [
   'Unlimited horses',
   'Everything in Starter',
-  'Unlimited team members',
+  'Up to 5 team members',
   '50 GB document storage',
   'Unlimited photo uploads',
   'Priority support',
