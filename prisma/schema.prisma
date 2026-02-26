@@ -102,10 +102,11 @@ model Barn {
   lessons           Lesson[]
   trainingLogs      TrainingLog[]
   competitions      Competition[]
-  externalStallions ExternalStallion[]
-  heatCycles        HeatCycle[]
-  breedingRecords   BreedingRecord[]
-  foalingRecords    FoalingRecord[]
+  externalStallions      ExternalStallion[]
+  heatCycles             HeatCycle[]
+  breedingRecords        BreedingRecord[]
+  foalingRecords         FoalingRecord[]
+  feedProgramTemplates   FeedProgramTemplate[]
 }
 
 model BarnMember {
@@ -338,6 +339,33 @@ model FeedProgramItem {
   supplement    Supplement? @relation(fields: [supplementId], references: [id])
 
   @@index([feedProgramId])
+}
+
+model FeedProgramTemplate {
+  id           String   @id @default(cuid())
+  barnId       String
+  name         String
+  instructions String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  barn  Barn @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  items FeedProgramTemplateItem[]
+
+  @@unique([barnId, name])
+  @@index([barnId])
+}
+
+model FeedProgramTemplateItem {
+  id          String @id @default(cuid())
+  templateId  String
+  feedName    String
+  amount      Float
+  unit        String
+  feedingTime String
+
+  template FeedProgramTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  @@index([templateId])
 }
 
 model FeedLog {

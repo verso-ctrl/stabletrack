@@ -22,6 +22,7 @@ import {
   Utensils,
   Weight,
   Camera,
+  Save,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -79,6 +80,10 @@ export default function HorseDetailPage() {
   const [showFeedModal, setShowFeedModal] = useState(false);
   const [showCogginsModal, setShowCogginsModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Feed program template state
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
   // Handle profile photo upload
   const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +167,80 @@ export default function HorseDetailPage() {
       });
     }
   }, [(horse as any)?.feedProgram]);
+
+  // Fetch feed program templates when modal opens
+  useEffect(() => {
+    if (showFeedModal && currentBarn?.id) {
+      fetch(`/api/barns/${currentBarn.id}/feed-program-templates`)
+        .then(r => r.json())
+        .then(data => setTemplates(data.data || []))
+        .catch(() => {});
+    }
+  }, [showFeedModal, currentBarn?.id]);
+
+  const handleLoadTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+    setFeedForm({
+      name: template.name,
+      instructions: template.instructions || '',
+      items: template.items.map((item: any) => ({
+        feedName: item.feedName,
+        amount: item.amount.toString(),
+        unit: item.unit,
+        feedingTime: item.feedingTime,
+      })),
+    });
+    toast.success('Plan loaded', `Loaded "${template.name}"`);
+  };
+
+  const handleSaveAsTemplate = async () => {
+    if (!feedForm.name.trim()) {
+      toast.warning('Name required', 'Enter a program name before saving');
+      return;
+    }
+    const validItems = feedForm.items.filter(item => item.feedName && item.amount);
+    if (validItems.length === 0) {
+      toast.warning('Items required', 'Add at least one feed item with name and amount');
+      return;
+    }
+
+    setIsSavingTemplate(true);
+    try {
+      const response = await csrfFetch(`/api/barns/${currentBarn?.id}/feed-program-templates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: feedForm.name.trim(),
+          instructions: feedForm.instructions || null,
+          items: validItems.map(item => ({
+            feedName: item.feedName,
+            amount: parseFloat(item.amount),
+            unit: item.unit,
+            feedingTime: item.feedingTime,
+          })),
+        }),
+      });
+
+      if (response.status === 409) {
+        toast.error('Duplicate name', 'A feeding plan with this name already exists');
+        return;
+      }
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to save template');
+      }
+
+      const { data } = await response.json();
+      setTemplates(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      toast.success('Plan saved', `"${data.name}" saved as a feeding plan`);
+    } catch (err) {
+      toast.error('Failed to save plan', err instanceof Error ? err.message : 'Please try again');
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
 
   const handleLogWeight = async () => {
     if (!weightForm.weight) {
@@ -813,6 +892,25 @@ export default function HorseDetailPage() {
               </div>
             </div>
             <div className="p-6 space-y-4">
+              {/* Load Feeding Plan */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Load Feeding Plan</label>
+                <select
+                  className="input w-full"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) handleLoadTemplate(e.target.value);
+                  }}
+                >
+                  <option value="">
+                    {templates.length === 0 ? 'No saved plans yet' : 'Select a feeding plan...'}
+                  </option>
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Program Name</label>
                 <input
@@ -905,10 +1003,17 @@ export default function HorseDetailPage() {
               </div>
             </div>
             <div className="p-6 border-t border-border flex gap-3">
-              <button onClick={() => setShowFeedModal(false)} className="btn-secondary flex-1" disabled={isSubmitting}>
+              <button onClick={() => setShowFeedModal(false)} className="btn-secondary flex-shrink-0" disabled={isSubmitting || isSavingTemplate}>
                 Cancel
               </button>
-              <button onClick={handleSaveFeedProgram} className="btn-primary flex-1" disabled={isSubmitting}>
+              <button
+                onClick={handleSaveAsTemplate}
+                className="btn-secondary flex-1 flex items-center justify-center gap-1.5"
+                disabled={isSubmitting || isSavingTemplate}
+              >
+                {isSavingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Save Feeding Plan</>}
+              </button>
+              <button onClick={handleSaveFeedProgram} className="btn-primary flex-1" disabled={isSubmitting || isSavingTemplate}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Feed Program'}
               </button>
             </div>
