@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Shield } from 'lucide-react';
+import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 
 export default function AcceptTermsPage() {
   const router = useRouter();
@@ -11,16 +12,25 @@ export default function AcceptTermsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [error, setError] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
 
   useEffect(() => {
-    async function checkTermsStatus() {
+    async function init() {
       try {
-        const res = await fetch('/api/user');
-        if (!res.ok) return;
-        const { data } = await res.json();
-        if (data?.tosAcceptedAt) {
-          router.push('/onboarding');
-          return;
+        const [userRes, csrfRes] = await Promise.all([
+          fetch('/api/user'),
+          fetch('/api/csrf'),
+        ]);
+        if (userRes.ok) {
+          const { data } = await userRes.json();
+          if (data?.tosAcceptedAt) {
+            router.push('/onboarding');
+            return;
+          }
+        }
+        if (csrfRes.ok) {
+          const { csrfToken } = await csrfRes.json();
+          setCsrfToken(csrfToken);
         }
       } catch {
         // Continue showing the page
@@ -28,7 +38,7 @@ export default function AcceptTermsPage() {
         setIsChecking(false);
       }
     }
-    checkTermsStatus();
+    init();
   }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -41,7 +51,10 @@ export default function AcceptTermsPage() {
     try {
       const res = await fetch('/api/user/accept-terms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+        },
         body: JSON.stringify({ tosAccepted: true, marketingOptIn }),
       });
 
@@ -75,8 +88,8 @@ export default function AcceptTermsPage() {
       <div className="max-w-lg w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-2xl mb-4">
-            <Shield className="w-8 h-8 text-amber-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
+            <Image src="/logo.png" alt="BarnKeep" width={64} height={64} className="rounded-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">Almost There!</h1>
           <p className="text-muted-foreground mt-2">
