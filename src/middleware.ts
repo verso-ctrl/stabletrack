@@ -82,13 +82,13 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   response.headers.set('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev",
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.clerk.accounts.dev https://clerk.barnkeep.com",
     "worker-src 'self' blob:",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://*.stripe.com",
+    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://*.stripe.com https://clerk.barnkeep.com",
     "font-src 'self'",
-    "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://*.sentry.io",
-    "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev",
+    "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://*.sentry.io https://clerk.barnkeep.com",
+    "frame-src 'self' https://js.stripe.com https://*.clerk.accounts.dev https://accounts.barnkeep.com",
     "object-src 'none'",
     "base-uri 'self'",
   ].join('; '));
