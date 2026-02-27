@@ -134,7 +134,14 @@ export async function getCurrentUser() {
 
         if (user) return user;
       } else {
-        console.warn(`Auth: New Clerk user ${userId} has same email as existing Clerk user ${existingUserByEmail.id}. Skipping migration.`);
+        console.warn(`Auth: New Clerk user ${userId} has same email as existing Clerk user ${existingUserByEmail.id}. Returning existing user.`);
+        // Two Clerk accounts share the same email — return the existing DB record
+        // rather than falling through and crashing on duplicate email constraint.
+        user = await prisma.user.findUnique({
+          where: { id: existingUserByEmail.id },
+          include: { subscription: true },
+        });
+        if (user) return user;
       }
     }
 
