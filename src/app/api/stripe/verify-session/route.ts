@@ -46,7 +46,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (session.client_reference_id !== user.id) {
+    // Allow if the session was created for this user OR for a Clerk duplicate that
+    // maps to this user (handles the case where two Clerk IDs share an email).
+    if (session.client_reference_id !== user.id && session.metadata?.userId !== user.id) {
+      console.error(`verify-session: client_reference_id ${session.client_reference_id} / metadata.userId ${session.metadata?.userId} does not match current user ${user.id}`)
       return NextResponse.json(
         { error: 'Session does not belong to this user' },
         { status: 403 }
@@ -146,9 +149,9 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Verify session error:', error)
+    console.error('Verify session error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
-      { error: 'Failed to verify session and create barn' },
+      { error: error instanceof Error ? error.message : 'Failed to verify session and create barn' },
       { status: 500 }
     )
   }
