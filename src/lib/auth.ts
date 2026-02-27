@@ -66,54 +66,94 @@ export async function getCurrentUser() {
 
     if (existingUserByEmail) {
       // A user with this email was created via direct invite (no Clerk ID).
-      // Migrate their record to use the Clerk ID so memberships carry over.
-      // This only runs for users without a Clerk ID (invited users have DB-generated IDs).
+      // Migrate: create new user with Clerk ID, transfer memberships, delete old.
       const hasClerkId = existingUserByEmail.id.startsWith('user_');
       if (!hasClerkId && isClerkConfigured) {
-        // Update all references from old ID to new Clerk ID
-        await prisma.$transaction([
-          prisma.barnMember.updateMany({
-            where: { userId: existingUserByEmail.id },
-            data: { userId: userId! },
-          }),
-          prisma.barnMember.updateMany({
-            where: { approvedBy: existingUserByEmail.id },
-            data: { approvedBy: userId! },
-          }),
-          prisma.activityLog.updateMany({
-            where: { userId: existingUserByEmail.id },
-            data: { userId: userId! },
-          }),
-          prisma.user.update({
-            where: { id: existingUserByEmail.id },
+        const oldId = existingUserByEmail.id;
+
+        user = await prisma.$transaction(async (tx) => {
+          // Get full old user data
+          const oldUser = await tx.user.findUnique({
+            where: { id: oldId },
+            include: { subscription: true },
+          });
+          if (!oldUser) return null;
+
+          // Temporarily clear the email on the old user to avoid unique constraint
+          await tx.user.update({
+            where: { id: oldId },
+            data: { email: `${oldId}@migrating.barnkeep.com` },
+          });
+
+          // Create new user with Clerk ID
+          const newUser = await tx.user.create({
             data: {
               id: userId!,
-              firstName: clerkUser?.firstName || undefined,
-              lastName: clerkUser?.lastName || undefined,
-              avatarUrl: clerkUser?.imageUrl || undefined,
+              email,
+              firstName: clerkUser?.firstName || oldUser.firstName,
+              lastName: clerkUser?.lastName || oldUser.lastName,
+              avatarUrl: clerkUser?.imageUrl || oldUser.avatarUrl,
+              phone: oldUser.phone,
+              timezone: oldUser.timezone,
+              subscription: {
+                create: {
+                  tier: oldUser.subscription?.tier || 'STARTER',
+                  status: oldUser.subscription?.status || 'ACTIVE',
+                  maxHorses: oldUser.subscription?.maxHorses || 5,
+                  maxBarns: oldUser.subscription?.maxBarns || 1,
+                  storageGb: oldUser.subscription?.storageGb || 1,
+                },
+              },
             },
-          }),
-        ]);
+            include: { subscription: true },
+          });
 
-        // Fetch the migrated user
-        user = await prisma.user.findUnique({
-          where: { id: userId! },
-          include: { subscription: true },
+          // Transfer barn memberships
+          await tx.barnMember.updateMany({
+            where: { userId: oldId },
+            data: { userId: userId! },
+          });
+
+          // Transfer approvedBy references
+          await tx.barnMember.updateMany({
+            where: { approvedBy: oldId },
+            data: { approvedBy: userId! },
+          });
+
+          // Transfer activity logs
+          await tx.activityLog.updateMany({
+            where: { userId: oldId },
+            data: { userId: userId! },
+          });
+
+          // Delete old user (subscription cascades)
+          await tx.user.delete({ where: { id: oldId } });
+
+          return newUser;
         });
 
         if (user) return user;
       } else {
-        // Another Clerk account with this email exists — do not auto-migrate
         console.warn(`Auth: New Clerk user ${userId} has same email as existing Clerk user ${existingUserByEmail.id}. Skipping migration.`);
       }
     }
 
-    // Create new user in our database (with unique email if collision)
-    const userEmail = existingUserByEmail ? `${userId}@pending.barnkeep.com` : email;
+    // Also check if a pending placeholder user was previously created for this Clerk ID
+    const pendingUser = await prisma.user.findUnique({ where: { id: userId! } });
+    if (pendingUser) {
+      // This Clerk user already has a record (with pending email). Just return it.
+      user = await prisma.user.findUnique({
+        where: { id: userId! },
+        include: { subscription: true },
+      });
+      if (user) return user;
+    }
+
+    // Create new user in our database
     user = await prisma.user.create({
       data: {
         id: userId,
-        email: userEmail,
+        email,
         firstName: clerkUser?.firstName || 'Demo',
         lastName: clerkUser?.lastName || 'User',
         avatarUrl: clerkUser?.imageUrl || null,
