@@ -11,18 +11,28 @@ export default function OnboardingPage() {
   const [hasBarns, setHasBarns] = useState(false);
 
   useEffect(() => {
-    // Check if user already has barns
-    async function checkBarns() {
+    async function checkUserAndBarns() {
       try {
+        // Check if user has accepted terms
+        const userRes = await fetch('/api/user');
+        if (userRes.ok) {
+          const { data: user } = await userRes.json();
+          if (!user?.tosAcceptedAt) {
+            router.push('/accept-terms');
+            return;
+          }
+        }
+
+        // Check if user already has barns
         const response = await fetch('/api/barns');
         const result = await response.json();
-        
+
         if (response.ok && result.data?.length > 0) {
           // User already has barns, redirect to dashboard
           router.push('/dashboard');
           return;
         }
-        
+
         setHasBarns(false);
       } catch (error) {
         console.error('Error checking barns:', error);
@@ -30,8 +40,8 @@ export default function OnboardingPage() {
         setIsLoading(false);
       }
     }
-    
-    checkBarns();
+
+    checkUserAndBarns();
   }, [router]);
 
   if (isLoading) {

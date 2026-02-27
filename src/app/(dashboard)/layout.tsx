@@ -1,16 +1,49 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sidebar, MobileBottomNav } from '@/components/dashboard/Sidebar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ToastContainer } from '@/components/ui/ToastContainer';
 import { TrialExpiredOverlay } from '@/components/billing/TrialExpiredOverlay';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Demo mode: No authentication required
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    async function checkTerms() {
+      try {
+        const res = await fetch('/api/user');
+        if (res.ok) {
+          const { data } = await res.json();
+          if (!data?.tosAcceptedAt) {
+            router.push('/accept-terms');
+            return;
+          }
+        }
+      } catch {
+        // If fetch fails, let the user through — API errors
+        // shouldn't block the entire dashboard
+      }
+      setReady(true);
+    }
+    checkTerms();
+  }, [router]);
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <div className="flex min-h-screen bg-background">

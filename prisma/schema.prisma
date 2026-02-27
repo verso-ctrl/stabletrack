@@ -23,6 +23,8 @@ model User {
   avatarUrl   String?
   phone       String?
   timezone    String   @default("America/New_York")
+  tosAcceptedAt DateTime?
+  marketingOptIn Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
