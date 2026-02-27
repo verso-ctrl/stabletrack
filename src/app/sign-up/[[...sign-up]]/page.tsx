@@ -17,7 +17,7 @@ export default function SignUpPage() {
 
         {/* Clerk Sign Up Component */}
         <SignUp
-          fallbackRedirectUrl="/onboarding"
+          forceRedirectUrl="/accept-terms"
           appearance={{
             elements: {
               rootBox: 'mx-auto',
