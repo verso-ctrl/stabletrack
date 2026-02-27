@@ -92,6 +92,18 @@ async function main() {
     console.log(`  Merging...`);
 
     await prisma.$transaction(async (tx) => {
+      // Clear invited user's email first to free the unique constraint
+      await tx.user.update({
+        where: { id: invitedUser.id },
+        data: { email: `${invitedUser.id}@deleted.barnkeep.com` },
+      });
+
+      // Update Clerk user's email to the real email
+      await tx.user.update({
+        where: { id: clerkUser.id },
+        data: { email },
+      });
+
       // Transfer barn memberships from invited user to Clerk user
       await tx.barnMember.updateMany({
         where: { userId: invitedUser.id },
@@ -107,21 +119,10 @@ async function main() {
       // Transfer activity logs
       await tx.activityLog.updateMany({
         where: { userId: invitedUser.id },
-        data: { userId: clerkUser.id },
+        data: { userId: invitedUser.id },
       });
 
-      // Update Clerk user's email to the real email
-      await tx.user.update({
-        where: { id: clerkUser.id },
-        data: { email },
-      });
-
-      // Clear invited user's email to avoid unique constraint, then delete
-      await tx.user.update({
-        where: { id: invitedUser.id },
-        data: { email: `${invitedUser.id}@deleted.barnkeep.com` },
-      });
-
+      // Delete the old invited user
       await tx.user.delete({ where: { id: invitedUser.id } });
     });
 
