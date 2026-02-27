@@ -107,6 +107,7 @@ barnkeep/
 │   │   │   └── training/      # Training logs
 │   │   ├── (marketing)/       # Public pages (pricing, privacy, terms)
 │   │   ├── api/               # REST API endpoints (52+ routes, includes Stripe webhooks)
+│   │   ├── accept-terms/       # ToS acceptance gate (required before onboarding/dashboard)
 │   │   ├── onboarding/        # User onboarding (create-barn, join-barn)
 │   │   ├── portal/            # Client portal
 │   │   └── sign-in/sign-up/   # Auth pages (Clerk)
@@ -173,6 +174,13 @@ barnkeep/
 - `getCurrentUser()` - Get authenticated user, auto-creates in Prisma on first login
 - `checkBarnPermission(userId, barnId, permission)` - Role-based access control
 
+**Terms of Service Gate:**
+- User model has `tosAcceptedAt` (nullable DateTime) and `marketingOptIn` (boolean, default false)
+- `/accept-terms` page: required ToS checkbox + optional marketing opt-in, redirects to `/onboarding` on accept
+- `POST /api/user/accept-terms`: sets `tosAcceptedAt` and `marketingOptIn` on the user record
+- Both `/onboarding` and `(dashboard)/layout.tsx` check `tosAcceptedAt` and redirect to `/accept-terms` if null
+- Flow: Sign up → /onboarding → (no ToS?) → /accept-terms → accept → /onboarding → create/join barn → /dashboard
+
 **Roles:** OWNER (all permissions), MANAGER, TRAINER, CARETAKER, CLIENT (restricted to own horses)
 
 **API Route Pattern:**
@@ -211,7 +219,7 @@ export async function GET(req: Request, { params }: { params: { barnId: string }
 
 PostgreSQL via Supabase (SQLite available for local dev). 42 models organized as:
 
-- **Users & Auth:** User, Subscription, BarnMember, HorseAccess
+- **Users & Auth:** User (includes tosAcceptedAt, marketingOptIn), Subscription, BarnMember, HorseAccess
 - **Core Entities:** Barn, Horse, Stall, Paddock, HorsePhoto, HorseTurnout
 - **Health:** WeightRecord, Vaccination, Medication, MedicationLog, HealthRecord, HealthAttachment, DailyHealthCheck
 - **Feed & Nutrition:** FeedType, Supplement, FeedProgram, FeedProgramItem, FeedLog, WaterLog
