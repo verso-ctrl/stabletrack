@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, FileText, Loader2, Pill, Plus, Printer, X } from 'lucide-react';
+import { ChevronRight, FileText, Loader2, Pencil, Pill, Plus, Printer, Trash2, X } from 'lucide-react';
 import { FamilyTree } from './FamilyTree';
+import { csrfFetch } from '@/lib/fetch';
+import { toast } from '@/lib/toast';
 
 interface HealthRecord {
   id: string;
@@ -94,6 +96,28 @@ interface HealthTabProps {
   refreshKey?: number;
 }
 
+const frequencyOptions = [
+  { value: 'ONCE_DAILY', label: 'Once daily' },
+  { value: 'ONCE_DAILY_WITH_FOOD', label: 'Once daily (with food)' },
+  { value: 'TWICE_DAILY', label: 'Twice daily' },
+  { value: 'TWICE_DAILY_WITH_FOOD', label: 'Twice daily (with food)' },
+  { value: 'THREE_TIMES_DAILY', label: 'Three times daily' },
+  { value: 'THREE_TIMES_DAILY_WITH_FOOD', label: 'Three times daily (with food)' },
+  { value: 'EVERY_OTHER_DAY', label: 'Every other day' },
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'AS_NEEDED', label: 'As needed' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+const routeOptions = [
+  { value: 'ORAL', label: 'Oral' },
+  { value: 'IM', label: 'Intramuscular (IM)' },
+  { value: 'IV', label: 'Intravenous (IV)' },
+  { value: 'TOPICAL', label: 'Topical' },
+  { value: 'OPHTHALMIC', label: 'Ophthalmic (Eye)' },
+  { value: 'OTHER', label: 'Other' },
+];
+
 export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true, onUpdate, refreshKey }: HealthTabProps) {
   const [coggins, setCoggins] = useState<CogginsData | null>(null);
   const [cogginsLoading, setCogginsLoading] = useState(true);
@@ -103,6 +127,16 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
   const [medicationsLoading, setMedicationsLoading] = useState(true);
   const [selectedHealthRecord, setSelectedHealthRecord] = useState<HealthRecord | null>(null);
   const [showHealthRecordModal, setShowHealthRecordModal] = useState(false);
+
+  // Edit medication modal
+  const [editingMed, setEditingMed] = useState<Medication | null>(null);
+  const [editMedForm, setEditMedForm] = useState({ name: '', dosage: '', frequency: '', route: '', instructions: '', status: '' });
+  const [savingMed, setSavingMed] = useState(false);
+
+  // Deleting state
+  const [deletingMedId, setDeletingMedId] = useState<string | null>(null);
+  const [deletingVaxId, setDeletingVaxId] = useState<string | null>(null);
+  const [deletingWeightId, setDeletingWeightId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchHealthData = async () => {
@@ -134,6 +168,81 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
     fetchHealthData();
   }, [barnId, horse?.id, refreshKey]);
+
+  const openEditMed = (med: Medication) => {
+    setEditingMed(med);
+    setEditMedForm({
+      name: med.name,
+      dosage: med.dosage,
+      frequency: med.frequency,
+      route: med.route || 'ORAL',
+      instructions: med.instructions || '',
+      status: med.status || 'ACTIVE',
+    });
+  };
+
+  const handleSaveMed = async () => {
+    if (!editingMed) return;
+    setSavingMed(true);
+    try {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}/medications/${editingMed.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editMedForm),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      const { data } = await res.json();
+      setMedications(prev => prev.map(m => m.id === data.id ? { ...m, ...data } : m).filter(m => m.status === 'ACTIVE'));
+      setEditingMed(null);
+      toast.success('Medication updated');
+    } catch {
+      toast.error('Failed to update medication');
+    } finally {
+      setSavingMed(false);
+    }
+  };
+
+  const handleDeleteMed = async (medId: string) => {
+    setDeletingMedId(medId);
+    try {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}/medications/${medId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      setMedications(prev => prev.filter(m => m.id !== medId));
+      toast.success('Medication removed');
+    } catch {
+      toast.error('Failed to delete medication');
+    } finally {
+      setDeletingMedId(null);
+    }
+  };
+
+  const handleDeleteVax = async (vaxId: string) => {
+    setDeletingVaxId(vaxId);
+    try {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}/vaccinations/${vaxId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Vaccination record removed');
+      onUpdate?.();
+    } catch {
+      toast.error('Failed to delete vaccination');
+    } finally {
+      setDeletingVaxId(null);
+    }
+  };
+
+  const handleDeleteWeight = async (weightId: string) => {
+    setDeletingWeightId(weightId);
+    try {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}/weights/${weightId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Weight record removed');
+      onUpdate?.();
+    } catch {
+      toast.error('Failed to delete weight record');
+    } finally {
+      setDeletingWeightId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -172,16 +281,39 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {medications.map((med) => (
               <div key={med.id} className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
-                <p className="font-medium text-foreground">{med.name}</p>
-                <p className="text-sm text-muted-foreground">{med.dosage} &bull; {med.frequency}</p>
-                {med.route && <p className="text-xs text-muted-foreground mt-1">Route: {med.route}</p>}
-                {med.instructions && <p className="text-xs text-muted-foreground mt-1">{med.instructions}</p>}
-                {med.logs && med.logs.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-purple-100 dark:border-purple-900/50">
-                    Last given: {new Date(med.logs[0].givenAt).toLocaleDateString()}
-                    {med.logs[0].givenBy && ` by ${med.logs[0].givenBy}`}
-                  </p>
-                )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">{med.name}</p>
+                    <p className="text-sm text-muted-foreground">{med.dosage} &bull; {med.frequency}</p>
+                    {med.route && <p className="text-xs text-muted-foreground mt-1">Route: {med.route}</p>}
+                    {med.instructions && <p className="text-xs text-muted-foreground mt-1">{med.instructions}</p>}
+                    {med.logs && med.logs.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-purple-100 dark:border-purple-900/50">
+                        Last given: {new Date(med.logs[0].givenAt).toLocaleDateString()}
+                        {med.logs[0].givenBy && ` by ${med.logs[0].givenBy}`}
+                      </p>
+                    )}
+                  </div>
+                  {canEdit && (
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => openEditMed(med)}
+                        className="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 text-muted-foreground hover:text-foreground transition-colors"
+                        title="Edit medication"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMed(med.id)}
+                        disabled={deletingMedId === med.id}
+                        className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50"
+                        title="Delete medication"
+                      >
+                        {deletingMedId === med.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -307,20 +439,32 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
 
               return (
                 <div key={vax.id} className="p-3 rounded-xl bg-background">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-foreground">
-                      {vax.type.replace(/_/g, ' ')}
-                    </p>
-                    {isExpiringSoon && <span className="badge-warning">Due Soon</span>}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{vax.type.replace(/_/g, ' ')}</p>
+                        {isExpiringSoon && <span className="badge-warning">Due Soon</span>}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Given: {new Date(vax.dateGiven).toLocaleDateString()}
+                      </p>
+                      {vax.nextDueDate && (
+                        <p className="text-sm text-muted-foreground">
+                          Next due: {new Date(vax.nextDueDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    {canEdit && (
+                      <button
+                        onClick={() => handleDeleteVax(vax.id)}
+                        disabled={deletingVaxId === vax.id}
+                        className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50 shrink-0"
+                        title="Delete vaccination record"
+                      >
+                        {deletingVaxId === vax.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      </button>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Given: {new Date(vax.dateGiven).toLocaleDateString()}
-                  </p>
-                  {vax.nextDueDate && (
-                    <p className="text-sm text-muted-foreground">
-                      Next due: {new Date(vax.nextDueDate).toLocaleDateString()}
-                    </p>
-                  )}
                 </div>
               );
             })}
@@ -349,6 +493,16 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                 <span className="font-medium text-foreground">{w.weight} lbs</span>
                 {w.bodyScore && (
                   <span className="text-sm text-muted-foreground">BCS: {w.bodyScore.toFixed(1)}</span>
+                )}
+                {canEdit && (
+                  <button
+                    onClick={() => handleDeleteWeight(w.id)}
+                    disabled={deletingWeightId === w.id}
+                    className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50"
+                    title="Delete weight record"
+                  >
+                    {deletingWeightId === w.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
                 )}
               </div>
             ))}
@@ -410,6 +564,61 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           </div>
         )}
       </div>
+
+      {/* Edit Medication Modal */}
+      {editingMed && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="font-semibold text-foreground">Edit Medication</h3>
+              <button onClick={() => setEditingMed(null)} className="p-1 rounded hover:bg-accent">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Name</label>
+                <input className="input w-full" value={editMedForm.name} onChange={e => setEditMedForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Dosage</label>
+                  <input className="input w-full" value={editMedForm.dosage} onChange={e => setEditMedForm(f => ({ ...f, dosage: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Status</label>
+                  <select className="input w-full" value={editMedForm.status} onChange={e => setEditMedForm(f => ({ ...f, status: e.target.value }))}>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Discontinued</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Frequency</label>
+                <select className="input w-full" value={editMedForm.frequency} onChange={e => setEditMedForm(f => ({ ...f, frequency: e.target.value }))}>
+                  {frequencyOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Route</label>
+                <select className="input w-full" value={editMedForm.route} onChange={e => setEditMedForm(f => ({ ...f, route: e.target.value }))}>
+                  {routeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Instructions</label>
+                <textarea className="input w-full h-20 resize-none" value={editMedForm.instructions} onChange={e => setEditMedForm(f => ({ ...f, instructions: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex gap-3 p-5 border-t border-border">
+              <button onClick={() => setEditingMed(null)} className="btn-secondary flex-1">Cancel</button>
+              <button onClick={handleSaveMed} disabled={savingMed} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                {savingMed ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Health Record Detail Modal */}
       {showHealthRecordModal && selectedHealthRecord && (
