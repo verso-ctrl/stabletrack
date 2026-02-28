@@ -237,6 +237,26 @@ export default function FeedChartPage() {
         </div>
       )}
 
+      {/* Medication Warning Banner */}
+      {chartData && chartData.horses.some((h: any) => h.medications?.length > 0) && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-semibold text-amber-800">Medications to give with feeding</p>
+            <ul className="mt-1 space-y-0.5">
+              {chartData.horses
+                .filter((h: any) => h.medications?.length > 0)
+                .map((h: any) => (
+                  <li key={h.id} className="text-sm text-amber-700">
+                    <span className="font-medium">{h.barnName}:</span>{' '}
+                    {h.medications.map((m: any) => `${m.name} — ${m.dosage}${m.giveWithFoodNotes ? ` (${m.giveWithFoodNotes})` : ''}`).join(', ')}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Feed Chart Table */}
       {chartData && chartData.horses.length > 0 ? (
         <div className="card overflow-hidden">
@@ -278,7 +298,15 @@ export default function FeedChartPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{horse.barnName}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium text-foreground">{horse.barnName}</p>
+                            {horse.medications?.length > 0 && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium" title="Has medications to give with food">
+                                <Pill className="w-3 h-3" />
+                                {horse.medications.length}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             {horse.stall}
                             {horse.section && ` • ${horse.section}`}
