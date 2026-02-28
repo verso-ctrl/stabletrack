@@ -25,6 +25,8 @@ interface Medication {
   frequency: string;
   route?: string | null;
   giveWithFood: boolean;
+  giveWithFoodNotes?: string | null;
+  instructions?: string | null;
 }
 
 interface CareTabProps {
@@ -62,7 +64,12 @@ export function CareTab({ horse, onEditFeed, canEdit = true }: CareTabProps) {
               <ul className="mt-0.5 space-y-0.5">
                 {medsWithFood.map(m => (
                   <li key={m.id} className="text-xs text-amber-700">
-                    {m.name} — {m.dosage}
+                    <span className="font-medium">{m.name}</span> — {m.dosage}
+                    {(m.giveWithFoodNotes || m.instructions) && (
+                      <span className="block text-amber-600 mt-0.5">
+                        {m.giveWithFoodNotes || m.instructions}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -32,7 +32,6 @@ const frequencyOptions = [
 
 const routeOptions = [
   { value: 'ORAL', label: 'Oral' },
-  { value: 'WITH_FOOD', label: 'With Food' },
   { value: 'IM', label: 'Intramuscular (IM)' },
   { value: 'IV', label: 'Intravenous (IV)' },
   { value: 'TOPICAL', label: 'Topical' },
@@ -55,6 +54,8 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     isControlled: false,
+    giveWithFood: false,
+    giveWithFoodNotes: '',
     refillsRemaining: '',
     pharmacy: '',
     instructions: '',
@@ -85,7 +86,8 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             startDate: formData.startDate,
             endDate: formData.endDate || null,
             isControlled: formData.isControlled,
-            giveWithFood: formData.route === 'WITH_FOOD' || formData.frequency.includes('WITH_FOOD'),
+            giveWithFood: formData.giveWithFood || formData.frequency.includes('WITH_FOOD'),
+            giveWithFoodNotes: formData.giveWithFoodNotes || null,
             refillsRemaining: formData.refillsRemaining || null,
             pharmacy: formData.pharmacy || null,
             instructions: formData.instructions || null,
@@ -186,19 +188,39 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Route
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
+                    Route
+                  </label>
+                  <select
+                    value={formData.route}
+                    onChange={(e) => setFormData({ ...formData, route: e.target.value })}
+                    className="input w-full"
+                  >
+                    {routeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.giveWithFood}
+                    onChange={(e) => setFormData({ ...formData, giveWithFood: e.target.checked })}
+                    className="w-4 h-4 rounded border-border text-green-600 focus:ring-green-500"
+                  />
+                  <span className="text-sm text-foreground">Give with food</span>
                 </label>
-                <select
-                  value={formData.route}
-                  onChange={(e) => setFormData({ ...formData, route: e.target.value })}
-                  className="input w-full"
-                >
-                  {routeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
+                {formData.giveWithFood && (
+                  <input
+                    type="text"
+                    value={formData.giveWithFoodNotes}
+                    onChange={(e) => setFormData({ ...formData, giveWithFoodNotes: e.target.value })}
+                    className="input w-full text-sm"
+                    placeholder="e.g., mix into grain, morning feed"
+                  />
+                )}
               </div>
             </div>
 
