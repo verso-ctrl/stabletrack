@@ -240,13 +240,14 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPricing> = {
 
 export const STARTER_FEATURES = [
   'Up to 10 horses',
+  'Up to 20 photos per horse',
   'Horse profiles & management',
   'Feed tracking & feed charts',
   'Health & vet records',
   'Stall & pasture management',
   'Calendar & tasks',
   'Document storage (10 GB)',
-  '1 team member',
+  'Solo use (owner only)',
   'Mobile access',
 ]
 
@@ -256,7 +257,7 @@ export const FARM_FEATURES = [
   'Up to 5 team members',
   '50 GB document storage',
   'Unlimited photo uploads',
-  'Priority support',
+  'Email & chat support',
 ]
 
 // =============================================================================

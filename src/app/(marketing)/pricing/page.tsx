@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Check,
   HelpCircle,
@@ -13,13 +14,6 @@ import {
   FARM_FEATURES,
   ADD_ONS,
 } from '@/lib/tiers';
-
-const HorseIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 12c0-4-3-8-8-8-3 0-5.5 1.5-7 3.5L3 10l1 3-2 4 3 1 2-1 2 3h4l1-2 2 1 4-3c1-1 2-2.5 2-4z"/>
-    <circle cx="18" cy="9" r="1"/>
-  </svg>
-);
 
 const faqs = [
   {
@@ -42,12 +36,26 @@ const faqs = [
     question: 'Do I need a credit card for the trial?',
     answer: 'No! Start your 14-day free trial without entering any payment info. We\'ll only ask for payment if you want to continue after the trial.',
   },
+  {
+    question: 'Is there a mobile app?',
+    answer: 'Yes — BarnKeep works on iOS and Android. You can access everything from your phone, whether you\'re in the barn or out in the pasture.',
+  },
+  {
+    question: 'Can I try before buying?',
+    answer: 'Absolutely. Every plan starts with a 14-day free trial. No credit card required, no commitment. Just sign up and start using it.',
+  },
 ];
 
 const comingSoonAddOns = [
   { name: 'Training & Lessons', description: 'Training logs, lesson scheduling, and competition tracking.' },
   { name: 'Client & Billing', description: 'Client management, invoicing, payments, and recurring billing.' },
   { name: 'Team Management', description: 'Multi-user access, role-based permissions, and team coordination.' },
+];
+
+const breedingFeatures = [
+  'Heat cycle tracking & calendar',
+  'Breeding records & stallion reports',
+  'Foaling management & mare history',
 ];
 
 export default function PricingPage() {
@@ -60,9 +68,7 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
-                <HorseIcon className="w-4 h-4" />
-              </div>
+              <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
               <span className="font-display font-semibold text-lg text-foreground tracking-tight">BarnKeep</span>
             </Link>
             <div className="flex items-center gap-3">
@@ -83,6 +89,9 @@ export default function PricingPage() {
       {/* Header */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto text-center">
+          <span className="inline-block text-sm font-medium text-primary bg-primary/8 px-3 py-1 rounded-full mb-5">
+            No credit card required
+          </span>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight">
             Simple plans for every farm.
           </h1>
@@ -99,7 +108,7 @@ export default function PricingPage() {
           <div className="rounded-xl border-2 border-border p-8 flex flex-col">
             <div className="mb-6">
               <h2 className="font-display text-xl font-semibold text-foreground">Starter</h2>
-              <p className="text-sm text-muted-foreground mt-1">Perfect for small farms with a few horses.</p>
+              <p className="text-sm text-muted-foreground mt-1">Perfect for hobby barns &amp; personal farms</p>
             </div>
 
             <div className="mb-6">
@@ -122,6 +131,7 @@ export default function PricingPage() {
             >
               Start free trial
             </Link>
+            <p className="text-center text-xs text-muted-foreground mt-3">No credit card required</p>
           </div>
 
           {/* Farm Plan */}
@@ -135,7 +145,7 @@ export default function PricingPage() {
 
             <div className="mb-6">
               <h2 className="font-display text-xl font-semibold text-foreground">Farm</h2>
-              <p className="text-sm text-muted-foreground mt-1">For growing farms that need no limits.</p>
+              <p className="text-sm text-muted-foreground mt-1">For growing operations &amp; boarding barns</p>
             </div>
 
             <div className="mb-6">
@@ -158,6 +168,7 @@ export default function PricingPage() {
             >
               Start free trial
             </Link>
+            <p className="text-center text-xs text-muted-foreground mt-3">No credit card required</p>
           </div>
         </div>
 
@@ -180,15 +191,23 @@ export default function PricingPage() {
 
           {/* Breeding Tracker - Available */}
           <div className="rounded-xl border-2 border-primary/30 bg-card p-6 mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
                   <ClipboardList className="w-4 h-4 text-primary" />
                   <h3 className="font-display font-semibold text-foreground">{ADD_ONS.breeding.name}</h3>
                   <span className="text-sm font-medium text-primary">+${ADD_ONS.breeding.monthlyPriceCents / 100}/month</span>
                 </div>
-                <p className="text-sm text-muted-foreground">{ADD_ONS.breeding.description}</p>
-                <p className="text-xs text-muted-foreground mt-1">Available on any plan.</p>
+                <p className="text-sm text-muted-foreground mb-3">{ADD_ONS.breeding.description}</p>
+                <ul className="space-y-1.5">
+                  {breedingFeatures.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-foreground">
+                      <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-muted-foreground mt-3">Available on any plan.</p>
               </div>
               <Link
                 href="/sign-up"
@@ -206,11 +225,12 @@ export default function PricingPage() {
                 key={addon.name}
                 className="rounded-lg border border-border/60 bg-card p-4 opacity-60"
               >
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <ClipboardList className="w-4 h-4 text-muted-foreground" />
                   <h3 className="font-display font-medium text-foreground text-sm">{addon.name}</h3>
                 </div>
-                <p className="text-xs text-muted-foreground">Coming Soon</p>
+                <p className="text-xs text-muted-foreground mb-2">{addon.description}</p>
+                <p className="text-xs font-medium text-muted-foreground">Coming Soon</p>
               </div>
             ))}
           </div>
@@ -259,28 +279,57 @@ export default function PricingPage() {
           <p className="mt-2 text-muted-foreground">
             14-day free trial. No credit card required. Plans start at $25/month.
           </p>
-          <Link
-            href="/sign-up"
-            className="inline-flex mt-6 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Start free trial
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+            <Link
+              href="/sign-up"
+              className="inline-flex px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Start free trial
+            </Link>
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            No credit card required · Takes 2 minutes to set up
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border/40">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-              <HorseIcon className="w-3.5 h-3.5 text-primary-foreground" />
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border/40 bg-muted/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
+            <div className="md:col-span-1">
+              <Link href="/" className="flex items-center gap-2.5">
+                <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
+                <span className="font-display font-semibold text-foreground">BarnKeep</span>
+              </Link>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Simple barn management for small farms.
+              </p>
             </div>
-            <span className="font-display font-medium text-foreground">BarnKeep</span>
-          </Link>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+            <div>
+              <h4 className="font-medium text-foreground text-sm">Product</h4>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/#features" className="hover:text-foreground transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground text-sm">Company</h4>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li><Link href="#" className="hover:text-foreground transition-colors">About</Link></li>
+                <li><Link href="#" className="hover:text-foreground transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground text-sm">Legal</h4>
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} BarnKeep. All rights reserved.
           </div>
         </div>
       </footer>
