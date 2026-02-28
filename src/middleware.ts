@@ -135,6 +135,8 @@ export default async function middleware(request: NextRequest) {
       const isPublicRoute = createRouteMatcher([
         '/',
         '/pricing(.*)',
+        '/about(.*)',
+        '/contact(.*)',
         '/privacy(.*)',
         '/terms(.*)',
         '/sign-in(.*)',
