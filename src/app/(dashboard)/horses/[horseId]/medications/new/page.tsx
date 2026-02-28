@@ -52,6 +52,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
     endDate: '',
     isControlled: false,
     giveWithFood: false,
+    giveWithFoodNotes: '',
     refillsRemaining: '',
     pharmacy: '',
     instructions: '',
@@ -83,6 +84,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             endDate: formData.endDate || null,
             isControlled: formData.isControlled,
             giveWithFood: formData.giveWithFood,
+            giveWithFoodNotes: formData.giveWithFoodNotes || null,
             refillsRemaining: formData.refillsRemaining || null,
             pharmacy: formData.pharmacy || null,
             instructions: formData.instructions || null,
@@ -307,18 +309,31 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
               </div>
             </div>
 
-            <label className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.giveWithFood}
-                onChange={(e) => setFormData({ ...formData, giveWithFood: e.target.checked })}
-                className="w-5 h-5 rounded border-border text-green-600 focus:ring-green-500"
-              />
-              <div>
-                <p className="font-medium text-green-800">Give with Food</p>
-                <p className="text-sm text-green-700">This medication should be given with a meal — it will appear on the feed chart</p>
-              </div>
-            </label>
+            <div className="rounded-xl bg-green-50 border border-green-200 overflow-hidden">
+              <label className="flex items-center gap-3 p-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.giveWithFood}
+                  onChange={(e) => setFormData({ ...formData, giveWithFood: e.target.checked })}
+                  className="w-5 h-5 rounded border-border text-green-600 focus:ring-green-500"
+                />
+                <div>
+                  <p className="font-medium text-green-800">Give with Food</p>
+                  <p className="text-sm text-green-700">This medication should be given with a meal — it will appear on the feed chart</p>
+                </div>
+              </label>
+              {formData.giveWithFood && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="text"
+                    value={formData.giveWithFoodNotes}
+                    onChange={(e) => setFormData({ ...formData, giveWithFoodNotes: e.target.value })}
+                    className="input w-full"
+                    placeholder="What to give it with (e.g., grain, morning feed)"
+                  />
+                </div>
+              )}
+            </div>
 
             <label className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 cursor-pointer">
               <input

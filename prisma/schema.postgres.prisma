@@ -362,6 +362,7 @@ model Medication {
   status             String    @default("ACTIVE")
   isControlled       Boolean   @default(false)
   giveWithFood       Boolean   @default(false)
+  giveWithFoodNotes  String?
   refillsRemaining   Int?
   pharmacy           String?
   instructions       String?

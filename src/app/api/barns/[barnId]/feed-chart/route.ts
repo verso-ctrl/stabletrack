@@ -39,6 +39,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
             name: true,
             dosage: true,
             frequency: true,
+            giveWithFoodNotes: true,
           },
         },
       },

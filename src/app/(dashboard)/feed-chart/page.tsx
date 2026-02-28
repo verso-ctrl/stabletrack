@@ -400,7 +400,7 @@ export default function FeedChartPage() {
                           {horse.medications.map((med: any) => (
                             <span key={med.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs">
                               <Pill className="w-3 h-3" />
-                              {med.name} — {med.dosage}
+                              {med.name} — {med.dosage}{med.giveWithFoodNotes ? ` (${med.giveWithFoodNotes})` : ''}
                             </span>
                           ))}
                         </div>
