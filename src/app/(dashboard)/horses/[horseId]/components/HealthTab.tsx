@@ -26,6 +26,10 @@ interface Vaccination {
   type: string;
   dateGiven: string;
   nextDueDate?: string;
+  veterinarian?: string | null;
+  notes?: string | null;
+  manufacturer?: string | null;
+  lotNumber?: string | null;
 }
 
 interface Weight {
@@ -118,6 +122,19 @@ const routeOptions = [
   { value: 'OTHER', label: 'Other' },
 ];
 
+const vaccinationTypes = [
+  { value: 'RABIES', label: 'Rabies' },
+  { value: 'TETANUS', label: 'Tetanus' },
+  { value: 'EWT_EEE_WEE_TETANUS', label: 'EWT / EEE / WEE / Tetanus' },
+  { value: 'WEST_NILE', label: 'West Nile' },
+  { value: 'INFLUENZA', label: 'Influenza' },
+  { value: 'RHINOPNEUMONITIS', label: 'Rhinopneumonitis' },
+  { value: 'STRANGLES', label: 'Strangles' },
+  { value: 'POTOMAC_HORSE_FEVER', label: 'Potomac Horse Fever' },
+  { value: 'BOTULISM', label: 'Botulism' },
+  { value: 'OTHER', label: 'Other' },
+];
+
 export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, barnId, canEdit = true, onUpdate, refreshKey }: HealthTabProps) {
   const [coggins, setCoggins] = useState<CogginsData | null>(null);
   const [cogginsLoading, setCogginsLoading] = useState(true);
@@ -132,6 +149,11 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
   const [editingMed, setEditingMed] = useState<Medication | null>(null);
   const [editMedForm, setEditMedForm] = useState({ name: '', dosage: '', frequency: '', route: '', instructions: '', status: '' });
   const [savingMed, setSavingMed] = useState(false);
+
+  // Edit vaccination modal
+  const [editingVax, setEditingVax] = useState<Vaccination | null>(null);
+  const [editVaxForm, setEditVaxForm] = useState({ type: '', dateGiven: '', nextDueDate: '', veterinarian: '', notes: '', manufacturer: '', lotNumber: '' });
+  const [savingVax, setSavingVax] = useState(false);
 
   // Deleting state
   const [deletingMedId, setDeletingMedId] = useState<string | null>(null);
@@ -199,6 +221,47 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
       toast.error('Failed to update medication');
     } finally {
       setSavingMed(false);
+    }
+  };
+
+  const openEditVax = (vax: Vaccination) => {
+    setEditingVax(vax);
+    setEditVaxForm({
+      type: vax.type,
+      dateGiven: vax.dateGiven ? new Date(vax.dateGiven).toISOString().split('T')[0] : '',
+      nextDueDate: vax.nextDueDate ? new Date(vax.nextDueDate).toISOString().split('T')[0] : '',
+      veterinarian: vax.veterinarian || '',
+      notes: vax.notes || '',
+      manufacturer: vax.manufacturer || '',
+      lotNumber: vax.lotNumber || '',
+    });
+  };
+
+  const handleSaveVax = async () => {
+    if (!editingVax) return;
+    setSavingVax(true);
+    try {
+      const res = await csrfFetch(`/api/barns/${barnId}/horses/${horse.id}/vaccinations/${editingVax.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: editVaxForm.type,
+          dateGiven: editVaxForm.dateGiven,
+          nextDueDate: editVaxForm.nextDueDate || null,
+          veterinarian: editVaxForm.veterinarian || null,
+          notes: editVaxForm.notes || null,
+          manufacturer: editVaxForm.manufacturer || null,
+          lotNumber: editVaxForm.lotNumber || null,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      setEditingVax(null);
+      toast.success('Vaccination updated');
+      onUpdate?.();
+    } catch {
+      toast.error('Failed to update vaccination');
+    } finally {
+      setSavingVax(false);
     }
   };
 
@@ -455,14 +518,23 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                       )}
                     </div>
                     {canEdit && (
-                      <button
-                        onClick={() => handleDeleteVax(vax.id)}
-                        disabled={deletingVaxId === vax.id}
-                        className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50 shrink-0"
-                        title="Delete vaccination record"
-                      >
-                        {deletingVaxId === vax.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => openEditVax(vax)}
+                          className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                          title="Edit vaccination"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteVax(vax.id)}
+                          disabled={deletingVaxId === vax.id}
+                          className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50"
+                          title="Delete vaccination record"
+                        >
+                          {deletingVaxId === vax.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -564,6 +636,62 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           </div>
         )}
       </div>
+
+      {/* Edit Vaccination Modal */}
+      {editingVax && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="font-semibold text-foreground">Edit Vaccination</h3>
+              <button onClick={() => setEditingVax(null)} className="p-1 rounded hover:bg-accent">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Vaccine Type</label>
+                <select className="input w-full" value={editVaxForm.type} onChange={e => setEditVaxForm(f => ({ ...f, type: e.target.value }))}>
+                  {vaccinationTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Date Given</label>
+                  <input type="date" className="input w-full" value={editVaxForm.dateGiven} onChange={e => setEditVaxForm(f => ({ ...f, dateGiven: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Next Due Date</label>
+                  <input type="date" className="input w-full" value={editVaxForm.nextDueDate} onChange={e => setEditVaxForm(f => ({ ...f, nextDueDate: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Veterinarian</label>
+                <input className="input w-full" value={editVaxForm.veterinarian} onChange={e => setEditVaxForm(f => ({ ...f, veterinarian: e.target.value }))} placeholder="Dr. Smith" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Manufacturer</label>
+                  <input className="input w-full" value={editVaxForm.manufacturer} onChange={e => setEditVaxForm(f => ({ ...f, manufacturer: e.target.value }))} placeholder="e.g. Zoetis" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Lot Number</label>
+                  <input className="input w-full" value={editVaxForm.lotNumber} onChange={e => setEditVaxForm(f => ({ ...f, lotNumber: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
+                <textarea className="input w-full h-20 resize-none" value={editVaxForm.notes} onChange={e => setEditVaxForm(f => ({ ...f, notes: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex gap-3 p-5 border-t border-border">
+              <button onClick={() => setEditingVax(null)} className="btn-secondary flex-1">Cancel</button>
+              <button onClick={handleSaveVax} disabled={savingVax} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                {savingVax ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Medication Modal */}
       {editingMed && (
