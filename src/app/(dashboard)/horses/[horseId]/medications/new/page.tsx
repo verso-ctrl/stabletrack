@@ -367,7 +367,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                Add Medication
+                Save Medication
               </>
             )}
           </button>

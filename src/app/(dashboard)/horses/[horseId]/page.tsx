@@ -894,7 +894,7 @@ export default function HorseDetailPage() {
             <div className="p-6 space-y-4">
               {/* Load Feeding Plan */}
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Load Feeding Plan</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Load Template</label>
                 <select
                   className="input w-full"
                   value=""
@@ -912,7 +912,7 @@ export default function HorseDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Program Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Feeding Plan Name</label>
                 <input
                   type="text"
                   value={feedForm.name}
@@ -930,7 +930,7 @@ export default function HorseDetailPage() {
                     onClick={addFeedItem}
                     className="text-sm text-amber-600 hover:text-amber-700 font-medium"
                   >
-                    + Add Item
+                    + Add another Food Item
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -1011,7 +1011,7 @@ export default function HorseDetailPage() {
                 className="btn-secondary flex-1 flex items-center justify-center gap-1.5"
                 disabled={isSubmitting || isSavingTemplate}
               >
-                {isSavingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Save Feeding Plan</>}
+                {isSavingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Save Template</>}
               </button>
               <button onClick={handleSaveFeedProgram} className="btn-primary flex-1" disabled={isSubmitting || isSavingTemplate}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Feed Program'}
