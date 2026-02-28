@@ -14,6 +14,7 @@ import {
   FARM_FEATURES,
   ADD_ONS,
 } from '@/lib/tiers';
+import { MarketingNav } from '@/components/marketing/MarketingNav';
 
 const faqs = [
   {
@@ -64,27 +65,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <Link href="/" className="flex items-center gap-2.5">
-              <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
-              <span className="font-display font-semibold text-lg text-foreground tracking-tight">BarnKeep</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/sign-in" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Sign In
-              </Link>
-              <Link
-                href="/sign-up"
-                className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       {/* Header */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
