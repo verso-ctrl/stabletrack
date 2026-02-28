@@ -19,8 +19,11 @@ import {
 
 const frequencyOptions = [
   { value: 'ONCE_DAILY', label: 'Once daily' },
+  { value: 'ONCE_DAILY_WITH_FOOD', label: 'Once daily (with food)' },
   { value: 'TWICE_DAILY', label: 'Twice daily' },
+  { value: 'TWICE_DAILY_WITH_FOOD', label: 'Twice daily (with food)' },
   { value: 'THREE_TIMES_DAILY', label: 'Three times daily' },
+  { value: 'THREE_TIMES_DAILY_WITH_FOOD', label: 'Three times daily (with food)' },
   { value: 'EVERY_OTHER_DAY', label: 'Every other day' },
   { value: 'WEEKLY', label: 'Weekly' },
   { value: 'AS_NEEDED', label: 'As needed' },
@@ -29,6 +32,7 @@ const frequencyOptions = [
 
 const routeOptions = [
   { value: 'ORAL', label: 'Oral' },
+  { value: 'WITH_FOOD', label: 'With Food' },
   { value: 'IM', label: 'Intramuscular (IM)' },
   { value: 'IV', label: 'Intravenous (IV)' },
   { value: 'TOPICAL', label: 'Topical' },
@@ -51,8 +55,6 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     isControlled: false,
-    giveWithFood: false,
-    giveWithFoodNotes: '',
     refillsRemaining: '',
     pharmacy: '',
     instructions: '',
@@ -83,8 +85,7 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
             startDate: formData.startDate,
             endDate: formData.endDate || null,
             isControlled: formData.isControlled,
-            giveWithFood: formData.giveWithFood,
-            giveWithFoodNotes: formData.giveWithFoodNotes || null,
+            giveWithFood: formData.route === 'WITH_FOOD' || formData.frequency.includes('WITH_FOOD'),
             refillsRemaining: formData.refillsRemaining || null,
             pharmacy: formData.pharmacy || null,
             instructions: formData.instructions || null,
@@ -307,32 +308,6 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
                   min="0"
                 />
               </div>
-            </div>
-
-            <div className="rounded-xl bg-green-50 border border-green-200 overflow-hidden">
-              <label className="flex items-center gap-3 p-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.giveWithFood}
-                  onChange={(e) => setFormData({ ...formData, giveWithFood: e.target.checked })}
-                  className="w-5 h-5 rounded border-border text-green-600 focus:ring-green-500"
-                />
-                <div>
-                  <p className="font-medium text-green-800">Give with Food</p>
-                  <p className="text-sm text-green-700">This medication should be given with a meal — it will appear on the feed chart</p>
-                </div>
-              </label>
-              {formData.giveWithFood && (
-                <div className="px-4 pb-4">
-                  <input
-                    type="text"
-                    value={formData.giveWithFoodNotes}
-                    onChange={(e) => setFormData({ ...formData, giveWithFoodNotes: e.target.value })}
-                    className="input w-full"
-                    placeholder="What to give it with (e.g., grain, morning feed)"
-                  />
-                </div>
-              )}
             </div>
 
             <label className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 cursor-pointer">

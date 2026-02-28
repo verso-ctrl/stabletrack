@@ -1,6 +1,6 @@
 'use client';
 
-import { Edit, Plus, Utensils } from 'lucide-react';
+import { Edit, Plus, Utensils, Pill } from 'lucide-react';
 
 interface FeedItem {
   id: string;
@@ -18,10 +18,20 @@ interface FeedProgram {
   instructions?: string;
 }
 
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  route?: string | null;
+  giveWithFood: boolean;
+}
+
 interface CareTabProps {
   horse: {
     id: string;
     feedProgram?: FeedProgram | null;
+    activeMedications?: Medication[];
   };
   onEditFeed: () => void;
   canEdit?: boolean;
@@ -29,6 +39,7 @@ interface CareTabProps {
 
 export function CareTab({ horse, onEditFeed, canEdit = true }: CareTabProps) {
   const feedProgram = horse.feedProgram;
+  const medsWithFood = (horse.activeMedications ?? []).filter(m => m.giveWithFood);
 
   return (
     <div className="space-y-6">
@@ -43,6 +54,22 @@ export function CareTab({ horse, onEditFeed, canEdit = true }: CareTabProps) {
             </button>
           )}
         </div>
+        {medsWithFood.length > 0 && (
+          <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 flex gap-2">
+            <Pill className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Give with feeding</p>
+              <ul className="mt-0.5 space-y-0.5">
+                {medsWithFood.map(m => (
+                  <li key={m.id} className="text-xs text-amber-700">
+                    {m.name} — {m.dosage}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
         {feedProgram ? (
           <div>
             {feedProgram.name && (
