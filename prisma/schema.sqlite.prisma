@@ -379,10 +379,11 @@ model Medication {
   endDate            DateTime?
   status             String    @default("ACTIVE")
   isControlled       Boolean   @default(false)
+  giveWithFood       Boolean   @default(false)
   refillsRemaining   Int?
   pharmacy           String?
   instructions       String?
-  
+
   horse              Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
   logs               MedicationLog[]
 }

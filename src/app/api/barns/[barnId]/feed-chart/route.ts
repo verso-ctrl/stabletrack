@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     const hasPermission = await checkBarnPermission(user.id, barnId, 'horses:read')
     if (!hasPermission) return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
 
-    // Get horses with their feed programs
+    // Get horses with their feed programs and active giveWithFood medications
     const horses = await prisma.horse.findMany({
       where: { barnId, status: { in: ['ACTIVE', 'LAYUP'] } },
       include: {
@@ -29,6 +29,18 @@ export async function GET(req: NextRequest, context: RouteContext) {
           },
         },
         stallRelation: true,
+        medications: {
+          where: {
+            status: 'ACTIVE',
+            giveWithFood: true,
+          },
+          select: {
+            id: true,
+            name: true,
+            dosage: true,
+            frequency: true,
+          },
+        },
       },
       orderBy: { barnName: 'asc' },
     })
@@ -73,6 +85,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
         hasFeedProgram: !!horse.feedProgram,
         feedSchedule,
         specialInstructions: (horse.feedProgram as any)?.notes || null,
+        medications: (horse as any).medications || [],
       }
     })
 

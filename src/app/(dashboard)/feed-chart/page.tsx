@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Filter,
   MessageSquare,
+  Pill,
 } from 'lucide-react';
 
 const feedingTimeLabels: Record<string, { label: string; icon: any; color: string }> = {
@@ -263,8 +264,8 @@ export default function FeedChartPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {chartData.horses.map((horse: any) => (
-                  <tr key={horse.id} className="hover:bg-accent">
+                {chartData.horses.map((horse: any) => (<React.Fragment key={horse.id}>
+                  <tr className="hover:bg-accent">
                     <td className="py-3 px-4 sticky left-0 bg-card z-10">
                       <div className="flex items-center gap-3">
                         <div className="relative w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden">
@@ -386,7 +387,27 @@ export default function FeedChartPage() {
                       );
                     })}
                   </tr>
-                ))}
+                  {horse.medications && horse.medications.length > 0 && (
+                    <tr className="bg-purple-50/50">
+                      <td className="py-2 px-4 sticky left-0 bg-purple-50/50 z-10">
+                        <div className="flex items-center gap-2 text-purple-700">
+                          <Pill className="w-3.5 h-3.5" />
+                          <span className="text-xs font-medium">Meds with food</span>
+                        </div>
+                      </td>
+                      <td colSpan={chartData.feedingTimes.length} className="py-2 px-3">
+                        <div className="flex flex-wrap gap-2">
+                          {horse.medications.map((med: any) => (
+                            <span key={med.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs">
+                              <Pill className="w-3 h-3" />
+                              {med.name} — {med.dosage}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>))}
               </tbody>
             </table>
           </div>
