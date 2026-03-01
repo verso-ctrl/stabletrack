@@ -782,6 +782,11 @@
     text-align: right;
   }
 
+  .horse-sheet-subtext {
+    font-size: 7.5pt;
+    color: #888;
+  }
+
   .horse-sheet-footer {
     text-align: center;
     margin-top: 10px;

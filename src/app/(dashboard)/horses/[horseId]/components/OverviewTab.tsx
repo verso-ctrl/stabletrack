@@ -49,11 +49,21 @@ interface OverviewTabProps {
     registeredName?: string | null;
     breed?: string | null;
     color?: string | null;
+    markings?: string | null;
     sex?: string | null;
     age?: number | null;
+    heightHands?: number | null;
+    currentWeight?: number | null;
+    microchipNumber?: string | null;
     stallName?: string | null;
     paddockName?: string | null;
     ownerName?: string | null;
+    ownerPhone?: string | null;
+    ownerEmail?: string | null;
+    coOwnerName?: string | null;
+    coOwnerPhone?: string | null;
+    registry?: string | null;
+    registrationNumber?: string | null;
     activeMedications?: MedicationData[];
     upcomingEvents?: Array<{
       id: string;
@@ -543,10 +553,13 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
               <p className="horse-sheet-reg">{horse.registeredName}</p>
             )}
             <p className="horse-sheet-meta">
-              {[horse.breed, horse.color, horse.sex, horse.age ? `${horse.age}y` : null, horse.stallName ? `Stall: ${horse.stallName}` : null, horse.paddockName ? `Pasture: ${horse.paddockName}` : null]
+              {[horse.breed, horse.color, horse.sex, horse.age ? `${horse.age}y` : null, horse.heightHands ? `${horse.heightHands} hh` : null, horse.currentWeight ? `${horse.currentWeight} lbs` : null, horse.stallName ? `Stall: ${horse.stallName}` : null, horse.paddockName ? `Pasture: ${horse.paddockName}` : null]
                 .filter(Boolean)
                 .join('  •  ')}
             </p>
+            {horse.markings && (
+              <p className="horse-sheet-meta">Markings: {horse.markings}</p>
+            )}
             <p className="horse-sheet-date">
               Care Sheet — {now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </p>
@@ -673,8 +686,56 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
             </div>
           </div>
 
-          {horse.ownerName && (
-            <p className="horse-sheet-owner">Owner: {horse.ownerName}</p>
+          {/* Ownership & ID section */}
+          {(horse.ownerName || horse.coOwnerName || horse.microchipNumber || horse.registry) && (
+            <div className="horse-sheet-section" style={{ marginTop: '12px' }}>
+              <h2 className="horse-sheet-section-title">Ownership &amp; Identification</h2>
+              <table className="horse-sheet-table">
+                <tbody>
+                  {horse.ownerName && (
+                    <tr>
+                      <td className="horse-sheet-th" style={{ width: '140px' }}>Owner</td>
+                      <td className="horse-sheet-td">
+                        {horse.ownerName}
+                        {(horse.ownerPhone || horse.ownerEmail) && (
+                          <span className="horse-sheet-subtext">
+                            {' — '}{[horse.ownerPhone, horse.ownerEmail].filter(Boolean).join(' · ')}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  {horse.coOwnerName && (
+                    <tr>
+                      <td className="horse-sheet-th" style={{ width: '140px' }}>Co-Owner</td>
+                      <td className="horse-sheet-td">
+                        {horse.coOwnerName}
+                        {horse.coOwnerPhone && (
+                          <span className="horse-sheet-subtext"> — {horse.coOwnerPhone}</span>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  {horse.registry && (
+                    <tr>
+                      <td className="horse-sheet-th" style={{ width: '140px' }}>Registry</td>
+                      <td className="horse-sheet-td">
+                        {horse.registry}
+                        {horse.registrationNumber && (
+                          <span className="horse-sheet-subtext"> — Reg# {horse.registrationNumber}</span>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  {horse.microchipNumber && (
+                    <tr>
+                      <td className="horse-sheet-th" style={{ width: '140px' }}>Microchip</td>
+                      <td className="horse-sheet-td">{horse.microchipNumber}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
 
           <div className="horse-sheet-footer">
