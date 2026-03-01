@@ -164,10 +164,12 @@ export async function PATCH(
 
     // Whitelist allowed fields to prevent arbitrary field injection
     const ALLOWED_FIELDS = [
-      'barnName', 'showName', 'breed', 'color', 'markings', 'sex',
-      'dateOfBirth', 'height', 'status', 'notes', 'microchipNumber',
-      'registrationNumber', 'insuranceInfo', 'profilePhotoUrl',
-      'sireId', 'damId', 'owner', 'cogginsExpiry',
+      'barnName', 'registeredName', 'breed', 'color', 'markings', 'sex',
+      'dateOfBirth', 'heightHands', 'status', 'bio', 'microchipNumber',
+      'registry', 'registrationNumber', 'profilePhotoUrl',
+      'sireId', 'damId', 'sireName', 'damName',
+      'ownerName', 'ownerEmail', 'ownerPhone',
+      'coOwnerName', 'coOwnerPhone',
     ];
     const updateData: Record<string, any> = {};
     for (const field of ALLOWED_FIELDS) {

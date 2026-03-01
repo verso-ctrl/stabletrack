@@ -45,6 +45,10 @@ export default function NewHorsePage() {
     status: 'ACTIVE' as HorseStatus,
     ownerName: '',
     ownerPhone: '',
+    coOwnerName: '',
+    coOwnerPhone: '',
+    registry: '',
+    registrationNumber: '',
   });
 
   // Fetch suggestions when barn is available
@@ -359,26 +363,78 @@ export default function NewHorsePage() {
             </div>
 
             <div>
-              <label className="label">Owner Name</label>
-              <AutocompleteInput
-                value={formData.ownerName}
-                onChange={handleFieldChange('ownerName')}
-                suggestions={suggestions.owners}
-                placeholder="Enter owner name"
+              <label className="label">Registry</label>
+              <input
+                type="text"
+                name="registry"
+                value={formData.registry}
+                onChange={handleChange}
+                placeholder="e.g., AQHA, APHA, USEF"
                 className="input"
               />
             </div>
 
             <div>
-              <label className="label">Owner Phone</label>
+              <label className="label">Registration Number</label>
               <input
-                type="tel"
-                name="ownerPhone"
-                value={formData.ownerPhone}
+                type="text"
+                name="registrationNumber"
+                value={formData.registrationNumber}
                 onChange={handleChange}
-                placeholder="(555) 123-4567"
+                placeholder="Enter registration number"
                 className="input"
               />
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-border">
+            <h4 className="text-sm font-medium text-foreground mb-3">Ownership</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Owner Name</label>
+                <AutocompleteInput
+                  value={formData.ownerName}
+                  onChange={handleFieldChange('ownerName')}
+                  suggestions={suggestions.owners}
+                  placeholder="Enter owner name"
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="label">Owner Phone</label>
+                <input
+                  type="tel"
+                  name="ownerPhone"
+                  value={formData.ownerPhone}
+                  onChange={handleChange}
+                  placeholder="(555) 123-4567"
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="label">Co-Owner Name</label>
+                <AutocompleteInput
+                  value={formData.coOwnerName}
+                  onChange={handleFieldChange('coOwnerName')}
+                  suggestions={suggestions.owners}
+                  placeholder="Enter co-owner name"
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="label">Co-Owner Phone</label>
+                <input
+                  type="tel"
+                  name="coOwnerPhone"
+                  value={formData.coOwnerPhone}
+                  onChange={handleChange}
+                  placeholder="(555) 123-4567"
+                  className="input"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -396,10 +452,10 @@ export default function NewHorsePage() {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Creating...
+                Saving...
               </>
             ) : (
-              'Add Horse'
+              'Save Horse'
             )}
           </button>
         </div>

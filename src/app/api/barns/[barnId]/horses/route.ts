@@ -190,6 +190,10 @@ export async function POST(
       ownerName,
       ownerEmail,
       ownerPhone,
+      coOwnerName,
+      coOwnerPhone,
+      registry,
+      registrationNumber,
       stall,
     } = body;
     
@@ -216,6 +220,10 @@ export async function POST(
         ownerName,
         ownerEmail,
         ownerPhone,
+        coOwnerName,
+        coOwnerPhone,
+        registry,
+        registrationNumber,
         stall,
       },
     });

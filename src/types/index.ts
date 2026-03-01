@@ -224,6 +224,10 @@ export interface Horse {
   ownerName: string | null;
   ownerEmail: string | null;
   ownerPhone: string | null;
+  coOwnerName: string | null;
+  coOwnerPhone: string | null;
+  registry: string | null;
+  registrationNumber: string | null;
   bio: string | null;
   createdAt: Date;
   updatedAt: Date;

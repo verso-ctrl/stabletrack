@@ -560,10 +560,25 @@ export default function HorseDetailPage() {
               subValue={[horse.ownerPhone, horse.ownerEmail].filter(Boolean).join(' • ') || undefined}
               icon={User}
             />
+            {(horse.coOwnerName) && (
+              <InfoItem
+                label="Co-Owner"
+                value={horse.coOwnerName}
+                subValue={horse.coOwnerPhone || undefined}
+                icon={User}
+              />
+            )}
             <InfoItem
               label="Microchip"
               value={horse.microchipNumber}
             />
+            {(horse.registry || horse.registrationNumber) && (
+              <InfoItem
+                label="Registry"
+                value={horse.registry}
+                subValue={horse.registrationNumber ? `Reg# ${horse.registrationNumber}` : undefined}
+              />
+            )}
           </div>
         </div>
 

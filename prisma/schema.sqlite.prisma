@@ -181,6 +181,10 @@ model Horse {
   ownerName       String?
   ownerEmail      String?
   ownerPhone      String?
+  coOwnerName     String?
+  coOwnerPhone    String?
+  registry        String?
+  registrationNumber String?
   profilePhotoUrl String?
   bio             String?
   stallId         String?   @unique

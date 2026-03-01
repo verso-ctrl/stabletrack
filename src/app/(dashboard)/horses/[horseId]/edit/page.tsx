@@ -61,6 +61,11 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
     microchipNumber: '',
     status: 'ACTIVE',
     ownerName: '',
+    ownerPhone: '',
+    coOwnerName: '',
+    coOwnerPhone: '',
+    registry: '',
+    registrationNumber: '',
     bio: '',
   });
 
@@ -97,6 +102,11 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
         microchipNumber: horse.microchipNumber || '',
         status: horse.status || 'ACTIVE',
         ownerName: horse.ownerName || '',
+        ownerPhone: horse.ownerPhone || '',
+        coOwnerName: horse.coOwnerName || '',
+        coOwnerPhone: horse.coOwnerPhone || '',
+        registry: horse.registry || '',
+        registrationNumber: horse.registrationNumber || '',
         bio: horse.bio || '',
       });
     }
@@ -431,16 +441,83 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1">
-                Owner Name
-              </label>
-              <AutocompleteInput
-                value={formData.ownerName}
-                onChange={(value) => setFormData({ ...formData, ownerName: value })}
-                suggestions={suggestions.owners}
-                className="input w-full"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Owner Name
+                </label>
+                <AutocompleteInput
+                  value={formData.ownerName}
+                  onChange={(value) => setFormData({ ...formData, ownerName: value })}
+                  suggestions={suggestions.owners}
+                  className="input w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Owner Phone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.ownerPhone}
+                  onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
+                  className="input w-full"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Co-Owner Name
+                </label>
+                <AutocompleteInput
+                  value={formData.coOwnerName}
+                  onChange={(value) => setFormData({ ...formData, coOwnerName: value })}
+                  suggestions={suggestions.owners}
+                  className="input w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Co-Owner Phone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.coOwnerPhone}
+                  onChange={(e) => setFormData({ ...formData, coOwnerPhone: e.target.value })}
+                  className="input w-full"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Registry
+                </label>
+                <input
+                  type="text"
+                  value={formData.registry}
+                  onChange={(e) => setFormData({ ...formData, registry: e.target.value })}
+                  className="input w-full"
+                  placeholder="e.g., AQHA, APHA, USEF"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  Registration Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.registrationNumber}
+                  onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                  className="input w-full"
+                  placeholder="Enter registration number"
+                />
+              </div>
             </div>
 
             <div>
