@@ -4,8 +4,10 @@ import React, { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
+import { queryKeys } from '@/lib/queryKeys';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
@@ -37,6 +39,7 @@ const statusOptions = [
 export default function EditHorsePage({ params }: { params: Promise<{ horseId: string }> }) {
   const { horseId } = use(params);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { currentBarn } = useBarn();
   const { horse, isLoading, error, refetch } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
@@ -173,7 +176,12 @@ export default function EditHorsePage({ params }: { params: Promise<{ horseId: s
         const error = await response.json();
         throw new Error(error.error || 'Failed to update horse');
       }
-      
+
+      // Invalidate cached horse data so the profile page shows fresh values
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.horses.detail(currentBarn?.id ?? '', horseId),
+      });
+
       router.push(`/horses/${horseId}`);
     } catch (err) {
       console.error('Error updating horse:', err);
