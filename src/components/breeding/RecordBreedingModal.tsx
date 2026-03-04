@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Loader2, Plus, Trash2, FileText, UploadCloud } from 'lucide-react';
+import { csrfFetch } from '@/lib/fetch';
 
 interface RecordBreedingModalProps {
   open: boolean;
@@ -213,7 +214,7 @@ export function RecordBreedingModal({
       formData.append('documentType', 'other');
       formData.append('documentTitle', 'Breeding Contract');
 
-      const res = await fetch('/api/storage/upload', { method: 'POST', body: formData });
+      const res = await csrfFetch('/api/storage/upload', { method: 'POST', body: formData });
       if (!res.ok) {
         const err = await res.json();
         alert(err.error || 'Upload failed');
