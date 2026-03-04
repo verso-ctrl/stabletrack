@@ -41,6 +41,7 @@ interface BreedingRecord {
   veterinarian?: string | null; cost?: number | null; contractUrl?: string | null; notes?: string | null;
   pregnancyCheckDate?: string | null; pregnancyCheckResult?: string | null;
   pregnancyChecks?: Array<{ date: string; result: string }> | null;
+  inUteroNominations?: Array<{ program: string; nominationDate: string; deadline: string; fee: string; notes: string }> | null;
   foalingRecord: { id: string; actualDate: string; foalName: string | null; outcome: string; foalId: string | null } | null;
 }
 interface FoalingRecord {
@@ -131,7 +132,15 @@ export default function BreedingPage() {
 
   const mares = horses.filter(h => h.sex === 'MARE' || h.sex === 'FILLY');
   const stallions = horses.filter(h => h.sex === 'STALLION' || h.sex === 'COLT');
-  const pregnancies = breedingRecords.filter(r => r.status === 'CONFIRMED_PREGNANT');
+  // Include PENDING records too — mares that were bred but never formally confirmed are still
+  // potentially pregnant (especially if past the due date). Sort overdue first, then by soonest due.
+  const pregnancies = breedingRecords
+    .filter(r => (r.status === 'CONFIRMED_PREGNANT' || r.status === 'PENDING') && !r.foalingRecord)
+    .sort((a, b) => {
+      const daysA = a.estimatedDueDate ? daysUntil(a.estimatedDueDate) : 9999;
+      const daysB = b.estimatedDueDate ? daysUntil(b.estimatedDueDate) : 9999;
+      return daysA - daysB;
+    });
   const foalableRecords = breedingRecords.filter(r => r.status === 'CONFIRMED_PREGNANT' && !r.foalingRecord);
 
   const fetchData = useCallback(async () => {
@@ -141,7 +150,7 @@ export default function BreedingPage() {
       const [statsRes, cyclesRes, recordsRes, foalingsRes, horsesRes, extRes] = await Promise.all([
         fetch(`/api/barns/${barnId}/breeding/stats`),
         fetch(`/api/barns/${barnId}/breeding/heat-cycles`),
-        fetch(`/api/barns/${barnId}/breeding/records`),
+        fetch(`/api/barns/${barnId}/breeding/records?limit=200`),
         fetch(`/api/barns/${barnId}/breeding/foalings`),
         fetch(`/api/barns/${barnId}/horses`),
         fetch(`/api/barns/${barnId}/breeding/external-stallions`),
@@ -183,7 +192,7 @@ export default function BreedingPage() {
     fetchData();
   };
 
-  const handleRecordFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
+  const handleRecordFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
     const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
@@ -206,11 +215,11 @@ export default function BreedingPage() {
     fetchData();
   };
 
-  const handleEditFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
+  const handleEditFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
     if (!editingFoaling) return;
     const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings/${editingFoaling.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ foalName: data.foalName, foalSex: data.foalSex, foalColor: data.foalColor, birthWeight: data.birthWeight, complications: data.complications, veterinarian: data.veterinarian, notes: data.notes }),
+      body: JSON.stringify({ foalName: data.foalName, foalSex: data.foalSex, foalColor: data.foalColor, complications: data.complications, veterinarian: data.veterinarian, notes: data.notes }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update foaling record', err.error || 'Please try again'); throw new Error(err.error); }
     toast.success('Foaling record updated');
@@ -243,6 +252,7 @@ export default function BreedingPage() {
         contractUrl: data.contractUrl || null,
         notes: data.notes || null,
         pregnancyChecks: data.pregnancyChecks?.length ? data.pregnancyChecks : null,
+        inUteroNominations: data.inUteroNominations?.length ? data.inUteroNominations : null,
       }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }
@@ -821,6 +831,18 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus,
                     Bred: {formatLocalDate(record.breedingDate)}
                   </span>
                 </div>
+                {/* In-utero nominations summary */}
+                {record.inUteroNominations && record.inUteroNominations.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium mr-1">Nominated:</span>
+                    {record.inUteroNominations.map((nom, i) => (
+                      <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400">
+                        {nom.program}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {record.estimatedDueDate && (
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-sm mb-1">

@@ -38,7 +38,6 @@ interface FoalingFormData {
   foalSex: string;
   foalColor: string;
   foalName: string;
-  birthWeight: string;
   outcome: string;
   complications: string;
   veterinarian: string;
@@ -52,7 +51,6 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
     foalSex: '',
     foalColor: '',
     foalName: '',
-    birthWeight: '',
     outcome: 'LIVE',
     complications: '',
     veterinarian: '',
@@ -68,7 +66,6 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
         foalSex: editFoaling.foalSex || '',
         foalColor: editFoaling.foalColor || '',
         foalName: editFoaling.foalName || '',
-        birthWeight: editFoaling.birthWeight ? String(editFoaling.birthWeight) : '',
         outcome: editFoaling.outcome || 'LIVE',
         complications: editFoaling.complications || '',
         veterinarian: editFoaling.veterinarian || '',
@@ -81,7 +78,6 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
         foalSex: '',
         foalColor: '',
         foalName: '',
-        birthWeight: '',
         outcome: 'LIVE',
         complications: '',
         veterinarian: '',
@@ -203,27 +199,15 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Color</label>
-                  <input
-                    type="text"
-                    value={form.foalColor}
-                    onChange={e => setForm(f => ({ ...f, foalColor: e.target.value }))}
-                    className="input w-full"
-                    placeholder="e.g. Bay, Chestnut"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Birth Weight (lbs)</label>
-                  <input
-                    type="number"
-                    value={form.birthWeight}
-                    onChange={e => setForm(f => ({ ...f, birthWeight: e.target.value }))}
-                    className="input w-full"
-                    placeholder="0"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Color</label>
+                <input
+                  type="text"
+                  value={form.foalColor}
+                  onChange={e => setForm(f => ({ ...f, foalColor: e.target.value }))}
+                  className="input w-full"
+                  placeholder="e.g. Bay, Chestnut"
+                />
               </div>
             </>
           )}

@@ -41,11 +41,14 @@ export async function GET(
       take: limit,
     });
 
-    // Parse pregnancyChecks JSON string to array
+    // Parse JSON string fields to arrays
     const data = records.map(r => ({
       ...r,
       pregnancyChecks: r.pregnancyChecks
         ? (() => { try { return JSON.parse(r.pregnancyChecks!); } catch { return []; } })()
+        : [],
+      inUteroNominations: r.inUteroNominations
+        ? (() => { try { return JSON.parse(r.inUteroNominations!); } catch { return []; } })()
         : [],
     }));
 

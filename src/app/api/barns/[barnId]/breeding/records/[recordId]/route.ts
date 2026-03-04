@@ -66,6 +66,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (body.pregnancyCheckDate !== undefined) updateData.pregnancyCheckDate = body.pregnancyCheckDate ? new Date(body.pregnancyCheckDate) : null;
     if (body.pregnancyCheckResult !== undefined) updateData.pregnancyCheckResult = body.pregnancyCheckResult || null;
     if (body.pregnancyChecks !== undefined) updateData.pregnancyChecks = body.pregnancyChecks?.length ? JSON.stringify(body.pregnancyChecks) : null;
+    if (body.inUteroNominations !== undefined) updateData.inUteroNominations = body.inUteroNominations?.length ? JSON.stringify(body.inUteroNominations) : null;
     if (body.contractUrl !== undefined) updateData.contractUrl = body.contractUrl || null;
     if (body.estimatedDueDate !== undefined) updateData.estimatedDueDate = body.estimatedDueDate ? new Date(body.estimatedDueDate) : null;
 

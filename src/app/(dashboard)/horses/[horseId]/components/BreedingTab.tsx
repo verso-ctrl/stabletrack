@@ -43,6 +43,7 @@ interface BreedingRecord {
   pregnancyCheckDate?: string | null;
   pregnancyCheckResult?: string | null;
   pregnancyChecks?: Array<{ date: string; result: string }> | null;
+  inUteroNominations?: Array<{ program: string; nominationDate: string; deadline: string; fee: string; notes: string }> | null;
   mare?: { id: string; barnName: string; profilePhotoUrl?: string | null };
   stallion?: { id: string; barnName: string } | null;
   externalStallion?: { id: string; name: string; studFarm?: string | null } | null;
@@ -151,7 +152,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
       if (isMare) {
         fetches.push(
           fetch(`/api/barns/${barnId}/breeding/heat-cycles?mareId=${horse.id}`),
-          fetch(`/api/barns/${barnId}/breeding/records?mareId=${horse.id}`),
+          fetch(`/api/barns/${barnId}/breeding/records?mareId=${horse.id}&limit=200`),
           fetch(`/api/barns/${barnId}/breeding/foalings?mareId=${horse.id}`),
         );
       } else if (isStallion) {
@@ -206,7 +207,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
     fetchData();
   };
 
-  const handleRecordFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
+  const handleRecordFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
     const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
     });
@@ -240,11 +241,11 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
     fetchData();
   };
 
-  const handleEditFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; birthWeight: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
+  const handleEditFoaling = async (data: { breedingRecordId: string; actualDate: string; foalSex: string; foalColor: string; foalName: string; outcome: string; complications: string; veterinarian: string; notes: string }) => {
     if (!editingFoaling) return;
     const res = await csrfFetch(`/api/barns/${barnId}/breeding/foalings/${editingFoaling.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ foalName: data.foalName, foalSex: data.foalSex, foalColor: data.foalColor, birthWeight: data.birthWeight, complications: data.complications, veterinarian: data.veterinarian, notes: data.notes }),
+      body: JSON.stringify({ foalName: data.foalName, foalSex: data.foalSex, foalColor: data.foalColor, complications: data.complications, veterinarian: data.veterinarian, notes: data.notes }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update foaling record', err.error); throw new Error(err.error); }
     toast.success('Foaling record updated');
@@ -263,6 +264,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
         contractUrl: data.contractUrl || null,
         notes: data.notes || null,
         pregnancyChecks: data.pregnancyChecks?.length ? data.pregnancyChecks : null,
+        inUteroNominations: data.inUteroNominations?.length ? data.inUteroNominations : null,
       }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }

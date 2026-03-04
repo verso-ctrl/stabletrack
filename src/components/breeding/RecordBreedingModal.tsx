@@ -31,6 +31,7 @@ export interface EditableBreedingRecord {
   pregnancyCheckDate?: string | null;
   pregnancyCheckResult?: string | null;
   pregnancyChecks?: Array<{ date: string; result: string }> | null;
+  inUteroNominations?: Array<{ program: string; nominationDate: string; deadline: string; fee: string; notes: string }> | null;
   mare?: { barnName: string };
   stallion?: { barnName: string } | null;
   externalStallion?: { name: string } | null;
@@ -49,6 +50,7 @@ export interface BreedingFormData {
   notes: string;
   estimatedDueDate: string;
   pregnancyChecks: Array<{ date: string; result: string }>;
+  inUteroNominations: Array<{ program: string; nominationDate: string; deadline: string; fee: string; notes: string }>;
 }
 
 const BREEDING_TYPES = [
@@ -93,6 +95,7 @@ export function RecordBreedingModal({
     notes: '',
     estimatedDueDate: '',
     pregnancyChecks: [],
+    inUteroNominations: [],
   });
   const [stallionSource, setStallionSource] = useState<'internal' | 'external'>('internal');
   const [saving, setSaving] = useState(false);
@@ -123,6 +126,7 @@ export function RecordBreedingModal({
         notes: editRecord.notes || '',
         estimatedDueDate: toDateInputValue(editRecord.estimatedDueDate),
         pregnancyChecks: checks,
+        inUteroNominations: editRecord.inUteroNominations || [],
       });
       setContractFileName(editRecord.contractUrl ? 'Uploaded contract' : '');
       setStallionSource(editRecord.externalStallionId ? 'external' : 'internal');
@@ -143,6 +147,7 @@ export function RecordBreedingModal({
         notes: '',
         estimatedDueDate: dueDate.toISOString().split('T')[0],
         pregnancyChecks: [],
+        inUteroNominations: [],
       });
       setContractFileName('');
       setStallionSource('internal');
@@ -170,6 +175,24 @@ export function RecordBreedingModal({
       ...f,
       pregnancyChecks: f.pregnancyChecks.filter((_, i) => i !== index),
     }));
+  };
+
+  const addNomination = () => {
+    setForm(f => ({
+      ...f,
+      inUteroNominations: [...f.inUteroNominations, { program: '', nominationDate: new Date().toISOString().split('T')[0], deadline: '', fee: '', notes: '' }],
+    }));
+  };
+
+  const updateNomination = (index: number, field: keyof BreedingFormData['inUteroNominations'][0], value: string) => {
+    setForm(f => ({
+      ...f,
+      inUteroNominations: f.inUteroNominations.map((n, i) => i === index ? { ...n, [field]: value } : n),
+    }));
+  };
+
+  const removeNomination = (index: number) => {
+    setForm(f => ({ ...f, inUteroNominations: f.inUteroNominations.filter((_, i) => i !== index) }));
   };
 
   const handleContractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,6 +537,87 @@ export function RecordBreedingModal({
                     disabled={uploadingContract}
                   />
                 </label>
+              )}
+            </div>
+          )}
+
+          {/* In-Utero Nominations */}
+          {isEditing && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-foreground">In-Utero Nominations</label>
+                <button
+                  type="button"
+                  onClick={addNomination}
+                  className="flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                  <Plus className="w-3 h-3" /> Add Nomination
+                </button>
+              </div>
+              {form.inUteroNominations.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">No nominations recorded. Use this to track futurity & stakes nominations for this foal.</p>
+              ) : (
+                <div className="space-y-3">
+                  {form.inUteroNominations.map((nom, i) => (
+                    <div key={i} className="p-3 rounded-lg border border-border bg-muted/30 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={nom.program}
+                          onChange={e => updateNomination(i, 'program', e.target.value)}
+                          className="input flex-1 text-sm"
+                          placeholder="Program / Registry name (e.g. AQHA Futurity)"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeNomination(i)}
+                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive flex-shrink-0"
+                          aria-label="Remove nomination"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-muted-foreground mb-0.5">Date Nominated</label>
+                          <input
+                            type="date"
+                            value={nom.nominationDate}
+                            onChange={e => updateNomination(i, 'nominationDate', e.target.value)}
+                            className="input w-full text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-muted-foreground mb-0.5">Deadline</label>
+                          <input
+                            type="date"
+                            value={nom.deadline}
+                            onChange={e => updateNomination(i, 'deadline', e.target.value)}
+                            className="input w-full text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-muted-foreground mb-0.5">Fee ($)</label>
+                          <input
+                            type="number"
+                            value={nom.fee}
+                            onChange={e => updateNomination(i, 'fee', e.target.value)}
+                            className="input w-full text-sm"
+                            placeholder="0"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        value={nom.notes}
+                        onChange={e => updateNomination(i, 'notes', e.target.value)}
+                        className="input w-full text-sm"
+                        placeholder="Notes (confirmation #, status, etc.)"
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}

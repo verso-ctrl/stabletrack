@@ -1108,6 +1108,7 @@ model BreedingRecord {
   pregnancyCheckDate  DateTime?
   pregnancyCheckResult String?  // POSITIVE, NEGATIVE, INCONCLUSIVE
   pregnancyChecks     String?   // JSON: [{date: string, result: string}]
+  inUteroNominations  String?   // JSON: [{program, nominationDate, deadline, fee, notes}]
   estimatedDueDate    DateTime?
   cost                Float?
   contractUrl         String?   // URL to uploaded breeding contract document
