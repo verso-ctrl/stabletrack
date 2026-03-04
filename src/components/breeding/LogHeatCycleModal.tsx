@@ -137,7 +137,9 @@ export function LogHeatCycleModal({ open, onClose, onSubmit, mares, preselectedM
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">End Date</label>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                End Date <span className="text-muted-foreground font-normal">(optional)</span>
+              </label>
               <input
                 type="date"
                 value={form.endDate}
@@ -146,6 +148,9 @@ export function LogHeatCycleModal({ open, onClose, onSubmit, mares, preselectedM
               />
             </div>
           </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            The next heat is predicted from the <strong>start date</strong> only — end date is for your records and doesn't affect calculations.
+          </p>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Intensity</label>
