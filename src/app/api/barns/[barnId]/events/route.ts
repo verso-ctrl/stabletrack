@@ -93,6 +93,18 @@ export async function GET(
               profilePhotoUrl: true,
             },
           },
+          horses: {
+            take: 10,
+            include: {
+              horse: {
+                select: {
+                  id: true,
+                  barnName: true,
+                  profilePhotoUrl: true,
+                },
+              },
+            },
+          },
           reminders: {
             take: 5,
           },
@@ -172,11 +184,14 @@ export async function POST(
     // Support both single horseId and multiple horseIds
     const targetHorseIds = horseIds || (horseId ? [horseId] : null);
 
-    // Use the first horseId for the event's horseId field
-    const eventHorseId = targetHorseIds && targetHorseIds.length > 0 ? targetHorseIds[0] : null;
+    // Use the first horseId for single-horse events, or null for multi-horse/barn-wide events
+    const eventHorseId = targetHorseIds && targetHorseIds.length === 1 ? targetHorseIds[0] : null;
 
-    // cost arrives in cents (Int) from the form
-    const costInt = cost ? Math.round(typeof cost === 'number' ? cost : parseFloat(cost)) : null;
+    // cost from form is in cents; convert to dollars for Float field
+    const totalCost = cost ? (typeof cost === 'number' ? cost / 100 : parseFloat(cost) / 100) : 0;
+    const costPerHorse = targetHorseIds && targetHorseIds.length > 0
+      ? totalCost / targetHorseIds.length
+      : 0;
 
     const event = await prisma.event.create({
       data: {
@@ -192,16 +207,34 @@ export async function POST(
         providerPhone,
         farrierWork,
         dewormProduct,
-        cost: costInt,
+        totalCost,
+        costPerHorse,
         notes,
         isRecurring: isRecurring || false,
         recurringRule,
+        horses: targetHorseIds && targetHorseIds.length > 0 ? {
+          create: targetHorseIds.map((hId: string) => ({
+            horseId: hId,
+            cost: costPerHorse,
+          })),
+        } : undefined,
       },
       include: {
         horse: {
           select: {
             barnName: true,
             profilePhotoUrl: true,
+          },
+        },
+        horses: {
+          include: {
+            horse: {
+              select: {
+                id: true,
+                barnName: true,
+                profilePhotoUrl: true,
+              },
+            },
           },
         },
         reminders: true,
