@@ -25,22 +25,24 @@ export const metadata: Metadata = {
 // ─── Design tokens ──────────────────────────────────────────────────────────
 const MK = {
   bg:       '#fdf8f3',
-  bg2:      '#f5f0eb',
-  accent:   '#e4a4bd',
+  bg2:      '#f0e8df',
+  accent:   '#b85470',
+  accentBg: 'rgba(184,84,112,0.10)',
+  dark:     '#1c1410',
   text:     '#262626',
-  muted:    'rgba(38,38,38,0.58)',
+  muted:    'rgba(38,38,38,0.56)',
   font:     "'League Spartan', sans-serif",
 } as const;
 
-// ─── Images (all verified URLs from existing codebase) ───────────────────────
+// ─── Images ──────────────────────────────────────────────────────────────────
 const IMG = {
-  hero:  'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=900&q=80&auto=format',
-  f1:    'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=700&q=80&auto=format',
-  f2:    'https://images.unsplash.com/photo-1508475039033-c0112d0a87e0?w=700&q=80&auto=format',
-  f3:    'https://images.unsplash.com/photo-1504208434411-354bd06c9b68?w=700&q=80&auto=format',
-  f4:    'https://images.unsplash.com/photo-1460134583885-95eb98e2ef85?w=700&q=80&auto=format',
-  hiw:   'https://images.unsplash.com/photo-1460134583885-95eb98e2ef85?w=800&q=80&auto=format',
-  cta:   'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&q=80&auto=format',
+  hero:  '/images/buckskin-pasture.jpg', // buckskin horse with red barn — warm hero
+  f1:    '/images/horse-portrait.jpg',   // close-up horse portrait — health records
+  f2:    '/images/horse-in-barn.jpg',    // horse in barn aisle — feed / daily care
+  f3:    '/images/horses-pasture.jpg',   // two horses in pasture — stall/pasture
+  f4:    '/images/horseshoe.jpg',        // horseshoe on barn — scheduling
+  hiw:   '/images/palomino-barn.jpg',    // palomino inside barn — how it works
+  cta:   '/images/tack-hooks.jpg',       // colorful tack/halters — CTA atmosphere
 };
 
 const heroFeatures = [
@@ -81,10 +83,10 @@ const cardFeatures = [
 ];
 
 const staggerFeatures = [
-  { image: IMG.f1, label: 'Health Records', title: 'Complete health history', tags: 'Vaccinations · Medications · Weight' },
-  { image: IMG.f2, label: 'Feeding',        title: 'Daily feed tracking',     tags: 'Programs · Logs · Supplements'    },
-  { image: IMG.f3, label: 'Pastures',       title: 'Turnout management',      tags: 'Stalls · Rotation · Assignments'  },
-  { image: IMG.f4, label: 'Scheduling',     title: 'Calendar & events',       tags: 'Vet · Farrier · Tasks'            },
+  { image: '/images/horse-portrait.jpg',   label: 'Health Records', title: 'Complete health history', tags: 'Vaccinations · Medications · Weight' },
+  { image: '/images/horse-in-barn.jpg',    label: 'Daily Care',     title: 'Daily feed tracking',     tags: 'Programs · Logs · Supplements'    },
+  { image: '/images/horses-pasture.jpg',   label: 'Pastures',       title: 'Turnout management',      tags: 'Stalls · Rotation · Assignments'  },
+  { image: '/images/horse-window.jpg',     label: 'Scheduling',     title: 'Calendar & events',       tags: 'Vet · Farrier · Tasks'            },
 ];
 
 const testimonials = [
@@ -214,7 +216,7 @@ export default function LandingPage() {
                 </Link>
               </div>
               <p style={{ fontSize: 11, color: 'rgba(38,38,38,0.38)', letterSpacing: '0.06em', fontFamily: MK.font }}>
-                No credit card required · 14-day free trial · Cancel anytime
+                14-day free trial · Cancel anytime
               </p>
             </div>
 
@@ -266,7 +268,7 @@ export default function LandingPage() {
 
       {/* ── SOCIAL PROOF STRIP ──────────────────────────────────────────── */}
       <AnimateOnScroll>
-        <section style={{ backgroundColor: MK.bg2, borderTop: `1px solid rgba(38,38,38,0.06)`, borderBottom: `1px solid rgba(38,38,38,0.06)`, padding: '40px 0' }}>
+        <section style={{ backgroundColor: MK.accent, padding: '36px 0' }}>
           <div className="max-w-5xl mx-auto px-6 sm:px-10">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
               {[
@@ -276,10 +278,10 @@ export default function LandingPage() {
                 { value: 'Cancel anytime', sub: 'No commitments' },
               ].map((item) => (
                 <div key={item.sub}>
-                  <p style={{ fontFamily: MK.font, fontSize: 17, fontWeight: 800, color: MK.text, letterSpacing: '-0.01em', marginBottom: 4 }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 17, fontWeight: 800, color: MK.bg, letterSpacing: '-0.01em', marginBottom: 4 }}>
                     {item.value}
                   </p>
-                  <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: MK.muted, textTransform: 'uppercase' }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: 'rgba(253,248,243,0.7)', textTransform: 'uppercase' }}>
                     {item.sub}
                   </p>
                 </div>
@@ -326,8 +328,8 @@ export default function LandingPage() {
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="fade-right">
-              <div style={{ padding: '36px', borderRadius: 16, border: `1px solid rgba(228,164,189,0.4)`, backgroundColor: 'rgba(228,164,189,0.06)' }}>
-                <p style={{ ...labelStyle, marginBottom: 28 }}>This is what BarnKeep solves.</p>
+              <div style={{ padding: '36px', borderRadius: 16, backgroundColor: MK.accent }}>
+                <p style={{ ...labelStyle, color: 'rgba(253,248,243,0.7)', marginBottom: 28 }}>This is what BarnKeep solves.</p>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                   {[
                     'One place for every horse\'s health history',
@@ -336,8 +338,8 @@ export default function LandingPage() {
                     'Documents stored and searchable from your phone',
                   ].map((item) => (
                     <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                      <Check style={{ width: 16, height: 16, color: MK.accent, flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.text, lineHeight: 1.5 }}>{item}</span>
+                      <Check style={{ width: 16, height: 16, color: MK.bg, flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.bg, lineHeight: 1.5 }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -405,7 +407,7 @@ export default function LandingPage() {
                   style={{
                     padding: '32px 28px',
                     border: `1px solid rgba(38,38,38,0.08)`,
-                    backgroundColor: MK.bg,
+                    backgroundColor: index % 2 === 1 ? MK.dark : MK.bg,
                     borderRadius: 12,
                     cursor: 'default',
                   }}
@@ -414,10 +416,10 @@ export default function LandingPage() {
                     className="mk-service-icon"
                     style={{ width: 32, height: 32, color: MK.accent, marginBottom: 20 }}
                   />
-                  <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 14, letterSpacing: '0.05em', textTransform: 'uppercase', color: MK.text, marginBottom: 10 }}>
+                  <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 14, letterSpacing: '0.05em', textTransform: 'uppercase', color: index % 2 === 1 ? MK.bg : MK.text, marginBottom: 10 }}>
                     {feature.title}
                   </h3>
-                  <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 13, color: index % 2 === 1 ? 'rgba(253,248,243,0.55)' : MK.muted, lineHeight: 1.7 }}>
                     {feature.description}
                   </p>
                 </div>
@@ -473,11 +475,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: MK.bg2, padding: '96px 0' }}>
+      <section style={{ backgroundColor: MK.dark, padding: '96px 0' }}>
         <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
           <AnimateOnScroll>
-            <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Testimonials</span>
-            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, marginBottom: 56 }}>
+            <span style={{ ...labelStyle, color: MK.accent, display: 'block', marginBottom: 20 }}>Testimonials</span>
+            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.bg, marginBottom: 56 }}>
               Loved by horse owners<br />
               <em style={{ fontStyle: 'italic', color: MK.accent }}>everywhere.</em>
             </h2>
@@ -486,18 +488,18 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, index) => (
               <AnimateOnScroll key={t.name} animation="fade-up" delay={index * 100}>
-                <div style={{ backgroundColor: MK.bg, borderRadius: 16, padding: 36, border: `1px solid rgba(38,38,38,0.06)`, height: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 36, border: `1px solid rgba(255,255,255,0.08)`, height: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
                   <span style={{ fontFamily: MK.font, fontSize: 48, color: MK.accent, lineHeight: 1, display: 'block' }}>&ldquo;</span>
-                  <p style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, lineHeight: 1.7, flex: 1, marginTop: -16 }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 15, color: 'rgba(253,248,243,0.65)', lineHeight: 1.7, flex: 1, marginTop: -16 }}>
                     {t.quote}
                   </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 16, borderTop: `1px solid rgba(38,38,38,0.06)` }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: MK.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.text, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 16, borderTop: `1px solid rgba(255,255,255,0.08)` }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: MK.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.bg, flexShrink: 0 }}>
                       {t.initial}
                     </div>
                     <div>
-                      <p style={{ fontFamily: MK.font, fontSize: 13, fontWeight: 700, color: MK.text }}>{t.name}</p>
-                      <p style={{ fontFamily: MK.font, fontSize: 11, color: MK.muted, letterSpacing: '0.05em' }}>{t.farm}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 13, fontWeight: 700, color: MK.bg }}>{t.name}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 11, color: 'rgba(253,248,243,0.4)', letterSpacing: '0.05em' }}>{t.farm}</p>
                     </div>
                   </div>
                 </div>
@@ -575,7 +577,7 @@ export default function LandingPage() {
                 Simple, honest pricing.
               </h2>
               <p style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted }}>
-                Both plans include a 14-day free trial. No credit card required.
+                Both plans include a 14-day free trial.
               </p>
             </div>
           </AnimateOnScroll>
@@ -669,7 +671,7 @@ export default function LandingPage() {
               <em style={{ fontStyle: 'italic', color: MK.accent }}>than a spreadsheet.</em>
             </h2>
             <p style={{ fontFamily: MK.font, fontSize: 16, color: 'rgba(253,248,243,0.7)', marginBottom: 44 }}>
-              Try BarnKeep free for 14 days. No credit card needed.
+              Try BarnKeep free for 14 days.
             </p>
             <Link
               href="/sign-up"

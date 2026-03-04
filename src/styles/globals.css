@@ -493,17 +493,14 @@
   animation: bounce-slow 4s ease-in-out infinite;
 }
 
-/* Grayscale → color hover on image wrappers */
+/* Subtle zoom on image wrappers */
 .mk-img-wrap {
   overflow: hidden;
 }
 .mk-img-wrap img {
-  filter: grayscale(100%);
-  transition: filter 1s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .mk-img-wrap:hover img {
-  filter: grayscale(0%);
   transform: scale(1.06);
 }
 
