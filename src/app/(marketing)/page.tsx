@@ -19,7 +19,7 @@ import {
 export const metadata: Metadata = {
   title: 'BarnKeep — Boutique Barn Management',
   description:
-    'The barn management tool built for boutique farms. Track horses, health records, feedings, and daily care — starting at $25/month.',
+    'The barn management tool built for small farms. Track horses, health records, feedings, and daily care — starting at $25/month.',
 };
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ export default function LandingPage() {
             {/* Left */}
             <div>
               <span style={{ ...labelStyle, display: 'block', marginBottom: 28 }}>
-                Boutique Barn Management
+                Barn Management Made Simple
               </span>
               <h1
                 style={{
@@ -176,7 +176,7 @@ export default function LandingPage() {
                 }}
               >
                 Track horses, health records, feedings, and daily care in one place.
-                Built for the boutique farm that cares about the details.
+                Built for the farm that cares about the details.
               </p>
 
               <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
@@ -228,7 +228,7 @@ export default function LandingPage() {
               >
                 <Image
                   src={IMG.hero}
-                  alt="Horse in a boutique barn"
+                  alt="Horse on a small farm"
                   fill
                   className="object-cover object-center"
                   unoptimized
@@ -258,7 +258,7 @@ export default function LandingPage() {
                   01
                 </em>
                 <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: '0.25em', color: MK.text, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.5 }}>
-                  BOUTIQUE<br />BARNS
+                  YOUR<br />FARM
                 </span>
               </div>
             </div>
