@@ -50,7 +50,7 @@ const sections: Section[] = [
     description: 'Everything about managing horse records, health history, and photos.',
     guides: [
       { title: 'Horse profile overview', description: 'Walk through each tab on a horse profile — health, feeding, breeding, and more.', type: 'video', duration: '6 min', status: 'coming-soon' },
-      { title: 'Logging vaccinations & medications', description: 'How to record vaccines, set medication schedules, and track health records.', type: 'article', duration: '3 min read', status: 'coming-soon' },
+      { title: 'Logging vaccinations & medications', description: 'How to record vaccines, set medication schedules, and track health records.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/logging-vaccinations-and-medications' },
       { title: 'Uploading photos & documents', description: 'Add photos, coggins papers, vet records, and other documents to a horse profile.', type: 'video', duration: '3 min', status: 'coming-soon' },
       { title: 'Tracking weight over time', description: 'Log weight records and read the weight history chart.', type: 'article', duration: '2 min read', status: 'coming-soon' },
     ],
