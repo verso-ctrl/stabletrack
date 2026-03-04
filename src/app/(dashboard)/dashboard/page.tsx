@@ -473,85 +473,131 @@ export default function DashboardPage() {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Tasks */}
+        {/* Barn Overview — events + tasks */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="font-semibold text-foreground">Barn Overview</h2>
-            <Link href="/daily-care" className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
-              View all <ChevronRight className="w-4 h-4" />
+          </div>
+
+          {/* Upcoming Events */}
+          {events.length > 0 && (
+            <>
+              <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upcoming Events</span>
+                <Link href="/calendar" className="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-0.5">
+                  View all <ChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="divide-y divide-border">
+                {events.slice(0, 3).map((event: any) => {
+                  const date = new Date(event.scheduledDate);
+                  const isEvtToday = today ? date.toDateString() === today.toDateString() : false;
+                  const isEvtTomorrow = today ? date.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
+                  const calendarDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                  return (
+                    <Link key={event.id} href={`/calendar?date=${calendarDate}`} className="flex items-center gap-3 p-4 hover:bg-accent transition-colors">
+                      <div className="flex-shrink-0 w-5 h-5 rounded bg-blue-500/10 flex items-center justify-center">
+                        <Calendar className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {event.horse?.barnName && <>{event.horse.barnName} · </>}
+                          {isEvtToday ? (
+                            <span className="text-amber-600 font-medium">Today</span>
+                          ) : isEvtTomorrow ? (
+                            <span className="text-blue-600">Tomorrow</span>
+                          ) : (
+                            date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          )}
+                        </p>
+                      </div>
+                      <ArrowUpRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Tasks */}
+          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tasks</span>
+            <Link href="/daily-care" className="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-0.5">
+              View all <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
-          
-          {tasks.length === 0 ? (
-            <div className="p-8 text-center">
-              <CheckCircle2 className="w-10 h-10 text-muted-foreground/20 mx-auto mb-2" />
-              <p className="text-muted-foreground">No tasks for today</p>
-              <p className="text-sm text-muted-foreground mt-1">All caught up!</p>
+
+          {tasks.filter((t: any) => t.status !== 'COMPLETED').length === 0 ? (
+            <div className="px-4 pb-6 pt-2 text-center">
+              <CheckCircle2 className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">All caught up!</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
               {[...tasks]
+                .filter((t: any) => t.status !== 'COMPLETED')
                 .sort((a: any, b: any) => {
                   const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
                   const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
                   return dateA - dateB;
                 })
-                .slice(0, 5)
+                .slice(0, 4)
                 .map((task: any) => {
-                const state = taskStates[task.id];
-                const isChecked = !!state || task.status === 'COMPLETED';
-                if (state === 'done') return null;
-                const taskDate = task.dueDate ? new Date(task.dueDate) : null;
-                const isTaskToday = taskDate && today ? taskDate.toDateString() === today.toDateString() : false;
-                const isTaskTomorrow = taskDate && today ? taskDate.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
-                return (
-                <div
-                  key={task.id}
-                  className={`flex items-center gap-3 p-4 hover:bg-accent transition-all duration-300 ${
-                    state === 'fading' ? 'opacity-0 max-h-0 py-0 overflow-hidden' : 'opacity-100 max-h-24'
-                  }`}
-                >
-                  <button
-                    onClick={() => !state && completeTask(task.id, task.title)}
-                    className="flex-shrink-0"
-                    disabled={!!state}
-                  >
-                    {isChecked ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-muted-foreground hover:text-emerald-400 transition-colors" />
-                    )}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm transition-all duration-300 ${isChecked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                      {task.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {task.horse?.barnName && <>{task.horse.barnName} · </>}
-                      {taskDate ? (
-                        isTaskToday ? (
-                          <span className="text-amber-600 font-medium">Today</span>
-                        ) : isTaskTomorrow ? (
-                          <span className="text-blue-600">Tomorrow</span>
+                  const state = taskStates[task.id];
+                  const isChecked = !!state;
+                  if (state === 'done') return null;
+                  const taskDate = task.dueDate ? new Date(task.dueDate) : null;
+                  const isTaskToday = taskDate && today ? taskDate.toDateString() === today.toDateString() : false;
+                  const isTaskTomorrow = taskDate && today ? taskDate.toDateString() === new Date(today.getTime() + 86400000).toDateString() : false;
+                  return (
+                    <div
+                      key={task.id}
+                      className={`flex items-center gap-3 p-4 hover:bg-accent transition-all duration-300 ${
+                        state === 'fading' ? 'opacity-0 max-h-0 py-0 overflow-hidden' : 'opacity-100 max-h-24'
+                      }`}
+                    >
+                      <button
+                        onClick={() => !state && completeTask(task.id, task.title)}
+                        className="flex-shrink-0"
+                        disabled={!!state}
+                      >
+                        {isChecked ? (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                         ) : (
-                          taskDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                        )
-                      ) : (
-                        'No due date'
+                          <Circle className="w-5 h-5 text-muted-foreground hover:text-emerald-400 transition-colors" />
+                        )}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm transition-all duration-300 ${isChecked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                          {task.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {task.horse?.barnName && <>{task.horse.barnName} · </>}
+                          {taskDate ? (
+                            isTaskToday ? (
+                              <span className="text-amber-600 font-medium">Today</span>
+                            ) : isTaskTomorrow ? (
+                              <span className="text-blue-600">Tomorrow</span>
+                            ) : (
+                              taskDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                            )
+                          ) : (
+                            'No due date'
+                          )}
+                        </p>
+                      </div>
+                      {task.dueTime && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {task.dueTime}
+                        </span>
                       )}
-                    </p>
-                  </div>
-                  {task.dueTime && (
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {task.dueTime}
-                    </span>
-                  )}
-                  {task.priority === 'URGENT' && (
-                    <span className="badge-danger">Urgent</span>
-                  )}
-                </div>
-                );
-              })}
+                      {task.priority === 'URGENT' && (
+                        <span className="badge-danger">Urgent</span>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
