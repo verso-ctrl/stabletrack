@@ -86,7 +86,7 @@ export default function SettingUpYourBarnGuide() {
 
       <Section number={2} title="Step 2 — Choose your plan">
         <p className="text-foreground/80 leading-relaxed">
-          Next, choose which plan fits your barn. Both plans include a <strong>14-day free trial</strong> — no credit card required to get started.
+          Next, choose which plan fits your barn. Both plans include a <strong>14-day free trial</strong> before you're charged.
         </p>
         <Screenshot label="Plan selection showing Starter and Farm plan cards side by side" aspectRatio="aspect-[16/6]" />
         <div className="space-y-3">

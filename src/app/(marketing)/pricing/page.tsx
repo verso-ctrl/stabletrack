@@ -11,7 +11,7 @@ import { MarketingNav } from '@/components/marketing/MarketingNav';
 const MK = {
   bg:     '#fdf8f3',
   bg2:    '#f5f0eb',
-  accent: '#e4a4bd',
+  accent: '#b85470',
   text:   '#262626',
   muted:  'rgba(38,38,38,0.58)',
   font:   "'League Spartan', sans-serif",
@@ -40,16 +40,12 @@ const faqs = [
     answer: 'Yes! Upgrade or downgrade anytime from Settings → Billing. Changes take effect immediately and billing is prorated.',
   },
   {
-    question: 'Do I need a credit card for the trial?',
-    answer: "No. Start your 14-day free trial without entering any payment info. We'll only ask for payment if you want to continue.",
-  },
-  {
     question: 'Is there a mobile app?',
     answer: 'Yes — BarnKeep works on iOS and Android. Access everything from your phone, whether you\'re in the barn or out in the pasture.',
   },
   {
     question: 'Can I try before buying?',
-    answer: 'Every plan starts with a 14-day free trial. No credit card required, no commitment. Just sign up and start using it.',
+    answer: 'Yes — every plan starts with a 14-day free trial. Just sign up, add your horses, and see if it works for you before you\'re charged.',
   },
 ];
 
@@ -75,9 +71,6 @@ export default function PricingPage() {
       {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <section style={{ backgroundColor: MK.bg, padding: '80px 0 64px' }}>
         <div className="max-w-3xl mx-auto px-6 sm:px-10" style={{ textAlign: 'center' }}>
-          <span style={{ ...labelStyle, display: 'inline-block', marginBottom: 24, backgroundColor: 'rgba(228,164,189,0.15)', padding: '8px 20px', borderRadius: 100 }}>
-            No credit card required
-          </span>
           <h1
             style={{
               fontFamily: MK.font,
@@ -128,9 +121,6 @@ export default function PricingPage() {
               >
                 Start Free Trial
               </Link>
-              <p style={{ fontFamily: MK.font, fontSize: 10, color: MK.muted, textAlign: 'center', letterSpacing: '0.05em' }}>
-                No credit card required
-              </p>
             </div>
 
             {/* Farm */}
@@ -164,9 +154,6 @@ export default function PricingPage() {
               >
                 Start Free Trial
               </Link>
-              <p style={{ fontFamily: MK.font, fontSize: 10, color: 'rgba(253,248,243,0.3)', textAlign: 'center', letterSpacing: '0.05em' }}>
-                No credit card required
-              </p>
             </div>
           </div>
 
@@ -293,7 +280,7 @@ export default function PricingPage() {
             <em style={{ fontStyle: 'italic', color: MK.accent }}>your barn?</em>
           </h2>
           <p style={{ fontFamily: MK.font, fontSize: 15, color: 'rgba(253,248,243,0.55)', marginBottom: 44, lineHeight: 1.6 }}>
-            14-day free trial. No credit card required. Plans start at $25/month.
+            14-day free trial. Plans start at $25/month.
           </p>
           <Link
             href="/sign-up"
@@ -302,7 +289,7 @@ export default function PricingPage() {
             Start Free Trial
           </Link>
           <p style={{ fontFamily: MK.font, fontSize: 10, color: 'rgba(253,248,243,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            No credit card required · Takes 2 minutes to set up
+            Takes 2 minutes to set up
           </p>
         </div>
       </section>

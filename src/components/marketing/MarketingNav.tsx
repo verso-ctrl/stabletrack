@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const MK_FONT = "'League Spartan', sans-serif";
 const MK_BG = '#fdf8f3';
-const MK_ACCENT = '#e4a4bd';
+const MK_ACCENT = '#b85470';
 const MK_TEXT = '#262626';
 
 interface MarketingNavProps {

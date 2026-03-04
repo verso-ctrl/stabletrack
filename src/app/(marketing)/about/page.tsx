@@ -84,7 +84,7 @@ export default function AboutPage() {
             Give it a try — free for 14 days
           </h2>
           <p className="mt-3 text-muted-foreground">
-            No credit card required. No complicated setup.
+            No complicated setup. Cancel anytime.
           </p>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

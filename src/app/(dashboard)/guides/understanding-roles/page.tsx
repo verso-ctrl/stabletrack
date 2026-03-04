@@ -80,7 +80,7 @@ export default function UnderstandingRolesGuide() {
               <p className="font-semibold text-foreground">Manager</p>
               <span className="text-xs px-1.5 py-0.5 rounded bg-blue-200/60 text-blue-800 dark:bg-blue-800/30 dark:text-blue-400">Broad access</span>
             </div>
-            <p className="text-sm text-foreground/80">Managers can do almost everything an Owner can — manage horses, health records, events, tasks, team members, contacts, and clients. The main things they <em>can't</em> do are manage billing and delete the barn.</p>
+            <p className="text-sm text-foreground/80">Managers can do almost everything an Owner can — manage horses, health records, events, tasks, team members, contacts, clients, and billing. The only things they <em>can't</em> do are manage the subscription plan itself and delete the barn.</p>
             <p className="text-sm text-foreground/80">Give this role to a barn manager, head trainer, or anyone who needs to run day-to-day operations independently.</p>
           </div>
 
