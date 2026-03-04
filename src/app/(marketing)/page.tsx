@@ -36,8 +36,8 @@ const MK = {
 
 // ─── Images ──────────────────────────────────────────────────────────────────
 const IMG = {
-  hero:  '/images/buckskin-pasture.jpg', // buckskin horse with red barn — warm hero
-  f1:    '/images/horse-portrait.jpg',   // close-up horse portrait — health records
+  hero:  '/images/horse-portrait.jpg',   // close-up chestnut horse face — striking hero
+  f1:    '/images/horses-in-stalls.jpg', // horses looking out of log stalls — health records
   f2:    '/images/horse-in-barn.jpg',    // horse in barn aisle — feed / daily care
   f3:    '/images/horses-pasture.jpg',   // two horses in pasture — stall/pasture
   f4:    '/images/horseshoe.jpg',        // horseshoe on barn — scheduling
@@ -83,7 +83,7 @@ const cardFeatures = [
 ];
 
 const staggerFeatures = [
-  { image: '/images/horse-portrait.jpg',   label: 'Health Records', title: 'Complete health history', tags: 'Vaccinations · Medications · Weight' },
+  { image: '/images/buckskin-pasture.jpg', label: 'Health Records', title: 'Complete health history', tags: 'Vaccinations · Medications · Weight' },
   { image: '/images/horse-in-barn.jpg',    label: 'Daily Care',     title: 'Daily feed tracking',     tags: 'Programs · Logs · Supplements'    },
   { image: '/images/horses-pasture.jpg',   label: 'Pastures',       title: 'Turnout management',      tags: 'Stalls · Rotation · Assignments'  },
   { image: '/images/horse-window.jpg',     label: 'Scheduling',     title: 'Calendar & events',       tags: 'Vet · Farrier · Tasks'            },
@@ -224,13 +224,13 @@ export default function LandingPage() {
             <div style={{ position: 'relative' }}>
               <div
                 className="mk-img-wrap"
-                style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', aspectRatio: '4/3' }}
+                style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', aspectRatio: '3/4' }}
               >
                 <Image
                   src={IMG.hero}
                   alt="Horse in a boutique barn"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                   unoptimized
                   priority
                 />
