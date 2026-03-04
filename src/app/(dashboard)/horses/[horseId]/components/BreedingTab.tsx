@@ -38,9 +38,11 @@ interface BreedingRecord {
   estimatedDueDate?: string | null;
   veterinarian?: string | null;
   cost?: number | null;
+  contractUrl?: string | null;
   notes?: string | null;
   pregnancyCheckDate?: string | null;
   pregnancyCheckResult?: string | null;
+  pregnancyChecks?: Array<{ date: string; result: string }> | null;
   mare?: { id: string; barnName: string; profilePhotoUrl?: string | null };
   stallion?: { id: string; barnName: string } | null;
   externalStallion?: { id: string; name: string; studFarm?: string | null } | null;
@@ -258,9 +260,9 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
         estimatedDueDate: data.estimatedDueDate || null,
         veterinarian: data.veterinarian || null,
         cost: data.cost || null,
+        contractUrl: data.contractUrl || null,
         notes: data.notes || null,
-        pregnancyCheckDate: data.pregnancyCheckDate || null,
-        pregnancyCheckResult: data.pregnancyCheckResult || null,
+        pregnancyChecks: data.pregnancyChecks?.length ? data.pregnancyChecks : null,
       }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }
@@ -709,6 +711,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
         externalStallions={externalStallions}
         preselectedMareId={isMare ? horse.id : undefined}
         editRecord={editingRecord}
+        barnId={barnId}
       />
       <RecordFoalingModal
         open={showFoalingModal}

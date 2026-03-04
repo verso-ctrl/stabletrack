@@ -38,8 +38,9 @@ interface BreedingRecord {
   externalStallion: { id: string; name: string; studFarm: string | null } | null;
   breedingDate: string; breedingType: string; status: string;
   estimatedDueDate: string | null;
-  veterinarian?: string | null; cost?: number | null; notes?: string | null;
+  veterinarian?: string | null; cost?: number | null; contractUrl?: string | null; notes?: string | null;
   pregnancyCheckDate?: string | null; pregnancyCheckResult?: string | null;
+  pregnancyChecks?: Array<{ date: string; result: string }> | null;
   foalingRecord: { id: string; actualDate: string; foalName: string | null; outcome: string; foalId: string | null } | null;
 }
 interface FoalingRecord {
@@ -239,9 +240,9 @@ export default function BreedingPage() {
         estimatedDueDate: data.estimatedDueDate || null,
         veterinarian: data.veterinarian || null,
         cost: data.cost || null,
+        contractUrl: data.contractUrl || null,
         notes: data.notes || null,
-        pregnancyCheckDate: data.pregnancyCheckDate || null,
-        pregnancyCheckResult: data.pregnancyCheckResult || null,
+        pregnancyChecks: data.pregnancyChecks?.length ? data.pregnancyChecks : null,
       }),
     });
     if (!res.ok) { const err = await res.json(); toast.error('Failed to update breeding record', err.error); throw new Error(err.error); }
@@ -518,6 +519,7 @@ export default function BreedingPage() {
           externalStallions={externalStallions.map(s => ({ id: s.id, name: s.name, studFarm: s.studFarm ?? null }))}
           onAddExternalStallion={() => { setShowBreedingModal(false); setEditingStallion(null); setShowStallionModal(true); }}
           editRecord={editingRecord}
+          barnId={barnId || undefined}
         />
         <RecordFoalingModal
           open={showFoalingModal}

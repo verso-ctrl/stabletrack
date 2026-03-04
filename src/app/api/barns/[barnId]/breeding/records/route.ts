@@ -41,7 +41,15 @@ export async function GET(
       take: limit,
     });
 
-    return NextResponse.json({ data: records });
+    // Parse pregnancyChecks JSON string to array
+    const data = records.map(r => ({
+      ...r,
+      pregnancyChecks: r.pregnancyChecks
+        ? (() => { try { return JSON.parse(r.pregnancyChecks!); } catch { return []; } })()
+        : [],
+    }));
+
+    return NextResponse.json({ data });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch breeding records';
     if (message.includes('not available')) return NextResponse.json({ error: message }, { status: 403 });

@@ -1107,8 +1107,10 @@ model BreedingRecord {
   status              String    @default("PENDING") // PENDING, CONFIRMED_PREGNANT, NOT_PREGNANT, REBREED, FOALED
   pregnancyCheckDate  DateTime?
   pregnancyCheckResult String?  // POSITIVE, NEGATIVE, INCONCLUSIVE
+  pregnancyChecks     String?   // JSON: [{date: string, result: string}]
   estimatedDueDate    DateTime?
   cost                Float?
+  contractUrl         String?   // URL to uploaded breeding contract document
   notes               String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
