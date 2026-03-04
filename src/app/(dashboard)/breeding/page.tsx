@@ -702,69 +702,179 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onEdit, o
           <p className="text-muted-foreground text-sm">No records match your search.</p>
         </div>
       ) : (
-        <div className="card divide-y divide-border">
-          {filtered.map(record => (
-            <div key={record.id} className="p-4 hover:bg-accent transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                  <Baby className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-foreground">
-                      <Link href={`/horses/${record.mare.id}`} className="hover:text-primary transition-colors">{record.mare.barnName}</Link>
-                      {' x '}
-                      {record.stallion ? (
-                        <Link href={`/horses/${record.stallion.id}`} className="hover:text-primary transition-colors">{record.stallion.barnName}</Link>
-                      ) : (
-                        <span>{record.externalStallion?.name || 'Unknown Stallion'}</span>
-                      )}
-                    </p>
-                    <BreedingStatusBadge status={record.breedingType} />
-                    {canEdit ? (
-                      <select
-                        value={record.status}
-                        onChange={(e) => onUpdateStatus(record.id, e.target.value)}
-                        className="text-xs rounded-lg border border-border bg-card px-2 py-1 text-foreground"
-                        aria-label={`Update status for ${record.mare.barnName}`}
-                      >
-                        {BREEDING_STATUSES.map(s => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <BreedingStatusBadge status={record.status} />
+        <div className="space-y-4">
+          {filtered.map(record => {
+            const badge = record.estimatedDueDate ? dueDateBadge(record.estimatedDueDate) : null;
+            const days = record.estimatedDueDate ? daysUntil(record.estimatedDueDate) : null;
+            const isActive = record.status === 'CONFIRMED_PREGNANT' || record.status === 'PENDING';
+
+            return (
+              <div key={record.id} className="card overflow-hidden">
+
+                {/* ── Header ── */}
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Baby className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground leading-snug">
+                        <Link href={`/horses/${record.mare.id}`} className="hover:text-primary transition-colors">{record.mare.barnName}</Link>
+                        <span className="text-muted-foreground font-normal mx-1.5">×</span>
+                        {record.stallion ? (
+                          <Link href={`/horses/${record.stallion.id}`} className="hover:text-primary transition-colors">{record.stallion.barnName}</Link>
+                        ) : (
+                          <span>{record.externalStallion?.name || 'Unknown Stallion'}</span>
+                        )}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <BreedingStatusBadge status={record.breedingType} />
+                        {canEdit ? (
+                          <select
+                            value={record.status}
+                            onChange={e => onUpdateStatus(record.id, e.target.value)}
+                            className="text-xs rounded-lg border border-border bg-card px-2 py-1 text-foreground"
+                            aria-label={`Update status for ${record.mare.barnName}`}
+                          >
+                            {BREEDING_STATUSES.map(s => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <BreedingStatusBadge status={record.status} />
+                        )}
+                        {badge && days !== null && (
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.color}`}>
+                            {days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Due today' : `${days}d until due`}
+                          </span>
+                        )}
+                        {record.foalingRecord && (
+                          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Foaled
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {canEdit && (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => onDelete(record.id)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors" aria-label="Delete breeding record">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatLocalDate(record.breedingDate)}
-                    </span>
-                    {record.estimatedDueDate && <span>Due: {formatLocalDate(record.estimatedDueDate)}</span>}
-                  </div>
                 </div>
+
+                {/* ── Key details strip ── */}
+                <div className="px-4 py-3 border-b border-border bg-muted/20 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <div>
+                    <span className="text-xs text-muted-foreground">Bred</span>
+                    <span className="ml-1.5 font-medium text-foreground">{formatLocalDate(record.breedingDate)}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Est. due</span>
+                    <span className="ml-1.5 font-medium text-foreground">
+                      {record.estimatedDueDate ? formatLocalDate(record.estimatedDueDate) : <span className="text-muted-foreground italic">not set</span>}
+                    </span>
+                  </div>
+                  {record.veterinarian && (
+                    <div>
+                      <span className="text-xs text-muted-foreground">Vet</span>
+                      <span className="ml-1.5 font-medium text-foreground">{record.veterinarian}</span>
+                    </div>
+                  )}
+                  {record.cost != null && (
+                    <div>
+                      <span className="text-xs text-muted-foreground">Stud fee</span>
+                      <span className="ml-1.5 font-medium text-foreground">${record.cost.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {record.contractUrl && (
+                    <a href={record.contractUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline flex items-center gap-1 ml-auto">
+                      View contract ↗
+                    </a>
+                  )}
+                </div>
+
+                {/* ── Gestation progress (active pregnancies only) ── */}
+                {isActive && record.estimatedDueDate && (
+                  <div className="px-4 py-3 border-b border-border">
+                    {(() => {
+                      const elapsed = Math.max(0, Date.now() - new Date(record.breedingDate).getTime());
+                      const elapsedDays = Math.round(elapsed / 86400000);
+                      const pct = Math.min(100, Math.round((elapsed / (340 * 86400000)) * 100));
+                      const barColor = pct >= 90 ? 'bg-red-500' : pct >= 67 ? 'bg-amber-500' : pct >= 33 ? 'bg-blue-500' : 'bg-emerald-500';
+                      const trimester = elapsedDays <= 113 ? '1st trimester' : elapsedDays <= 226 ? '2nd trimester' : '3rd trimester';
+                      return (
+                        <div>
+                          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                            <span>{trimester} · Day {elapsedDays} of ~340</span>
+                            <span>{pct}%</span>
+                          </div>
+                          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                            <div className={`h-full ${barColor} transition-all duration-500 rounded-full`} style={{ width: `${pct}%` }} />
+                            <div className="absolute top-0 bottom-0 w-px bg-border/60" style={{ left: '33.2%' }} />
+                            <div className="absolute top-0 bottom-0 w-px bg-border/60" style={{ left: '66.5%' }} />
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* ── Pregnancy Checks ── */}
+                {record.pregnancyChecks && record.pregnancyChecks.length > 0 && (
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Pregnancy Checks</p>
+                    <div className="space-y-1.5">
+                      {record.pregnancyChecks.map((check, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground w-24 flex-shrink-0">{formatLocalDate(check.date)}</span>
+                          <BreedingStatusBadge status={check.result} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── In-Utero Nominations ── */}
+                {record.inUteroNominations && record.inUteroNominations.length > 0 && (
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">In-Utero Nominations</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {record.inUteroNominations.map((nom, i) => (
+                        <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400">
+                          {nom.program}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Notes ── */}
+                {record.notes && (
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-sm text-foreground line-clamp-2">{record.notes}</p>
+                  </div>
+                )}
+
+                {/* ── Footer ── */}
                 {canEdit && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="px-4 py-3 bg-muted/30 flex items-center gap-2">
                     <button
                       onClick={() => onEdit(record)}
-                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
-                      aria-label="Edit breeding record"
+                      className="btn-secondary btn-md flex items-center gap-1.5 text-sm"
                     >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(record.id)}
-                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                      aria-label="Delete breeding record"
-                    >
-                      <Trash2 className="w-4 h-4" />
+                      <Pencil className="w-3.5 h-3.5" />
+                      Update Record
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
