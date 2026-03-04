@@ -86,19 +86,19 @@ export default function BreedingTrackerOverviewGuide() {
             <p className="text-sm text-muted-foreground">Log observed heat cycles for mares. Record signs of estrus, the date observed, and any notes. BarnKeep uses this history to predict the next expected cycle — so you're never caught off guard.</p>
           </div>
           <div className="rounded-lg border border-border p-4 space-y-1">
-            <p className="font-semibold text-foreground text-sm">Records</p>
-            <p className="text-sm text-muted-foreground">Document each breeding event — which mare was bred to which stallion, the breeding type (live cover, AI, embryo transfer), the attending vet, and any stud fees paid. This tab is the historical record of all breeding attempts.</p>
+            <p className="font-semibold text-foreground text-sm">Breeding Records</p>
+            <p className="text-sm text-muted-foreground">Document each breeding event — which mare was bred to which stallion, the breeding type (natural cover, AI, embryo transfer), the attending vet, and any stud fees paid. This tab is the historical record of all breeding attempts.</p>
           </div>
           <div className="rounded-lg border border-border p-4 space-y-1">
             <p className="font-semibold text-foreground text-sm">Pregnancies</p>
             <p className="text-sm text-muted-foreground">Track confirmed pregnancies with pregnancy check results and dates. Each pregnancy shows a gestation progress bar so you can see at a glance how far along a mare is. Update the status as checks are performed.</p>
           </div>
           <div className="rounded-lg border border-border p-4 space-y-1">
-            <p className="font-semibold text-foreground text-sm">Foalings</p>
+            <p className="font-semibold text-foreground text-sm">Foaling History</p>
             <p className="text-sm text-muted-foreground">Record the birth outcome — date, time, foal sex, condition, and any complications. You can automatically add the foal to your herd as a new horse profile from within the foaling record.</p>
           </div>
           <div className="rounded-lg border border-border p-4 space-y-1">
-            <p className="font-semibold text-foreground text-sm">Stallions</p>
+            <p className="font-semibold text-foreground text-sm">External Stallions</p>
             <p className="text-sm text-muted-foreground">Maintain a database of external stallions used in your breeding program — name, breed, registration, contact for the owner, and any notes. This keeps stallion info handy without having to search for it each time.</p>
           </div>
         </div>

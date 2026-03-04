@@ -67,7 +67,7 @@ export default function RecordingABreedingGuide() {
 
       <Section number={1} title="Opening the Records tab">
         <p className="text-foreground/80 leading-relaxed">
-          Go to <strong>Breeding</strong> in the sidebar and click the <strong>Records</strong> tab. You'll see all past breeding records in a list. Click <strong>"Record Breeding"</strong> to add a new entry.
+          Go to <strong>Breeding</strong> in the sidebar and click the <strong>Breeding Records</strong> tab. You'll see all past breeding records in a list. Click <strong>"Record Breeding"</strong> to add a new entry.
         </p>
         <Screenshot label="Records tab showing a list of past breeding events and the Record Breeding button" aspectRatio="aspect-[16/5]" />
       </Section>
@@ -91,13 +91,12 @@ export default function RecordingABreedingGuide() {
             <li>
               <strong>Breeding Type</strong> — choose from:
               <ul className="mt-1 ml-4 space-y-0.5">
-                <li><strong>Live Cover</strong> — the mare was bred naturally</li>
-                <li><strong>Artificial Insemination (AI)</strong> — fresh, chilled, or frozen semen</li>
-                <li><strong>Embryo Transfer (ET)</strong> — embryo transferred to a recipient mare</li>
+                <li><strong>Natural Cover</strong> — bred naturally in-hand or at pasture</li>
+                <li><strong>AI (Fresh Semen)</strong> — artificial insemination with fresh semen</li>
+                <li><strong>AI (Cooled Semen)</strong> — artificial insemination with shipped cooled semen</li>
+                <li><strong>AI (Frozen Semen)</strong> — artificial insemination with frozen semen</li>
+                <li><strong>Embryo Transfer</strong> — embryo transferred to a recipient mare</li>
               </ul>
-            </li>
-            <li>
-              <strong>Semen Type</strong> (if AI) — Fresh, Chilled, or Frozen.
             </li>
             <li>
               <strong>Veterinarian</strong> — the vet who performed or supervised the breeding.
