@@ -308,8 +308,7 @@ export default function LogVaccinationsMedicationsGuide() {
         <h2 className="text-lg font-semibold text-foreground">What to read next</h2>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { href: '/guides/understanding-the-dashboard', label: 'Understanding the Dashboard', desc: 'Get oriented with the main dashboard view.' },
-            { href: '/horses', label: 'Open the Horses list', desc: 'Go add a vaccination or medication right now.' },
+            { href: '/guides/understanding-the-dashboard', label: 'Understanding the Dashboard', desc: 'A tour of everything on your main dashboard.' },
             { href: '/guides', label: 'Back to all guides', desc: 'Browse the full guide library.' },
           ].map(link => (
             <Link key={link.href} href={link.href} className="card p-4 flex items-start gap-3 hover:shadow-md transition-shadow">
@@ -320,6 +319,13 @@ export default function LogVaccinationsMedicationsGuide() {
               <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             </Link>
           ))}
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Try it now</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/horses" className="btn-secondary btn-md text-sm">Open Horses →</Link>
+          </div>
         </div>
       </div>
 

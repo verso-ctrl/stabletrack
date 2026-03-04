@@ -229,16 +229,10 @@ export default function UnderstandingDashboardGuide() {
         <h2 className="text-lg font-semibold text-foreground">What to read next</h2>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { href: '/horses', label: 'Managing your horses', desc: 'Add horses, track health, and manage profiles.' },
-            { href: '/daily-care', label: 'Daily care & tasks', desc: 'Build routines and keep your team on the same page.' },
-            { href: '/calendar', label: 'Schedule & events', desc: 'Book vet visits, farrier appointments, and more.' },
+            { href: '/guides/logging-vaccinations-and-medications', label: 'Logging vaccinations & medications', desc: 'Record vaccines with due-date tracking and manage active medications.' },
             { href: '/guides', label: 'Back to all guides', desc: 'Browse the full guide library.' },
           ].map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="card p-4 flex items-start gap-3 hover:shadow-md transition-shadow"
-            >
+            <Link key={link.href} href={link.href} className="card p-4 flex items-start gap-3 hover:shadow-md transition-shadow">
               <div className="flex-1">
                 <p className="font-medium text-foreground text-sm">{link.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{link.desc}</p>
@@ -246,6 +240,21 @@ export default function UnderstandingDashboardGuide() {
               <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             </Link>
           ))}
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Jump to the app</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { href: '/horses', label: 'Horses' },
+              { href: '/daily-care', label: 'Daily Care' },
+              { href: '/calendar', label: 'Schedule' },
+            ].map(link => (
+              <Link key={link.href} href={link.href} className="btn-secondary btn-md text-sm">
+                {link.label} →
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
