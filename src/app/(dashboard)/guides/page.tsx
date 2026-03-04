@@ -37,8 +37,8 @@ const sections: Section[] = [
     title: 'Getting Started',
     description: 'Set up your barn and get familiar with BarnKeep in under 10 minutes.',
     guides: [
-      { title: 'Setting up your barn', description: 'Name your barn, add your address, and invite your first team member.', type: 'video', duration: '3 min', status: 'coming-soon' },
-      { title: 'Adding your first horse', description: 'Create a horse profile with photos, breed, and basic health info.', type: 'video', duration: '4 min', status: 'coming-soon' },
+      { title: 'Setting up your barn', description: 'Name your barn, add your address, and choose your plan.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/setting-up-your-barn' },
+      { title: 'Adding your first horse', description: 'Create a horse profile with photos, breed, and basic health info.', type: 'article', duration: '4 min read', status: 'available', href: '/guides/adding-your-first-horse' },
       { title: 'Understanding the dashboard', description: 'A quick tour of everything on your main dashboard.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/understanding-the-dashboard' },
     ],
   },
@@ -49,10 +49,10 @@ const sections: Section[] = [
     title: 'Horse Profiles',
     description: 'Everything about managing horse records, health history, and photos.',
     guides: [
-      { title: 'Horse profile overview', description: 'Walk through each tab on a horse profile — health, feeding, breeding, and more.', type: 'video', duration: '6 min', status: 'coming-soon' },
+      { title: 'Horse profile overview', description: 'Walk through each tab on a horse profile — health, feeding, breeding, and more.', type: 'article', duration: '6 min read', status: 'available', href: '/guides/horse-profile-overview' },
       { title: 'Logging vaccinations & medications', description: 'How to record vaccines, set medication schedules, and track health records.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/logging-vaccinations-and-medications' },
-      { title: 'Uploading photos & documents', description: 'Add photos, coggins papers, vet records, and other documents to a horse profile.', type: 'video', duration: '3 min', status: 'coming-soon' },
-      { title: 'Tracking weight over time', description: 'Log weight records and read the weight history chart.', type: 'article', duration: '2 min read', status: 'coming-soon' },
+      { title: 'Uploading photos & documents', description: 'Add photos, coggins papers, vet records, and other documents to a horse profile.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/uploading-photos-and-documents' },
+      { title: 'Tracking weight over time', description: 'Log weight records and read the weight history.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/tracking-weight-over-time' },
     ],
   },
   {
@@ -62,9 +62,9 @@ const sections: Section[] = [
     title: 'Daily Care & Feeding',
     description: 'Build feed programs, log daily care, and keep your whole team on the same page.',
     guides: [
-      { title: 'Creating a feed program', description: 'Set up hay, grain, and supplement schedules for each horse.', type: 'video', duration: '5 min', status: 'coming-soon' },
-      { title: 'Using the feed chart', description: 'How to read and print the daily feed chart for your barn.', type: 'article', duration: '2 min read', status: 'coming-soon' },
-      { title: 'Logging daily care', description: 'Record turnout, grooming, and general care observations each day.', type: 'video', duration: '3 min', status: 'coming-soon' },
+      { title: 'Creating a feed program', description: 'Set up hay, grain, and supplement schedules for each horse.', type: 'article', duration: '5 min read', status: 'available', href: '/guides/creating-a-feed-program' },
+      { title: 'Using the feed chart', description: 'How to read and mark feedings complete on the daily feed chart.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/using-the-feed-chart' },
+      { title: 'Logging daily care', description: 'Record health checks, feedings, and medication logs for each day.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/logging-daily-care' },
     ],
   },
   {
@@ -74,9 +74,9 @@ const sections: Section[] = [
     title: 'Schedule & Tasks',
     description: 'Stay on top of vet appointments, farrier visits, and daily to-dos.',
     guides: [
-      { title: 'Creating events on the calendar', description: 'Schedule vet visits, farrier appointments, and competitions.', type: 'video', duration: '4 min', status: 'coming-soon' },
-      { title: 'Managing tasks', description: 'Create one-off and recurring tasks, assign them to team members, and mark them done.', type: 'article', duration: '3 min read', status: 'coming-soon' },
-      { title: 'Setting reminders', description: 'Get notified before important events so nothing falls through the cracks.', type: 'article', duration: '2 min read', status: 'coming-soon' },
+      { title: 'Creating events on the calendar', description: 'Schedule vet visits, farrier appointments, and competitions.', type: 'article', duration: '4 min read', status: 'available', href: '/guides/creating-events-on-the-calendar' },
+      { title: 'Managing tasks', description: 'Create one-off and recurring tasks and mark them done.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/managing-tasks' },
+      { title: 'Setting reminders', description: 'Get notified before important events with Google Calendar sync.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/setting-reminders' },
     ],
   },
   {
@@ -86,12 +86,12 @@ const sections: Section[] = [
     title: 'Breeding Tracker',
     description: 'Track heat cycles, breeding records, pregnancies, and foaling from start to finish.',
     guides: [
-      { title: 'Breeding tracker overview', description: 'How the five tabs work together — heat cycles, records, pregnancies, foalings, and stallions.', type: 'video', duration: '5 min', status: 'coming-soon' },
-      { title: 'Logging a heat cycle', description: 'Record signs of estrus and let BarnKeep predict the next cycle.', type: 'article', duration: '2 min read', status: 'coming-soon' },
-      { title: 'Recording a breeding', description: 'Log a breeding event with mare, stallion, type, vet, and stud fee.', type: 'video', duration: '4 min', status: 'coming-soon' },
-      { title: 'Tracking a pregnancy', description: 'Add pregnancy check results, update status, and monitor the gestation progress bar.', type: 'article', duration: '3 min read', status: 'coming-soon' },
-      { title: 'Recording a foaling', description: 'Document the birth outcome and automatically add the foal to your herd.', type: 'video', duration: '3 min', status: 'coming-soon' },
-      { title: 'In-utero nominations', description: 'Track futurity and stakes nominations for a foal before it\'s born.', type: 'article', duration: '2 min read', status: 'coming-soon' },
+      { title: 'Breeding tracker overview', description: 'How the five tabs work together — heat cycles, records, pregnancies, foalings, and stallions.', type: 'article', duration: '5 min read', status: 'available', href: '/guides/breeding-tracker-overview' },
+      { title: 'Logging a heat cycle', description: 'Record signs of estrus and let BarnKeep predict the next cycle.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/logging-a-heat-cycle' },
+      { title: 'Recording a breeding', description: 'Log a breeding event with mare, stallion, type, vet, and stud fee.', type: 'article', duration: '4 min read', status: 'available', href: '/guides/recording-a-breeding' },
+      { title: 'Tracking a pregnancy', description: 'Add pregnancy check results, update status, and monitor the gestation progress bar.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/tracking-a-pregnancy' },
+      { title: 'Recording a foaling', description: 'Document the birth outcome and automatically add the foal to your herd.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/recording-a-foaling' },
+      { title: 'In-utero nominations', description: 'Track futurity and stakes nominations for a foal before it\'s born.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/in-utero-nominations' },
     ],
   },
   {
@@ -101,8 +101,8 @@ const sections: Section[] = [
     title: 'Farm Tasks & Maintenance',
     description: 'Keep up with barn repairs, equipment checks, and farm-wide to-dos.',
     guides: [
-      { title: 'Farm tasks vs. horse tasks', description: 'Understand the difference between farm-level and horse-level task management.', type: 'article', duration: '2 min read', status: 'coming-soon' },
-      { title: 'Setting up recurring maintenance', description: 'Schedule repeating tasks like water trough cleaning or equipment checks.', type: 'video', duration: '3 min', status: 'coming-soon' },
+      { title: 'Farm tasks vs. horse tasks', description: 'Understand the difference between farm-level and horse-level task management.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/farm-tasks-vs-horse-tasks' },
+      { title: 'Setting up recurring maintenance', description: 'Schedule repeating tasks like water trough cleaning or equipment checks.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/setting-up-recurring-maintenance' },
     ],
   },
   {
@@ -112,8 +112,8 @@ const sections: Section[] = [
     title: 'Team & Permissions',
     description: 'Invite staff, set roles, and control who can see and do what.',
     guides: [
-      { title: 'Inviting a team member', description: 'Generate an invite code or share a link to bring someone onto your barn.', type: 'article', duration: '2 min read', status: 'coming-soon' },
-      { title: 'Understanding roles', description: 'Owner, Manager, Trainer, Caretaker — what each role can and can\'t do.', type: 'article', duration: '3 min read', status: 'coming-soon' },
+      { title: 'Inviting a team member', description: 'Generate an invite code or share a link to bring someone onto your barn.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/inviting-a-team-member' },
+      { title: 'Understanding roles', description: 'Owner, Manager, Caretaker — what each role can and can\'t do.', type: 'article', duration: '3 min read', status: 'available', href: '/guides/understanding-roles' },
     ],
   },
   {
@@ -123,8 +123,8 @@ const sections: Section[] = [
     title: 'Settings & Billing',
     description: 'Manage your subscription, update barn details, and configure your account.',
     guides: [
-      { title: 'Upgrading your plan', description: 'How to switch from Starter to Farm, or add the Breeding Tracker.', type: 'article', duration: '2 min read', status: 'coming-soon' },
-      { title: 'Barn settings overview', description: 'Update your barn name, address, timezone, and notification preferences.', type: 'article', duration: '2 min read', status: 'coming-soon' },
+      { title: 'Upgrading your plan', description: 'How to switch from Starter to Farm, or add the Breeding Tracker.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/upgrading-your-plan' },
+      { title: 'Barn settings overview', description: 'Update your barn name, address, timezone, and notification preferences.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/barn-settings-overview' },
     ],
   },
 ];
@@ -146,18 +146,6 @@ export default function GuidesPage() {
         >
           Need help? Email us
         </a>
-      </div>
-
-      {/* Coming soon banner */}
-      <div className="card p-4 flex items-start gap-3 bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800">
-        <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-amber-900 dark:text-amber-400">Guides are on the way</p>
-          <p className="text-sm text-amber-700 dark:text-amber-500 mt-0.5">
-            We&apos;re recording video walkthroughs and writing step-by-step articles for every feature. In the meantime, email us at{' '}
-            <a href="mailto:support@barnkeep.com" className="underline">support@barnkeep.com</a> and we&apos;ll walk you through anything.
-          </p>
-        </div>
       </div>
 
       {/* Sections */}
