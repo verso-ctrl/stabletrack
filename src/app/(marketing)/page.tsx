@@ -419,25 +419,25 @@ export default function LandingPage() {
                 src="/images/screenshot-daily-care.png"
                 alt="BarnKeep daily care log"
                 label="Daily Care"
-                aspectRatio="4/3"
+                aspectRatio="3/2"
                 small
-                objectPosition="20% 0%"
+                objectPosition="25% 50%"
               />
               <ScreenshotFrame
                 src="/images/screenshot-breeding.png"
                 alt="BarnKeep breeding management"
                 label="Breeding Tracker"
-                aspectRatio="4/3"
+                aspectRatio="3/2"
                 small
-                objectPosition="20% 0%"
+                objectPosition="25% 50%"
               />
               <ScreenshotFrame
                 src="/images/screenshot-team.png"
                 alt="BarnKeep team management"
                 label="Team"
-                aspectRatio="4/3"
+                aspectRatio="3/2"
                 small
-                objectPosition="20% 0%"
+                objectPosition="25% 50%"
               />
             </div>
           </AnimateOnScroll>
