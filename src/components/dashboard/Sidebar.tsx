@@ -25,6 +25,7 @@ import {
   Heart,
   BookUser,
   Users,
+  BookOpen,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -58,8 +59,8 @@ const navItems = [
 ];
 
 const bottomNavItems = [
+  { href: '/guides', label: 'Guides', icon: BookOpen },
   { href: '/settings', label: 'Settings', icon: Settings },
-  // Help hidden for v1 - links are placeholder
 ];
 
 function UserProfile() {
