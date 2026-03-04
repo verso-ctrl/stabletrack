@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   DollarSign,
   Users,
@@ -663,7 +664,7 @@ export default function BillingPage() {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {invoice.client.firstName} {invoice.client.lastName} • Due {new Date(invoice.dueDate).toLocaleDateString()}
+                    {invoice.client.firstName} {invoice.client.lastName} • Due {formatLocalDate(invoice.dueDate)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -808,7 +809,7 @@ export default function BillingPage() {
                               clientId: group.client.id,
                               dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                               items: group.lessons.map((lesson: any) => ({
-                                description: `${lesson.type} Lesson - ${new Date(lesson.scheduledDate).toLocaleDateString()}${lesson.horse ? ` (${lesson.horse.barnName})` : ''}`,
+                                description: `${lesson.type} Lesson - ${formatLocalDate(lesson.scheduledDate)}${lesson.horse ? ` (${lesson.horse.barnName})` : ''}`,
                                 quantity: 1,
                                 unitPrice: lesson.price || 0,
                                 horseId: lesson.horse?.id || '',
@@ -835,7 +836,7 @@ export default function BillingPage() {
                               {lesson.horse && <span className="text-muted-foreground"> with {lesson.horse.barnName}</span>}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(lesson.scheduledDate).toLocaleDateString()} • {lesson.duration} min
+                              {formatLocalDate(lesson.scheduledDate)} • {lesson.duration} min
                               {lesson.discipline && ` • ${lesson.discipline}`}
                             </p>
                           </div>
@@ -906,7 +907,7 @@ export default function BillingPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {recurring.client.firstName} {recurring.client.lastName} • 
-                      Next: {new Date(recurring.nextRunDate).toLocaleDateString()}
+                      Next: {formatLocalDate(recurring.nextRunDate)}
                     </p>
                   </div>
                   <div className="text-right">

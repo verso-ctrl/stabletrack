@@ -5,6 +5,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   Plus,
   CheckCircle2,
@@ -372,7 +373,7 @@ export default function FarmMaintenancePage() {
                   {task.dueDate && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(task.dueDate).toLocaleDateString()}
+                      {formatLocalDate(task.dueDate)}
                     </span>
                   )}
                   {task.dueTime && (

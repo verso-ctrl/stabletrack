@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   Activity,
   Plus,
@@ -229,7 +230,7 @@ export default function TrainingPage() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(log.date).toLocaleDateString()}
+                      {formatLocalDate(log.date)}
                     </span>
                     {log.duration && (
                       <span className="flex items-center gap-1">

@@ -5,6 +5,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useTasks, useHorses } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   Plus,
   Search,
@@ -245,7 +246,7 @@ export default function TasksPage() {
                   {task.dueDate && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(task.dueDate).toLocaleDateString()}
+                      {formatLocalDate(task.dueDate)}
                     </span>
                   )}
                   {task.dueTime && (

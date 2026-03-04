@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import { formatLocalDate } from '@/lib/utils';
 
 interface Event {
   id: string;
@@ -37,7 +38,7 @@ export function EventsTab({ horse, canEdit = true }: EventsTabProps) {
               <div className="flex-1">
                 <p className="font-medium text-foreground">{event.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(event.scheduledDate).toLocaleDateString()}
+                  {formatLocalDate(event.scheduledDate)}
                 </p>
               </div>
               <span className="badge-info">{event.type}</span>

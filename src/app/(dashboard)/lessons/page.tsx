@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   Calendar,
   Plus,
@@ -240,7 +241,7 @@ export default function LessonsPage() {
                   {new Date(lesson.scheduledDate).getDate()}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(lesson.scheduledDate).toLocaleDateString('en-US', { month: 'short' })}
+                  {formatLocalDate(lesson.scheduledDate, { month: 'short' })}
                 </p>
               </div>
               <div className="flex-1">

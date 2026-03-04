@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, Plus, Loader2, Calendar, Baby, GitBranch, Pencil, Trash2, FileText } from 'lucide-react';
+import { formatLocalDate } from '@/lib/utils';
 import { HeatCycleTimeline } from '@/components/breeding/HeatCycleTimeline';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
 import { LogHeatCycleModal } from '@/components/breeding/LogHeatCycleModal';
@@ -364,12 +365,12 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                     </span>
                     {status.label === 'Pregnant' && pregnantRecord?.estimatedDueDate && (
                       <span className="text-sm text-muted-foreground">
-                        Due {new Date(pregnantRecord.estimatedDueDate).toLocaleDateString()}
+                        Due {formatLocalDate(pregnantRecord.estimatedDueDate)}
                       </span>
                     )}
                     {status.label === 'Not in Heat' && heatCycles.length > 0 && heatCycles[0].predictedNextDate && (
                       <span className="text-sm text-muted-foreground">
-                        Next predicted: {new Date(heatCycles[0].predictedNextDate).toLocaleDateString()}
+                        Next predicted: {formatLocalDate(heatCycles[0].predictedNextDate)}
                       </span>
                     )}
                   </div>
@@ -414,7 +415,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
               <div className="mt-3 space-y-1">
                 {heatCycles.map(cycle => (
                   <div key={cycle.id} className="flex items-center justify-between text-xs text-muted-foreground py-1">
-                    <span>{new Date(cycle.startDate).toLocaleDateString()}{cycle.endDate ? ` - ${new Date(cycle.endDate).toLocaleDateString()}` : ''}</span>
+                    <span>{formatLocalDate(cycle.startDate)}{cycle.endDate ? ` - ${formatLocalDate(cycle.endDate)}` : ''}</span>
                     <div className="flex items-center gap-1">
                       <button onClick={() => { setEditingCycle(cycle); setShowHeatCycleModal(true); }} className="p-1 rounded hover:bg-muted" aria-label="Edit heat cycle">
                         <Pencil className="w-3.5 h-3.5" />
@@ -451,8 +452,8 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                       <div className="min-w-0">
                         <p className="font-medium text-foreground text-sm truncate">{getStallionName(record)}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(record.breedingDate).toLocaleDateString()}
-                          {record.estimatedDueDate && <> &middot; Due {new Date(record.estimatedDueDate).toLocaleDateString()}</>}
+                          {formatLocalDate(record.breedingDate)}
+                          {record.estimatedDueDate && <> &middot; Due {formatLocalDate(record.estimatedDueDate)}</>}
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -529,7 +530,7 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                             <p className="font-medium text-foreground text-sm truncate">{foaling.foalName || 'Unnamed Foal'}</p>
                           )}
                           <p className="text-xs text-muted-foreground">
-                            {new Date(foaling.actualDate).toLocaleDateString()} &middot; Sire: {sireDisplay}
+                            {formatLocalDate(foaling.actualDate)} &middot; Sire: {sireDisplay}
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -582,8 +583,8 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
                       <div className="min-w-0">
                         <p className="font-medium text-foreground text-sm truncate">{record.mare?.barnName || 'Unknown Mare'}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(record.breedingDate).toLocaleDateString()}
-                          {record.estimatedDueDate && <> &middot; Due {new Date(record.estimatedDueDate).toLocaleDateString()}</>}
+                          {formatLocalDate(record.breedingDate)}
+                          {record.estimatedDueDate && <> &middot; Due {formatLocalDate(record.estimatedDueDate)}</>}
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">

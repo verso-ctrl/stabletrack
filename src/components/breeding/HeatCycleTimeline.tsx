@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { formatLocalDate } from '@/lib/utils';
 
 interface HeatCycleData {
   id: string;
@@ -54,7 +55,7 @@ export function HeatCycleTimeline({ cycles, daysToShow = 90, daysForward = 30 }:
         width: Math.max(1, dayToPercent(cycleEnd) - dayToPercent(cycleStart)),
         color: intensityColors[cycle.intensity || 'MODERATE'] || intensityColors.MODERATE,
         isPredicted: false,
-        tooltip: `${cycleStart.toLocaleDateString()} - ${cycle.endDate ? new Date(cycle.endDate).toLocaleDateString() : 'ongoing'}`,
+        tooltip: `${formatLocalDate(cycleStart)} - ${cycle.endDate ? formatLocalDate(cycle.endDate) : 'ongoing'}`,
         cycleLength: cycle.cycleLength,
       };
     });

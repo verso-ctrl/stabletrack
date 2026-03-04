@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Trophy, X } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 
 interface Competition {
   id: string;
@@ -144,7 +145,7 @@ export function CompetitionsTab({ horse, barnId, canEdit = true }: CompetitionsT
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {comp.className && `${comp.className} · `}
-                        {new Date(comp.eventDate).toLocaleDateString()}
+                        {formatLocalDate(comp.eventDate)}
                         {comp.location && ` · ${comp.location}`}
                       </p>
                       <div className="flex flex-wrap gap-3 mt-2 text-sm">

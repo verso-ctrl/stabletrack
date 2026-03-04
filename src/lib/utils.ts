@@ -19,6 +19,20 @@ export function formatDate(date: Date | string | null, formatStr: string = 'MMM 
 }
 
 /**
+ * Format a date-only value from the database (stored at UTC midnight).
+ * Forces UTC timezone to prevent off-by-one when the user's local timezone is behind UTC.
+ * Use this for any date field entered by the user (dateGiven, dueDate, dateOfBirth, etc.)
+ * Do NOT use for new Date() (current device time) — that's already local.
+ */
+export function formatLocalDate(
+  date: Date | string | null | undefined,
+  options: Intl.DateTimeFormatOptions = {}
+): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-US', { timeZone: 'UTC', ...options });
+}
+
+/**
  * Format a date relative to now (e.g., "2 days ago")
  */
 export function formatRelativeDate(date: Date | string | null): string {

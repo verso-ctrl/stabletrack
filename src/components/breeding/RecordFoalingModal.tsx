@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { formatLocalDate } from '@/lib/utils';
 import { X, Loader2 } from 'lucide-react';
 
 interface RecordFoalingModalProps {
@@ -130,7 +131,7 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
               {breedingRecords.map(r => (
                 <option key={r.id} value={r.id}>
                   {r.mare?.barnName} x {r.stallion?.barnName || r.externalStallion?.name || 'Unknown'}
-                  {r.estimatedDueDate ? ` (due ${new Date(r.estimatedDueDate).toLocaleDateString()})` : ''}
+                  {r.estimatedDueDate ? ` (due ${formatLocalDate(r.estimatedDueDate)})` : ''}
                 </option>
               ))}
             </select>

@@ -8,6 +8,7 @@ import { FeatureGate } from '@/components/subscription/FeatureGate';
 import { LogHeatCycleModal } from '@/components/breeding/LogHeatCycleModal';
 import { RecordBreedingModal, type BreedingFormData } from '@/components/breeding/RecordBreedingModal';
 import { RecordFoalingModal } from '@/components/breeding/RecordFoalingModal';
+import { formatLocalDate } from '@/lib/utils';
 import { ExternalStallionModal, type ExternalStallionFormData } from '@/components/breeding/ExternalStallionModal';
 import { BreedingStatusBadge } from '@/components/breeding/BreedingStatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -587,13 +588,13 @@ function HeatCyclesTab({ cycles, canEdit, onAdd, onEdit, onDelete }: {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(cycle.startDate).toLocaleDateString()}
-                    {cycle.endDate && ` - ${new Date(cycle.endDate).toLocaleDateString()}`}
+                    {formatLocalDate(cycle.startDate)}
+                    {cycle.endDate && ` - ${formatLocalDate(cycle.endDate)}`}
                   </span>
                   <span>Cycle: {cycle.cycleLength}d</span>
                 </div>
                 {cycle.predictedNextDate && (
-                  <p className="text-xs text-muted-foreground mt-1">Predicted next: {new Date(cycle.predictedNextDate).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Predicted next: {formatLocalDate(cycle.predictedNextDate)}</p>
                 )}
                 {cycle.signs && cycle.signs.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
@@ -726,9 +727,9 @@ function BreedingRecordsTab({ records, canEdit, onAdd, onUpdateStatus, onEdit, o
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(record.breedingDate).toLocaleDateString()}
+                      {formatLocalDate(record.breedingDate)}
                     </span>
-                    {record.estimatedDueDate && <span>Due: {new Date(record.estimatedDueDate).toLocaleDateString()}</span>}
+                    {record.estimatedDueDate && <span>Due: {formatLocalDate(record.estimatedDueDate)}</span>}
                   </div>
                 </div>
                 {canEdit && (
@@ -815,7 +816,7 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus,
                   )}</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    Bred: {new Date(record.breedingDate).toLocaleDateString()}
+                    Bred: {formatLocalDate(record.breedingDate)}
                   </span>
                 </div>
                 {record.estimatedDueDate && (
@@ -823,7 +824,7 @@ function PregnanciesTab({ pregnancies, canEdit, onRecordFoaling, onUpdateStatus,
                     <div className="flex items-center justify-between text-sm mb-1">
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Due:</span>
-                        <span className="font-medium text-foreground">{new Date(record.estimatedDueDate).toLocaleDateString()}</span>
+                        <span className="font-medium text-foreground">{formatLocalDate(record.estimatedDueDate)}</span>
                       </div>
                       {days !== null && (
                         <span className={`text-xs font-medium ${days < 0 ? 'text-red-600' : days <= 30 ? 'text-amber-600' : 'text-muted-foreground'}`}>
@@ -923,7 +924,7 @@ function FoalingsTab({ foalings, canEdit, onAdd, onEdit, onDelete }: {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(foaling.actualDate).toLocaleDateString()}
+                    {formatLocalDate(foaling.actualDate)}
                   </span>
                   <span>Sire: {sire}</span>
                 </div>

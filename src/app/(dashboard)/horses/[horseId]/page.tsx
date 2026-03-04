@@ -8,6 +8,7 @@ import { useHorse } from '@/hooks/useData';
 import { useBarn } from '@/contexts/BarnContext';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import { HorsePhotoGallery } from '@/components/storage/HorsePhotoGallery';
 import {
   ArrowLeft,
@@ -532,7 +533,7 @@ export default function HorseDetailPage() {
             <InfoItem
               label="Age"
               value={horse.age ? `${horse.age} years` : null}
-              subValue={horse.dateOfBirth ? new Date(horse.dateOfBirth).toLocaleDateString() : undefined}
+              subValue={horse.dateOfBirth ? formatLocalDate(horse.dateOfBirth) : undefined}
             />
             <InfoItem
               label="Height"

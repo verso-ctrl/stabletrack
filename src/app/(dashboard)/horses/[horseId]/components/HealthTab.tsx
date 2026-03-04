@@ -6,6 +6,7 @@ import { ChevronRight, FileText, Loader2, Pencil, Pill, Plus, Printer, Trash2, X
 import { FamilyTree } from './FamilyTree';
 import { csrfFetch } from '@/lib/fetch';
 import { toast } from '@/lib/toast';
+import { formatLocalDate } from '@/lib/utils';
 
 interface HealthRecord {
   id: string;
@@ -352,7 +353,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                     {med.instructions && <p className="text-xs text-muted-foreground mt-1">{med.instructions}</p>}
                     {med.logs && med.logs.length > 0 && (
                       <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-purple-100 dark:border-purple-900/50">
-                        Last given: {new Date(med.logs[0].givenAt).toLocaleDateString()}
+                        Last given: {formatLocalDate(med.logs[0].givenAt)}
                         {med.logs[0].givenBy && ` by ${med.logs[0].givenBy}`}
                       </p>
                     )}
@@ -421,11 +422,11 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Test Date</p>
-                <p className="font-medium">{new Date(coggins.current.testDate).toLocaleDateString()}</p>
+                <p className="font-medium">{formatLocalDate(coggins.current.testDate)}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Expiry Date</p>
-                <p className="font-medium">{new Date(coggins.current.expiryDate).toLocaleDateString()}</p>
+                <p className="font-medium">{formatLocalDate(coggins.current.expiryDate)}</p>
               </div>
               {coggins.current.veterinarian && (
                 <div>
@@ -472,9 +473,9 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             <div className="space-y-2">
               {coggins.data.slice(1, 4).map((c) => (
                 <div key={c.id} className="flex items-center justify-between text-sm p-2 rounded bg-background">
-                  <span className="text-muted-foreground">{new Date(c.testDate).toLocaleDateString()}</span>
+                  <span className="text-muted-foreground">{formatLocalDate(c.testDate)}</span>
                   <span className={new Date(c.expiryDate) > new Date() ? 'text-green-600' : 'text-muted-foreground'}>
-                    Exp: {new Date(c.expiryDate).toLocaleDateString()}
+                    Exp: {formatLocalDate(c.expiryDate)}
                   </span>
                 </div>
               ))}
@@ -509,11 +510,11 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                         {isExpiringSoon && <span className="badge-warning">Due Soon</span>}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Given: {new Date(vax.dateGiven).toLocaleDateString()}
+                        Given: {formatLocalDate(vax.dateGiven)}
                       </p>
                       {vax.nextDueDate && (
                         <p className="text-sm text-muted-foreground">
-                          Next due: {new Date(vax.nextDueDate).toLocaleDateString()}
+                          Next due: {formatLocalDate(vax.nextDueDate)}
                         </p>
                       )}
                     </div>
@@ -561,7 +562,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
           <div className="space-y-2">
             {horse.weights.slice(0, 5).map((w) => (
               <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-background">
-                <span className="text-muted-foreground">{new Date(w.date).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">{formatLocalDate(w.date)}</span>
                 <span className="font-medium text-foreground">{w.weight} lbs</span>
                 {w.bodyScore && (
                   <span className="text-sm text-muted-foreground">BCS: {w.bodyScore.toFixed(1)}</span>
@@ -613,7 +614,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-foreground">{record.type.replace(/_/g, ' ')}</p>
-                    <p className="text-sm text-muted-foreground">{new Date(record.date).toLocaleDateString()}</p>
+                    <p className="text-sm text-muted-foreground">{formatLocalDate(record.date)}</p>
                     {record.provider && (
                       <p className="text-xs text-muted-foreground mt-1">Provider: {record.provider}</p>
                     )}
@@ -770,7 +771,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
             <div className="p-6 space-y-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Date</label>
-                <p className="text-foreground">{new Date(selectedHealthRecord.date).toLocaleDateString()}</p>
+                <p className="text-foreground">{formatLocalDate(selectedHealthRecord.date)}</p>
               </div>
 
               {selectedHealthRecord.provider && (
@@ -811,7 +812,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
               {selectedHealthRecord.followUpDate && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Follow-up Date</label>
-                  <p className="text-foreground">{new Date(selectedHealthRecord.followUpDate).toLocaleDateString()}</p>
+                  <p className="text-foreground">{formatLocalDate(selectedHealthRecord.followUpDate)}</p>
                 </div>
               )}
 
@@ -907,11 +908,11 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                     </tr>
                     <tr>
                       <td className="horse-sheet-td horse-sheet-td-name">Test Date</td>
-                      <td className="horse-sheet-td">{new Date(coggins.current.testDate).toLocaleDateString()}</td>
+                      <td className="horse-sheet-td">{formatLocalDate(coggins.current.testDate)}</td>
                     </tr>
                     <tr>
                       <td className="horse-sheet-td horse-sheet-td-name">Expiry</td>
-                      <td className="horse-sheet-td">{new Date(coggins.current.expiryDate).toLocaleDateString()}</td>
+                      <td className="horse-sheet-td">{formatLocalDate(coggins.current.expiryDate)}</td>
                     </tr>
                     {coggins.current.veterinarian && (
                       <tr>
@@ -944,8 +945,8 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                     {horse.vaccinations.map((vax) => (
                       <tr key={vax.id}>
                         <td className="horse-sheet-td horse-sheet-td-name">{vax.type.replace(/_/g, ' ')}</td>
-                        <td className="horse-sheet-td">{new Date(vax.dateGiven).toLocaleDateString()}</td>
-                        <td className="horse-sheet-td">{vax.nextDueDate ? new Date(vax.nextDueDate).toLocaleDateString() : '\u2014'}</td>
+                        <td className="horse-sheet-td">{formatLocalDate(vax.dateGiven)}</td>
+                        <td className="horse-sheet-td">{vax.nextDueDate ? formatLocalDate(vax.nextDueDate) : '\u2014'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -970,7 +971,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                   <tbody>
                     {horse.weights.slice(0, 10).map((w) => (
                       <tr key={w.id}>
-                        <td className="horse-sheet-td">{new Date(w.date).toLocaleDateString()}</td>
+                        <td className="horse-sheet-td">{formatLocalDate(w.date)}</td>
                         <td className="horse-sheet-td horse-sheet-td-name">{w.weight} lbs</td>
                         <td className="horse-sheet-td">{w.bodyScore?.toFixed(1) || '\u2014'}</td>
                       </tr>
@@ -1000,7 +1001,7 @@ export function HealthTab({ horse, onLogWeight, onLogVaccination, onLogCoggins, 
                   {healthRecords.map((record) => (
                     <tr key={record.id}>
                       <td className="horse-sheet-td horse-sheet-td-name">{record.type.replace(/_/g, ' ')}</td>
-                      <td className="horse-sheet-td">{new Date(record.date).toLocaleDateString()}</td>
+                      <td className="horse-sheet-td">{formatLocalDate(record.date)}</td>
                       <td className="horse-sheet-td">{record.provider || '\u2014'}</td>
                       <td className="horse-sheet-td">{record.diagnosis || record.treatment || '\u2014'}</td>
                     </tr>

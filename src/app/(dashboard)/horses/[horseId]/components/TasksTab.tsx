@@ -5,6 +5,7 @@ import { useBarn } from '@/contexts/BarnContext';
 import { useTasks } from '@/hooks/useData';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
+import { formatLocalDate } from '@/lib/utils';
 import {
   Plus,
   CheckCircle2,
@@ -287,7 +288,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
                     {task.dueDate && (
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {new Date(task.dueDate).toLocaleDateString()}
+                        {formatLocalDate(task.dueDate)}
                       </span>
                     )}
                     {task.dueTime && (
@@ -340,7 +341,7 @@ export function TasksTab({ horse, canEdit = true }: TasksTabProps) {
                   </span>
                   {task.completedAt && (
                     <span className="text-xs text-muted-foreground">
-                      Completed {new Date(task.completedAt).toLocaleDateString()}
+                      Completed {formatLocalDate(task.completedAt)}
                     </span>
                   )}
                 </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Calendar, ClipboardCheck, Loader2, Pill, Stethoscope, Printer, Pencil, Trash2 } from 'lucide-react';
+import { formatLocalDate } from '@/lib/utils';
 import { useTasks } from '@/hooks/useData';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
@@ -312,7 +313,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(event.scheduledDate).toLocaleDateString()}
+                      {formatLocalDate(event.scheduledDate)}
                     </p>
                   </div>
                   <span className="badge-info">{event.type.replace(/_/g, ' ')}</span>
@@ -345,7 +346,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
                 >
                   <p className="font-medium text-foreground">{record.type.replace(/_/g, ' ')}</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(record.date).toLocaleDateString()}
+                    {formatLocalDate(record.date)}
                   </p>
                 </button>
               ))}
@@ -645,7 +646,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
                         <td className="horse-sheet-td horse-sheet-td-name">{task.title}</td>
                         <td className="horse-sheet-td">{task.priority || '—'}</td>
                         <td className="horse-sheet-td">
-                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                          {task.dueDate ? formatLocalDate(task.dueDate, { month: 'short', day: 'numeric' }) : '—'}
                         </td>
                       </tr>
                     ))}
@@ -674,7 +675,7 @@ export function OverviewTab({ horse, barnId, onNavigateToHealth, onRefresh }: Ov
                         <td className="horse-sheet-td horse-sheet-td-name">{event.title}</td>
                         <td className="horse-sheet-td">{event.type.replace(/_/g, ' ')}</td>
                         <td className="horse-sheet-td">
-                          {new Date(event.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {formatLocalDate(event.scheduledDate, { month: 'short', day: 'numeric' })}
                         </td>
                       </tr>
                     ))}
