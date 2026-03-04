@@ -124,12 +124,13 @@ const labelStyle: React.CSSProperties = {
 // ─── Screenshot frame component ──────────────────────────────────────────────
 // Drop your app screenshots in by passing a `src` prop.
 // Until then, each slot shows a labeled placeholder.
-function ScreenshotFrame({ src, alt, label, aspectRatio = '16/10', small = false }: {
+function ScreenshotFrame({ src, alt, label, aspectRatio = '16/10', small = false, objectPosition = '50% 0%' }: {
   src?: string;
   alt?: string;
   label: string;
   aspectRatio?: string;
   small?: boolean;
+  objectPosition?: string;
 }) {
   const dotSize = small ? 7 : 10;
   return (
@@ -170,7 +171,14 @@ function ScreenshotFrame({ src, alt, label, aspectRatio = '16/10', small = false
       {/* Content area */}
       <div style={{ position: 'relative', aspectRatio, backgroundColor: '#f8f4ef' }}>
         {src ? (
-          <Image src={src} alt={alt ?? label} fill className="object-cover object-top" unoptimized />
+          <Image
+            src={src}
+            alt={alt ?? label}
+            fill
+            className="object-cover"
+            style={{ objectPosition }}
+            unoptimized
+          />
         ) : (
           <div style={{
             position: 'absolute', inset: 0,
@@ -397,13 +405,40 @@ export default function LandingPage() {
             </div>
 
             {/* Large hero screenshot */}
-            <ScreenshotFrame label="Dashboard overview — add a screenshot here" aspectRatio="16/9" />
+            <ScreenshotFrame
+              src="/images/screenshot-dashboard.png"
+              alt="BarnKeep dashboard showing upcoming events and tasks"
+              label="Dashboard"
+              aspectRatio="16/9"
+              objectPosition="20% 0%"
+            />
 
             {/* 3 smaller feature screenshots */}
             <div className="grid sm:grid-cols-3 gap-4 mt-5">
-              <ScreenshotFrame label="Horse profile — add a screenshot here" aspectRatio="4/3" small />
-              <ScreenshotFrame label="Feed chart — add a screenshot here" aspectRatio="4/3" small />
-              <ScreenshotFrame label="Health records — add a screenshot here" aspectRatio="4/3" small />
+              <ScreenshotFrame
+                src="/images/screenshot-daily-care.png"
+                alt="BarnKeep daily care log"
+                label="Daily Care"
+                aspectRatio="4/3"
+                small
+                objectPosition="20% 0%"
+              />
+              <ScreenshotFrame
+                src="/images/screenshot-breeding.png"
+                alt="BarnKeep breeding management"
+                label="Breeding Tracker"
+                aspectRatio="4/3"
+                small
+                objectPosition="20% 0%"
+              />
+              <ScreenshotFrame
+                src="/images/screenshot-team.png"
+                alt="BarnKeep team management"
+                label="Team"
+                aspectRatio="4/3"
+                small
+                objectPosition="20% 0%"
+              />
             </div>
           </AnimateOnScroll>
         </div>
