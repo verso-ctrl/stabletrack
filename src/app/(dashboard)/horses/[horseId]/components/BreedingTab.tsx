@@ -719,14 +719,16 @@ export function BreedingTab({ horse, barnId, canEdit = true }: BreedingTabProps)
         open={showFoalingModal}
         onClose={() => { setShowFoalingModal(false); setEditingFoaling(null); }}
         onSubmit={editingFoaling ? handleEditFoaling : handleRecordFoaling}
-        breedingRecords={breedingRecords.map(r => ({
-          id: r.id,
-          mareId: r.mareId,
-          mare: r.mare ? { barnName: r.mare.barnName } : undefined,
-          stallion: r.stallion ? { barnName: r.stallion.barnName } : null,
-          externalStallion: r.externalStallion ? { name: r.externalStallion.name } : null,
-          estimatedDueDate: r.estimatedDueDate,
-        }))}
+        breedingRecords={breedingRecords
+          .filter(r => (r.status === 'CONFIRMED_PREGNANT' || r.status === 'PENDING') && !r.foalingRecord)
+          .map(r => ({
+            id: r.id,
+            mareId: r.mareId,
+            mare: r.mare ? { barnName: r.mare.barnName } : undefined,
+            stallion: r.stallion ? { barnName: r.stallion.barnName } : null,
+            externalStallion: r.externalStallion ? { name: r.externalStallion.name } : null,
+            estimatedDueDate: r.estimatedDueDate,
+          }))}
         editFoaling={editingFoaling}
       />
 

@@ -150,7 +150,12 @@ export function RecordFoalingModal({ open, onClose, onSubmit, breedingRecords, p
                 <button
                   key={o.value}
                   type="button"
-                  onClick={() => setForm(f => ({ ...f, outcome: o.value }))}
+                  onClick={() => setForm(f => ({
+                    ...f,
+                    outcome: o.value,
+                    // Clear foal-specific fields if switching away from a live birth
+                    ...(o.value !== 'LIVE' ? { foalName: '', foalSex: '', foalColor: '' } : {}),
+                  }))}
                   className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     form.outcome === o.value ? `${o.color} ring-2 ring-current` : 'bg-muted text-muted-foreground hover:bg-accent'
                   }`}

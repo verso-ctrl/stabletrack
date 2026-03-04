@@ -28,7 +28,12 @@ export async function GET(request: NextRequest, { params }: Params) {
     });
 
     if (!record) return NextResponse.json({ error: 'Breeding record not found' }, { status: 404 });
-    return NextResponse.json({ data: record });
+    const parsed = {
+      ...record,
+      pregnancyChecks: record.pregnancyChecks ? (() => { try { return JSON.parse(record.pregnancyChecks!); } catch { return []; } })() : [],
+      inUteroNominations: record.inUteroNominations ? (() => { try { return JSON.parse(record.inUteroNominations!); } catch { return []; } })() : [],
+    };
+    return NextResponse.json({ data: parsed });
   } catch (error) {
     console.error('Error fetching breeding record:', error);
     const message = error instanceof Error ? error.message : 'Failed to fetch breeding record';

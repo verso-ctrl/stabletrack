@@ -141,7 +141,7 @@ export default function BreedingPage() {
       const daysB = b.estimatedDueDate ? daysUntil(b.estimatedDueDate) : 9999;
       return daysA - daysB;
     });
-  const foalableRecords = breedingRecords.filter(r => r.status === 'CONFIRMED_PREGNANT' && !r.foalingRecord);
+  const foalableRecords = breedingRecords.filter(r => (r.status === 'CONFIRMED_PREGNANT' || r.status === 'PENDING') && !r.foalingRecord);
 
   const fetchData = useCallback(async () => {
     if (!barnId) return;
