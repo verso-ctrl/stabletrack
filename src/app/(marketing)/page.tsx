@@ -4,80 +4,94 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AnimateOnScroll } from '@/components/marketing/AnimateOnScroll';
 import { MarketingNav } from '@/components/marketing/MarketingNav';
-
-export const metadata: Metadata = {
-  title: 'BarnKeep - Simple Barn Management for Small Farms',
-  description: 'Built for small farms and hobby barns. Track your horses, feedings, health records, and daily care — all for $25/month. No enterprise pricing, no feature walls.',
-};
-
 import {
   Check,
-  ChevronRight,
-  Calendar,
-  FileText,
+  X,
   Heart,
   Wheat,
   Home,
   Pill,
+  Calendar,
+  FileText,
   ClipboardList,
-  X,
-  Quote,
 } from 'lucide-react';
 
-// Top features get full-width image + text rows
+export const metadata: Metadata = {
+  title: 'BarnKeep — Boutique Barn Management',
+  description:
+    'The barn management tool built for boutique farms. Track horses, health records, feedings, and daily care — starting at $25/month.',
+};
+
+// ─── Design tokens ──────────────────────────────────────────────────────────
+const MK = {
+  bg:       '#fdf8f3',
+  bg2:      '#f5f0eb',
+  accent:   '#e4a4bd',
+  text:     '#262626',
+  muted:    'rgba(38,38,38,0.58)',
+  font:     "'League Spartan', sans-serif",
+} as const;
+
+// ─── Images (all verified URLs from existing codebase) ───────────────────────
+const IMG = {
+  hero:  'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=900&q=80&auto=format',
+  f1:    'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=700&q=80&auto=format',
+  f2:    'https://images.unsplash.com/photo-1508475039033-c0112d0a87e0?w=700&q=80&auto=format',
+  f3:    'https://images.unsplash.com/photo-1504208434411-354bd06c9b68?w=700&q=80&auto=format',
+  f4:    'https://images.unsplash.com/photo-1460134583885-95eb98e2ef85?w=700&q=80&auto=format',
+  hiw:   'https://images.unsplash.com/photo-1460134583885-95eb98e2ef85?w=800&q=80&auto=format',
+  cta:   'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&q=80&auto=format',
+};
+
 const heroFeatures = [
   {
     icon: Heart,
-    title: 'Health & Vet Records',
-    description: 'Vaccinations, coggins, medications, weight tracking — all in one place. Pull up any horse\'s full health history from your phone in seconds.',
-    image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=700&q=80&auto=format',
+    label: 'Health & Vet Records',
+    title: 'Every record, at your fingertips.',
+    description:
+      'Vaccinations, coggins, medications, weight tracking — all in one place. Pull up any horse\'s full health history from your phone in seconds.',
+    image: IMG.f1,
     alt: 'Person caring for a horse in a barn aisle',
   },
   {
     icon: Wheat,
-    title: 'Feed Tracking & Charts',
-    description: 'Set up individual feed programs for each horse. Track daily feedings, log supplements, and keep the whole team on the same page.',
-    image: 'https://images.unsplash.com/photo-1508475039033-c0112d0a87e0?w=700&q=80&auto=format',
+    label: 'Feed Tracking',
+    title: 'Feed programs that actually work.',
+    description:
+      'Set up individual feed programs for each horse. Log daily feedings, track supplements, and keep the whole team on the same page with a daily feed chart.',
+    image: IMG.f2,
     alt: 'Close-up of a horse eating hay',
   },
   {
     icon: Home,
-    title: 'Stall & Pasture Management',
-    description: 'See who\'s where at a glance. Assign stalls, rotate pastures, and track turnout schedules without sticky notes on the barn door.',
-    image: 'https://images.unsplash.com/photo-1504208434411-354bd06c9b68?w=700&q=80&auto=format',
-    alt: 'Horses grazing in a green pasture',
+    label: 'Stall & Pasture',
+    title: 'See who\'s where, always.',
+    description:
+      'Assign stalls, rotate pastures, and track turnout schedules without sticky notes on the barn door. At a glance, everything is accounted for.',
+    image: IMG.f3,
+    alt: 'Horses grazing in a pasture',
   },
 ];
 
-// Bottom features as icon cards (4)
 const cardFeatures = [
-  {
-    icon: Pill,
-    title: 'Medication Schedules',
-    description: 'Never miss a dose. Track medications, set reminders, and log when treatments are given.',
-  },
-  {
-    icon: Calendar,
-    title: 'Calendar & Tasks',
-    description: 'Vet visits, farrier appointments, and daily to-dos — all in one place so nothing slips through.',
-  },
-  {
-    icon: FileText,
-    title: 'Documents & Records',
-    description: 'Store registration papers, coggins, and photos. Access everything from your phone.',
-  },
-  {
-    icon: ClipboardList,
-    title: 'Daily Care Logs',
-    description: 'Log daily observations, notes, and care tasks. Keep a clear record of each horse\'s routine.',
-  },
+  { icon: Pill,          title: 'Medication Schedules', description: 'Never miss a dose. Track medications, set reminders, and log when treatments are given.' },
+  { icon: Calendar,      title: 'Calendar & Tasks',     description: 'Vet visits, farrier appointments, and daily to-dos — all in one place so nothing slips through.' },
+  { icon: FileText,      title: 'Documents & Records',  description: 'Store registration papers, coggins, and photos. Access everything from your phone in the barn.' },
+  { icon: ClipboardList, title: 'Daily Care Logs',      description: 'Log daily observations and care tasks. Keep a clear, timestamped record for every horse.' },
+];
+
+const staggerFeatures = [
+  { image: IMG.f1, label: 'Health Records', title: 'Complete health history', tags: 'Vaccinations · Medications · Weight' },
+  { image: IMG.f2, label: 'Feeding',        title: 'Daily feed tracking',     tags: 'Programs · Logs · Supplements'    },
+  { image: IMG.f3, label: 'Pastures',       title: 'Turnout management',      tags: 'Stalls · Rotation · Assignments'  },
+  { image: IMG.f4, label: 'Scheduling',     title: 'Calendar & events',       tags: 'Vet · Farrier · Tasks'            },
 ];
 
 const testimonials = [
   {
     quote: 'Finally I know exactly what each horse has eaten and when they last had their coggins done. It\'s all right there.',
     name: 'Sarah M.',
-    farm: 'Hobby barn, 4 horses',
+    farm: 'Hobby barn · 4 horses',
     initial: 'S',
   },
   {
@@ -87,211 +101,243 @@ const testimonials = [
     initial: 'J',
   },
   {
-    quote: 'It\'s simple. I\'m not a tech person and I figured it out in an afternoon. My whole barn routine changed.',
+    quote: 'Simple. I\'m not a tech person and I figured it out in an afternoon. My whole barn routine changed.',
     name: 'Linda R.',
-    farm: 'Boarding farm, 8 horses',
+    farm: 'Boarding farm · 8 horses',
     initial: 'L',
   },
 ];
 
-const IMAGES = {
-  parallax1: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1920&q=80&auto=format',
-  howItWorks: 'https://images.unsplash.com/photo-1460134583885-95eb98e2ef85?w=800&q=80&auto=format',
-  cta: 'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&q=80&auto=format',
+// ─── Shared label style ──────────────────────────────────────────────────────
+const labelStyle: React.CSSProperties = {
+  fontFamily: MK.font,
+  fontSize: 10,
+  fontWeight: 900,
+  letterSpacing: '0.4em',
+  textTransform: 'uppercase',
+  color: MK.accent,
 };
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* ================================================================
-          NAVIGATION
-          ================================================================ */}
+    <div style={{ backgroundColor: MK.bg, fontFamily: MK.font, color: MK.text }}>
+      {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <MarketingNav fixed />
 
-      {/* ================================================================
-          HERO — Split layout with app preview card
-          ================================================================ */}
-      <section className="pt-28 pb-16 lg:pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Text */}
-          <div>
-            <span className="inline-block text-sm font-medium text-primary bg-primary/8 px-3 py-1 rounded-full mb-5">
-              Built for independent farms — not enterprise operations
-            </span>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-[1.1] tracking-tight">
-              Your barn, finally organized.
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
-              Track horses, health records, feedings, and daily care in one place. Starting at $25/month — less than a bag of grain.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity"
+      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          minHeight: '100vh',
+          paddingTop: 80,
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: MK.bg,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          className="w-full px-6 sm:px-10 lg:px-16"
+          style={{ maxWidth: 1280, margin: '0 auto' }}
+        >
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center py-16 lg:py-24">
+            {/* Left */}
+            <div>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: 28 }}>
+                Boutique Barn Management
+              </span>
+              <h1
+                style={{
+                  fontFamily: MK.font,
+                  fontWeight: 900,
+                  fontSize: 'clamp(52px, 8vw, 104px)',
+                  lineHeight: 0.88,
+                  letterSpacing: '-0.03em',
+                  color: MK.text,
+                  marginBottom: 32,
+                }}
               >
-                Start Free Trial
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center px-6 py-3 text-foreground font-medium rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                Your barn,
+                <br />
+                <em style={{ fontStyle: 'italic', color: MK.accent }}>beautifully</em>
+                <br />
+                organized.
+              </h1>
+              <p
+                style={{
+                  fontSize: 18,
+                  color: MK.muted,
+                  lineHeight: 1.65,
+                  maxWidth: 440,
+                  marginBottom: 44,
+                  fontFamily: MK.font,
+                  fontWeight: 400,
+                }}
               >
-                See pricing
-              </Link>
+                Track horses, health records, feedings, and daily care in one place.
+                Built for the boutique farm that cares about the details.
+              </p>
+
+              <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
+                <Link
+                  href="/sign-up"
+                  style={{
+                    backgroundColor: MK.text,
+                    color: MK.bg,
+                    fontFamily: MK.font,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: '0.2em',
+                    padding: '16px 44px',
+                    borderRadius: 4,
+                    textDecoration: 'none',
+                    textTransform: 'uppercase',
+                    display: 'inline-block',
+                  }}
+                >
+                  Start Free Trial
+                </Link>
+                <Link
+                  href="/pricing"
+                  style={{
+                    color: MK.text,
+                    fontFamily: MK.font,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.15em',
+                    textDecoration: 'none',
+                    textTransform: 'uppercase',
+                    borderBottom: `2px solid ${MK.accent}`,
+                    paddingBottom: 2,
+                  }}
+                >
+                  See Pricing →
+                </Link>
+              </div>
+              <p style={{ fontSize: 11, color: 'rgba(38,38,38,0.38)', letterSpacing: '0.06em', fontFamily: MK.font }}>
+                No credit card required · 14-day free trial · Cancel anytime
+              </p>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              No credit card required · 14-day free trial · Cancel anytime
-            </p>
+
+            {/* Right: image + floating badge */}
+            <div style={{ position: 'relative' }}>
+              <div
+                className="mk-img-wrap"
+                style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', aspectRatio: '4/3' }}
+              >
+                <Image
+                  src={IMG.hero}
+                  alt="Horse in a boutique barn"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                  priority
+                />
+              </div>
+
+              {/* Floating concierge badge */}
+              <div
+                className="animate-bounce-slow hidden lg:flex"
+                style={{
+                  position: 'absolute',
+                  bottom: -28,
+                  left: -28,
+                  width: 152,
+                  height: 152,
+                  borderRadius: '50%',
+                  backgroundColor: MK.accent,
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  zIndex: 10,
+                }}
+              >
+                <em style={{ fontFamily: MK.font, fontSize: 42, fontStyle: 'italic', fontWeight: 800, color: MK.text, lineHeight: 1 }}>
+                  01
+                </em>
+                <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: '0.25em', color: MK.text, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.5 }}>
+                  BOUTIQUE<br />BARNS
+                </span>
+              </div>
+            </div>
           </div>
-
-          {/* App Preview Card */}
-          <AnimateOnScroll animation="fade-right">
-            <div className="rounded-2xl shadow-2xl border border-border bg-card overflow-hidden">
-              {/* Card header */}
-              <div className="bg-primary/8 px-5 py-4 border-b border-border flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-base">
-                  A
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Apollo</p>
-                  <p className="text-xs text-muted-foreground">Bay Thoroughbred · Stall 4</p>
-                </div>
-                <div className="ml-auto">
-                  <span className="px-2.5 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium dark:bg-green-900/30 dark:text-green-400">
-                    Healthy
-                  </span>
-                </div>
-              </div>
-
-              {/* Card body */}
-              <div className="p-5 space-y-4">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5">
-                    Today&apos;s Feed Schedule
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">Morning feed</span>
-                      <span className="text-green-600 dark:text-green-400 font-medium text-xs">✓ Done</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">Afternoon check</span>
-                      <span className="text-amber-500 font-medium text-xs">Pending</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">Evening hay</span>
-                      <span className="text-muted-foreground text-xs">6:00 PM</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-border">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2.5">
-                    Upcoming
-                  </p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                      <span className="text-foreground">Coggins due in 12 days</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
-                      <span className="text-foreground">Farrier visit — Mar 5</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-border">
-                  <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full dark:bg-blue-900/30 dark:text-blue-300">
-                    <Pill className="w-3 h-3" />
-                    Bute · 2g daily · Day 3 of 5
-                  </span>
-                </div>
-              </div>
-            </div>
-          </AnimateOnScroll>
         </div>
       </section>
 
-      {/* ================================================================
-          SOCIAL PROOF STRIP
-          ================================================================ */}
+      {/* ── SOCIAL PROOF STRIP ──────────────────────────────────────────── */}
       <AnimateOnScroll>
-        <section className="py-10 border-y border-border/40 bg-primary/5">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section style={{ backgroundColor: MK.bg2, borderTop: `1px solid rgba(38,38,38,0.06)`, borderBottom: `1px solid rgba(38,38,38,0.06)`, padding: '40px 0' }}>
+          <div className="max-w-5xl mx-auto px-6 sm:px-10">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-              <div>
-                <p className="font-display text-2xl font-semibold text-foreground">$25<span className="text-base text-muted-foreground">/mo</span></p>
-                <p className="text-sm text-muted-foreground mt-0.5">Plans start at</p>
-              </div>
-              <div>
-                <p className="font-display text-2xl font-semibold text-foreground">No setup fees</p>
-                <p className="text-sm text-muted-foreground mt-0.5">Start in minutes</p>
-              </div>
-              <div>
-                <p className="font-display text-2xl font-semibold text-foreground">Works on mobile</p>
-                <p className="text-sm text-muted-foreground mt-0.5">iOS &amp; Android</p>
-              </div>
-              <div>
-                <p className="font-display text-2xl font-semibold text-foreground">Cancel anytime</p>
-                <p className="text-sm text-muted-foreground mt-0.5">No commitments</p>
-              </div>
+              {[
+                { value: '$25/mo', sub: 'Plans start at' },
+                { value: 'No setup fees', sub: 'Start in minutes' },
+                { value: 'iOS & Android', sub: 'Works on mobile' },
+                { value: 'Cancel anytime', sub: 'No commitments' },
+              ].map((item) => (
+                <div key={item.sub}>
+                  <p style={{ fontFamily: MK.font, fontSize: 17, fontWeight: 800, color: MK.text, letterSpacing: '-0.01em', marginBottom: 4 }}>
+                    {item.value}
+                  </p>
+                  <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: MK.muted, textTransform: 'uppercase' }}>
+                    {item.sub}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </AnimateOnScroll>
 
-      {/* ================================================================
-          PROBLEM STATEMENT
-          ================================================================ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+      {/* ── PROBLEM STATEMENT ────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: MK.bg, padding: '96px 0' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
           <AnimateOnScroll>
-            <div className="max-w-2xl mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Still managing your barn with sticky notes?
+            <div style={{ marginBottom: 56 }}>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>The Problem</span>
+              <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, maxWidth: 640 }}>
+                Still managing your barn with{' '}
+                <em style={{ fontStyle: 'italic', color: MK.accent }}>sticky notes?</em>
               </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
+              <p style={{ fontFamily: MK.font, fontSize: 17, color: MK.muted, lineHeight: 1.6, maxWidth: 520, marginTop: 24 }}>
                 Most barn owners patch things together with notebooks, whiteboards, and memory. It works — until it doesn&apos;t.
               </p>
             </div>
           </AnimateOnScroll>
 
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-            {/* Pain points */}
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
             <AnimateOnScroll animation="fade-left">
-              <div className="p-7 rounded-xl border border-border/60 bg-muted/20 h-full">
-                <h3 className="font-medium text-foreground mb-5 text-sm uppercase tracking-wide">Sound familiar?</h3>
-                <ul className="space-y-4">
+              <div style={{ padding: '36px', borderRadius: 16, border: `1px solid rgba(38,38,38,0.08)`, backgroundColor: MK.bg2 }}>
+                <p style={{ ...labelStyle, marginBottom: 28, color: 'rgba(38,38,38,0.4)' }}>Sound familiar?</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                   {[
                     'Forgetting when vaccines are due',
                     'Medication logs in 3 different notebooks',
                     'Trying to remember who last fed who',
                     'Vet records buried in a filing cabinet',
                   ].map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-muted-foreground">
-                      <X className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                      <X style={{ width: 16, height: 16, color: '#e07070', flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, lineHeight: 1.5 }}>{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </AnimateOnScroll>
 
-            {/* Solutions */}
             <AnimateOnScroll animation="fade-right">
-              <div className="p-7 rounded-xl border border-primary/20 bg-primary/5 h-full">
-                <h3 className="font-medium text-foreground mb-5 text-sm uppercase tracking-wide">This is what BarnKeep solves.</h3>
-                <ul className="space-y-4">
+              <div style={{ padding: '36px', borderRadius: 16, border: `1px solid rgba(228,164,189,0.4)`, backgroundColor: 'rgba(228,164,189,0.06)' }}>
+                <p style={{ ...labelStyle, marginBottom: 28 }}>This is what BarnKeep solves.</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                   {[
                     'One place for every horse\'s health history',
                     'Feed charts and medication reminders',
                     'Daily care logs the whole team can see',
                     'Documents stored and searchable from your phone',
                   ].map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-foreground">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                      <Check style={{ width: 16, height: 16, color: MK.accent, flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.text, lineHeight: 1.5 }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -301,43 +347,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          PARALLAX DIVIDER — Between problem and features
-          ================================================================ */}
-      <div
-        className="parallax-section h-48 sm:h-64 lg:h-80 relative"
-        style={{ backgroundImage: `url('${IMAGES.parallax1}')` }}
-      >
-        <div className="absolute inset-0 bg-black/30 parallax-overlay" />
-      </div>
-
-      {/* ================================================================
-          FEATURES — Alternating image + text rows
-          ================================================================ */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
+      {/* ── FEATURES — alternating rows ──────────────────────────────────── */}
+      <section id="features" style={{ backgroundColor: MK.bg2, padding: '96px 0' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
           <AnimateOnScroll>
-            <div className="max-w-2xl mb-20">
-              <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Everything your small farm needs
-              </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
-                No complicated setup. No features you&apos;ll never use. Just the tools that actually matter for day-to-day barn life.
-              </p>
-            </div>
+            <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Features</span>
+            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(36px, 5vw, 72px)', lineHeight: 0.9, letterSpacing: '-0.03em', color: MK.text, marginBottom: 72 }}>
+              Everything your<br />
+              <em style={{ fontStyle: 'italic', color: MK.accent }}>farm needs.</em>
+            </h2>
           </AnimateOnScroll>
 
-          {/* Alternating image + text */}
-          <div className="space-y-20 lg:space-y-28">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 80 }}>
             {heroFeatures.map((feature, index) => {
               const imageFirst = index % 2 === 0;
               return (
-                <AnimateOnScroll
-                  key={feature.title}
-                  animation={imageFirst ? 'fade-left' : 'fade-right'}
-                >
-                  <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-                    <div className={`relative aspect-[4/3] rounded-2xl overflow-hidden shadow-card bg-muted ${!imageFirst ? 'lg:order-2' : ''}`}>
+                <AnimateOnScroll key={feature.title} animation={imageFirst ? 'fade-left' : 'fade-right'}>
+                  <div className={`grid lg:grid-cols-2 gap-10 lg:gap-20 items-center`}>
+                    {/* Image */}
+                    <div
+                      className={`mk-img-wrap relative group/card ${!imageFirst ? 'lg:order-2' : ''}`}
+                      style={{ borderRadius: 16, overflow: 'hidden', aspectRatio: '4/3', position: 'relative' }}
+                    >
                       <Image
                         src={feature.image}
                         alt={feature.alt}
@@ -345,13 +376,19 @@ export default function LandingPage() {
                         className="object-cover"
                         unoptimized
                       />
-                    </div>
-                    <div className={!imageFirst ? 'lg:order-1' : ''}>
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                        <feature.icon className="w-6 h-6" />
+                      <div className="mk-card-overlay">
+                        <span>{feature.label}</span>
                       </div>
-                      <h3 className="font-display text-2xl font-semibold text-foreground">{feature.title}</h3>
-                      <p className="mt-3 text-muted-foreground text-lg leading-relaxed">{feature.description}</p>
+                    </div>
+                    {/* Text */}
+                    <div className={!imageFirst ? 'lg:order-1' : ''}>
+                      <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>{feature.label}</span>
+                      <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 'clamp(28px, 3vw, 42px)', lineHeight: 1.05, letterSpacing: '-0.02em', color: MK.text, marginBottom: 20 }}>
+                        {feature.title}
+                      </h3>
+                      <p style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted, lineHeight: 1.7 }}>
+                        {feature.description}
+                      </p>
                     </div>
                   </div>
                 </AnimateOnScroll>
@@ -359,16 +396,30 @@ export default function LandingPage() {
             })}
           </div>
 
-          {/* Icon cards (4) */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-20 lg:mt-28">
+          {/* Icon cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-20" style={{ borderTop: `1px solid rgba(38,38,38,0.08)`, paddingTop: 64 }}>
             {cardFeatures.map((feature, index) => (
-              <AnimateOnScroll key={feature.title} animation="fade-up" delay={index * 100}>
-                <div className="group p-6 rounded-xl border border-border/60 bg-card hover:border-border hover:shadow-card transition-all">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-display font-medium text-foreground">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+              <AnimateOnScroll key={feature.title} animation="fade-up" delay={index * 80}>
+                <div
+                  className="mk-service-card"
+                  style={{
+                    padding: '32px 28px',
+                    border: `1px solid rgba(38,38,38,0.08)`,
+                    backgroundColor: MK.bg,
+                    borderRadius: 12,
+                    cursor: 'default',
+                  }}
+                >
+                  <feature.icon
+                    className="mk-service-icon"
+                    style={{ width: 32, height: 32, color: MK.accent, marginBottom: 20 }}
+                  />
+                  <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 14, letterSpacing: '0.05em', textTransform: 'uppercase', color: MK.text, marginBottom: 10 }}>
+                    {feature.title}
+                  </h3>
+                  <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, lineHeight: 1.7 }}>
+                    {feature.description}
+                  </p>
                 </div>
               </AnimateOnScroll>
             ))}
@@ -376,32 +427,77 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          TESTIMONIALS
-          ================================================================ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+      {/* ── STAGGERED FEATURE GALLERY ────────────────────────────────────── */}
+      <section style={{ backgroundColor: MK.bg, padding: '96px 0' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
           <AnimateOnScroll>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Loved by horse owners everywhere
-              </h2>
-            </div>
+            <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>At a glance</span>
+            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, marginBottom: 64 }}>
+              Built for real barn life.
+            </h2>
+          </AnimateOnScroll>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+            {staggerFeatures.map((item, index) => (
+              <AnimateOnScroll key={item.title} animation="fade-up" delay={index * 60}>
+                <div className={index % 2 === 1 ? 'mk-stagger-right' : ''}>
+                  {/* Image */}
+                  <div
+                    className="mk-img-wrap group/card"
+                    style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 16, overflow: 'hidden', marginBottom: 20 }}
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                    <div className="mk-card-overlay">
+                      <span>{item.label}</span>
+                    </div>
+                  </div>
+                  {/* Caption */}
+                  <p style={{ ...labelStyle, color: MK.accent, marginBottom: 8 }}>{item.label}</p>
+                  <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 22, letterSpacing: '-0.01em', color: MK.text, marginBottom: 6 }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ fontFamily: MK.font, fontSize: 11, color: MK.muted, letterSpacing: '0.05em' }}>
+                    {item.tags}
+                  </p>
+                </div>
+              </AnimateOnScroll>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: MK.bg2, padding: '96px 0' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+          <AnimateOnScroll>
+            <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Testimonials</span>
+            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, marginBottom: 56 }}>
+              Loved by horse owners<br />
+              <em style={{ fontStyle: 'italic', color: MK.accent }}>everywhere.</em>
+            </h2>
           </AnimateOnScroll>
 
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, index) => (
               <AnimateOnScroll key={t.name} animation="fade-up" delay={index * 100}>
-                <div className="p-6 rounded-xl border border-border/60 bg-card flex flex-col gap-4 h-full">
-                  <Quote className="w-6 h-6 text-primary/40" />
-                  <p className="text-muted-foreground leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-                    <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary font-semibold text-sm">
+                <div style={{ backgroundColor: MK.bg, borderRadius: 16, padding: 36, border: `1px solid rgba(38,38,38,0.06)`, height: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  <span style={{ fontFamily: MK.font, fontSize: 48, color: MK.accent, lineHeight: 1, display: 'block' }}>&ldquo;</span>
+                  <p style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, lineHeight: 1.7, flex: 1, marginTop: -16 }}>
+                    {t.quote}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 16, borderTop: `1px solid rgba(38,38,38,0.06)` }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: MK.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.text, flexShrink: 0 }}>
                       {t.initial}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.farm}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 13, fontWeight: 700, color: MK.text }}>{t.name}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 11, color: MK.muted, letterSpacing: '0.05em' }}>{t.farm}</p>
                     </div>
                   </div>
                 </div>
@@ -411,45 +507,53 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          HOW IT WORKS — Two-column with sticky side image
-          ================================================================ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <AnimateOnScroll>
-            <div className="max-w-2xl mb-16">
-              <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Up and running in minutes
-              </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
-                No training required. If you can use your phone, you can use BarnKeep.
-              </p>
-            </div>
-          </AnimateOnScroll>
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: MK.bg, padding: '96px 0' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            {/* Left */}
+            <div>
+              <AnimateOnScroll>
+                <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>How it works</span>
+                <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, marginBottom: 56 }}>
+                  Up and running<br />
+                  <em style={{ fontStyle: 'italic', color: MK.accent }}>in minutes.</em>
+                </h2>
+              </AnimateOnScroll>
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            <div className="space-y-12">
-              {[
-                { step: '01', title: 'Create your barn', description: 'Sign up and set up your barn profile in about 2 minutes. No complicated onboarding.' },
-                { step: '02', title: 'Add your horses', description: 'Enter each horse\'s details, feed program, and health records — all in a simple form.' },
-                { step: '03', title: 'Start managing', description: 'Log feedings, track medications, assign stalls, and keep your whole team in sync.' },
-              ].map((item, index) => (
-                <AnimateOnScroll key={item.step} animation="fade-up" delay={index * 150}>
-                  <div className="flex gap-6">
-                    <span className="font-display text-5xl font-bold text-primary/15 leading-none select-none">{item.step}</span>
-                    <div>
-                      <h3 className="font-display text-xl font-medium text-foreground">{item.title}</h3>
-                      <p className="mt-2 text-muted-foreground leading-relaxed">{item.description}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 44 }}>
+                {[
+                  { step: '01', title: 'Create your barn', description: 'Sign up and set up your barn profile in about 2 minutes. No complicated onboarding, no setup fees.' },
+                  { step: '02', title: 'Add your horses', description: "Enter each horse's details, feed program, and health records — all in a simple, intuitive form." },
+                  { step: '03', title: 'Start managing', description: 'Log feedings, track medications, assign stalls, and keep your whole team in sync from any device.' },
+                ].map((item, index) => (
+                  <AnimateOnScroll key={item.step} animation="fade-up" delay={index * 120}>
+                    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+                      <span style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 52, color: 'rgba(228,164,189,0.35)', lineHeight: 0.9, flexShrink: 0, letterSpacing: '-0.04em' }}>
+                        {item.step}
+                      </span>
+                      <div>
+                        <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em', color: MK.text, marginBottom: 8 }}>
+                          {item.title}
+                        </h3>
+                        <p style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, lineHeight: 1.65 }}>
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </AnimateOnScroll>
-              ))}
+                  </AnimateOnScroll>
+                ))}
+              </div>
             </div>
 
+            {/* Right: sticky image */}
             <AnimateOnScroll animation="fade-right">
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-card bg-muted lg:sticky lg:top-24">
+              <div
+                className="mk-img-wrap hidden lg:block"
+                style={{ borderRadius: 20, overflow: 'hidden', position: 'sticky', top: 112, aspectRatio: '3/4' }}
+              >
                 <Image
-                  src={IMAGES.howItWorks}
+                  src={IMG.hiw}
                   alt="Person walking alongside a horse"
                   fill
                   className="object-cover"
@@ -461,18 +565,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          PRICING TEASER — Two clean plan cards
-          ================================================================ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+      {/* ── PRICING TEASER ───────────────────────────────────────────────── */}
+      <section style={{ backgroundColor: MK.bg2, padding: '96px 0' }}>
+        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16">
           <AnimateOnScroll>
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
-                Simple, honest pricing
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Pricing</span>
+              <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 0.92, letterSpacing: '-0.03em', color: MK.text, marginBottom: 16 }}>
+                Simple, honest pricing.
               </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
-                Pick the plan that fits. Both include a 14-day free trial.
+              <p style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted }}>
+                Both plans include a 14-day free trial. No credit card required.
               </p>
             </div>
           </AnimateOnScroll>
@@ -480,139 +583,152 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {/* Starter */}
             <AnimateOnScroll animation="fade-up">
-              <div className="rounded-xl border border-border p-7 flex flex-col h-full">
-                <h3 className="font-display text-xl font-semibold text-foreground">Starter</h3>
-                <p className="text-sm text-muted-foreground mt-1">Perfect for hobby barns &amp; personal farms</p>
-                <div className="mt-4 mb-6">
-                  <span className="font-display text-4xl font-semibold text-foreground">$25</span>
-                  <span className="text-muted-foreground">/month</span>
+              <div style={{ backgroundColor: MK.bg, borderRadius: 16, padding: '40px 36px', border: `1px solid rgba(38,38,38,0.08)`, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <p style={{ ...labelStyle, marginBottom: 16 }}>Starter</p>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 52, color: MK.text, letterSpacing: '-0.04em' }}>$25</span>
+                  <span style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted }}>/month</span>
                 </div>
-                <ul className="space-y-2 mb-8 flex-1">
+                <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, marginBottom: 28 }}>
+                  Perfect for hobby barns & personal farms
+                </p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32, flex: 1 }}>
                   {['Up to 10 horses', 'Feed tracking & charts', 'Health & vet records', 'Documents & photos', 'Mobile access'].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                      {f}
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Check style={{ width: 14, height: 14, color: MK.accent, flexShrink: 0 }} />
+                      <span style={{ fontFamily: MK.font, fontSize: 13, color: MK.text }}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/sign-up"
-                  className="block w-full py-2.5 text-sm font-medium text-center rounded-lg border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', border: `2px solid ${MK.text}`, borderRadius: 4, fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
                 >
-                  Start free trial
+                  Start Free Trial
                 </Link>
               </div>
             </AnimateOnScroll>
 
             {/* Farm */}
             <AnimateOnScroll animation="fade-up" delay={100}>
-              <div className="rounded-xl border-2 border-primary/50 bg-primary/5 p-7 flex flex-col h-full">
-                <h3 className="font-display text-xl font-semibold text-foreground">Farm</h3>
-                <p className="text-sm text-muted-foreground mt-1">For growing operations &amp; boarding barns</p>
-                <div className="mt-4 mb-6">
-                  <span className="font-display text-4xl font-semibold text-foreground">$60</span>
-                  <span className="text-muted-foreground">/month</span>
+              <div style={{ backgroundColor: MK.text, borderRadius: 16, padding: '40px 36px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <p style={{ ...labelStyle, color: MK.accent, marginBottom: 16 }}>Farm</p>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 52, color: MK.bg, letterSpacing: '-0.04em' }}>$60</span>
+                  <span style={{ fontFamily: MK.font, fontSize: 14, color: 'rgba(253,248,243,0.55)' }}>/month</span>
                 </div>
-                <ul className="space-y-2 mb-8 flex-1">
+                <p style={{ fontFamily: MK.font, fontSize: 13, color: 'rgba(253,248,243,0.55)', marginBottom: 28 }}>
+                  For growing operations & boarding barns
+                </p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32, flex: 1 }}>
                   {['Unlimited horses', 'Everything in Starter', 'Up to 5 team members', '50 GB document storage', 'Unlimited photos'].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                      {f}
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Check style={{ width: 14, height: 14, color: MK.accent, flexShrink: 0 }} />
+                      <span style={{ fontFamily: MK.font, fontSize: 13, color: MK.bg }}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/sign-up"
-                  className="block w-full py-2.5 text-sm font-medium text-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', backgroundColor: MK.accent, borderRadius: 4, fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
                 >
-                  Start free trial
+                  Start Free Trial
                 </Link>
               </div>
             </AnimateOnScroll>
           </div>
 
-          <div className="text-center mt-8">
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              style={{ fontFamily: MK.font, fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `2px solid ${MK.accent}`, paddingBottom: 2 }}
             >
-              See full pricing &amp; add-ons
-              <ChevronRight className="w-4 h-4" />
+              See full pricing & add-ons →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ================================================================
-          CTA — Full-width background image
-          ================================================================ */}
-      <section className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '120px 0' }}>
         <Image
-          src={IMAGES.cta}
+          src={IMG.cta}
           alt=""
           fill
           className="object-cover"
           unoptimized
         />
-        <div className="absolute inset-0 bg-black/50 dark:bg-black/65" />
-        <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <AnimateOnScroll animation="fade-up">
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white tracking-tight">
-              Your horses deserve better than a spreadsheet.
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(38,38,38,0.62)' }} />
+        <AnimateOnScroll animation="fade-up">
+          <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
+            <span style={{ ...labelStyle, color: MK.accent, display: 'block', marginBottom: 24 }}>
+              Get started today
+            </span>
+            <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 0.9, letterSpacing: '-0.03em', color: '#fdf8f3', marginBottom: 20 }}>
+              Your horses deserve better<br />
+              <em style={{ fontStyle: 'italic', color: MK.accent }}>than a spreadsheet.</em>
             </h2>
-            <p className="mt-4 text-white/80 text-lg">
+            <p style={{ fontFamily: MK.font, fontSize: 16, color: 'rgba(253,248,243,0.7)', marginBottom: 44 }}>
               Try BarnKeep free for 14 days. No credit card needed.
             </p>
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-white text-brand-800 font-medium rounded-lg hover:bg-white/90 transition-opacity"
+              style={{ backgroundColor: MK.bg, color: MK.text, fontFamily: MK.font, fontSize: 11, fontWeight: 800, letterSpacing: '0.2em', padding: '18px 52px', borderRadius: 4, textDecoration: 'none', textTransform: 'uppercase', display: 'inline-block' }}
             >
-              Start your free trial
-              <ChevronRight className="w-4 h-4" />
+              Start Your Free Trial
             </Link>
-          </AnimateOnScroll>
-        </div>
+          </div>
+        </AnimateOnScroll>
       </section>
 
-      {/* ================================================================
-          FOOTER
-          ================================================================ */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border/40 bg-muted/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
-            <div className="md:col-span-1">
-              <Link href="/" className="flex items-center gap-2.5">
-                <Image src="/logo.png" alt="BarnKeep" width={32} height={32} className="rounded-md" />
-                <span className="font-display font-semibold text-foreground">BarnKeep</span>
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer style={{ backgroundColor: MK.bg2, padding: '64px 0 32px' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="grid md:grid-cols-5 gap-10 md:gap-16 mb-16">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
+                <Image src="/logo.png" alt="BarnKeep" width={30} height={30} style={{ borderRadius: 7 }} />
+                <span style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.text, letterSpacing: '-0.01em' }}>BARNKEEP</span>
               </Link>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Simple barn management for small farms.
+              <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, lineHeight: 1.7, maxWidth: 260 }}>
+                Boutique barn management for the horse farms that care about the details.
               </p>
             </div>
-            <div>
-              <h4 className="font-medium text-foreground text-sm">Product</h4>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#features" className="hover:text-foreground transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-foreground text-sm">Company</h4>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-foreground text-sm">Legal</h4>
-              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
-              </ul>
-            </div>
+
+            {/* Links */}
+            {[
+              { heading: 'Product', links: [['Features', '/#features'], ['Pricing', '/pricing']] },
+              { heading: 'Company', links: [['About', '/about'], ['Contact', '/contact']] },
+              { heading: 'Legal',   links: [['Privacy', '/privacy'], ['Terms', '/terms']] },
+            ].map((col) => (
+              <div key={col.heading}>
+                <p style={{ fontFamily: MK.font, fontSize: 9, fontWeight: 900, letterSpacing: '0.35em', textTransform: 'uppercase', color: MK.accent, marginBottom: 16, borderBottom: `2px solid ${MK.accent}`, paddingBottom: 8, display: 'inline-block' }}>
+                  {col.heading}
+                </p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+                  {col.links.map(([label, href]) => (
+                    <li key={href}>
+                      <Link href={href} style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, textDecoration: 'none', letterSpacing: '0.02em' }}>
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} BarnKeep. All rights reserved.
+
+          <div style={{ borderTop: `1px solid rgba(38,38,38,0.08)`, paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <p style={{ fontFamily: MK.font, fontSize: 9, color: 'rgba(38,38,38,0.3)', letterSpacing: '0.08em' }}>
+              © {new Date().getFullYear()} BARNKEEP. ALL RIGHTS RESERVED.
+            </p>
+            <Link
+              href="/sign-up"
+              style={{ fontFamily: MK.font, fontSize: 9, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `1px solid ${MK.accent}`, paddingBottom: 1 }}
+            >
+              Start Free Trial →
+            </Link>
           </div>
         </div>
       </footer>

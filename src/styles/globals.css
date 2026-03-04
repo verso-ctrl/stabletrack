@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700;800;900&family=Outfit:wght@300..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -478,6 +478,85 @@
 /* Dark mode: deepen parallax/CTA image overlays */
 .dark .parallax-overlay {
   background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================================
+   Marketing Design System
+   ============================================================================ */
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(-5%); }
+  50%       { transform: translateY(5%);  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 4s ease-in-out infinite;
+}
+
+/* Grayscale → color hover on image wrappers */
+.mk-img-wrap {
+  overflow: hidden;
+}
+.mk-img-wrap img {
+  filter: grayscale(100%);
+  transition: filter 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mk-img-wrap:hover img {
+  filter: grayscale(0%);
+  transform: scale(1.06);
+}
+
+/* Feature card hover overlay */
+.mk-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mk-card-overlay > span {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #262626;
+  color: #fdf8f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.group\/card:hover .mk-card-overlay {
+  background: rgba(38, 38, 38, 0.3);
+}
+.group\/card:hover .mk-card-overlay > span {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered grid: right column offset */
+.mk-stagger-right {
+  padding-top: 80px;
+}
+
+/* Services grid card hover */
+.mk-service-card {
+  transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mk-service-card:hover {
+  background: #e4a4bd !important;
+}
+.mk-service-card:hover .mk-service-icon {
+  color: #262626 !important;
 }
 
 /* ============================================================================
