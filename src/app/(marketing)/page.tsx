@@ -14,10 +14,11 @@ import {
   Calendar,
   FileText,
   ClipboardList,
+  Monitor,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'BarnKeep — Boutique Barn Management',
+  title: 'BarnKeep — Simple Barn Management',
   description:
     'The barn management tool built for small farms. Track horses, health records, feedings, and daily care — starting at $25/month.',
 };
@@ -119,6 +120,91 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   color: MK.accent,
 };
+
+// ─── Screenshot frame component ──────────────────────────────────────────────
+// Drop your app screenshots in by passing a `src` prop.
+// Until then, each slot shows a labeled placeholder.
+function ScreenshotFrame({ src, alt, label, aspectRatio = '16/10', small = false }: {
+  src?: string;
+  alt?: string;
+  label: string;
+  aspectRatio?: string;
+  small?: boolean;
+}) {
+  const dotSize = small ? 7 : 10;
+  return (
+    <div style={{
+      borderRadius: small ? 10 : 14,
+      overflow: 'hidden',
+      boxShadow: small
+        ? '0 6px 24px rgba(0,0,0,0.12)'
+        : '0 32px 80px rgba(0,0,0,0.14)',
+      border: '1px solid rgba(38,38,38,0.08)',
+    }}>
+      {/* Browser chrome */}
+      <div style={{
+        backgroundColor: '#e8e2da',
+        padding: small ? '7px 12px' : '11px 18px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: small ? 8 : 12,
+        borderBottom: '1px solid rgba(38,38,38,0.08)',
+      }}>
+        <div style={{ display: 'flex', gap: small ? 4 : 6 }}>
+          {(['#ff5f57', '#febc2e', '#28c840'] as const).map((c) => (
+            <div key={c} style={{ width: dotSize, height: dotSize, borderRadius: '50%', backgroundColor: c }} />
+          ))}
+        </div>
+        <div style={{
+          flex: 1,
+          backgroundColor: 'rgba(38,38,38,0.06)',
+          borderRadius: 5,
+          padding: small ? '3px 10px' : '5px 14px',
+          fontFamily: 'system-ui, monospace',
+          fontSize: small ? 9 : 11,
+          color: 'rgba(38,38,38,0.28)',
+        }}>
+          app.barnkeep.com
+        </div>
+      </div>
+      {/* Content area */}
+      <div style={{ position: 'relative', aspectRatio, backgroundColor: '#f8f4ef' }}>
+        {src ? (
+          <Image src={src} alt={alt ?? label} fill className="object-cover object-top" unoptimized />
+        ) : (
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: 10,
+            border: '2px dashed rgba(38,38,38,0.1)',
+            margin: small ? 8 : 12,
+            borderRadius: small ? 6 : 8,
+          }}>
+            <div style={{
+              width: small ? 30 : 44, height: small ? 30 : 44,
+              borderRadius: '50%',
+              backgroundColor: 'rgba(38,38,38,0.05)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Monitor style={{ width: small ? 14 : 20, height: small ? 14 : 20, color: 'rgba(38,38,38,0.2)' }} />
+            </div>
+            <p style={{
+              fontFamily: "'League Spartan', sans-serif",
+              fontSize: small ? 9 : 11,
+              color: 'rgba(38,38,38,0.28)',
+              letterSpacing: '0.06em',
+              textAlign: 'center',
+              padding: '0 16px',
+              lineHeight: 1.6,
+            }}>
+              {label}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -290,6 +376,38 @@ export default function LandingPage() {
           </div>
         </section>
       </AnimateOnScroll>
+
+      {/* ── APP PREVIEW ──────────────────────────────────────────────────── */}
+      {/*
+        TO ADD SCREENSHOTS:
+        Pass a `src="/images/your-screenshot.png"` prop to each ScreenshotFrame.
+        Example: <ScreenshotFrame src="/images/dashboard.png" label="Dashboard" />
+      */}
+      <section style={{ backgroundColor: MK.bg, padding: '96px 0' }}>
+        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16">
+          <AnimateOnScroll>
+            <div style={{ textAlign: 'center', marginBottom: 48 }}>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: 16 }}>The App</span>
+              <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(28px, 3.5vw, 48px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: MK.text }}>
+                See it for yourself.
+              </h2>
+              <p style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, marginTop: 16 }}>
+                Everything you need, nothing you don&apos;t.
+              </p>
+            </div>
+
+            {/* Large hero screenshot */}
+            <ScreenshotFrame label="Dashboard overview — add a screenshot here" aspectRatio="16/9" />
+
+            {/* 3 smaller feature screenshots */}
+            <div className="grid sm:grid-cols-3 gap-4 mt-5">
+              <ScreenshotFrame label="Horse profile — add a screenshot here" aspectRatio="4/3" small />
+              <ScreenshotFrame label="Feed chart — add a screenshot here" aspectRatio="4/3" small />
+              <ScreenshotFrame label="Health records — add a screenshot here" aspectRatio="4/3" small />
+            </div>
+          </AnimateOnScroll>
+        </div>
+      </section>
 
       {/* ── PROBLEM STATEMENT ────────────────────────────────────────────── */}
       <section style={{ backgroundColor: MK.bg, padding: '96px 0' }}>
@@ -694,7 +812,7 @@ export default function LandingPage() {
                 <span style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.text, letterSpacing: '-0.01em' }}>BARNKEEP</span>
               </Link>
               <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, lineHeight: 1.7, maxWidth: 260 }}>
-                Boutique barn management for the horse farms that care about the details.
+                Simple barn management for the farms that care about the details.
               </p>
             </div>
 
