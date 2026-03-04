@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { BookOpen, Play, FileText, Heart, Activity, Calendar, Wrench, Users, Settings, ChevronRight, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
@@ -9,6 +10,7 @@ interface Guide {
   type: 'video' | 'article';
   duration: string;
   status: 'available' | 'coming-soon';
+  href?: string;
 }
 
 interface Section {
@@ -37,7 +39,7 @@ const sections: Section[] = [
     guides: [
       { title: 'Setting up your barn', description: 'Name your barn, add your address, and invite your first team member.', type: 'video', duration: '3 min', status: 'coming-soon' },
       { title: 'Adding your first horse', description: 'Create a horse profile with photos, breed, and basic health info.', type: 'video', duration: '4 min', status: 'coming-soon' },
-      { title: 'Understanding the dashboard', description: 'A quick tour of everything on your main dashboard.', type: 'article', duration: '2 min read', status: 'coming-soon' },
+      { title: 'Understanding the dashboard', description: 'A quick tour of everything on your main dashboard.', type: 'article', duration: '2 min read', status: 'available', href: '/guides/understanding-the-dashboard' },
     ],
   },
   {
@@ -175,11 +177,20 @@ export default function GuidesPage() {
 
             {/* Guide cards */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {section.guides.map((guide) => (
-                <div
-                  key={guide.title}
-                  className={`card p-4 flex flex-col gap-3 ${guide.status === 'coming-soon' ? 'opacity-70' : 'hover:shadow-md cursor-pointer transition-shadow'}`}
-                >
+              {section.guides.map((guide) => {
+                const CardWrapper = guide.status === 'available' && guide.href
+                  ? ({ children }: { children: React.ReactNode }) => (
+                      <Link href={guide.href!} className="card p-4 flex flex-col gap-3 hover:shadow-md transition-shadow">
+                        {children}
+                      </Link>
+                    )
+                  : ({ children }: { children: React.ReactNode }) => (
+                      <div className="card p-4 flex flex-col gap-3 opacity-70">
+                        {children}
+                      </div>
+                    );
+                return (
+                <CardWrapper key={guide.title}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
                       {guide.type === 'video' ? (
@@ -213,8 +224,9 @@ export default function GuidesPage() {
                       <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
-                </div>
-              ))}
+                </CardWrapper>
+                );
+              })}
             </div>
           </div>
         ))}
