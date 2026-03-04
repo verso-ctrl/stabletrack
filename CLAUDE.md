@@ -228,6 +228,9 @@ PostgreSQL via Supabase (SQLite available for local dev). 42 models organized as
 - **Billing:** Client, ClientHorse, Service, Invoice, InvoiceItem, Payment, RecurringInvoice, RecurringInvoiceItem
 - **Training:** Lesson, TrainingLog, Competition
 - **Breeding:** ExternalStallion, HeatCycle, BreedingRecord, FoalingRecord
+  - `BreedingRecord` has JSON string fields parsed to arrays in all API responses: `pregnancyChecks` (`[{date, result}]`), `inUteroNominations` (`[{program, nominationDate, deadline, fee, notes}]`), and `contractUrl`
+  - Pregnancies tab includes both `CONFIRMED_PREGNANT` and `PENDING` records (mares past due date stay visible)
+  - Breeding record status flow: `PENDING → CONFIRMED_PREGNANT → FOALED` (or `NOT_PREGNANT` / `REBREED`)
 
 ### TypeScript Paths
 
@@ -285,3 +288,5 @@ npm run test:ci                # CI mode with coverage
 - Zod validation on all API inputs
 - Role-based permission checks on all routes
 - Multi-tenant data isolation by barnId
+
+**CSRF fetch rule:** All client-side mutations (POST, PATCH, DELETE, PUT) — including `FormData` file uploads — must use `csrfFetch` from `@/lib/fetch`, not plain `fetch()`. Plain `fetch()` is only acceptable for GET requests. Using `fetch()` for mutations will result in an "Invalid or missing CSRF token" error.
