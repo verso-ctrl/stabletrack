@@ -41,6 +41,7 @@ export const tabs: { id: TabId; label: string; icon: TabIcon }[] = [
 // Status badge colors
 export const statusColors: Record<string, string> = {
   ACTIVE: 'badge-success',
+  LEASED_IN: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   LAYUP: 'badge-warning',
   RETIRED: 'badge-neutral',
   SOLD: 'badge-neutral',

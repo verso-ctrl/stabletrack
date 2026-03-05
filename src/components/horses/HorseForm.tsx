@@ -29,6 +29,7 @@ const SEX_OPTIONS: { value: HorseSex; label: string }[] = [
 
 const STATUS_OPTIONS: { value: HorseStatus; label: string }[] = [
   { value: 'ACTIVE', label: 'Active' },
+  { value: 'LEASED_IN', label: 'On Lease (Boarded In)' },
   { value: 'LAYUP', label: 'Layup' },
   { value: 'RETIRED', label: 'Retired' },
   { value: 'LEASED_OUT', label: 'Leased Out' },
