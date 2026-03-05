@@ -43,6 +43,10 @@ export const statusColors: Record<string, string> = {
   ACTIVE: 'badge-success',
   LAYUP: 'badge-warning',
   RETIRED: 'badge-neutral',
+  SOLD: 'badge-neutral',
+  DECEASED: 'badge-neutral',
+  LEASED_OUT: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  RETURNED_TO_OWNER: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
 };
 
 // Vaccination types

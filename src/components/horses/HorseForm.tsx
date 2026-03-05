@@ -32,6 +32,9 @@ const STATUS_OPTIONS: { value: HorseStatus; label: string }[] = [
   { value: 'LAYUP', label: 'Layup' },
   { value: 'RETIRED', label: 'Retired' },
   { value: 'LEASED_OUT', label: 'Leased Out' },
+  { value: 'SOLD', label: 'Sold' },
+  { value: 'DECEASED', label: 'Deceased' },
+  { value: 'RETURNED_TO_OWNER', label: 'Returned to Owner' },
 ];
 
 const BREED_SUGGESTIONS = [

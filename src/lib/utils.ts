@@ -201,6 +201,7 @@ export function getStatusColor(status: string): string {
     SOLD: 'status-sold',
     DECEASED: 'bg-muted text-muted-foreground',
     LEASED_OUT: 'bg-purple-100 text-purple-700',
+    RETURNED_TO_OWNER: 'bg-blue-100 text-blue-700',
   };
   return colors[status] || 'bg-muted text-muted-foreground';
 }

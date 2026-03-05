@@ -203,7 +203,7 @@ export interface BarnMember {
 // HORSE TYPES
 // ============================================================================
 
-export type HorseStatus = 'ACTIVE' | 'LAYUP' | 'RETIRED' | 'SOLD' | 'DECEASED' | 'LEASED_OUT';
+export type HorseStatus = 'ACTIVE' | 'LAYUP' | 'RETIRED' | 'SOLD' | 'DECEASED' | 'LEASED_OUT' | 'RETURNED_TO_OWNER';
 export type HorseSex = 'MARE' | 'GELDING' | 'STALLION' | 'COLT' | 'FILLY';
 
 export interface Horse {

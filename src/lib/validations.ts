@@ -22,7 +22,7 @@ export const horseSchema = z.object({
   passportNumber: z.string().max(50, 'Passport number is too long').optional(),
   coggins: z.string().max(50, 'Coggins is too long').optional(),
   cogginsExpiry: z.string().optional(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'RETIRED', 'SOLD']).optional(),
+  status: z.enum(['ACTIVE', 'LAYUP', 'RETIRED', 'SOLD', 'DECEASED', 'LEASED_OUT', 'RETURNED_TO_OWNER']).optional(),
   ownerId: z.string().optional(),
   notes: z.string().optional(),
 });
