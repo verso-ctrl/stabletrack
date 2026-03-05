@@ -114,7 +114,7 @@ const testimonials = [
 // ─── Shared label style ──────────────────────────────────────────────────────
 const labelStyle: React.CSSProperties = {
   fontFamily: MK.font,
-  fontSize: 10,
+  fontSize: 11,
   fontWeight: 900,
   letterSpacing: '0.4em',
   textTransform: 'uppercase',
@@ -280,7 +280,7 @@ export default function LandingPage() {
                     backgroundColor: MK.text,
                     color: MK.bg,
                     fontFamily: MK.font,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 800,
                     letterSpacing: '0.2em',
                     padding: '16px 44px',
@@ -297,7 +297,7 @@ export default function LandingPage() {
                   style={{
                     color: MK.text,
                     fontFamily: MK.font,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: '0.15em',
                     textDecoration: 'none',
@@ -309,7 +309,7 @@ export default function LandingPage() {
                   See Pricing →
                 </Link>
               </div>
-              <p style={{ fontSize: 11, color: 'rgba(38,38,38,0.38)', letterSpacing: '0.06em', fontFamily: MK.font }}>
+              <p style={{ fontSize: 13, color: 'rgba(38,38,38,0.38)', letterSpacing: '0.06em', fontFamily: MK.font }}>
                 14-day free trial · Cancel anytime
               </p>
             </div>
@@ -375,7 +375,7 @@ export default function LandingPage() {
                   <p style={{ fontFamily: MK.font, fontSize: 17, fontWeight: 800, color: MK.bg, letterSpacing: '-0.01em', marginBottom: 4 }}>
                     {item.value}
                   </p>
-                  <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', color: 'rgba(253,248,243,0.7)', textTransform: 'uppercase' }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 11, fontWeight: 600, letterSpacing: '0.15em', color: 'rgba(253,248,243,0.7)', textTransform: 'uppercase' }}>
                     {item.sub}
                   </p>
                 </div>
@@ -399,7 +399,7 @@ export default function LandingPage() {
               <h2 style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 'clamp(28px, 3.5vw, 48px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: MK.text }}>
                 See it for yourself.
               </h2>
-              <p style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, marginTop: 16 }}>
+              <p style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted, marginTop: 16 }}>
                 Everything you need, nothing you don&apos;t.
               </p>
             </div>
@@ -473,7 +473,7 @@ export default function LandingPage() {
                   ].map((item) => (
                     <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                       <X style={{ width: 16, height: 16, color: '#e07070', flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, lineHeight: 1.5 }}>{item}</span>
+                      <span style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted, lineHeight: 1.5 }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -492,7 +492,7 @@ export default function LandingPage() {
                   ].map((item) => (
                     <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                       <Check style={{ width: 16, height: 16, color: MK.bg, flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.bg, lineHeight: 1.5 }}>{item}</span>
+                      <span style={{ fontFamily: MK.font, fontSize: 16, color: MK.bg, lineHeight: 1.5 }}>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -541,7 +541,7 @@ export default function LandingPage() {
                       <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 'clamp(28px, 3vw, 42px)', lineHeight: 1.05, letterSpacing: '-0.02em', color: MK.text, marginBottom: 20 }}>
                         {feature.title}
                       </h3>
-                      <p style={{ fontFamily: MK.font, fontSize: 16, color: MK.muted, lineHeight: 1.7 }}>
+                      <p style={{ fontFamily: MK.font, fontSize: 17, color: MK.muted, lineHeight: 1.7 }}>
                         {feature.description}
                       </p>
                     </div>
@@ -572,7 +572,7 @@ export default function LandingPage() {
                   <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 14, letterSpacing: '0.05em', textTransform: 'uppercase', color: index % 2 === 1 ? MK.bg : MK.text, marginBottom: 10 }}>
                     {feature.title}
                   </h3>
-                  <p style={{ fontFamily: MK.font, fontSize: 13, color: index % 2 === 1 ? 'rgba(253,248,243,0.55)' : MK.muted, lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 14, color: index % 2 === 1 ? 'rgba(253,248,243,0.55)' : MK.muted, lineHeight: 1.7 }}>
                     {feature.description}
                   </p>
                 </div>
@@ -617,7 +617,7 @@ export default function LandingPage() {
                   <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 22, letterSpacing: '-0.01em', color: MK.text, marginBottom: 6 }}>
                     {item.title}
                   </h3>
-                  <p style={{ fontFamily: MK.font, fontSize: 11, color: MK.muted, letterSpacing: '0.05em' }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, letterSpacing: '0.05em' }}>
                     {item.tags}
                   </p>
                 </div>
@@ -643,7 +643,7 @@ export default function LandingPage() {
               <AnimateOnScroll key={t.name} animation="fade-up" delay={index * 100}>
                 <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 36, border: `1px solid rgba(255,255,255,0.08)`, height: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
                   <span style={{ fontFamily: MK.font, fontSize: 48, color: MK.accent, lineHeight: 1, display: 'block' }}>&ldquo;</span>
-                  <p style={{ fontFamily: MK.font, fontSize: 15, color: 'rgba(253,248,243,0.65)', lineHeight: 1.7, flex: 1, marginTop: -16 }}>
+                  <p style={{ fontFamily: MK.font, fontSize: 16, color: 'rgba(253,248,243,0.65)', lineHeight: 1.7, flex: 1, marginTop: -16 }}>
                     {t.quote}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 16, borderTop: `1px solid rgba(255,255,255,0.08)` }}>
@@ -651,8 +651,8 @@ export default function LandingPage() {
                       {t.initial}
                     </div>
                     <div>
-                      <p style={{ fontFamily: MK.font, fontSize: 13, fontWeight: 700, color: MK.bg }}>{t.name}</p>
-                      <p style={{ fontFamily: MK.font, fontSize: 11, color: 'rgba(253,248,243,0.4)', letterSpacing: '0.05em' }}>{t.farm}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 14, fontWeight: 700, color: MK.bg }}>{t.name}</p>
+                      <p style={{ fontFamily: MK.font, fontSize: 12, color: 'rgba(253,248,243,0.4)', letterSpacing: '0.05em' }}>{t.farm}</p>
                     </div>
                   </div>
                 </div>
@@ -691,7 +691,7 @@ export default function LandingPage() {
                         <h3 style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em', color: MK.text, marginBottom: 8 }}>
                           {item.title}
                         </h3>
-                        <p style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, lineHeight: 1.65 }}>
+                        <p style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted, lineHeight: 1.65 }}>
                           {item.description}
                         </p>
                       </div>
@@ -742,22 +742,22 @@ export default function LandingPage() {
                 <p style={{ ...labelStyle, marginBottom: 16 }}>Starter</p>
                 <div style={{ marginBottom: 8 }}>
                   <span style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 52, color: MK.text, letterSpacing: '-0.04em' }}>$25</span>
-                  <span style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted }}>/month</span>
+                  <span style={{ fontFamily: MK.font, fontSize: 15, color: MK.muted }}>/month</span>
                 </div>
-                <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, marginBottom: 28 }}>
+                <p style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, marginBottom: 28 }}>
                   Perfect for hobby barns & personal farms
                 </p>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32, flex: 1 }}>
                   {['Up to 10 horses', 'Feed tracking & charts', 'Health & vet records', 'Documents & photos', 'Mobile access'].map((f) => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <Check style={{ width: 14, height: 14, color: MK.accent, flexShrink: 0 }} />
-                      <span style={{ fontFamily: MK.font, fontSize: 13, color: MK.text }}>{f}</span>
+                      <span style={{ fontFamily: MK.font, fontSize: 14, color: MK.text }}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/sign-up"
-                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', border: `2px solid ${MK.text}`, borderRadius: 4, fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
+                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', border: `2px solid ${MK.text}`, borderRadius: 4, fontFamily: MK.font, fontSize: 11, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
                 >
                   Start Free Trial
                 </Link>
@@ -770,22 +770,22 @@ export default function LandingPage() {
                 <p style={{ ...labelStyle, color: MK.accent, marginBottom: 16 }}>Farm</p>
                 <div style={{ marginBottom: 8 }}>
                   <span style={{ fontFamily: MK.font, fontWeight: 900, fontSize: 52, color: MK.bg, letterSpacing: '-0.04em' }}>$60</span>
-                  <span style={{ fontFamily: MK.font, fontSize: 14, color: 'rgba(253,248,243,0.55)' }}>/month</span>
+                  <span style={{ fontFamily: MK.font, fontSize: 15, color: 'rgba(253,248,243,0.55)' }}>/month</span>
                 </div>
-                <p style={{ fontFamily: MK.font, fontSize: 13, color: 'rgba(253,248,243,0.55)', marginBottom: 28 }}>
+                <p style={{ fontFamily: MK.font, fontSize: 14, color: 'rgba(253,248,243,0.55)', marginBottom: 28 }}>
                   For growing operations & boarding barns
                 </p>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32, flex: 1 }}>
                   {['Unlimited horses', 'Everything in Starter', 'Up to 5 team members', '50 GB document storage', 'Unlimited photos'].map((f) => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <Check style={{ width: 14, height: 14, color: MK.accent, flexShrink: 0 }} />
-                      <span style={{ fontFamily: MK.font, fontSize: 13, color: MK.bg }}>{f}</span>
+                      <span style={{ fontFamily: MK.font, fontSize: 14, color: MK.bg }}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/sign-up"
-                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', backgroundColor: MK.accent, borderRadius: 4, fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
+                  style={{ display: 'block', textAlign: 'center', padding: '14px 0', backgroundColor: MK.accent, borderRadius: 4, fontFamily: MK.font, fontSize: 11, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none' }}
                 >
                   Start Free Trial
                 </Link>
@@ -796,7 +796,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', marginTop: 32 }}>
             <Link
               href="/pricing"
-              style={{ fontFamily: MK.font, fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `2px solid ${MK.accent}`, paddingBottom: 2 }}
+              style={{ fontFamily: MK.font, fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `2px solid ${MK.accent}`, paddingBottom: 2 }}
             >
               See full pricing & add-ons →
             </Link>
@@ -828,7 +828,7 @@ export default function LandingPage() {
             </p>
             <Link
               href="/sign-up"
-              style={{ backgroundColor: MK.bg, color: MK.text, fontFamily: MK.font, fontSize: 11, fontWeight: 800, letterSpacing: '0.2em', padding: '18px 52px', borderRadius: 4, textDecoration: 'none', textTransform: 'uppercase', display: 'inline-block' }}
+              style={{ backgroundColor: MK.bg, color: MK.text, fontFamily: MK.font, fontSize: 12, fontWeight: 800, letterSpacing: '0.2em', padding: '18px 52px', borderRadius: 4, textDecoration: 'none', textTransform: 'uppercase', display: 'inline-block' }}
             >
               Start Your Free Trial
             </Link>
@@ -846,7 +846,7 @@ export default function LandingPage() {
                 <Image src="/logo.png" alt="BarnKeep" width={30} height={30} style={{ borderRadius: 7 }} />
                 <span style={{ fontFamily: MK.font, fontWeight: 800, fontSize: 16, color: MK.text, letterSpacing: '-0.01em' }}>BARNKEEP</span>
               </Link>
-              <p style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, lineHeight: 1.7, maxWidth: 260 }}>
+              <p style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, lineHeight: 1.7, maxWidth: 260 }}>
                 Simple barn management for the farms that care about the details.
               </p>
             </div>
@@ -858,13 +858,13 @@ export default function LandingPage() {
               { heading: 'Legal',   links: [['Privacy', '/privacy'], ['Terms', '/terms']] },
             ].map((col) => (
               <div key={col.heading}>
-                <p style={{ fontFamily: MK.font, fontSize: 9, fontWeight: 900, letterSpacing: '0.35em', textTransform: 'uppercase', color: MK.accent, marginBottom: 16, borderBottom: `2px solid ${MK.accent}`, paddingBottom: 8, display: 'inline-block' }}>
+                <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.35em', textTransform: 'uppercase', color: MK.accent, marginBottom: 16, borderBottom: `2px solid ${MK.accent}`, paddingBottom: 8, display: 'inline-block' }}>
                   {col.heading}
                 </p>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
                   {col.links.map(([label, href]) => (
                     <li key={href}>
-                      <Link href={href} style={{ fontFamily: MK.font, fontSize: 13, color: MK.muted, textDecoration: 'none', letterSpacing: '0.02em' }}>
+                      <Link href={href} style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, textDecoration: 'none', letterSpacing: '0.02em' }}>
                         {label}
                       </Link>
                     </li>
@@ -875,12 +875,12 @@ export default function LandingPage() {
           </div>
 
           <div style={{ borderTop: `1px solid rgba(38,38,38,0.08)`, paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-            <p style={{ fontFamily: MK.font, fontSize: 9, color: 'rgba(38,38,38,0.3)', letterSpacing: '0.08em' }}>
+            <p style={{ fontFamily: MK.font, fontSize: 11, color: 'rgba(38,38,38,0.3)', letterSpacing: '0.08em' }}>
               © {new Date().getFullYear()} BARNKEEP. ALL RIGHTS RESERVED.
             </p>
             <Link
               href="/sign-up"
-              style={{ fontFamily: MK.font, fontSize: 9, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `1px solid ${MK.accent}`, paddingBottom: 1 }}
+              style={{ fontFamily: MK.font, fontSize: 11, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: MK.text, textDecoration: 'none', borderBottom: `1px solid ${MK.accent}`, paddingBottom: 1 }}
             >
               Start Free Trial →
             </Link>
