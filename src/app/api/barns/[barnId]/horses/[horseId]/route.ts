@@ -108,10 +108,7 @@ export async function GET(
       ...horse,
       currentWeight: horse.weightRecords[0]?.weightLbs || null,
       age: horse.dateOfBirth
-        ? Math.floor(
-            (Date.now() - new Date(horse.dateOfBirth).getTime()) /
-              (365.25 * 24 * 60 * 60 * 1000)
-          )
+        ? new Date().getFullYear() - new Date(horse.dateOfBirth).getFullYear()
         : null,
       stallName: horse.stallRelation?.name || horse.stall || null,
       paddockName: horse.turnouts[0]?.paddock?.name || null,

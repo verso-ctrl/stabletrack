@@ -45,7 +45,6 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
         <h3 className="font-medium text-foreground truncate">{horse.barnName}</h3>
         <p className="text-xs text-muted-foreground truncate">
           {horse.breed || 'Unknown breed'}
-          {horse.age && ` • ${horse.age} yo`}
         </p>
       </div>
 
@@ -123,7 +122,6 @@ export function HorseCard({ horse, onClick, variant = 'default' }: HorseCardProp
             </h3>
             <p className="text-sm text-muted-foreground truncate">
               {horse.breed || 'Unknown breed'}
-              {horse.age && ` • ${horse.age} yo`}
             </p>
           </div>
           <span
