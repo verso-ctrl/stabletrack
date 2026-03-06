@@ -56,11 +56,15 @@ function FeedChartGrid({
   feedChartData,
   chartTime,
   setChartTime,
+  barnName,
 }: {
   feedChartData: { feedingTimes: string[]; horses: FeedChartHorse[] };
   chartTime: string;
   setChartTime: (t: string) => void;
+  barnName: string;
 }) {
+  const [showPrint, setShowPrint] = useState(false);
+
   const allFeedNames = Array.from(
     new Set(
       feedChartData.horses.flatMap(h =>
@@ -69,11 +73,35 @@ function FeedChartGrid({
     )
   ).sort();
 
+  const handlePrint = () => {
+    setShowPrint(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+        setShowPrint(false);
+      });
+    });
+  };
+
+  const printDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  });
+
   return (
+    <>
     <div className="card p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-foreground">Feed Plan Chart</h3>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrint}
+            className="btn-secondary btn-sm flex items-center gap-1.5"
+            title="Print feed chart"
+          >
+            <Printer className="w-4 h-4" />
+            <span className="hidden sm:inline">Print</span>
+          </button>
+          <div className="flex gap-1">
           {feedChartData.feedingTimes.map(time => (
             <button
               key={time}
@@ -87,6 +115,7 @@ function FeedChartGrid({
               {time}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
@@ -157,6 +186,72 @@ function FeedChartGrid({
         </div>
       )}
     </div>
+
+    {/* Printable feed chart — hidden on screen, shown on print */}
+    {showPrint && (
+      <div className="printable-feed-chart-wrapper">
+        <div style={{ padding: '0.5in', fontFamily: 'sans-serif', color: 'black', background: 'white' }}>
+          <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #d4c5b5', paddingBottom: '12px' }}>
+            <h1 style={{ fontSize: '18pt', fontWeight: 'bold', margin: 0 }}>Feed Plan Chart</h1>
+            <p style={{ fontSize: '10pt', color: '#666', margin: '4px 0 0' }}>{barnName} &mdash; {printDate}</p>
+          </div>
+
+          {feedChartData.feedingTimes.map(time => {
+            const timeNames = Array.from(
+              new Set(feedChartData.horses.flatMap(h => (h.feedSchedule[time]?.items || []).map(i => i.name)))
+            ).sort();
+            if (timeNames.length === 0) return null;
+            return (
+              <div key={time} style={{ marginBottom: '28px' }}>
+                <h2 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#7c5c2b' }}>{time} Feeding</h2>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+                  <thead>
+                    <tr style={{ background: '#f5f0ea' }}>
+                      <th style={{ textAlign: 'left', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600, minWidth: '130px' }}>Horse</th>
+                      {timeNames.map(name => (
+                        <th key={name} style={{ textAlign: 'center', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600 }}>{name}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {feedChartData.horses.map((horse, i) => {
+                      const items = horse.feedSchedule[time]?.items || [];
+                      const itemMap = new Map(items.map(item => [item.name, item]));
+                      return (
+                        <tr key={horse.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5' }}>
+                          <td style={{ padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 500 }}>
+                            {horse.barnName}
+                            {horse.stall && horse.stall !== 'No stall' && (
+                              <span style={{ fontSize: '7.5pt', color: '#888', marginLeft: '6px' }}>({horse.stall})</span>
+                            )}
+                          </td>
+                          {timeNames.map(name => {
+                            const item = itemMap.get(name);
+                            return (
+                              <td key={name} style={{ padding: '6px 10px', border: '1px solid #d4c5b5', textAlign: 'center' }}>
+                                {item
+                                  ? `${item.amount != null ? item.amount : ''}${item.unit ? ' ' + item.unit : ''}`
+                                  : <span style={{ color: '#ccc' }}>—</span>
+                                }
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+
+          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '7.5pt', color: '#aaa', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+            Printed from BarnKeep &mdash; {printDate}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -639,6 +734,7 @@ export default function DailyCarePage() {
               feedChartData={feedChartData}
               chartTime={chartTime}
               setChartTime={setChartTime}
+              barnName={currentBarn?.name ?? ''}
             />
           )}
         </div>
