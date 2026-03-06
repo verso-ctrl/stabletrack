@@ -855,7 +855,7 @@ export default function LandingPage() {
             {[
               { heading: 'Product', links: [['Features', '/#features'], ['Pricing', '/pricing']] },
               { heading: 'Company', links: [['About', '/about'], ['Contact', '/contact']] },
-              { heading: 'Legal',   links: [['Privacy', '/privacy'], ['Terms', '/terms']] },
+              { heading: 'Legal',   links: [['Privacy', '/privacy'], ['Terms', '/terms'], ['Cookies', '/cookies']] },
             ].map((col) => (
               <div key={col.heading}>
                 <p style={{ fontFamily: MK.font, fontSize: 10, fontWeight: 900, letterSpacing: '0.35em', textTransform: 'uppercase', color: MK.accent, marginBottom: 16, borderBottom: `2px solid ${MK.accent}`, paddingBottom: 8, display: 'inline-block' }}>
@@ -869,6 +869,13 @@ export default function LandingPage() {
                       </Link>
                     </li>
                   ))}
+                  {col.heading === 'Legal' && (
+                    <li>
+                      <a href="#" className="termly-display-preferences" style={{ fontFamily: MK.font, fontSize: 14, color: MK.muted, textDecoration: 'none', letterSpacing: '0.02em' }}>
+                        Consent Preferences
+                      </a>
+                    </li>
+                  )}
                 </ul>
               </div>
             ))}

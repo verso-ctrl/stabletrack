@@ -4,11 +4,11 @@ import { MarketingNav } from '@/components/marketing/MarketingNav';
 import { TermlyEmbed } from '@/components/marketing/TermlyEmbed';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — BarnKeep',
-  description: 'Read the BarnKeep Privacy Policy.',
+  title: 'Cookie Policy — BarnKeep',
+  description: 'Read the BarnKeep Cookie Policy.',
 };
 
-export default function PrivacyPage() {
+export default function CookiesPage() {
   return (
     <div className="min-h-screen bg-background">
       <MarketingNav />
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         <Link href="/" className="text-amber-600 hover:text-amber-700 mb-8 inline-block">
           ← Back to Home
         </Link>
-        <TermlyEmbed dataId="0b27dd69-5a34-4bcd-af72-dfaf3bddc6e7" />
+        <TermlyEmbed dataId="f16eb82e-4817-488a-9923-eafaeb20b634" />
       </div>
     </div>
   );

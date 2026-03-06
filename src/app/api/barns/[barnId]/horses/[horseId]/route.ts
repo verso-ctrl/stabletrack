@@ -167,6 +167,7 @@ export async function PATCH(
       'sireId', 'damId', 'sireName', 'damName',
       'ownerName', 'ownerEmail', 'ownerPhone',
       'coOwnerName', 'coOwnerPhone',
+      'studFee', 'semenCollectionFee', 'fedexDeliveryFee', 'shipperBoxFee',
     ];
     const updateData: Record<string, any> = {};
     for (const field of ALLOWED_FIELDS) {

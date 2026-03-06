@@ -580,6 +580,25 @@ export default function HorseDetailPage() {
                 subValue={horse.registrationNumber ? `Reg# ${horse.registrationNumber}` : undefined}
               />
             )}
+            {(horse.studFee != null || horse.semenCollectionFee != null || horse.fedexDeliveryFee != null || horse.shipperBoxFee != null) && (
+              <>
+                <div className="col-span-2 sm:col-span-2 md:col-span-3 pt-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Stud Breeding Fees</p>
+                </div>
+                {horse.studFee != null && (
+                  <InfoItem label="Stud Fee" value={`$${horse.studFee.toLocaleString()}`} />
+                )}
+                {horse.semenCollectionFee != null && (
+                  <InfoItem label="Stallion Semen Collection Fee" value={`$${horse.semenCollectionFee.toLocaleString()}`} />
+                )}
+                {horse.fedexDeliveryFee != null && (
+                  <InfoItem label="FedEx Weekday Delivery" value={`$${horse.fedexDeliveryFee.toLocaleString()}`} />
+                )}
+                {horse.shipperBoxFee != null && (
+                  <InfoItem label="Disposable Shipper Box" value={`$${horse.shipperBoxFee.toLocaleString()}`} />
+                )}
+              </>
+            )}
           </div>
         </div>
 

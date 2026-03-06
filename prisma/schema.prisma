@@ -204,6 +204,10 @@ model Horse {
   damId           String?
   sireName        String?
   damName         String?
+  studFee            Float?
+  semenCollectionFee Float?
+  fedexDeliveryFee   Float?
+  shipperBoxFee      Float?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

@@ -6,7 +6,7 @@ import { MarketingNav } from '@/components/marketing/MarketingNav';
 
 export const metadata: Metadata = {
   title: 'About — BarnKeep',
-  description: 'BarnKeep is built for small horse farms and hobby barns. Learn why we made it and who it\'s for.',
+  description: 'BarnKeep is simple, affordable barn management software for horse owners. Learn why we built it.',
 };
 
 export default function AboutPage() {
@@ -19,10 +19,10 @@ export default function AboutPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 border-b border-border/40">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight">
-            Built for the people who actually muck stalls.
+            Built for horse people, by horse people.
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            BarnKeep started with a simple observation: the barn management software that existed was built for large commercial operations — not for the hobby farmer with 4 horses, or the small boarding barn with 12.
+            BarnKeep was built on a simple idea: keeping track of your horses shouldn&apos;t require a filing cabinet, a spreadsheet, and three separate notebooks.
           </p>
         </div>
       </section>
@@ -32,13 +32,13 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto prose prose-stone max-w-none">
           <h2 className="font-display text-2xl font-semibold text-foreground mb-4">Why we built this</h2>
           <p className="text-muted-foreground leading-relaxed mb-6">
-            Small farm owners were managing their horses with a patchwork of sticky notes, spiral notebooks, group texts, and memory. That works — until a horse gets sick, a new caretaker starts, or you can&apos;t remember when the last coggins was done.
+            A lot of horse owners manage their animals with a mix of sticky notes, spiral notebooks, group texts, and memory. That works — until a horse gets sick, a new caretaker starts, or you can&apos;t remember when the last coggins was done.
           </p>
           <p className="text-muted-foreground leading-relaxed mb-6">
-            Enterprise barn software costs hundreds of dollars a month and assumes you have a full-time farm manager to configure it. We wanted something different: a tool that a single horse owner could set up in an afternoon and actually stick with.
+            We wanted something anyone could open up, understand in a few minutes, and actually keep using — not because they had to, but because it genuinely makes barn life easier.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            BarnKeep is that tool. Straightforward, affordable, and genuinely useful — whether you have 2 horses or 20.
+            BarnKeep is that tool. Straightforward, affordable, and built to work however you run your barn — whether you have 2 horses or 20.
           </p>
         </div>
       </section>
@@ -135,6 +135,8 @@ export default function AboutPage() {
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
+                <li><Link href="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                <li><a href="#" className="termly-display-preferences hover:text-foreground transition-colors">Consent Preferences</a></li>
               </ul>
             </div>
           </div>

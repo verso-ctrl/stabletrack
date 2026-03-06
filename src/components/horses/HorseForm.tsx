@@ -97,6 +97,10 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
     microchipNumber: horse?.microchipNumber || '',
     status: horse?.status || 'ACTIVE',
     ownerName: horse?.ownerName || '',
+    studFee: horse?.studFee ?? undefined,
+    semenCollectionFee: horse?.semenCollectionFee ?? undefined,
+    fedexDeliveryFee: horse?.fedexDeliveryFee ?? undefined,
+    shipperBoxFee: horse?.shipperBoxFee ?? undefined,
   });
 
   const handleChange = (
@@ -370,6 +374,79 @@ export function HorseForm({ horse, onSuccess, onCancel }: HorseFormProps) {
               value={formData.ownerName}
               onChange={handleChange}
               placeholder="Horse owner's name"
+              className="input w-full"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Stud Breeding Fees */}
+      <section>
+        <h3 className="text-lg font-semibold text-foreground mb-4">
+          Stud Breeding Fees
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+              Stud Fee ($)
+            </label>
+            <input
+              type="number"
+              name="studFee"
+              value={formData.studFee ?? ''}
+              onChange={handleChange}
+              placeholder="e.g., 2500"
+              step="0.01"
+              min="0"
+              className="input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+              Stallion Semen Collection Fee ($)
+            </label>
+            <input
+              type="number"
+              name="semenCollectionFee"
+              value={formData.semenCollectionFee ?? ''}
+              onChange={handleChange}
+              placeholder="e.g., 350"
+              step="0.01"
+              min="0"
+              className="input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+              FedEx Weekday Delivery Fee ($)
+            </label>
+            <input
+              type="number"
+              name="fedexDeliveryFee"
+              value={formData.fedexDeliveryFee ?? ''}
+              onChange={handleChange}
+              placeholder="e.g., 75"
+              step="0.01"
+              min="0"
+              className="input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+              Disposable Shipper Box ($)
+            </label>
+            <input
+              type="number"
+              name="shipperBoxFee"
+              value={formData.shipperBoxFee ?? ''}
+              onChange={handleChange}
+              placeholder="e.g., 50"
+              step="0.01"
+              min="0"
               className="input w-full"
             />
           </div>

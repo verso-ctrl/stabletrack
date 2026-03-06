@@ -3,8 +3,10 @@
 import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBarn } from '@/contexts/BarnContext';
 import { useHorse } from '@/hooks/useData';
+import { queryKeys } from '@/lib/queryKeys';
 import { toast } from '@/lib/toast';
 import { csrfFetch } from '@/lib/fetch';
 import {
@@ -42,6 +44,7 @@ const routeOptions = [
 export default function AddMedicationPage({ params }: { params: Promise<{ horseId: string }> }) {
   const { horseId } = use(params);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { currentBarn } = useBarn();
   const { horse, isLoading: horseLoading } = useHorse(horseId);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,7 +104,9 @@ export default function AddMedicationPage({ params }: { params: Promise<{ horseI
       }
 
       toast.success('Medication added', `${formData.name} has been added`);
-      router.refresh();
+      if (currentBarn) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.horses.detail(currentBarn.id, horseId) });
+      }
       router.push(`/horses/${horseId}`);
     } catch (error) {
       console.error('Error adding medication:', error);

@@ -229,6 +229,10 @@ export interface Horse {
   registry: string | null;
   registrationNumber: string | null;
   bio: string | null;
+  studFee: number | null;
+  semenCollectionFee: number | null;
+  fedexDeliveryFee: number | null;
+  shipperBoxFee: number | null;
   createdAt: Date;
   updatedAt: Date;
   
@@ -675,6 +679,10 @@ export interface CreateHorseInput {
   microchipNumber?: string;
   status?: HorseStatus;
   ownerName?: string;
+  studFee?: number;
+  semenCollectionFee?: number;
+  fedexDeliveryFee?: number;
+  shipperBoxFee?: number;
 }
 
 export interface UpdateHorseInput extends Partial<CreateHorseInput> {

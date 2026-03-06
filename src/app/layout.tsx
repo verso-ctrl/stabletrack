@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
+import Script from 'next/script';
 import { Providers } from './providers';
 import '@/styles/globals.css';
 
@@ -62,6 +63,11 @@ export default function RootLayout({
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         </head>
         <body className="min-h-screen bg-background" suppressHydrationWarning>
+          <Script
+            id="termly-consent"
+            src="https://app.termly.io/resource-blocker/70b50ff6-2dc9-4f4d-ada3-eca04e7b584f?autoBlock=on"
+            strategy="beforeInteractive"
+          />
           {/* Demo Mode Banner */}
           <div className="bg-primary/90 text-primary-foreground text-center py-2 px-4 text-sm font-medium">
             Demo Mode - Configure Clerk & Stripe keys in .env for full features
@@ -79,6 +85,11 @@ export default function RootLayout({
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         </head>
         <body className="min-h-screen bg-background" suppressHydrationWarning>
+          <Script
+            id="termly-consent"
+            src="https://app.termly.io/resource-blocker/70b50ff6-2dc9-4f4d-ada3-eca04e7b584f?autoBlock=on"
+            strategy="beforeInteractive"
+          />
           <Providers>{children}</Providers>
         </body>
       </html>
