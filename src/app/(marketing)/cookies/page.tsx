@@ -16,7 +16,9 @@ export default function CookiesPage() {
         <Link href="/" className="text-amber-600 hover:text-amber-700 mb-8 inline-block">
           ← Back to Home
         </Link>
-        <TermlyEmbed dataId="f16eb82e-4817-488a-9923-eafaeb20b634" />
+        <div className="bg-white rounded-xl p-6 sm:p-10 min-h-[400px]">
+          <TermlyEmbed dataId="f16eb82e-4817-488a-9923-eafaeb20b634" />
+        </div>
       </div>
     </div>
   );

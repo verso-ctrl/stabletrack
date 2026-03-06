@@ -11,14 +11,15 @@ export function TermlyEmbed({ dataId }: { dataId: string }) {
     // Set the non-standard name attribute Termly requires to find this div
     ref.current.setAttribute('name', 'termly-embed');
 
-    // Inject the script only once — after the div is in the DOM with name set
-    if (!document.getElementById('termly-jssdk')) {
-      const script = document.createElement('script');
-      script.id = 'termly-jssdk';
-      script.src = 'https://app.termly.io/embed-policy.min.js';
-      document.body.appendChild(script);
-    }
-  }, []);
+    // Always remove and re-inject so client-side navigation triggers a fresh load
+    const existing = document.getElementById('termly-jssdk');
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.id = 'termly-jssdk';
+    script.src = 'https://app.termly.io/embed-policy.min.js';
+    document.body.appendChild(script);
+  }, [dataId]);
 
   return <div ref={ref} data-id={dataId} />;
 }

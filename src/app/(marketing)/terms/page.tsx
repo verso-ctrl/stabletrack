@@ -16,7 +16,9 @@ export default function TermsPage() {
         <Link href="/" className="text-amber-600 hover:text-amber-700 mb-8 inline-block">
           ← Back to Home
         </Link>
-        <TermlyEmbed dataId="81155145-dd9b-4b8a-b213-d813032bb92f" />
+        <div className="bg-white rounded-xl p-6 sm:p-10 min-h-[400px]">
+          <TermlyEmbed dataId="81155145-dd9b-4b8a-b213-d813032bb92f" />
+        </div>
       </div>
     </div>
   );

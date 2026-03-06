@@ -16,7 +16,9 @@ export default function PrivacyPage() {
         <Link href="/" className="text-amber-600 hover:text-amber-700 mb-8 inline-block">
           ← Back to Home
         </Link>
-        <TermlyEmbed dataId="0b27dd69-5a34-4bcd-af72-dfaf3bddc6e7" />
+        <div className="bg-white rounded-xl p-6 sm:p-10 min-h-[400px]">
+          <TermlyEmbed dataId="0b27dd69-5a34-4bcd-af72-dfaf3bddc6e7" />
+        </div>
       </div>
     </div>
   );
