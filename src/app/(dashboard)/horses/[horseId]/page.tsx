@@ -160,7 +160,7 @@ export default function HorseDetailPage() {
         name: feedProgram.name || '',
         instructions: feedProgram.instructions || '',
         items: feedProgram.items?.map((item: any) => ({
-          feedName: item.feedType?.name || item.supplement?.name || '',
+          feedName: item.feedType?.name || item.supplement?.name || item.customName || '',
           amount: item.amount?.toString() || '',
           unit: item.unit || 'lbs',
           feedingTime: item.feedingTime || 'AM',
