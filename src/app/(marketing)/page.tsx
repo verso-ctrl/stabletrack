@@ -330,31 +330,6 @@ export default function LandingPage() {
                 />
               </div>
 
-              {/* Floating concierge badge */}
-              <div
-                className="animate-bounce-slow hidden lg:flex"
-                style={{
-                  position: 'absolute',
-                  bottom: -28,
-                  left: -28,
-                  width: 152,
-                  height: 152,
-                  borderRadius: '50%',
-                  backgroundColor: MK.accent,
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  zIndex: 10,
-                }}
-              >
-                <em style={{ fontFamily: MK.font, fontSize: 42, fontStyle: 'italic', fontWeight: 800, color: MK.text, lineHeight: 1 }}>
-                  01
-                </em>
-                <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: '0.25em', color: MK.text, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.5 }}>
-                  YOUR<br />FARM
-                </span>
-              </div>
             </div>
           </div>
         </div>
