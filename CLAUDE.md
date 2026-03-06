@@ -90,7 +90,7 @@ barnkeep/
 │   │   │   ├── breeding/      # Breeding tracker
 │   │   │   ├── calendar/      # Calendar view
 │   │   │   ├── clients/       # Client management
-│   │   │   ├── daily-care/    # Daily care logs
+│   │   │   ├── daily-care/    # Daily care logs (Overview/Health/Feeding/Medications tabs + Feed Plan Chart)
 │   │   │   ├── dashboard/     # Main dashboard
 │   │   │   ├── documents/     # Document management
 │   │   │   ├── farm-maintenance/ # Farm maintenance tasks
@@ -105,7 +105,7 @@ barnkeep/
 │   │   │   ├── tasks/         # Task management
 │   │   │   ├── team/          # Team management
 │   │   │   └── training/      # Training logs
-│   │   ├── (marketing)/       # Public pages (pricing, privacy, terms)
+│   │   ├── (marketing)/       # Public pages (pricing, privacy, terms, cookies, about, contact)
 │   │   ├── api/               # REST API endpoints (52+ routes, includes Stripe webhooks)
 │   │   ├── accept-terms/       # ToS acceptance gate (required before onboarding/dashboard)
 │   │   ├── onboarding/        # User onboarding (create-barn, join-barn)
@@ -120,6 +120,7 @@ barnkeep/
 │   │   ├── storage/           # File upload (DocumentManager, FileUpload, HorsePhotoGallery, StorageQuota)
 │   │   ├── subscription/      # Feature gating (FeatureGate, UpgradeModal)
 │   │   ├── breeding/          # Breeding tracker (BreedingStatusBadge, HeatCycleTimeline, LogHeatCycleModal, PedigreeCard, RecordBreedingModal, RecordFoalingModal)
+│   │   ├── marketing/         # Marketing components (MarketingNav, TermlyEmbed, AnimateOnScroll)
 │   │   └── auth/              # Auth components
 │   ├── lib/                   # Core utilities (21 files)
 │   │   ├── auth.ts            # Authentication layer (Clerk + demo mode)
@@ -215,9 +216,35 @@ export async function GET(req: Request, { params }: { params: { barnId: string }
 
 **Multi-tenant Isolation:** All database queries scoped to `barnId`. Client access controlled via `ClientHorse` table. Team access via `BarnMember` with roles.
 
+**Feed Plan Chart (Daily Care page, Feeding tab):**
+- Fetches from `/api/barns/[barnId]/feed-chart` which returns horses with their `feedSchedule` keyed by feeding time
+- Renders two separate AM and PM matrix tables (horses × feed item names)
+- Feeding time grouping: `AM_TIMES = {EARLY_AM, AM, MORNING}`, `PM_TIMES = {PM, MIDDAY, EVENING, AFTERNOON}`, `BOTH_TIMES = {BOTH, ALL, ALL_DAY}`
+- Items in BOTH_TIMES appear in both the AM and PM tables
+- Has a Print button that outputs both tables as a print-friendly layout using `.printable-feed-chart-wrapper` CSS class
+
+**Termly Legal Integration:**
+- Legal pages (privacy, terms, cookies) use `TermlyEmbed` component (`src/components/marketing/TermlyEmbed.tsx`)
+- `TermlyEmbed` uses `useEffect` + `useRef` to set the `name="termly-embed"` attribute (React strips non-standard attrs) then injects the Termly script — always removes and re-injects on client navigation
+- Cookie consent manager script injected inline in `src/app/layout.tsx` `<head>` via `dangerouslySetInnerHTML`
+- All Termly domains allowed in CSP: `*.termly.io` in script-src, style-src, img-src, font-src, connect-src, frame-src
+- Footer includes a `<a className="termly-display-preferences">` link to reopen the consent banner
+
+**Horse Model — Stud Breeding Fees:**
+- Added optional fields: `studFee`, `semenCollectionFee`, `fedexDeliveryFee`, `shipperBoxFee` (all `Float?`)
+- Displayed in horse profile page when any value is set; editable in `HorseForm.tsx` under "Stud Breeding Fees" section
+- Included in `ALLOWED_FIELDS` in the horse PATCH route
+
+### Git Workflow
+
+- **`dev`** branch: active development — all feature work goes here
+- **`main`** branch: production — Railway auto-deploys from `main` via GitHub webhook
+- Workflow: commit + push to `dev`, then `git checkout main && git merge dev && git push && git checkout dev`
+- Railway "Redeploy" button re-deploys the same commit; to trigger a new deploy push a new commit to `main`
+
 ### Database
 
-PostgreSQL via Supabase (SQLite available for local dev). 42 models organized as:
+PostgreSQL via Supabase (SQLite available for local dev). 42+ models organized as:
 
 - **Users & Auth:** User (includes tosAcceptedAt, marketingOptIn), Subscription, BarnMember, HorseAccess
 - **Core Entities:** Barn, Horse, Stall, Paddock, HorsePhoto, HorseTurnout
