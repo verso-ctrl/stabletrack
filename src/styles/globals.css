@@ -579,6 +579,11 @@
   display: none;
 }
 
+/* Printable feed chart: hidden on screen */
+.printable-feed-chart-wrapper {
+  display: none;
+}
+
 /* Print styles */
 @media print {
   /* Hide everything on the page */
@@ -629,6 +634,24 @@
   }
 
   .printable-medical-report-wrapper {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    background: white;
+    overflow: visible;
+  }
+
+  /* Show the printable feed chart and all its children */
+  .printable-feed-chart-wrapper,
+  .printable-feed-chart-wrapper * {
+    visibility: visible;
+  }
+
+  .printable-feed-chart-wrapper {
     display: block !important;
     position: fixed;
     top: 0;
