@@ -17,6 +17,7 @@ import {
   Calendar,
   Settings,
   CreditCard,
+  Utensils,
 } from 'lucide-react';
 
 const faqCategories = [
@@ -54,7 +55,34 @@ const faqCategories = [
       },
       {
         question: 'How do I set up a feed program?',
-        answer: 'From the horse\'s profile, go to the Feed tab. Create a feed program with specific amounts and feeding times for each type of feed and supplement.',
+        answer: 'From the horse\'s profile, go to the Feed tab. Create a feed program with specific amounts and feeding times (AM, PM, Midday, etc.) for each type of feed and supplement. Once set, the feed plan will appear on the Daily Care page\'s Feed Plan Chart.',
+      },
+    ],
+  },
+  {
+    id: 'feeding',
+    name: 'Daily Care & Feeding',
+    icon: Utensils,
+    faqs: [
+      {
+        question: 'Where can I see what every horse should be fed?',
+        answer: 'Go to Daily Care and click the Feeding tab. Scroll down to the Feed Plan Chart — it shows a grid of every horse versus every feed item, with the amount for each. AM and PM feedings are shown as separate tables so you can quickly see what needs to go in each bucket.',
+      },
+      {
+        question: 'How does the AM / PM split work in the Feed Plan Chart?',
+        answer: 'Feed items are automatically grouped by their feeding time. AM items (including Early AM) appear in the AM table. PM items (including Midday) appear in the PM table. If a feed item is set to "Both" when creating the feed program, it will show up in both the AM and PM tables so nothing gets missed.',
+      },
+      {
+        question: 'Can I print the feeding chart?',
+        answer: 'Yes — click the Print button in the top-right corner of the Feed Plan Chart card. It will open your browser\'s print dialog with a clean, print-ready layout showing both the AM and PM feeding tables, the barn name, and today\'s date.',
+      },
+      {
+        question: 'How do I log that a horse has been fed?',
+        answer: 'From the Feeding tab on Daily Care, click "Log Feeding" to record an AM or PM feeding for a horse. You can also go to Log > Feed from the sidebar. The Feeding Status section at the top of the tab updates in real time to show which horses have been fed.',
+      },
+      {
+        question: 'A horse doesn\'t show up in the Feed Plan Chart — why?',
+        answer: 'The chart only shows horses that have a feed program set up. Go to the horse\'s profile, open the Feed tab, and create a feed program with at least one item. The horse will then appear in the chart.',
       },
     ],
   },
