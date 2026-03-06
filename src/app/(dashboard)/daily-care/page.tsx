@@ -52,6 +52,11 @@ interface FeedChartHorse {
   }>;
 }
 
+// Which feeding times belong to AM, PM, or both
+const AM_TIMES = new Set(['EARLY_AM', 'AM', 'MORNING']);
+const PM_TIMES = new Set(['PM', 'MIDDAY', 'EVENING', 'AFTERNOON']);
+const BOTH_TIMES = new Set(['BOTH', 'ALL', 'ALL_DAY']);
+
 function FeedChartGrid({
   feedChartData,
   barnName,
@@ -61,26 +66,24 @@ function FeedChartGrid({
 }) {
   const [showPrint, setShowPrint] = useState(false);
 
-  // All unique feed names across every feeding time
-  const allFeedNames = Array.from(
-    new Set(
-      feedChartData.horses.flatMap(h =>
-        feedChartData.feedingTimes.flatMap(time =>
-          (h.feedSchedule[time]?.items || []).map(i => i.name)
-        )
-      )
-    )
+  // Get all items for a horse that belong to a given time group
+  const getGroupItems = (horse: FeedChartHorse, isGroup: (t: string) => boolean) =>
+    feedChartData.feedingTimes
+      .filter(isGroup)
+      .flatMap(time => (horse.feedSchedule[time]?.items || []).map(i => ({ ...i, time })));
+
+  const isAm = (t: string) => AM_TIMES.has(t) || BOTH_TIMES.has(t);
+  const isPm = (t: string) => PM_TIMES.has(t) || BOTH_TIMES.has(t);
+
+  // Unique feed names for each group across all horses
+  const amFeedNames = Array.from(
+    new Set(feedChartData.horses.flatMap(h => getGroupItems(h, isAm).map(i => i.name)))
+  ).sort();
+  const pmFeedNames = Array.from(
+    new Set(feedChartData.horses.flatMap(h => getGroupItems(h, isPm).map(i => i.name)))
   ).sort();
 
-  // Returns every time-entry for a given horse + feed name
-  const getEntries = (horse: FeedChartHorse, feedName: string) =>
-    feedChartData.feedingTimes.flatMap(time => {
-      const item = (horse.feedSchedule[time]?.items || []).find(i => i.name === feedName);
-      return item ? [{ ...item, time }] : [];
-    });
-
-  const timeLabel = (time: string) =>
-    ({ EARLY_AM: 'Early AM', AM: 'AM', MIDDAY: 'Mid', PM: 'PM', BOTH: 'AM+PM' } as Record<string, string>)[time] ?? time;
+  const hasAnyData = amFeedNames.length > 0 || pmFeedNames.length > 0;
 
   const handlePrint = () => {
     setShowPrint(true);
@@ -96,45 +99,33 @@ function FeedChartGrid({
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
 
-  return (
-    <>
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-foreground">Feed Plan Chart</h3>
-        <button
-          onClick={handlePrint}
-          className="btn-secondary btn-sm flex items-center gap-1.5"
-          title="Print feed chart"
-        >
-          <Printer className="w-4 h-4" />
-          <span className="hidden sm:inline">Print</span>
-        </button>
-      </div>
-
-      {allFeedNames.length === 0 ? (
-        <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground">No feed plans set up yet.</p>
-          <Link href="/feed-chart" className="mt-2 inline-block text-sm text-amber-600 hover:underline">
-            Set up feed programs
-          </Link>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm border-collapse min-w-max">
-            <thead>
-              <tr className="bg-muted/40 border-b border-border">
-                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[160px]">
-                  Horse
+  // Renders one AM or PM matrix table
+  const renderTable = (feedNames: string[], isGroup: (t: string) => boolean) => {
+    if (feedNames.length === 0) {
+      return <p className="text-sm text-muted-foreground py-2">No feed plan set.</p>;
+    }
+    return (
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full text-sm border-collapse min-w-max">
+          <thead>
+            <tr className="bg-muted/40 border-b border-border">
+              <th className="text-left px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[160px]">
+                Horse
+              </th>
+              {feedNames.map(name => (
+                <th key={name} className="text-center px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[110px]">
+                  {name}
                 </th>
-                {allFeedNames.map(name => (
-                  <th key={name} className="text-center px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[110px]">
-                    {name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {feedChartData.horses.map((horse, i) => (
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {feedChartData.horses.map((horse, i) => {
+              const items = getGroupItems(horse, isGroup);
+              // Deduplicate by name — first entry wins
+              const itemMap = new Map<string, typeof items[0]>();
+              items.forEach(item => { if (!itemMap.has(item.name)) itemMap.set(item.name, item); });
+              return (
                 <tr
                   key={horse.id}
                   className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}
@@ -152,25 +143,15 @@ function FeedChartGrid({
                       </div>
                     </div>
                   </td>
-                  {allFeedNames.map(name => {
-                    const entries = getEntries(horse, name);
+                  {feedNames.map(name => {
+                    const item = itemMap.get(name);
                     return (
                       <td key={name} className="px-4 py-3 text-center">
-                        {entries.length > 0 ? (
-                          <div className="flex flex-col gap-1 items-center">
-                            {entries.map(entry => (
-                              <span
-                                key={entry.time}
-                                className="inline-flex flex-col items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap"
-                              >
-                                <span className="font-semibold">
-                                  {entry.amount != null ? entry.amount : ''}
-                                  {entry.unit ? ` ${entry.unit}` : ''}
-                                </span>
-                                <span className="text-[10px] text-amber-600 font-normal">{timeLabel(entry.time)}</span>
-                              </span>
-                            ))}
-                          </div>
+                        {item ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
+                            {item.amount != null ? item.amount : ''}
+                            {item.unit ? ` ${item.unit}` : ''}
+                          </span>
                         ) : (
                           <span className="text-muted-foreground/50 text-xs">—</span>
                         )}
@@ -178,9 +159,97 @@ function FeedChartGrid({
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  // Renders one print section table (inline styles for print compatibility)
+  const renderPrintTable = (feedNames: string[], isGroup: (t: string) => boolean) => {
+    if (feedNames.length === 0) return null;
+    return (
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+        <thead>
+          <tr style={{ background: '#f5f0ea' }}>
+            <th style={{ textAlign: 'left', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600, minWidth: '130px' }}>Horse</th>
+            {feedNames.map(name => (
+              <th key={name} style={{ textAlign: 'center', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600 }}>{name}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {feedChartData.horses.map((horse, i) => {
+            const items = getGroupItems(horse, isGroup);
+            const itemMap = new Map<string, typeof items[0]>();
+            items.forEach(item => { if (!itemMap.has(item.name)) itemMap.set(item.name, item); });
+            return (
+              <tr key={horse.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5' }}>
+                <td style={{ padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 500 }}>
+                  {horse.barnName}
+                  {horse.stall && horse.stall !== 'No stall' && (
+                    <span style={{ fontSize: '7.5pt', color: '#888', marginLeft: '6px' }}>({horse.stall})</span>
+                  )}
+                </td>
+                {feedNames.map(name => {
+                  const item = itemMap.get(name);
+                  return (
+                    <td key={name} style={{ padding: '6px 10px', border: '1px solid #d4c5b5', textAlign: 'center' }}>
+                      {item
+                        ? `${item.amount != null ? item.amount : ''}${item.unit ? ' ' + item.unit : ''}`
+                        : <span style={{ color: '#ccc' }}>—</span>
+                      }
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  };
+
+  return (
+    <>
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="font-semibold text-foreground">Feed Plan Chart</h3>
+        <button
+          onClick={handlePrint}
+          className="btn-secondary btn-sm flex items-center gap-1.5"
+          title="Print feed chart"
+        >
+          <Printer className="w-4 h-4" />
+          <span className="hidden sm:inline">Print</span>
+        </button>
+      </div>
+
+      {!hasAnyData ? (
+        <div className="text-center py-6">
+          <p className="text-sm text-muted-foreground">No feed plans set up yet.</p>
+          <Link href="/feed-chart" className="mt-2 inline-block text-sm text-amber-600 hover:underline">
+            Set up feed programs
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Sun className="w-4 h-4 text-amber-500" />
+              <h4 className="text-sm font-semibold text-foreground">AM Feeding</h4>
+            </div>
+            {renderTable(amFeedNames, isAm)}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Moon className="w-4 h-4 text-indigo-500" />
+              <h4 className="text-sm font-semibold text-foreground">PM Feeding</h4>
+            </div>
+            {renderTable(pmFeedNames, isPm)}
+          </div>
         </div>
       )}
     </div>
@@ -194,54 +263,18 @@ function FeedChartGrid({
             <p style={{ fontSize: '10pt', color: '#666', margin: '4px 0 0' }}>{barnName} &mdash; {printDate}</p>
           </div>
 
-          {feedChartData.feedingTimes.map(time => {
-            const timeNames = Array.from(
-              new Set(feedChartData.horses.flatMap(h => (h.feedSchedule[time]?.items || []).map(i => i.name)))
-            ).sort();
-            if (timeNames.length === 0) return null;
-            return (
-              <div key={time} style={{ marginBottom: '28px' }}>
-                <h2 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#7c5c2b' }}>{time} Feeding</h2>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
-                  <thead>
-                    <tr style={{ background: '#f5f0ea' }}>
-                      <th style={{ textAlign: 'left', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600, minWidth: '130px' }}>Horse</th>
-                      {timeNames.map(name => (
-                        <th key={name} style={{ textAlign: 'center', padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 600 }}>{name}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {feedChartData.horses.map((horse, i) => {
-                      const items = horse.feedSchedule[time]?.items || [];
-                      const itemMap = new Map(items.map(item => [item.name, item]));
-                      return (
-                        <tr key={horse.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5' }}>
-                          <td style={{ padding: '6px 10px', border: '1px solid #d4c5b5', fontWeight: 500 }}>
-                            {horse.barnName}
-                            {horse.stall && horse.stall !== 'No stall' && (
-                              <span style={{ fontSize: '7.5pt', color: '#888', marginLeft: '6px' }}>({horse.stall})</span>
-                            )}
-                          </td>
-                          {timeNames.map(name => {
-                            const item = itemMap.get(name);
-                            return (
-                              <td key={name} style={{ padding: '6px 10px', border: '1px solid #d4c5b5', textAlign: 'center' }}>
-                                {item
-                                  ? `${item.amount != null ? item.amount : ''}${item.unit ? ' ' + item.unit : ''}`
-                                  : <span style={{ color: '#ccc' }}>—</span>
-                                }
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            );
-          })}
+          {amFeedNames.length > 0 && (
+            <div style={{ marginBottom: '28px' }}>
+              <h2 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#7c5c2b' }}>AM Feeding</h2>
+              {renderPrintTable(amFeedNames, isAm)}
+            </div>
+          )}
+          {pmFeedNames.length > 0 && (
+            <div style={{ marginBottom: '28px' }}>
+              <h2 style={{ fontSize: '11pt', fontWeight: 'bold', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4a5490' }}>PM Feeding</h2>
+              {renderPrintTable(pmFeedNames, isPm)}
+            </div>
+          )}
 
           <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '7.5pt', color: '#aaa', borderTop: '1px solid #eee', paddingTop: '10px' }}>
             Printed from BarnKeep &mdash; {printDate}
