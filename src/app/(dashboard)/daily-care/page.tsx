@@ -54,24 +54,33 @@ interface FeedChartHorse {
 
 function FeedChartGrid({
   feedChartData,
-  chartTime,
-  setChartTime,
   barnName,
 }: {
   feedChartData: { feedingTimes: string[]; horses: FeedChartHorse[] };
-  chartTime: string;
-  setChartTime: (t: string) => void;
   barnName: string;
 }) {
   const [showPrint, setShowPrint] = useState(false);
 
+  // All unique feed names across every feeding time
   const allFeedNames = Array.from(
     new Set(
       feedChartData.horses.flatMap(h =>
-        (h.feedSchedule[chartTime]?.items || []).map(i => i.name)
+        feedChartData.feedingTimes.flatMap(time =>
+          (h.feedSchedule[time]?.items || []).map(i => i.name)
+        )
       )
     )
   ).sort();
+
+  // Returns every time-entry for a given horse + feed name
+  const getEntries = (horse: FeedChartHorse, feedName: string) =>
+    feedChartData.feedingTimes.flatMap(time => {
+      const item = (horse.feedSchedule[time]?.items || []).find(i => i.name === feedName);
+      return item ? [{ ...item, time }] : [];
+    });
+
+  const timeLabel = (time: string) =>
+    ({ EARLY_AM: 'Early AM', AM: 'AM', MIDDAY: 'Mid', PM: 'PM', BOTH: 'AM+PM' } as Record<string, string>)[time] ?? time;
 
   const handlePrint = () => {
     setShowPrint(true);
@@ -92,36 +101,19 @@ function FeedChartGrid({
     <div className="card p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-foreground">Feed Plan Chart</h3>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrint}
-            className="btn-secondary btn-sm flex items-center gap-1.5"
-            title="Print feed chart"
-          >
-            <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">Print</span>
-          </button>
-          <div className="flex gap-1">
-          {feedChartData.feedingTimes.map(time => (
-            <button
-              key={time}
-              onClick={() => setChartTime(time)}
-              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-                chartTime === time
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              {time}
-            </button>
-          ))}
-          </div>
-        </div>
+        <button
+          onClick={handlePrint}
+          className="btn-secondary btn-sm flex items-center gap-1.5"
+          title="Print feed chart"
+        >
+          <Printer className="w-4 h-4" />
+          <span className="hidden sm:inline">Print</span>
+        </button>
       </div>
 
       {allFeedNames.length === 0 ? (
         <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground">No feed plans set for {chartTime} feedings.</p>
+          <p className="text-sm text-muted-foreground">No feed plans set up yet.</p>
           <Link href="/feed-chart" className="mt-2 inline-block text-sm text-amber-600 hover:underline">
             Set up feed programs
           </Link>
@@ -142,45 +134,51 @@ function FeedChartGrid({
               </tr>
             </thead>
             <tbody>
-              {feedChartData.horses.map((horse, i) => {
-                const items = horse.feedSchedule[chartTime]?.items || [];
-                const itemMap = new Map(items.map(item => [item.name, item]));
-                return (
-                  <tr
-                    key={horse.id}
-                    className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold flex-shrink-0">
-                          {horse.barnName.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground text-sm leading-tight">{horse.barnName}</p>
-                          {horse.stall && horse.stall !== 'No stall' && (
-                            <p className="text-xs text-muted-foreground">{horse.stall}</p>
-                          )}
-                        </div>
+              {feedChartData.horses.map((horse, i) => (
+                <tr
+                  key={horse.id}
+                  className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}
+                >
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold flex-shrink-0">
+                        {horse.barnName.charAt(0)}
                       </div>
-                    </td>
-                    {allFeedNames.map(name => {
-                      const item = itemMap.get(name);
-                      return (
-                        <td key={name} className="px-4 py-3 text-center">
-                          {item ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
-                              {item.amount != null ? item.amount : ''}
-                              {item.unit ? ` ${item.unit}` : ''}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground/50 text-xs">—</span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground text-sm leading-tight">{horse.barnName}</p>
+                        {horse.stall && horse.stall !== 'No stall' && (
+                          <p className="text-xs text-muted-foreground">{horse.stall}</p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  {allFeedNames.map(name => {
+                    const entries = getEntries(horse, name);
+                    return (
+                      <td key={name} className="px-4 py-3 text-center">
+                        {entries.length > 0 ? (
+                          <div className="flex flex-col gap-1 items-center">
+                            {entries.map(entry => (
+                              <span
+                                key={entry.time}
+                                className="inline-flex flex-col items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap"
+                              >
+                                <span className="font-semibold">
+                                  {entry.amount != null ? entry.amount : ''}
+                                  {entry.unit ? ` ${entry.unit}` : ''}
+                                </span>
+                                <span className="text-[10px] text-amber-600 font-normal">{timeLabel(entry.time)}</span>
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground/50 text-xs">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -267,7 +265,6 @@ export default function DailyCarePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showPrintView, setShowPrintView] = useState(false);
   const [feedChartData, setFeedChartData] = useState<{ feedingTimes: string[]; horses: FeedChartHorse[] } | null>(null);
-  const [chartTime, setChartTime] = useState<string>('AM');
   const [stats, setStats] = useState<DailyStats>({
     healthChecks: { completed: 0, total: 0 },
     feeding: { am: 0, pm: 0, total: 0 },
@@ -297,9 +294,6 @@ export default function DailyCarePage() {
 
         if (feedChartRaw?.data) {
           setFeedChartData(feedChartRaw.data);
-          if (feedChartRaw.data.feedingTimes?.length > 0) {
-            setChartTime(feedChartRaw.data.feedingTimes[0]);
-          }
         }
 
         // Store and calculate feed logs stats (AM/PM feedings) - count unique horses fed
@@ -732,8 +726,6 @@ export default function DailyCarePage() {
           {feedChartData && (
             <FeedChartGrid
               feedChartData={feedChartData}
-              chartTime={chartTime}
-              setChartTime={setChartTime}
               barnName={currentBarn?.name ?? ''}
             />
           )}
