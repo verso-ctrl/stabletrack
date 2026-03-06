@@ -42,6 +42,124 @@ interface HealthCheck {
   horse?: { barnName: string };
 }
 
+interface FeedChartHorse {
+  id: string;
+  barnName: string;
+  stall: string;
+  hasFeedProgram: boolean;
+  feedSchedule: Record<string, {
+    items: { name: string; amount: number | null; unit: string | null }[];
+  }>;
+}
+
+function FeedChartGrid({
+  feedChartData,
+  chartTime,
+  setChartTime,
+}: {
+  feedChartData: { feedingTimes: string[]; horses: FeedChartHorse[] };
+  chartTime: string;
+  setChartTime: (t: string) => void;
+}) {
+  const allFeedNames = Array.from(
+    new Set(
+      feedChartData.horses.flatMap(h =>
+        (h.feedSchedule[chartTime]?.items || []).map(i => i.name)
+      )
+    )
+  ).sort();
+
+  return (
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-foreground">Feed Plan Chart</h3>
+        <div className="flex gap-1">
+          {feedChartData.feedingTimes.map(time => (
+            <button
+              key={time}
+              onClick={() => setChartTime(time)}
+              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                chartTime === time
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {time}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {allFeedNames.length === 0 ? (
+        <div className="text-center py-6">
+          <p className="text-sm text-muted-foreground">No feed plans set for {chartTime} feedings.</p>
+          <Link href="/feed-chart" className="mt-2 inline-block text-sm text-amber-600 hover:underline">
+            Set up feed programs
+          </Link>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm border-collapse min-w-max">
+            <thead>
+              <tr className="bg-muted/40 border-b border-border">
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[160px]">
+                  Horse
+                </th>
+                {allFeedNames.map(name => (
+                  <th key={name} className="text-center px-4 py-2.5 font-medium text-muted-foreground text-xs uppercase tracking-wide min-w-[110px]">
+                    {name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {feedChartData.horses.map((horse, i) => {
+                const items = horse.feedSchedule[chartTime]?.items || [];
+                const itemMap = new Map(items.map(item => [item.name, item]));
+                return (
+                  <tr
+                    key={horse.id}
+                    className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold flex-shrink-0">
+                          {horse.barnName.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground text-sm leading-tight">{horse.barnName}</p>
+                          {horse.stall && horse.stall !== 'No stall' && (
+                            <p className="text-xs text-muted-foreground">{horse.stall}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    {allFeedNames.map(name => {
+                      const item = itemMap.get(name);
+                      return (
+                        <td key={name} className="px-4 py-3 text-center">
+                          {item ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
+                              {item.amount != null ? item.amount : ''}
+                              {item.unit ? ` ${item.unit}` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50 text-xs">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DailyCarePage() {
   const { currentBarn } = useBarn();
   const { horses } = useHorses();
@@ -53,6 +171,8 @@ export default function DailyCarePage() {
   const [pmFedHorseIds, setPmFedHorseIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [showPrintView, setShowPrintView] = useState(false);
+  const [feedChartData, setFeedChartData] = useState<{ feedingTimes: string[]; horses: FeedChartHorse[] } | null>(null);
+  const [chartTime, setChartTime] = useState<string>('AM');
   const [stats, setStats] = useState<DailyStats>({
     healthChecks: { completed: 0, total: 0 },
     feeding: { am: 0, pm: 0, total: 0 },
@@ -68,15 +188,24 @@ export default function DailyCarePage() {
 
       try {
         // Fetch all daily care data in parallel
-        const [feedLogsRes, healthChecksRes] = await Promise.all([
+        const [feedLogsRes, healthChecksRes, feedChartRes] = await Promise.all([
           fetch(`/api/barns/${currentBarn.id}/feed-logs?date=${today}`),
           fetch(`/api/barns/${currentBarn.id}/health-checks?date=${today}`),
+          fetch(`/api/barns/${currentBarn.id}/feed-chart`),
         ]);
 
-        const [feedLogsData, healthChecksData] = await Promise.all([
+        const [feedLogsData, healthChecksData, feedChartRaw] = await Promise.all([
           feedLogsRes.json(),
           healthChecksRes.json(),
+          feedChartRes.json(),
         ]);
+
+        if (feedChartRaw?.data) {
+          setFeedChartData(feedChartRaw.data);
+          if (feedChartRaw.data.feedingTimes?.length > 0) {
+            setChartTime(feedChartRaw.data.feedingTimes[0]);
+          }
+        }
 
         // Store and calculate feed logs stats (AM/PM feedings) - count unique horses fed
         const feedLogsArr: FeedLog[] = feedLogsData.data || [];
@@ -504,6 +633,14 @@ export default function DailyCarePage() {
               })}
             </div>
           </div>
+
+          {feedChartData && (
+            <FeedChartGrid
+              feedChartData={feedChartData}
+              chartTime={chartTime}
+              setChartTime={setChartTime}
+            />
+          )}
         </div>
       )}
 
