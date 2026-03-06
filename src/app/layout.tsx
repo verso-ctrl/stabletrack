@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
-import Script from 'next/script';
 import { Providers } from './providers';
 import '@/styles/globals.css';
 
@@ -54,6 +53,7 @@ export default function RootLayout({
 }) {
   // Script to prevent flash of wrong theme
   const themeScript = `(function(){try{var t=localStorage.getItem('barnkeep-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`;
+  const termlyScript = `(function(){var s=document.createElement('script');s.src='https://app.termly.io/resource-blocker/70b50ff6-2dc9-4f4d-ada3-eca04e7b584f?autoBlock=on';s.async=true;document.head.appendChild(s);})();`;
 
   // If Clerk is not configured, render without ClerkProvider (demo mode)
   if (!isClerkConfigured) {
@@ -61,13 +61,9 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head>
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+          <script dangerouslySetInnerHTML={{ __html: termlyScript }} />
         </head>
         <body className="min-h-screen bg-background" suppressHydrationWarning>
-          <Script
-            id="termly-consent"
-            src="https://app.termly.io/resource-blocker/70b50ff6-2dc9-4f4d-ada3-eca04e7b584f?autoBlock=on"
-            strategy="beforeInteractive"
-          />
           {/* Demo Mode Banner */}
           <div className="bg-primary/90 text-primary-foreground text-center py-2 px-4 text-sm font-medium">
             Demo Mode - Configure Clerk & Stripe keys in .env for full features
@@ -83,13 +79,9 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head>
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+          <script dangerouslySetInnerHTML={{ __html: termlyScript }} />
         </head>
         <body className="min-h-screen bg-background" suppressHydrationWarning>
-          <Script
-            id="termly-consent"
-            src="https://app.termly.io/resource-blocker/70b50ff6-2dc9-4f4d-ada3-eca04e7b584f?autoBlock=on"
-            strategy="beforeInteractive"
-          />
           <Providers>{children}</Providers>
         </body>
       </html>

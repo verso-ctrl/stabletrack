@@ -5,10 +5,11 @@ import Script from 'next/script';
 export function TermlyEmbed({ dataId }: { dataId: string }) {
   return (
     <>
+      {/* dangerouslySetInnerHTML ensures the name attribute survives React rendering */}
       <div
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {...({ name: 'termly-embed' } as any)}
-        data-id={dataId}
+        dangerouslySetInnerHTML={{
+          __html: `<div name="termly-embed" data-id="${dataId}"></div>`,
+        }}
       />
       <Script
         id="termly-jssdk"
