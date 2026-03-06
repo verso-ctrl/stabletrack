@@ -14,7 +14,16 @@ interface ActivityMetadata {
   givenBy?: string;
   fedBy?: string;
   checkedBy?: string;
+  amountEaten?: string;
 }
+
+const amountEatenColors: Record<string, string> = {
+  ALL:    'bg-green-100 text-green-800',
+  MOST:   'bg-green-50 text-green-700',
+  HALF:   'bg-yellow-100 text-yellow-800',
+  LITTLE: 'bg-orange-100 text-orange-800',
+  NONE:   'bg-red-100 text-red-700',
+};
 
 interface ActivityItem {
   id: string;
@@ -201,6 +210,15 @@ export function ActivityTab({ horse, barnId, refreshKey }: ActivityTabProps) {
                               {activity.metadata.attitude && (
                                 <span>Attitude: {activity.metadata.attitude}</span>
                               )}
+                            </div>
+                          )}
+                          {/* Feed amount eaten */}
+                          {activity.category === 'feed' && activity.metadata?.amountEaten && (
+                            <div className="mt-1.5 flex items-center gap-1.5">
+                              <span className="text-xs text-muted-foreground">Ate:</span>
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${amountEatenColors[activity.metadata.amountEaten.toUpperCase()] || 'bg-muted text-muted-foreground'}`}>
+                                {activity.metadata.amountEaten.charAt(0).toUpperCase() + activity.metadata.amountEaten.slice(1).toLowerCase()}
+                              </span>
                             </div>
                           )}
                           {activity.metadata?.notes && (
