@@ -15,6 +15,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:benchmark": "npx tsx scripts/db-benchmark.ts",
+    "db:explain": "npx tsx scripts/db-explain.ts",
     "db:studio": "prisma studio",
     "setup": "npx tsx scripts/setup-db.ts",
     "setup:sqlite": "npx tsx scripts/setup-db.ts sqlite",
