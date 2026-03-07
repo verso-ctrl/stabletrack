@@ -73,6 +73,29 @@ export async function GET(
       fileData = document.fileData
       mimeType = document.mimeType || 'application/octet-stream'
       fileName = document.fileName || 'document'
+    } else if (type === 'barn-document') {
+      const barnDoc = await prisma.barnDocument.findUnique({
+        where: { id },
+        select: {
+          storagePath: true,
+          mimeType: true,
+          fileName: true,
+          barnId: true,
+        },
+      })
+
+      if (!barnDoc || !barnDoc.storagePath) {
+        return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+      }
+
+      const hasAccess = await verifyBarnAccess(user.id, barnDoc.barnId)
+      if (!hasAccess) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      }
+
+      fileData = barnDoc.storagePath
+      mimeType = barnDoc.mimeType || 'application/octet-stream'
+      fileName = barnDoc.fileName || 'document'
     } else {
       return NextResponse.json(
         { error: 'Invalid file type' },

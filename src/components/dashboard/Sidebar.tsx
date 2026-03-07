@@ -26,6 +26,7 @@ import {
   BookUser,
   Users,
   BookOpen,
+  NotebookText,
 } from 'lucide-react';
 
 // Dynamically import Clerk components (only loads when Clerk is configured)
@@ -55,6 +56,7 @@ const navItems = [
   { href: '/breeding', label: 'Breeding', icon: Heart, permission: 'horses:read', addOn: 'breeding' },
   { href: '/pastures', label: 'Pastures & Stalls', icon: Trees, permission: 'horses:read', addOn: null },
   { href: '/contacts', label: 'Contacts', icon: BookUser, permission: 'clients:read', addOn: null },
+  { href: '/barn-notes', label: 'Barn Notes', icon: NotebookText, permission: 'horses:read', addOn: null },
   { href: '/team', label: 'Team', icon: Users, permission: 'team:read', addOn: null },
 ];
 

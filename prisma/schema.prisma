@@ -31,6 +31,7 @@ model User {
   subscription    Subscription?
   barnMemberships BarnMember[]
   createdNotes    Note[]
+  barnNotes       BarnNote[]
   assignedTasks   Task[]
   assignedEvents  Event[]       @relation("AssignedEvents")
   activityLogs    ActivityLog[]
@@ -109,6 +110,8 @@ model Barn {
   breedingRecords        BreedingRecord[]
   foalingRecords         FoalingRecord[]
   feedProgramTemplates   FeedProgramTemplate[]
+  barnNotes              BarnNote[]
+  barnDocuments          BarnDocument[]
 }
 
 model BarnMember {
@@ -1161,4 +1164,44 @@ model FoalingRecord {
   @@index([barnId])
   @@index([mareId])
   @@index([barnId, actualDate(sort: Desc)])
+}
+
+// ============================================================================
+// BARN-LEVEL NOTES & DOCUMENTS
+// ============================================================================
+
+model BarnNote {
+  id        String   @id @default(cuid())
+  barnId    String
+  content   String
+  isPinned  Boolean  @default(false)
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  barn      Barn     @relation(fields: [barnId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [createdBy], references: [id])
+
+  @@index([barnId])
+  @@index([barnId, createdAt(sort: Desc)])
+}
+
+model BarnDocument {
+  id          String    @id @default(cuid())
+  barnId      String
+  type        String    @default("Other")
+  title       String
+  fileName    String
+  fileUrl     String
+  storagePath String?
+  fileSize    Int?
+  mimeType    String?
+  notes       String?
+  uploadedAt  DateTime  @default(now())
+  uploadedBy  String?
+
+  barn        Barn      @relation(fields: [barnId], references: [id], onDelete: Cascade)
+
+  @@index([barnId])
+  @@index([barnId, uploadedAt(sort: Desc)])
 }
