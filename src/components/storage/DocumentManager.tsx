@@ -12,12 +12,12 @@ import {
   Download,
   ExternalLink,
   Loader2,
-  AlertCircle,
   Tag,
   X,
   Filter,
   Plus,
   Pencil,
+  StickyNote,
 } from 'lucide-react'
 import { toast } from '@/lib/toast'
 import { formatBytes } from '@/lib/tiers'
@@ -42,6 +42,15 @@ interface DocumentItem {
   mimeType: string | null
   notes: string | null
   uploadedAt: string
+}
+
+interface NoteItem {
+  id: string
+  content: string
+  isPinned: boolean
+  createdAt: string
+  updatedAt: string
+  authorName: string
 }
 
 // Common tag suggestions
@@ -83,6 +92,16 @@ export function DocumentManager({
   const [editDocId, setEditDocId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ title: '', notes: '', tag: '' })
 
+  // Notes state
+  const [notes, setNotes] = useState<NoteItem[]>([])
+  const [notesLoading, setNotesLoading] = useState(true)
+  const [showAddNote, setShowAddNote] = useState(false)
+  const [newNoteContent, setNewNoteContent] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [editNoteId, setEditNoteId] = useState<string | null>(null)
+  const [editNoteContent, setEditNoteContent] = useState('')
+  const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null)
+
   // Fetch documents
   const fetchDocuments = useCallback(async () => {
     try {
@@ -99,9 +118,80 @@ export function DocumentManager({
     }
   }, [barnId, horseId])
 
+  // Fetch notes
+  const fetchNotes = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/barns/${barnId}/horses/${horseId}/notes`)
+      if (response.ok) {
+        const data = await response.json()
+        setNotes(data.data || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch notes:', error)
+    } finally {
+      setNotesLoading(false)
+    }
+  }, [barnId, horseId])
+
   useEffect(() => {
     fetchDocuments()
-  }, [fetchDocuments])
+    fetchNotes()
+  }, [fetchDocuments, fetchNotes])
+
+  const handleAddNote = async () => {
+    if (!newNoteContent.trim()) return
+    setSavingNote(true)
+    try {
+      const response = await csrfFetch(`/api/barns/${barnId}/horses/${horseId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newNoteContent.trim() }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setNotes(prev => [data.data, ...prev])
+        setNewNoteContent('')
+        setShowAddNote(false)
+        toast.success('Note saved')
+      }
+    } catch {
+      toast.error('Failed to save note')
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  const handleEditNote = async (noteId: string) => {
+    if (!editNoteContent.trim()) return
+    try {
+      const response = await csrfFetch(`/api/barns/${barnId}/horses/${horseId}/notes/${noteId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editNoteContent.trim() }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setNotes(prev => prev.map(n => n.id === noteId ? data.data : n))
+        setEditNoteId(null)
+        toast.success('Note updated')
+      }
+    } catch {
+      toast.error('Failed to update note')
+    }
+  }
+
+  const handleDeleteNote = async () => {
+    if (!deleteNoteId) return
+    const id = deleteNoteId
+    setDeleteNoteId(null)
+    try {
+      await csrfFetch(`/api/barns/${barnId}/horses/${horseId}/notes/${id}`, { method: 'DELETE' })
+      setNotes(prev => prev.filter(n => n.id !== id))
+      toast.success('Note deleted')
+    } catch {
+      toast.error('Failed to delete note')
+    }
+  }
 
   // File select handler
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -343,6 +433,132 @@ export function DocumentManager({
         variant="danger"
         confirmLabel="Delete"
       />
+
+      {/* ── Notes Section ─────────────────────────────────────── */}
+      <div className="border-t border-border pt-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <StickyNote className="w-5 h-5" />
+            <h3 className="font-medium">Notes</h3>
+            <span className="text-sm text-muted-foreground">({notes.length})</span>
+          </div>
+          {editable && !showAddNote && (
+            <button
+              onClick={() => setShowAddNote(true)}
+              className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add note
+            </button>
+          )}
+        </div>
+
+        {/* Add note form */}
+        {showAddNote && (
+          <div className="mb-3 p-3 border border-border rounded-lg bg-muted/20 space-y-2">
+            <textarea
+              autoFocus
+              value={newNoteContent}
+              onChange={e => setNewNoteContent(e.target.value)}
+              placeholder="Write a note..."
+              rows={3}
+              className="input w-full resize-none text-sm"
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => { setShowAddNote(false); setNewNoteContent('') }}
+                className="btn-secondary btn-sm"
+                disabled={savingNote}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddNote}
+                className="btn-primary btn-sm flex items-center gap-1.5"
+                disabled={savingNote || !newNoteContent.trim()}
+              >
+                {savingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Notes list */}
+        {notesLoading ? (
+          <div className="text-center py-4 text-muted-foreground">
+            <Loader2 className="w-5 h-5 mx-auto animate-spin" />
+          </div>
+        ) : notes.length === 0 && !showAddNote ? (
+          <p className="text-sm text-muted-foreground">No notes yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {notes.map(note => (
+              <div key={note.id} className="p-3 border border-border rounded-lg bg-background">
+                {editNoteId === note.id ? (
+                  <div className="space-y-2">
+                    <textarea
+                      autoFocus
+                      value={editNoteContent}
+                      onChange={e => setEditNoteContent(e.target.value)}
+                      rows={3}
+                      className="input w-full resize-none text-sm"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setEditNoteId(null)} className="btn-secondary btn-sm">Cancel</button>
+                      <button
+                        onClick={() => handleEditNote(note.id)}
+                        className="btn-primary btn-sm"
+                        disabled={!editNoteContent.trim()}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <p className="flex-1 text-sm text-foreground whitespace-pre-wrap leading-relaxed">{note.content}</p>
+                    {editable && (
+                      <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                        <button
+                          onClick={() => { setEditNoteId(note.id); setEditNoteContent(note.content) }}
+                          className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+                          title="Edit"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteNoteId(note.id)}
+                          className="p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                  <span>{note.authorName}</span>
+                  <span>·</span>
+                  <span>{new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  {note.updatedAt !== note.createdAt && <span className="italic">· edited</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <ConfirmDialog
+          open={!!deleteNoteId}
+          onConfirm={handleDeleteNote}
+          onCancel={() => setDeleteNoteId(null)}
+          title="Delete note?"
+          description="This note will be permanently removed."
+          variant="danger"
+          confirmLabel="Delete"
+        />
+      </div>
 
       {/* Upload Modal */}
       {showUploadModal && (
