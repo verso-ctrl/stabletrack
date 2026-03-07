@@ -71,14 +71,13 @@ export async function GET() {
       },
     });
     
-    // Auto-link client profiles that matched by email
-    for (const profile of clientProfiles) {
-      if (!profile.userId) {
-        await prisma.client.update({
-          where: { id: profile.id },
-          data: { userId: user.id },
-        });
-      }
+    // Auto-link client profiles that matched by email (single batch update)
+    const unlinkedClientIds = clientProfiles.filter(p => !p.userId).map(p => p.id);
+    if (unlinkedClientIds.length > 0) {
+      await prisma.client.updateMany({
+        where: { id: { in: unlinkedClientIds } },
+        data: { userId: user.id },
+      });
     }
     
     // Also get pending requests to show notification

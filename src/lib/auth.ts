@@ -441,14 +441,13 @@ export async function getUserClientBarns(userId: string) {
     },
   });
   
-  // If any client profile matched by email but not linked, link them now
-  for (const profile of clientProfiles) {
-    if (!profile.userId) {
-      await prisma.client.update({
-        where: { id: profile.id },
-        data: { userId },
-      });
-    }
+  // If any client profile matched by email but not linked, link them now (single batch update)
+  const unlinkedClientIds = clientProfiles.filter(p => !p.userId).map(p => p.id);
+  if (unlinkedClientIds.length > 0) {
+    await prisma.client.updateMany({
+      where: { id: { in: unlinkedClientIds } },
+      data: { userId },
+    });
   }
   
   return clientProfiles.map((cp) => ({

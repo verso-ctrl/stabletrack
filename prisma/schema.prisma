@@ -130,6 +130,7 @@ model BarnMember {
   horseAccess HorseAccess[]
 
   @@unique([userId, barnId])
+  @@index([barnId])
 }
 
 model HorseAccess {
@@ -272,6 +273,7 @@ model HorsePhoto {
   horse       Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
   @@index([horseId])
+  @@index([horseId, uploadedAt(sort: Desc)])
 }
 
 model HorseTurnout {
@@ -285,6 +287,7 @@ model HorseTurnout {
   paddock   Paddock   @relation(fields: [paddockId], references: [id], onDelete: Cascade)
 
   @@index([horseId])
+  @@index([horseId, endTime])
 }
 
 // ============================================================================
@@ -433,6 +436,7 @@ model Vaccination {
   horse        Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
   @@index([horseId])
+  @@index([horseId, dateGiven(sort: Desc)])
   @@index([nextDueDate])
 }
 
@@ -474,6 +478,7 @@ model MedicationLog {
   medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
 
   @@index([medicationId])
+  @@index([medicationId, givenAt(sort: Desc)])
 }
 
 model HealthRecord {
@@ -648,6 +653,7 @@ model Document {
   horse       Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
   @@index([horseId])
+  @@index([horseId, uploadedAt(sort: Desc)])
 }
 
 model Note {
@@ -664,6 +670,7 @@ model Note {
   author    User     @relation(fields: [createdBy], references: [id])
 
   @@index([horseId])
+  @@index([horseId, createdAt(sort: Desc)])
 }
 
 model InventoryItem {
@@ -699,6 +706,7 @@ model ActivityLog {
 
   @@index([barnId])
   @@index([barnId, createdAt(sort: Desc)])
+  @@index([barnId, type])
   @@index([userId])
   @@index([type])
 }

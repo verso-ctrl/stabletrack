@@ -45,6 +45,7 @@ export async function GET(
         attachments: true,
       },
       orderBy: { date: 'desc' },
+      take: 200,
     });
     
     return NextResponse.json({ data: healthRecords });

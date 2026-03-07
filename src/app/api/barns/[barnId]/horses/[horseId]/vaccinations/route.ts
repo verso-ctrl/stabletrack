@@ -31,6 +31,7 @@ export async function GET(
     const vaccinations = await prisma.vaccination.findMany({
       where: { horseId: horseId },
       orderBy: { dateGiven: 'desc' },
+      take: 200,
     });
 
     return NextResponse.json({ data: vaccinations });
